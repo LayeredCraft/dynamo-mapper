@@ -1,3 +1,8 @@
+---
+title: Phase 2 Requirements
+description: Fluent DSL configuration for DynamoMapper - comprehensive Phase 2 specification
+---
+
 # DynamoMapper – Phase 2 Requirements (Fluent DSL Configuration) 🚀
 
 > **Scope:** Phase 2 introduces an **optional fluent DSL** for configuring DynamoMapper mappings, providing a strongly-typed, refactor-safe alternative to attribute-based configuration introduced in Phase 1.

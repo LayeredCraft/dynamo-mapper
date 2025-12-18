@@ -1,5 +1,27 @@
 <Solution>
+  <Folder Name="/docs/">
+    <File Path="mkdocs.yml" />
+    <File Path="requirements.txt" />
+  </Folder>
+  <Folder Name="/docs/advanced/" />
+  <Folder Name="/docs/api-reference/" />
+  <Folder Name="/docs/assets/">
+    <File Path="docs\assets\icon.png" />
+  </Folder>
+  <Folder Name="/docs/assets/css/" />
+  <Folder Name="/docs/core-concepts/" />
+  <Folder Name="/docs/examples/" />
+  <Folder Name="/docs/getting-started/" />
+  <Folder Name="/docs/roadmap/">
+    <File Path="docs\roadmap\phase-1.md" />
+    <File Path="docs\roadmap\phase-2.md" />
+  </Folder>
+  <Folder Name="/docs/usage/" />
   <Folder Name="/git/">
+    <File Path=".github\dependabot.yml" />
+    <File Path=".github\workflows\build.yaml" />
+    <File Path=".github\workflows\docs.yml" />
+    <File Path=".github\workflows\pr-build.yaml" />
     <File Path=".gitignore" />
   </Folder>
   <Folder Name="/Solution Items/">
@@ -10,5 +32,10 @@
     <Project Path="src/LayeredCraft.DynamoMapper.Generators/LayeredCraft.DynamoMapper.Generators.csproj" />
     <Project Path="src/LayeredCraft.DynamoMapper.Runtime/LayeredCraft.DynamoMapper.Runtime.csproj" />
   </Folder>
-  <Folder Name="/test/" />
+  <Folder Name="/test/">
+    <File Path="test\Directory.Build.props" />
+    <Project Path="test/LayeredCraft.DynamoMapper.Generators.Tests/LayeredCraft.DynamoMapper.Generators.Tests.csproj" />
+    <Project Path="test/LayeredCraft.DynamoMapper.Runtime.Tests/LayeredCraft.DynamoMapper.Runtime.Tests.csproj" />
+    <Project Path="test/LayeredCraft.DynamoMapper.TestKit/LayeredCraft.DynamoMapper.TestKit.csproj" />
+  </Folder>
 </Solution>

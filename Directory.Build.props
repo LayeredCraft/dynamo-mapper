@@ -1,7 +1,4 @@
 <Project>
-    <!-- Import release notes -->
-    <Import Project="releasenotes.props" />
-
     <PropertyGroup>
         <VersionPrefix>0.1.0-alpha</VersionPrefix>
         <!-- SPDX license identifier for MIT -->

@@ -19,4 +19,8 @@
         <PackageScribanIncludeSource>true</PackageScribanIncludeSource>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\LayeredCraft.DynamoMapper.Runtime\LayeredCraft.DynamoMapper.Runtime.csproj" />
+    </ItemGroup>
+
 </Project>

@@ -1,3 +1,8 @@
+---
+title: Phase 1 Requirements
+description: Attribute-based mapping for DynamoMapper - comprehensive Phase 1 specification
+---
+
 # DynamoMapper – Phase 1 Requirements (Attribute-Based Mapping) ✅
 
 > **Scope:** Phase 1 delivers a Mapperly-style, attribute-configured **incremental source generator** that generates high-performance mapping code between **domain models** and **Amazon DynamoDB `AttributeValue` dictionaries**, without requiring any attributes on the domain models themselves.

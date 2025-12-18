@@ -6,6 +6,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>LayeredCraft.DynamoMapper.Runtime.Tests</RootNamespace>
     <TargetFrameworks>net8.0;net10.0;net9.0</TargetFrameworks>
+    <IsTestProject>true</IsTestProject>
     <IsPackable>false</IsPackable>
     <LangVersion>default</LangVersion>
     <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>

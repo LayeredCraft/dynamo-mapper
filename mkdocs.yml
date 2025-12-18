@@ -145,3 +145,7 @@ extra:
     - icon: fontawesome/solid/download
       link: https://www.nuget.org/packages/DynamoMapper/
       name: NuGet Package
+
+# Custom CSS
+extra_css:
+  - assets/css/extra.css

@@ -20,7 +20,9 @@
   <Folder Name="/docs/assets/">
     <File Path="docs\assets\icon.png" />
   </Folder>
-  <Folder Name="/docs/assets/css/" />
+  <Folder Name="/docs/assets/css/">
+    <File Path="docs\assets\css\extra.css" />
+  </Folder>
   <Folder Name="/docs/core-concepts/">
     <File Path="docs\core-concepts\how-it-works.md" />
     <File Path="docs\core-concepts\naming-conventions.md" />

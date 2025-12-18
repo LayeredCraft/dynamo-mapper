@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <LangVersion>latest</LangVersion>
+        <IncludeBuildOutput>false</IncludeBuildOutput>
+        <IsPackable>true</IsPackable>
+        <ImplicitUsings>true</ImplicitUsings>
+        <PackageId>DynamoMapper</PackageId>
+        <AssemblyName>$(PackageId)</AssemblyName>
+        <RootNamespace>$(PackageId)</RootNamespace>
+        <Title>$(PackageId)</Title>
+        <Description>DynamoMapper is a source generator for .NET that generates fast, strongly-typed mappings between your domain models and Amazon DynamoDB AttributeValue dictionaries.
+
+            Designed for DynamoDB single-table patterns, it provides compile-time validation and high-performance, zero-reflection mapping code—without requiring AWS attributes on your entities. Install this package to enable code generation; it references DynamoMapper.Runtime for shared attributes and helpers.</Description>
+        <PackageTags>dynamodb;aws;source-generator;mapping;mapper;single-table;nosql;lambda;dotnet;csharp;roslyn</PackageTags>
+        <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+        <PackageScribanIncludeSource>true</PackageScribanIncludeSource>
+    </PropertyGroup>
+
+</Project>

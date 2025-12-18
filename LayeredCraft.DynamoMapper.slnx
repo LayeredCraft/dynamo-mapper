@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/git/">
+    <File Path=".gitignore" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path="Directory.Build.props" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/LayeredCraft.DynamoMapper.Generators/LayeredCraft.DynamoMapper.Generators.csproj" />
+    <Project Path="src/LayeredCraft.DynamoMapper.Runtime/LayeredCraft.DynamoMapper.Runtime.csproj" />
+  </Folder>
+  <Folder Name="/test/" />
+</Solution>

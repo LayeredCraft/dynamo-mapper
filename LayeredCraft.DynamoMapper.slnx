@@ -1,5 +1,59 @@
 <Solution>
+  <Folder Name="/docs/">
+    <File Path="docs\changelog.md" />
+    <File Path="docs\contributing.md" />
+    <File Path="docs\index.md" />
+    <File Path="mkdocs.yml" />
+    <File Path="requirements.txt" />
+  </Folder>
+  <Folder Name="/docs/advanced/">
+    <File Path="docs\advanced\diagnostics.md" />
+    <File Path="docs\advanced\performance.md" />
+    <File Path="docs\advanced\testing.md" />
+    <File Path="docs\advanced\troubleshooting.md" />
+  </Folder>
+  <Folder Name="/docs/api-reference/">
+    <File Path="docs\api-reference\attributes.md" />
+    <File Path="docs\api-reference\generated-code.md" />
+    <File Path="docs\api-reference\runtime-helpers.md" />
+  </Folder>
+  <Folder Name="/docs/assets/">
+    <File Path="docs\assets\icon.png" />
+  </Folder>
+  <Folder Name="/docs/assets/css/" />
+  <Folder Name="/docs/core-concepts/">
+    <File Path="docs\core-concepts\how-it-works.md" />
+    <File Path="docs\core-concepts\naming-conventions.md" />
+    <File Path="docs\core-concepts\single-table-patterns.md" />
+    <File Path="docs\core-concepts\source-generators.md" />
+  </Folder>
+  <Folder Name="/docs/examples/">
+    <File Path="docs\examples\custom-converters.md" />
+    <File Path="docs\examples\index.md" />
+    <File Path="docs\examples\lambda-functions.md" />
+    <File Path="docs\examples\single-table-design.md" />
+  </Folder>
+  <Folder Name="/docs/getting-started/">
+    <File Path="docs\getting-started\installation.md" />
+    <File Path="docs\getting-started\quick-start.md" />
+    <File Path="docs\getting-started\requirements.md" />
+  </Folder>
+  <Folder Name="/docs/roadmap/">
+    <File Path="docs\roadmap\phase-1.md" />
+    <File Path="docs\roadmap\phase-2.md" />
+  </Folder>
+  <Folder Name="/docs/usage/">
+    <File Path="docs\usage\basic-mapping.md" />
+    <File Path="docs\usage\converters.md" />
+    <File Path="docs\usage\customization-hooks.md" />
+    <File Path="docs\usage\dsl-configuration.md" />
+    <File Path="docs\usage\field-configuration.md" />
+  </Folder>
   <Folder Name="/git/">
+    <File Path=".github\dependabot.yml" />
+    <File Path=".github\workflows\build.yaml" />
+    <File Path=".github\workflows\docs.yml" />
+    <File Path=".github\workflows\pr-build.yaml" />
     <File Path=".gitignore" />
   </Folder>
   <Folder Name="/Solution Items/">
@@ -10,5 +64,10 @@
     <Project Path="src/LayeredCraft.DynamoMapper.Generators/LayeredCraft.DynamoMapper.Generators.csproj" />
     <Project Path="src/LayeredCraft.DynamoMapper.Runtime/LayeredCraft.DynamoMapper.Runtime.csproj" />
   </Folder>
-  <Folder Name="/test/" />
+  <Folder Name="/test/">
+    <File Path="test\Directory.Build.props" />
+    <Project Path="test/LayeredCraft.DynamoMapper.Generators.Tests/LayeredCraft.DynamoMapper.Generators.Tests.csproj" />
+    <Project Path="test/LayeredCraft.DynamoMapper.Runtime.Tests/LayeredCraft.DynamoMapper.Runtime.Tests.csproj" />
+    <Project Path="test/LayeredCraft.DynamoMapper.TestKit/LayeredCraft.DynamoMapper.TestKit.csproj" />
+  </Folder>
 </Solution>

@@ -1,0 +1,147 @@
+site_name: DynamoMapper
+site_description: High-performance source generator for DynamoDB attribute mapping
+site_url: https://layeredcraft.github.io/dynamo-mapper/
+site_author: Nick Cipollina
+
+# Repository
+repo_name: layeredcraft/dynamo-mapper
+repo_url: https://github.com/layeredcraft/dynamo-mapper
+edit_uri: edit/main/docs/
+
+# Copyright
+copyright: Copyright &copy; 2025 LayeredCraft
+
+# Configuration
+theme:
+  name: material
+  language: en
+  logo: assets/icon.png
+  favicon: assets/icon.png
+
+  features:
+    - content.code.copy
+    - content.code.select
+    - navigation.expand
+    - navigation.footer
+    - navigation.instant
+    - navigation.sections
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.top
+    - search.highlight
+    - search.share
+    - search.suggest
+    - toc.follow
+
+  # Dark/Light mode toggle
+  palette:
+    # Light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: deep-orange
+      accent: deep-orange
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep-orange
+      accent: deep-orange
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+  font:
+    text: Roboto
+    code: Roboto Mono
+
+# Plugins
+plugins:
+  - search
+  - minify:
+      minify_html: true
+
+# Extensions
+markdown_extensions:
+  # Python Markdown
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+
+  # Python Markdown Extensions
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+# Navigation
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation: getting-started/installation.md
+    - Requirements: getting-started/requirements.md
+    - Quick Start: getting-started/quick-start.md
+  - Core Concepts:
+    - How It Works: core-concepts/how-it-works.md
+    - Source Generators: core-concepts/source-generators.md
+    - Naming Conventions: core-concepts/naming-conventions.md
+    - Single-Table Patterns: core-concepts/single-table-patterns.md
+  - Usage:
+    - Basic Mapping: usage/basic-mapping.md
+    - Field Configuration: usage/field-configuration.md
+    - Converters: usage/converters.md
+    - Customization Hooks: usage/customization-hooks.md
+    - DSL Configuration: usage/dsl-configuration.md
+  - Examples:
+    - Overview: examples/index.md
+    - Single-Table Design: examples/single-table-design.md
+    - Custom Converters: examples/custom-converters.md
+    - Lambda Functions: examples/lambda-functions.md
+  - Advanced:
+    - Performance: advanced/performance.md
+    - Diagnostics: advanced/diagnostics.md
+    - Testing: advanced/testing.md
+    - Troubleshooting: advanced/troubleshooting.md
+  - API Reference:
+    - Attributes: api-reference/attributes.md
+    - Runtime Helpers: api-reference/runtime-helpers.md
+    - Generated Code: api-reference/generated-code.md
+  - Roadmap:
+    - Phase 1: roadmap/phase-1.md
+    - Phase 2: roadmap/phase-2.md
+  - Contributing: contributing.md
+  - Changelog: changelog.md
+
+# Social links
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/layeredcraft/dynamo-mapper
+      name: GitHub Repository
+    - icon: fontawesome/solid/download
+      link: https://www.nuget.org/packages/DynamoMapper/
+      name: NuGet Package

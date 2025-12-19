@@ -16,4 +16,8 @@
         <PackageTags>dynamodb;aws;attributevalue;nosql;single-table;lambda;dotnet;csharp;utilities;extensions</PackageTags>
     </PropertyGroup>
 
+    <ItemGroup>
+      <PackageReference Include="AWSSDK.DynamoDBv2" Version="4.0.10.4" />
+    </ItemGroup>
+
 </Project>

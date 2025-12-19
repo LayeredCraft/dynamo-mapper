@@ -1,6 +1,7 @@
-namespace LayeredCraft.DynamoMapper.Runtime;
-
+using System.Globalization;
 using Amazon.DynamoDBv2.Model;
+
+namespace DynamoMapper.Runtime;
 
 public static class AttributeValueExtensions
 {
@@ -26,6 +27,35 @@ public static class AttributeValueExtensions
         public bool? GetNullableBool(string key)
         {
             return attributes.TryGetValue(key, out var value) ? value.BOOL : null;
+        }
+
+        // Integer methods
+        public int GetInt(string key)
+        {
+            return attributes.TryGetValue(key, out var value)
+                ? int.TryParse(value.N, NumberStyles.Integer, CultureInfo.InvariantCulture, out var result) ? result : 0
+                : 0;
+        }
+
+        public int? GetNullableInt(string key)
+        {
+            return attributes.TryGetValue(key, out var value)
+                ? int.TryParse(value.N, NumberStyles.Integer, CultureInfo.InvariantCulture, out var result) ? result : null
+                : null;
+        }
+
+        public long GetLong(string key)
+        {
+            return attributes.TryGetValue(key, out var value)
+                ? long.TryParse(value.N, NumberStyles.Integer, CultureInfo.InvariantCulture, out var result) ? result : 0
+                : 0;
+        }
+
+        public long? GetNullableLong(string key)
+        {
+            return attributes.TryGetValue(key, out var value)
+                ? long.TryParse(value.N, NumberStyles.Integer, CultureInfo.InvariantCulture, out var result) ? result : null
+                : null;
         }
     }
 }

@@ -57,5 +57,48 @@ public static class AttributeValueExtensions
                 ? long.TryParse(value.N, NumberStyles.Integer, CultureInfo.InvariantCulture, out var result) ? result : null
                 : null;
         }
+
+        // Floating point methods
+        public float GetFloat(string key)
+        {
+            return attributes.TryGetValue(key, out var value)
+                ? float.TryParse(value.N, NumberStyles.Float, CultureInfo.InvariantCulture, out var result) ? result : 0f
+                : 0f;
+        }
+
+        public float? GetNullableFloat(string key)
+        {
+            return attributes.TryGetValue(key, out var value)
+                ? float.TryParse(value.N, NumberStyles.Float, CultureInfo.InvariantCulture, out var result) ? result : null
+                : null;
+        }
+
+        public double GetDouble(string key)
+        {
+            return attributes.TryGetValue(key, out var value)
+                ? double.TryParse(value.N, NumberStyles.Float, CultureInfo.InvariantCulture, out var result) ? result : 0.0
+                : 0.0;
+        }
+
+        public double? GetNullableDouble(string key)
+        {
+            return attributes.TryGetValue(key, out var value)
+                ? double.TryParse(value.N, NumberStyles.Float, CultureInfo.InvariantCulture, out var result) ? result : null
+                : null;
+        }
+
+        public decimal GetDecimal(string key)
+        {
+            return attributes.TryGetValue(key, out var value)
+                ? decimal.TryParse(value.N, NumberStyles.Float, CultureInfo.InvariantCulture, out var result) ? result : 0m
+                : 0m;
+        }
+
+        public decimal? GetNullableDecimal(string key)
+        {
+            return attributes.TryGetValue(key, out var value)
+                ? decimal.TryParse(value.N, NumberStyles.Float, CultureInfo.InvariantCulture, out var result) ? result : null
+                : null;
+        }
     }
 }

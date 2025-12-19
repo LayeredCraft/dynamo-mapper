@@ -100,5 +100,20 @@ public static class AttributeValueExtensions
                 ? decimal.TryParse(value.N, NumberStyles.Float, CultureInfo.InvariantCulture, out var result) ? result : null
                 : null;
         }
+
+        // Guid methods
+        public Guid GetGuid(string key)
+        {
+            return attributes.TryGetValue(key, out var value)
+                ? Guid.TryParse(value.S, out var id) ? id : Guid.Empty
+                : Guid.Empty;
+        }
+
+        public Guid? GetNullableGuid(string key)
+        {
+            return attributes.TryGetValue(key, out var value)
+                ? Guid.TryParse(value.S, out var id) ? id : null
+                : null;
+        }
     }
 }

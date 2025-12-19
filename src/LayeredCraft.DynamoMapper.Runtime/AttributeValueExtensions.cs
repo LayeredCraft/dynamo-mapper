@@ -15,7 +15,7 @@ public static class AttributeValueExtensions
 
         public string GetString(string key)
         {
-            return attributes.TryGetValue(key, out var value) ? value.S : string.Empty;
+            return attributes.TryGetValue(key, out var value) ? value.S ?? string.Empty : string.Empty;
         }
 
         // Boolean methods

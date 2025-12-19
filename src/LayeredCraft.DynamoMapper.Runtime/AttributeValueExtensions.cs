@@ -158,5 +158,26 @@ public static class AttributeValueExtensions
                 ? TimeSpan.TryParse(value.S, CultureInfo.InvariantCulture, out var timeSpan) ? timeSpan : null
                 : null;
         }
+
+        // Enum methods
+        public TEnum GetEnum<TEnum>(string key, TEnum defaultValue) where TEnum : struct
+        {
+            if (attributes.TryGetValue(key, out var value) && Enum.TryParse(value.S, out TEnum valueEnum))
+            {
+                return valueEnum;
+            }
+
+            return defaultValue;
+        }
+
+        public TEnum? GetNullableEnum<TEnum>(string key) where TEnum : struct
+        {
+            if (attributes.TryGetValue(key, out var value) && Enum.TryParse(value.S, out TEnum valueEnum))
+            {
+                return valueEnum;
+            }
+
+            return null;
+        }
     }
 }

@@ -8,6 +8,8 @@ description: Attribute-based mapping for DynamoMapper - comprehensive Phase 1 sp
 > **Scope:** Phase 1 delivers a Mapperly-style, attribute-configured **incremental source generator** that generates high-performance mapping code between **domain models** and **Amazon DynamoDB `AttributeValue` dictionaries**, without requiring any attributes on the domain models themselves.
 >
 > **Core philosophy:** *Domain stays clean.* All configuration lives on mapper methods (and optionally the mapper type). Generated code is explicit, allocation-conscious, and friendly to single-table DynamoDB patterns.
+>
+> **Important:** DynamoMapper is a **DynamoDB-specific mapping library**, not a general-purpose object mapper. It supports only two mapping directions: `T → Dictionary<string, AttributeValue>` and `Dictionary<string, AttributeValue> → T`. Unlike general-purpose mappers like Mapperly, DynamoMapper focuses exclusively on DynamoDB attribute mapping and single-table patterns.
 
 ---
 
@@ -279,11 +281,19 @@ Constructor:
 
 ### 9.1 Design Goals
 Converters are necessary for:
-- Custom “Enumeration” patterns (e.g., `Species`, `ForceAlignment`)
+- Custom "Enumeration" patterns (e.g., `OrderStatus`, `CustomerType`)
 - Alternate serialization formats
 - Non-standard conversion strategies
 
-### 9.2 Converter Interface (Runtime)
+Phase 1 supports **two equally first-class conversion approaches**:
+1. **Converter types** implementing `IDynamoConverter<T>` (recommended for reusable, testable conversions)
+2. **Named static methods** on the mapper class (convenient for one-off, inline conversions)
+
+Both approaches are fully supported and generate identical runtime code.
+
+### 9.2 Approach 1: Converter Types (Recommended)
+
+#### 9.2.1 Converter Interface (Runtime)
 Provide a runtime interface usable by generated code:
 
 ```csharp
@@ -298,21 +308,141 @@ Support nullable conversion either via:
 - separate interface `IDynamoConverter<T?>`, or
 - generator wraps null checks.
 
-### 9.3 Using Converters
-Per field:
-- `[DynamoField(nameof(JediCharacter.Species), Converter = typeof(EnumerationAsStringConverter<Species>))]`
+#### 9.2.2 Example Converter Implementation
+
+```csharp
+public class OrderStatusConverter : IDynamoConverter<OrderStatus>
+{
+    public AttributeValue ToAttributeValue(OrderStatus value)
+    {
+        return new AttributeValue { S = value.Name };
+    }
+
+    public OrderStatus FromAttributeValue(AttributeValue value)
+    {
+        return OrderStatus.FromName(value.S);
+    }
+}
+```
+
+#### 9.2.3 Using Converter Types
+Per field via attribute:
+```csharp
+[DynamoField(nameof(Order.Status), Converter = typeof(OrderStatusConverter))]
+public static partial Dictionary<string, AttributeValue> ToItem(Order source);
+```
 
 Constraints:
 - Converter must implement `IDynamoConverter<TProperty>`
 - If mismatch, emit diagnostic.
 
-### 9.4 Built-in Converters (Phase 1)
+#### 9.2.4 Benefits
+- Reusable across multiple mappers
+- Testable in isolation
+- Works with dependency injection (if needed in future phases)
+- Clear separation of concerns
+
+### 9.3 Approach 2: Named Static Conversion Methods
+
+#### 9.3.1 Overview
+For inline, one-off conversions, users may define static methods on the mapper class with specific signatures.
+
+#### 9.3.2 Required Method Signatures
+Static conversion methods must follow these exact signatures:
+
+```csharp
+// Conversion TO DynamoDB AttributeValue
+static AttributeValue ToMethodName(TProperty value);
+
+// Conversion FROM DynamoDB AttributeValue
+static TProperty FromMethodName(AttributeValue value);
+```
+
+**Naming convention:** Methods must be paired with symmetric names. By convention, use `To{PropertyName}` and `From{PropertyName}`.
+
+#### 9.3.3 Example Static Method Conversion
+
+```csharp
+[DynamoMapper(Convention = DynamoNamingConvention.CamelCase)]
+public static partial class OrderMapper
+{
+    [DynamoField(nameof(Order.Status), ToMethod = nameof(ToOrderStatus), FromMethod = nameof(FromOrderStatus))]
+    public static partial Dictionary<string, AttributeValue> ToItem(Order source);
+
+    public static partial Order FromItem(Dictionary<string, AttributeValue> item);
+
+    // Static conversion methods
+    static AttributeValue ToOrderStatus(OrderStatus status)
+    {
+        return new AttributeValue { S = status.Name };
+    }
+
+    static OrderStatus FromOrderStatus(AttributeValue value)
+    {
+        return OrderStatus.FromName(value.S);
+    }
+}
+```
+
+#### 9.3.4 Constraints and Diagnostics
+The generator must validate:
+- Methods exist and are accessible
+- Methods are `static`
+- Method signatures match exactly: `AttributeValue ToX(T)` and `T FromX(AttributeValue)`
+- Return types and parameter types align with property type
+
+Violations produce compile-time diagnostics:
+- **DM0201**: Static conversion method not found
+- **DM0202**: Static conversion method has invalid signature
+- **DM0203**: Static conversion method parameter/return type mismatch
+
+#### 9.3.5 Benefits
+- Concise for simple, one-off conversions
+- No additional types required
+- Familiar to Mapperly users
+- Co-located with mapper configuration
+
+#### 9.3.6 When to Use Static Methods vs Converter Types
+Use **static methods** when:
+- Conversion is specific to one mapper
+- Logic is simple and inline
+- No reuse needed across mappers
+
+Use **converter types** when:
+- Conversion is reusable across multiple mappers
+- Complex conversion logic benefits from testability
+- Future DSL integration is desired
+
+### 9.4 Attribute Configuration for Converters
+
+#### 9.4.1 DynamoField Attribute Properties
+The `[DynamoField]` attribute supports both approaches:
+
+```csharp
+// Converter type approach
+[DynamoField(nameof(Order.Status), Converter = typeof(OrderStatusConverter))]
+
+// Static method approach
+[DynamoField(nameof(Order.Status), ToMethod = nameof(ToOrderStatus), FromMethod = nameof(FromOrderStatus))]
+```
+
+Constraints:
+- Cannot specify both `Converter` and `ToMethod`/`FromMethod` simultaneously
+- Both `ToMethod` and `FromMethod` must be specified together
+- If only one is specified, emit diagnostic
+
+### 9.5 Built-in Converters (Phase 1)
 Include minimal built-ins:
 - `GuidAsStringConverter`
 - `DateTimeIsoStringConverter` (if needed beyond default)
 - `EnumAsStringConverter<TEnum>` (optional; generator may inline enums instead)
 
-> Custom Enumeration pattern can be handled by a user-provided converter in Phase 1.
+> Custom patterns (Enumeration, Value Objects, etc.) can be handled by user-provided converters or static methods in Phase 1.
+
+### 9.6 Cross-References
+See also:
+- [Converter Types Documentation](../../docs/usage/converters.md)
+- [Static Converter Documentation](../../docs/usage/static-converters.md)
 
 ---
 
@@ -360,25 +490,287 @@ Generated runtime failures should throw `DynamoMappingException`.
 
 ## 11. Customization Hooks (Phase 1)
 
-### 11.1 Supported Hooks
-Allow optional partial methods on the mapper type:
+Customization hooks are **first-class extension points** that allow developers to inject custom logic into the mapping pipeline. Hooks are implemented as **optional partial methods** on the mapper class.
+
+### 11.1 Hook Signatures
+
+Phase 1 supports four lifecycle hooks that provide access to mapping operations at key points:
+
+#### 11.1.1 BeforeToItem Hook
+Invoked **before** property mapping during `ToItem`.
 
 ```csharp
 static partial void BeforeToItem(T source, Dictionary<string, AttributeValue> item);
-static partial void AfterToItem(T source, Dictionary<string, AttributeValue> item);
+```
 
+**Parameters:**
+- `source`: The source domain object being mapped
+- `item`: An empty dictionary that will be populated with mapped properties
+
+**Use cases:**
+- Initialize dictionary with fixed capacity hints
+- Add metadata before property mapping
+- Pre-compute derived values
+
+#### 11.1.2 AfterToItem Hook
+Invoked **after** property mapping during `ToItem`.
+
+```csharp
+static partial void AfterToItem(T source, Dictionary<string, AttributeValue> item);
+```
+
+**Parameters:**
+- `source`: The source domain object (for reference)
+- `item`: The fully populated dictionary with all mapped properties
+
+**Use cases:**
+- Add single-table keys (`pk`, `sk`)
+- Inject discriminator fields (`recordType`, `entityType`)
+- Add TTL attributes
+- Merge additional attribute dictionaries
+- Override or remove generated attributes
+
+#### 11.1.3 BeforeFromItem Hook
+Invoked **before** property mapping during `FromItem`.
+
+```csharp
 static partial void BeforeFromItem(Dictionary<string, AttributeValue> item);
+```
+
+**Parameters:**
+- `item`: The raw DynamoDB item dictionary
+
+**Use cases:**
+- Validate required metadata fields
+- Transform or normalize item structure before mapping
+- Extract and store unmapped attributes
+- Log or audit incoming data
+
+#### 11.1.4 AfterFromItem Hook
+Invoked **after** property mapping and object construction during `FromItem`.
+
+```csharp
 static partial void AfterFromItem(Dictionary<string, AttributeValue> item, ref T entity);
 ```
 
-Rules:
-- Hooks are optional; if not implemented, generator does not emit calls.
-- Hooks must be invoked in the generated methods in the order above.
+**Parameters:**
+- `item`: The raw DynamoDB item dictionary (for reference)
+- `entity`: The constructed and mapped entity (passed by `ref` for modification)
 
-### 11.2 Use Cases
-- Merging a `Keys` dictionary
-- Injecting `pk`, `sk`, `recordType`, `ttl`
-- Normalizing data after construction
+**Use cases:**
+- Post-construction normalization
+- Populate record type discriminators
+- Hydrate computed properties
+- Populate unmapped attribute bags
+- Validate entity state after hydration
+
+### 11.2 Hook Placement and Organization
+
+#### 11.2.1 Same Partial Class
+Hooks must be declared in the **same partial mapper class** as the mapping methods:
+
+```csharp
+[DynamoMapper(Convention = DynamoNamingConvention.CamelCase)]
+public static partial class ProductMapper
+{
+    public static partial Dictionary<string, AttributeValue> ToItem(Product source);
+    public static partial Product FromItem(Dictionary<string, AttributeValue> item);
+
+    // Hooks defined in the same partial class
+    static partial void AfterToItem(Product source, Dictionary<string, AttributeValue> item)
+    {
+        item["pk"] = new AttributeValue { S = $"PRODUCT#{source.ProductId}" };
+        item["sk"] = new AttributeValue { S = $"METADATA" };
+        item["recordType"] = new AttributeValue { S = "Product" };
+    }
+}
+```
+
+#### 11.2.2 Separate Files for Organization
+Hooks may be placed in **separate partial class files** for better organization:
+
+```csharp
+// ProductMapper.cs
+[DynamoMapper(Convention = DynamoNamingConvention.CamelCase)]
+public static partial class ProductMapper
+{
+    public static partial Dictionary<string, AttributeValue> ToItem(Product source);
+    public static partial Product FromItem(Dictionary<string, AttributeValue> item);
+}
+
+// ProductMapper.Hooks.cs
+public static partial class ProductMapper
+{
+    static partial void AfterToItem(Product source, Dictionary<string, AttributeValue> item)
+    {
+        item["pk"] = new AttributeValue { S = $"PRODUCT#{source.ProductId}" };
+        item["sk"] = new AttributeValue { S = $"METADATA" };
+        item["recordType"] = new AttributeValue { S = "Product" };
+    }
+
+    static partial void AfterFromItem(Dictionary<string, AttributeValue> item, ref Product entity)
+    {
+        // Populate additional state
+    }
+}
+```
+
+### 11.3 How Hooks Are Invoked
+
+#### 11.3.1 Unconditional Invocation
+The generated code **always invokes hooks unconditionally**, regardless of whether they are implemented:
+
+```csharp
+// Generated ToItem implementation
+public static partial Dictionary<string, AttributeValue> ToItem(Product source)
+{
+    var item = new Dictionary<string, AttributeValue>(capacity: 5);
+
+    BeforeToItem(source, item); // Always invoked
+
+    // Property mapping...
+    item["productId"] = new AttributeValue { S = source.ProductId.ToString() };
+    item["name"] = new AttributeValue { S = source.Name };
+
+    AfterToItem(source, item); // Always invoked
+
+    return item;
+}
+```
+
+#### 11.3.2 Partial Void Behavior
+Unimplemented hooks **compile away** due to `partial void` semantics:
+
+- If a hook is **not implemented**, the C# compiler removes the call site
+- No runtime overhead for unused hooks
+- No null checks or conditionals required
+
+### 11.4 Common Use Cases
+
+#### 11.4.1 Single-Table PK/SK Composition
+
+```csharp
+static partial void AfterToItem(Order order, Dictionary<string, AttributeValue> item)
+{
+    item["pk"] = new AttributeValue { S = $"CUSTOMER#{order.CustomerId}" };
+    item["sk"] = new AttributeValue { S = $"ORDER#{order.OrderId}" };
+    item["recordType"] = new AttributeValue { S = "Order" };
+}
+```
+
+#### 11.4.2 Record Type Discrimination
+
+```csharp
+static partial void AfterToItem(Customer customer, Dictionary<string, AttributeValue> item)
+{
+    item["entityType"] = new AttributeValue { S = nameof(Customer) };
+}
+
+static partial void AfterFromItem(Dictionary<string, AttributeValue> item, ref Customer entity)
+{
+    // Validate entity type on read
+    if (item.TryGetValue("entityType", out var typeAttr) && typeAttr.S != nameof(Customer))
+    {
+        throw new InvalidOperationException($"Expected Customer, got {typeAttr.S}");
+    }
+}
+```
+
+#### 11.4.3 TTL Attributes
+
+```csharp
+static partial void AfterToItem(Session session, Dictionary<string, AttributeValue> item)
+{
+    // Set TTL to 24 hours from now
+    var ttl = DateTimeOffset.UtcNow.AddHours(24).ToUnixTimeSeconds();
+    item["ttl"] = new AttributeValue { N = ttl.ToString() };
+}
+```
+
+#### 11.4.4 Unmapped Attribute Bags
+
+```csharp
+public class Product
+{
+    public Guid ProductId { get; set; }
+    public string Name { get; set; }
+    public Dictionary<string, AttributeValue>? AdditionalAttributes { get; set; }
+}
+
+static partial void AfterToItem(Product source, Dictionary<string, AttributeValue> item)
+{
+    // Merge additional attributes
+    if (source.AdditionalAttributes != null)
+    {
+        foreach (var kvp in source.AdditionalAttributes)
+        {
+            item[kvp.Key] = kvp.Value;
+        }
+    }
+}
+
+static partial void AfterFromItem(Dictionary<string, AttributeValue> item, ref Product entity)
+{
+    // Capture unmapped attributes
+    var mappedKeys = new HashSet<string> { "pk", "sk", "productId", "name" };
+    entity.AdditionalAttributes = item
+        .Where(kvp => !mappedKeys.Contains(kvp.Key))
+        .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+}
+```
+
+#### 11.4.5 Post-Hydration Normalization
+
+```csharp
+static partial void AfterFromItem(Dictionary<string, AttributeValue> item, ref User entity)
+{
+    // Normalize email to lowercase
+    entity.Email = entity.Email?.ToLowerInvariant();
+
+    // Compute derived property
+    entity.FullName = $"{entity.FirstName} {entity.LastName}";
+}
+```
+
+### 11.5 Hook Execution Order
+
+Hooks execute in a deterministic order:
+
+**During ToItem:**
+1. `BeforeToItem(source, item)` - item is empty
+2. Generated property mapping
+3. `AfterToItem(source, item)` - item is fully populated
+
+**During FromItem:**
+1. `BeforeFromItem(item)` - item is unmodified
+2. Generated property mapping and object construction
+3. `AfterFromItem(item, ref entity)` - entity is constructed and populated
+
+### 11.6 Constraints and Best Practices
+
+#### 11.6.1 Constraints
+- Hooks must be `static partial void`
+- Hooks must match exact signatures
+- Hooks cannot return values
+- Hooks cannot be async (Phase 1)
+
+#### 11.6.2 Best Practices
+- Keep hooks focused and single-purpose
+- Avoid complex business logic in hooks
+- Use hooks for DynamoDB-specific concerns (keys, types, TTLs)
+- Consider separate files for complex hook implementations
+- Document hook behavior for team clarity
+
+### 11.7 Diagnostics
+The generator validates hook signatures and emits diagnostics for:
+- Incorrect hook signatures
+- Non-static hook methods
+- Mismatched parameter types
+
+### 11.8 Cross-References
+See also:
+- [Customization Hooks Guide](../../docs/usage/customization-hooks.md)
+- [Single-Table Design Patterns](../../docs/examples/single-table-design.md)
 
 ---
 

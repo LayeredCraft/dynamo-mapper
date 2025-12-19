@@ -8,6 +8,8 @@ description: Fluent DSL configuration for DynamoMapper - comprehensive Phase 2 s
 > **Scope:** Phase 2 introduces an **optional fluent DSL** for configuring DynamoMapper mappings, providing a strongly-typed, refactor-safe alternative to attribute-based configuration introduced in Phase 1.
 >
 > **Key principle:** Phase 2 **does not replace** Phase 1. Attribute-based configuration remains fully supported and first-class. The DSL is additive and opt-in.
+>
+> **Important:** Like Phase 1, DynamoMapper remains a **DynamoDB-specific mapping library**, not a general-purpose object mapper. The DSL supports only two mapping directions: `T → Dictionary<string, AttributeValue>` and `Dictionary<string, AttributeValue> → T`. The DSL does not introduce general-purpose mapping capabilities beyond DynamoDB.
 
 ---
 
@@ -175,16 +177,156 @@ map.OmitNullValues();
 
 ## 8. Converters (DSL)
 
-### 8.1 Per-Property Converter
+The Phase 2 DSL supports **both converter approaches** introduced in Phase 1, ensuring parity and consistency between attribute-based and DSL-based configuration.
+
+### 8.1 Approach 1: Converter Types (Recommended)
+
+Use the `.Using<TConverter>()` fluent method to apply a converter type:
 
 ```csharp
-map.Property(x => x.Species)
-   .Using<EnumerationAsStringConverter<Species>>();
+map.Property(x => x.Status)
+   .Using<OrderStatusConverter>();
 ```
 
-Rules:
+**Requirements:**
 - Converter must implement `IDynamoConverter<T>`
-- Generator validates generic type match
+- Generic type `T` must match property type
+- Generator validates type compatibility at compile time
+
+**Example:**
+
+```csharp
+[DynamoMapper]
+public static partial class OrderMapper
+{
+    public static partial Dictionary<string, AttributeValue> ToItem(Order source);
+    public static partial Order FromItem(Dictionary<string, AttributeValue> item);
+
+    static partial void Configure(DynamoMapBuilder<Order> map)
+    {
+        map.Property(x => x.Status)
+           .Using<OrderStatusConverter>();
+    }
+}
+
+public class OrderStatusConverter : IDynamoConverter<OrderStatus>
+{
+    public AttributeValue ToAttributeValue(OrderStatus value)
+        => new AttributeValue { S = value.Name };
+
+    public OrderStatus FromAttributeValue(AttributeValue value)
+        => OrderStatus.FromName(value.S);
+}
+```
+
+### 8.2 Approach 2: Named Static Methods
+
+Use the `.Using(toMethod, fromMethod)` fluent method to reference static conversion methods:
+
+```csharp
+map.Property(x => x.Status)
+   .Using(nameof(ToOrderStatus), nameof(FromOrderStatus));
+```
+
+**Requirements:**
+- Both method names must be provided (no partial specification)
+- Methods must be `static` on the mapper class
+- Method signatures must match: `AttributeValue ToX(T)` and `T FromX(AttributeValue)`
+- Methods must be accessible from generated code
+
+**Example:**
+
+```csharp
+[DynamoMapper]
+public static partial class OrderMapper
+{
+    public static partial Dictionary<string, AttributeValue> ToItem(Order source);
+    public static partial Order FromItem(Dictionary<string, AttributeValue> item);
+
+    static partial void Configure(DynamoMapBuilder<Order> map)
+    {
+        map.Property(x => x.Status)
+           .Using(nameof(ToOrderStatus), nameof(FromOrderStatus));
+    }
+
+    // Static conversion methods
+    static AttributeValue ToOrderStatus(OrderStatus status)
+    {
+        return new AttributeValue { S = status.Name };
+    }
+
+    static OrderStatus FromOrderStatus(AttributeValue value)
+    {
+        return OrderStatus.FromName(value.S);
+    }
+}
+```
+
+### 8.3 DSL Constraints and Validation
+
+The generator validates converter configuration and emits diagnostics for:
+
+**Converter Type Errors:**
+- **DM0301**: Converter type does not implement `IDynamoConverter<T>`
+- **DM0302**: Converter generic type mismatch with property type
+
+**Static Method Errors:**
+- **DM0303**: Static conversion method not found
+- **DM0304**: Static conversion method has invalid signature
+- **DM0305**: Both ToMethod and FromMethod must be specified together
+- **DM0306**: Cannot specify both converter type and static methods
+
+### 8.4 Choosing Between Approaches in DSL
+
+The same guidance from Phase 1 applies:
+
+**Use converter types** (`.Using<TConverter>()`) when:
+- Conversion logic is reusable across multiple mappers
+- Complex conversion benefits from testability
+- You prefer explicit, dedicated converter classes
+
+**Use static methods** (`.Using(toMethod, fromMethod)`) when:
+- Conversion is specific to one mapper
+- Logic is simple and inline
+- You prefer co-location with configuration
+
+Both approaches generate identical runtime code and have equivalent performance.
+
+### 8.5 Mixing DSL and Attribute Converter Configuration
+
+When both DSL and attributes specify converters for the same property:
+
+1. **DSL converter takes precedence** over attribute converter
+2. Generator emits a **warning diagnostic** (DM0307) about the override
+3. Attribute converter is ignored
+
+Example (DSL wins):
+
+```csharp
+[DynamoMapper]
+public static partial class ProductMapper
+{
+    // Attribute specifies one converter
+    [DynamoField(nameof(Product.Category), Converter = typeof(OldCategoryConverter))]
+    public static partial Dictionary<string, AttributeValue> ToItem(Product source);
+
+    public static partial Product FromItem(Dictionary<string, AttributeValue> item);
+
+    static partial void Configure(DynamoMapBuilder<Product> map)
+    {
+        // DSL overrides attribute - NewCategoryConverter is used
+        map.Property(x => x.Category)
+           .Using<NewCategoryConverter>();
+    }
+}
+```
+
+### 8.6 Cross-References
+
+See also:
+- [Phase 1 Converters](phase-1.md#9-converters-phase-1)
+- [Converter Types Documentation](../../docs/usage/converters.md)
+- [Static Converter Documentation](../../docs/usage/static-converters.md)
 
 ---
 

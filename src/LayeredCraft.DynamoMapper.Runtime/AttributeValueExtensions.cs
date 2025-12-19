@@ -115,5 +115,48 @@ public static class AttributeValueExtensions
                 ? Guid.TryParse(value.S, out var id) ? id : null
                 : null;
         }
+
+        // DateTime methods
+        public DateTime GetDateTime(string key)
+        {
+            return attributes.TryGetValue(key, out var value)
+                ? DateTime.TryParse(value.S, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var date) ? date : DateTime.MinValue
+                : DateTime.MinValue;
+        }
+
+        public DateTime? GetNullableDateTime(string key)
+        {
+            return attributes.TryGetValue(key, out var value)
+                ? DateTime.TryParse(value.S, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var date) ? date : null
+                : null;
+        }
+
+        public DateTimeOffset GetDateTimeOffset(string key)
+        {
+            return attributes.TryGetValue(key, out var value)
+                ? DateTimeOffset.TryParse(value.S, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var date) ? date : DateTimeOffset.MinValue
+                : DateTimeOffset.MinValue;
+        }
+
+        public DateTimeOffset? GetNullableDateTimeOffset(string key)
+        {
+            return attributes.TryGetValue(key, out var value)
+                ? DateTimeOffset.TryParse(value.S, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var date) ? date : null
+                : null;
+        }
+
+        public TimeSpan GetTimeSpan(string key)
+        {
+            return attributes.TryGetValue(key, out var value)
+                ? TimeSpan.TryParse(value.S, CultureInfo.InvariantCulture, out var timeSpan) ? timeSpan : TimeSpan.Zero
+                : TimeSpan.Zero;
+        }
+
+        public TimeSpan? GetNullableTimeSpan(string key)
+        {
+            return attributes.TryGetValue(key, out var value)
+                ? TimeSpan.TryParse(value.S, CultureInfo.InvariantCulture, out var timeSpan) ? timeSpan : null
+                : null;
+        }
     }
 }

@@ -18,7 +18,13 @@
     <Using Include="Xunit" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Basic.Reference.Assemblies.Net100" />
+    <PackageReference Include="Basic.Reference.Assemblies.Net80" />
+    <PackageReference Include="Basic.Reference.Assemblies.Net90" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="Verify.SourceGenerators" />
+    <PackageReference Include="Verify.XunitV3" />
     <PackageReference Include="xunit.v3" />
     <PackageReference Include="xunit.runner.visualstudio" />
   </ItemGroup>

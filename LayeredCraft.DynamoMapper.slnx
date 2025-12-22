@@ -52,6 +52,9 @@
     <File Path="docs\usage\field-configuration.md" />
     <File Path="docs\usage\static-converters.md" />
   </Folder>
+  <Folder Name="/examples/">
+    <Project Path="examples/DynamoMapper.SimpleExample/DynamoMapper.SimpleExample.csproj" />
+  </Folder>
   <Folder Name="/git/">
     <File Path=".github\dependabot.yml" />
     <File Path=".github\workflows\build.yaml" />

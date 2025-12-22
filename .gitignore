@@ -434,3 +434,5 @@ ehthumbs.db
 Thumbs.db
 
 *.received.*
+
+**/*.DotSettings.user

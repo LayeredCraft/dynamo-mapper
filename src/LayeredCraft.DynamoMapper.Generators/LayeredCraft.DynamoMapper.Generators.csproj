@@ -24,5 +24,6 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.Common" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
   </ItemGroup>
 </Project>

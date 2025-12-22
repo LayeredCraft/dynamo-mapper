@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Amazon.DynamoDBv2.Model;
-
-Console.WriteLine("DynamoDB AttributeValue Examples");
-Console.WriteLine("=================================\n");
+using DynamoMapper.Runtime;
 
 // Example enum definitions
 var exampleAttributes = new Dictionary<string, AttributeValue>
@@ -90,31 +88,68 @@ var exampleAttributes = new Dictionary<string, AttributeValue>
     ["OrderStatus"] = new() { S = "Pending" },
 };
 
-// Display examples
-foreach (var kvp in exampleAttributes)
+var myEntity = ExampleEntityMapper.FromItem(exampleAttributes);
+
+[DynamoMapper]
+public static class ExampleEntityMapper
 {
-    var value = kvp.Value;
-    var typeInfo =
-        value.S != null ? $"S = \"{value.S}\""
-        : value.N != null ? $"N = \"{value.N}\""
-        : value.BOOL == true ? "BOOL = true"
-        : value.BOOL == false ? "BOOL = false"
-        : value.NULL == true ? "NULL = true"
-        : "Unknown";
+    public static Dictionary<string, AttributeValue> ToItem(ExampleEntity source) =>
+        throw new NotImplementedException();
 
-    Console.WriteLine($"{kvp.Key, -25} -> {typeInfo}");
+    public static ExampleEntity FromItem(Dictionary<string, AttributeValue> item)
+    {
+        var entity = new ExampleEntity
+        {
+            Age = item.GetInt("Age"),
+            Amount = 0,
+            CompletedAt = null,
+            CorrelationId = default,
+            Count = 0,
+            CreatedAt = default,
+            DeletedAt = null,
+            Duration = default,
+            DurationTicks = default,
+            EmptyString = null,
+            EventTime = default,
+            IsActive = false,
+            IsDeleted = false,
+            IsOptional = null,
+            IsVerified = null,
+            LocalDateTime = default,
+            LongDuration = default,
+            LongValue = 0,
+            Name = null,
+            NegativeDuration = default,
+            NegativeInt = 0,
+            NullableDecimal = null,
+            NullableDouble = null,
+            NullableInt = null,
+            NullableLong = null,
+            NullDateTime = null,
+            NullDateTimeOffset = null,
+            NullDecimal = null,
+            NullDouble = null,
+            NullGuid = null,
+            NullLong = null,
+            NullTimeSpan = null,
+            OptionalCount = null,
+            OptionalDuration = null,
+            OptionalGuid = null,
+            OrderStatus = OrderStatus.Pending,
+            Precision = 0,
+            Price = 0,
+            Priority = Priority.Low,
+            ScheduledTime = default,
+            ShortDuration = default,
+            Status = Status.Active,
+            Temperature = 0,
+            UpdatedAt = default,
+            UserId = default,
+        };
+
+        return entity;
+    }
 }
-
-Console.WriteLine("\n=================================");
-Console.WriteLine("Type Mapping Summary:");
-Console.WriteLine("- string              -> S (String)");
-Console.WriteLine("- bool/bool?          -> BOOL (Boolean) or NULL");
-Console.WriteLine("- int/long/double/decimal -> N (Number as string)");
-Console.WriteLine("- Guid/Guid?          -> S (String representation)");
-Console.WriteLine("- DateTime/DateTime?  -> S (ISO-8601)");
-Console.WriteLine("- DateTimeOffset      -> S (ISO-8601 with offset)");
-Console.WriteLine("- TimeSpan            -> S (ISO-8601 Duration) or N (Ticks)");
-Console.WriteLine("- enum                -> S (String name)");
 
 // POCO with properties matching the dictionary
 public class ExampleEntity

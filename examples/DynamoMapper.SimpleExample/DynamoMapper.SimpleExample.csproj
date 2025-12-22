@@ -9,4 +9,7 @@
   <ItemGroup>
     <PackageReference Include="AWSSDK.DynamoDBv2" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\LayeredCraft.DynamoMapper.Runtime\LayeredCraft.DynamoMapper.Runtime.csproj" />
+  </ItemGroup>
 </Project>

@@ -1,5 +1,5 @@
 using Basic.Reference.Assemblies;
-using DynamoMapper;
+using DynamoMapper.Generator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 

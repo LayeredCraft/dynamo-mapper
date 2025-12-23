@@ -2,7 +2,10 @@ using Microsoft.CodeAnalysis;
 
 namespace DynamoMapper.Generator;
 
-public readonly record struct GeneratorInfo;
+internal readonly record struct MapperAndDiagnosticInfo(
+    MapperInfo MapperInfo,
+    DiagnosticInfo? DiagnosticInfo
+);
 
 [Generator]
 public class DynamoMapperGenerator : IIncrementalGenerator
@@ -16,11 +19,54 @@ public class DynamoMapperGenerator : IIncrementalGenerator
                 MapperSyntaxProvider.Transformer
             )
             .WithTrackingName(TrackingName.MapperSyntaxProvider_Extract)
-            .Where(static m => m is not null)
-            .WithTrackingName(TrackingName.MapperSyntaxProvider_FilterNotNull)
-            .Select(static (m, _) => m!.Value)
-            .WithTrackingName(TrackingName.MapperSyntaxProvider_GetValue);
+            .WhereNotNull()
+            .WithTrackingName(TrackingName.MapperSyntaxProvider_FilterNotNull);
 
-        // context.RegisterSourceOutput();
+        var mapperAndDiagnosticInfo = mapperInfos
+            .Select(DiagnosticsProvider.Build)
+            .WithTrackingName(TrackingName.DiagnosticsProvider);
+
+        // output diagnostics
+        context.RegisterSourceOutput(
+            mapperAndDiagnosticInfo,
+            static (ctx, info) =>
+            {
+                if (info.DiagnosticInfo is not null)
+                    info.DiagnosticInfo!.Value.ReportDiagnostic(ctx);
+            }
+        );
+
+        // mappers to build
+        var mappersToBuild = mapperAndDiagnosticInfo.Where(static m => m.DiagnosticInfo is null);
+
+        context.RegisterSourceOutput(
+            mappersToBuild,
+            (ctx, info) =>
+            {
+                MapperOutputGenerator.Generate(ctx, info.MapperInfo);
+            }
+        );
+    }
+}
+
+internal static class IncrementalValueProviderExtensions
+{
+    extension<T>(IncrementalValuesProvider<T?> valueProviders)
+        where T : struct
+    {
+        public IncrementalValuesProvider<T> WhereNotNull() =>
+            valueProviders.Where(static v => v is not null).Select(static (v, _) => v!.Value);
+    }
+}
+
+internal static class EnumerableExtensions
+{
+    extension<T>(IEnumerable<T> enumerable)
+    {
+        public void ForEach(Action<T> action)
+        {
+            foreach (var item in enumerable)
+                action(item);
+        }
     }
 }

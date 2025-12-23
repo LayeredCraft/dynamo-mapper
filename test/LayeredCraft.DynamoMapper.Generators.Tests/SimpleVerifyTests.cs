@@ -8,10 +8,27 @@ public class SimpleVerifyTests
             new VerifyTestOptions
             {
                 SourceCode = """
-                using System;
+                using Amazon.DynamoDBv2.Model;
+                using DynamoMapper.Runtime;
+                using System.Collections.Generic;
 
-                Console.WriteLine("Hello, World!");
+                [DynamoMapper]
+                public static partial class ExampleEntityMapper
+                {
+                    // public static partial Dictionary<string, AttributeValue> ToItem(string source);
+
+                    // public static partial string FromItem(Dictionary<string, AttributeValue> item);
+                }
+
+                [DynamoMapper]
+                public static partial class ExampleEntityMapper2
+                {
+                    // public static partial Dictionary<string, AttributeValue> ToItem(string source);
+
+                    // public static partial string FromItem(Dictionary<string, AttributeValue> item);
+                }
                 """,
-            }
+            },
+            TestContext.Current.CancellationToken
         );
 }

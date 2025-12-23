@@ -10,6 +10,11 @@
     <PackageReference Include="AWSSDK.DynamoDBv2" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference
+      Include="..\..\src\LayeredCraft.DynamoMapper.Generators\LayeredCraft.DynamoMapper.Generators.csproj"
+      ReferenceOutputAssembly="false"
+      OutputItemType="Analyzer"
+    />
     <ProjectReference Include="..\..\src\LayeredCraft.DynamoMapper.Runtime\LayeredCraft.DynamoMapper.Runtime.csproj" />
   </ItemGroup>
 </Project>

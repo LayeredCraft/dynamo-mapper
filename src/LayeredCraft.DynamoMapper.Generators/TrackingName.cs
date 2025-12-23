@@ -10,5 +10,9 @@ internal static class TrackingName
         MapperSyntaxProvider_FilterNotNull
     );
 
-    internal const string MapperSyntaxProvider_GetValue = nameof(MapperSyntaxProvider_GetValue);
+    internal const string DiagnosticsProvider = nameof(DiagnosticsProvider);
+
+    internal const string GeneratorInfo_CollectMapperInfos = nameof(
+        GeneratorInfo_CollectMapperInfos
+    );
 }

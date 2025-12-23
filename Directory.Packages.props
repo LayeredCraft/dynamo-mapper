@@ -13,6 +13,8 @@
     <PackageVersion Include="Basic.Reference.Assemblies.Net100" Version="1.8.4" />
     <PackageVersion Include="Basic.Reference.Assemblies.Net80" Version="1.8.4" />
     <PackageVersion Include="Basic.Reference.Assemblies.Net90" Version="1.8.4" />
+    <PackageVersion Include="LayeredCraft.SourceGeneratorTools.Generator" Version="0.1.0-beta.10" />
+    <PackageVersion Include="Meziantou.Polyfill" Version="1.0.71" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Common" Version="5.0.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />

@@ -48,25 +48,3 @@ public class DynamoMapperGenerator : IIncrementalGenerator
         );
     }
 }
-
-internal static class IncrementalValueProviderExtensions
-{
-    extension<T>(IncrementalValuesProvider<T?> valueProviders)
-        where T : struct
-    {
-        public IncrementalValuesProvider<T> WhereNotNull() =>
-            valueProviders.Where(static v => v is not null).Select(static (v, _) => v!.Value);
-    }
-}
-
-internal static class EnumerableExtensions
-{
-    extension<T>(IEnumerable<T> enumerable)
-    {
-        public void ForEach(Action<T> action)
-        {
-            foreach (var item in enumerable)
-                action(item);
-        }
-    }
-}

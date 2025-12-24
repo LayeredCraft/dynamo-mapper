@@ -14,13 +14,20 @@ namespace DynamoMapper.Generator;
  */
 
 public readonly record struct MapperInfo(
-    string ClassName,
-    string ClassAccessibility,
-    string ModelType,
-    string? ToItemSignature,
-    string? FromItemSignature,
-    string? ClassNamespace
+    MapperClassInfo MapperClass,
+    ModelClassInfo ModelClassInfo
 );
+
+public readonly record struct MapperClassInfo(
+    string Name,
+    string FullyQualifiedType,
+    string Accessibility,
+    string Namespace,
+    string? ToItemSignature,
+    string? FromItemSignature
+);
+
+public readonly record struct ModelClassInfo(string FullyQualifiedType);
 
 public static class MapperSyntaxProvider
 {
@@ -93,16 +100,17 @@ public static class MapperSyntaxProvider
         var toItemSignature = GetMethodSignature(toItemMethod);
         var fromItemSignature = GetMethodSignature(fromItemMethod);
 
-        var methodInfo = new MapperInfo(
+        var mapperClassInfo = new MapperClassInfo(
             classSymbol.Name,
+            classSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
             classSymbol.DeclaredAccessibility.ToString(),
-            modelType,
+            classSymbol.ContainingNamespace?.ToDisplayString() ?? string.Empty,
             toItemSignature,
-            fromItemSignature,
-            classSymbol.ContainingNamespace?.ToDisplayString()
+            fromItemSignature
         );
+        var modelClassInfo = new ModelClassInfo(modelType);
 
-        return methodInfo;
+        return new MapperInfo(mapperClassInfo, modelClassInfo);
     }
 
     private static string EnsurePocoTypesMatch(

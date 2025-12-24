@@ -37,6 +37,8 @@ internal static class WellKnownTypeData
         Microsoft_Extensions_DependencyInjection_FromKeyedServicesAttribute,
         Microsoft_Extensions_DependencyInjection_IServiceCollection,
         System_AttributeUsageAttribute,
+        Amazon_DynamoDBv2_Model_AttributeValue,
+        System_Collections_Generic_Dictionary_2,
     }
 
     public static readonly string[] WellKnownTypeNames =
@@ -64,5 +66,7 @@ internal static class WellKnownTypeData
         "Microsoft.Extensions.DependencyInjection.FromKeyedServicesAttribute",
         "Microsoft.Extensions.DependencyInjection.IServiceCollection",
         "System.AttributeUsageAttribute",
+        "Amazon.DynamoDBv2.Model.AttributeValue",
+        "System.Collections.Generic.Dictionary`2",
     ];
 }

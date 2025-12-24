@@ -43,7 +43,7 @@ public class DynamoMapperGenerator : IIncrementalGenerator
             mappersToBuild,
             (ctx, info) =>
             {
-                MapperOutputGenerator.Generate(ctx, info.MapperInfo);
+                MapperEmitter.Generate(ctx, info.MapperInfo);
             }
         );
     }

@@ -14,6 +14,7 @@ internal readonly record struct MapperClassInfo(
     string FullyQualifiedType,
     string Accessibility,
     string Namespace,
+    string ClassSignature,
     string? ToItemSignature,
     string? FromItemSignature
 );
@@ -22,19 +23,6 @@ internal static class MapperClassInfoExtensions
 {
     private const string ToItemMethodName = "ToItem";
     private const string FromItemMethodName = "FromItem";
-
-    private static readonly SymbolDisplayFormat MethodFormat = new(
-        SymbolDisplayGlobalNamespaceStyle.Included,
-        SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
-        SymbolDisplayGenericsOptions.IncludeTypeParameters,
-        SymbolDisplayMemberOptions.IncludeParameters
-            | SymbolDisplayMemberOptions.IncludeModifiers
-            | SymbolDisplayMemberOptions.IncludeAccessibility
-            | SymbolDisplayMemberOptions.IncludeType,
-        parameterOptions: SymbolDisplayParameterOptions.IncludeType
-            | SymbolDisplayParameterOptions.IncludeName
-            | SymbolDisplayParameterOptions.IncludeParamsRefOut
-    );
 
     extension(MapperClassInfo)
     {
@@ -97,6 +85,7 @@ internal static class MapperClassInfoExtensions
     )
     {
         var modelTypeSymbol = EnsurePocoTypesMatch(toItemMethod, fromItemMethod);
+        var classSignature = GetClassSignature(classSymbol);
         var toItemSignature = GetMethodSignature(toItemMethod);
         var fromItemSignature = GetMethodSignature(fromItemMethod);
 
@@ -105,6 +94,7 @@ internal static class MapperClassInfoExtensions
             classSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
             classSymbol.DeclaredAccessibility.ToString(),
             classSymbol.ContainingNamespace?.ToDisplayString() ?? string.Empty,
+            classSignature,
             toItemSignature,
             fromItemSignature
         );
@@ -180,11 +170,34 @@ internal static class MapperClassInfoExtensions
             && SymbolEqualityComparer.Default.Equals(typeArguments[1], attributeValueType);
     }
 
+    private static string GetClassSignature(INamedTypeSymbol classSymbol)
+    {
+        var accessibility = classSymbol.DeclaredAccessibility.ToString().ToLowerInvariant();
+        var modifiers = classSymbol.IsStatic ? "static " : "";
+
+        return $"{accessibility} {modifiers}partial class {classSymbol.Name}";
+    }
+
     private static string? GetMethodSignature(IMethodSymbol? method)
     {
         if (method is null)
             return null;
 
-        return method.ToDisplayString(MethodFormat);
+        // Build signature manually with hardcoded parameter name
+        var parameter = method.Parameters[0];
+        var parameterName = string.Equals(method.Name, ToItemMethodName, StringComparison.Ordinal)
+            ? "source"
+            : "item";
+
+        var returnType = method.ReturnType.ToDisplayString(
+            SymbolDisplayFormat.FullyQualifiedFormat
+        );
+        var parameterType = parameter.Type.ToDisplayString(
+            SymbolDisplayFormat.FullyQualifiedFormat
+        );
+        var accessibility = method.DeclaredAccessibility.ToString().ToLowerInvariant();
+        var modifiers = method.IsStatic ? "static " : "";
+
+        return $"{accessibility} {modifiers}{returnType} {method.Name}({parameterType} {parameterName})";
     }
 }

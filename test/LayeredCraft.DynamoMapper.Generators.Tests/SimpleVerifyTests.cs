@@ -19,7 +19,7 @@ public class SimpleVerifyTests
                 {
                     public static partial Dictionary<string, AttributeValue> ToItem(MyDto source);
 
-                    public static partial MyDto FromItem(Dictionary<string, AttributeValue> item);
+                    public static partial MyDto FromItem(Dictionary<string, AttributeValue> x);
                 }
 
                 public class MyDto

@@ -17,4 +17,11 @@ internal static class EnumerableExtensions
         public IEnumerable<T> WhereNotNull() =>
             valueProviders.Where(static v => v is not null).Select(static v => v!.Value);
     }
+
+    extension<T>(IEnumerable<T?> valueProviders)
+        where T : class
+    {
+        public IEnumerable<T> WhereNotNull() =>
+            valueProviders.Where(static v => v is not null).Select(static v => v!);
+    }
 }

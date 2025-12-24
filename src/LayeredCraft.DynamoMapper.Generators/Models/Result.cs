@@ -41,6 +41,5 @@ internal class DiagnosticResult<T> : Result<T, DiagnosticInfo?>
 
     public static new DiagnosticResult<T> Success(T value) => new(true, value, null);
 
-    public static new DiagnosticResult<T> Failure(DiagnosticInfo error) =>
-        new(false, default, error);
+    public static DiagnosticResult<T> Failure(DiagnosticInfo error) => new(false, default, error);
 }

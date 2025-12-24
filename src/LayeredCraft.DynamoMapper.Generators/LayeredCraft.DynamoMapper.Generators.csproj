@@ -32,6 +32,20 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.CodeAnalysis.Common" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+    <PackageReference Include="Microsoft.CSharp" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" />
+    <PackageReference Include="Scriban" IncludeAssets="Build" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Templates\*.scriban" />
+    <EmbeddedResource Include="Templates\*.scriban" />
+  </ItemGroup>
+  <PropertyGroup>
+    <!-- Disable PolySharp's ModuleInitializerAttribute shim -->
+    <PolySharpExcludeGeneratedTypes>System.Runtime.CompilerServices.ModuleInitializerAttribute</PolySharpExcludeGeneratedTypes>
+  </PropertyGroup>
+  <PropertyGroup>
+    <IsAotCompatible>false</IsAotCompatible>
+  </PropertyGroup>
 </Project>

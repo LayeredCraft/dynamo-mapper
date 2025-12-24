@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis;
 
 namespace DynamoMapper.Generator;
 
-internal static class MapperOutputGenerator
+internal static class MapperEmitter
 {
     internal static string GeneratedCodeAttribute
     {
@@ -29,12 +29,13 @@ internal static class MapperOutputGenerator
     {
         _counter++;
 
-        var outputCode = $$"""
-            namespace DynamoMapper.Generator;
+        var model = new
+        {
+            MapperClassNamespace = mapperInfo.MapperClass.Namespace,
+            MapperClassSignature = mapperInfo.MapperClass.ClassSignature,
+        };
 
-            {{GeneratedCodeAttribute}}
-            public static class Generated{{_counter}}{ }
-            """;
+        var outputCode = TemplateHelper.Render("Templates.Mapper.scriban", model);
 
         context.AddSource($"Generated{_counter}.g.cs", outputCode);
     }

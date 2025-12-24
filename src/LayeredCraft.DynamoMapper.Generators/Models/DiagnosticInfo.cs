@@ -5,12 +5,12 @@ namespace DynamoMapper.Generator;
 
 internal readonly struct DiagnosticInfo(
     DiagnosticDescriptor diagnosticDescriptor,
-    LocationInfo locationInfo,
+    LocationInfo? locationInfo = null,
     params object[] messageArgs
 ) : IEquatable<DiagnosticInfo>
 {
     public DiagnosticDescriptor DiagnosticDescriptor { get; } = diagnosticDescriptor;
-    public LocationInfo LocationInfo { get; } = locationInfo;
+    public LocationInfo? LocationInfo { get; } = locationInfo;
     public object[] MessageArgs { get; } = messageArgs;
 
     public bool Equals(DiagnosticInfo other) =>
@@ -28,7 +28,7 @@ internal static class DiagnosticInfoExtensions
         internal Diagnostic CreateDiagnostic() =>
             Diagnostic.Create(
                 diagnosticInfo.DiagnosticDescriptor,
-                diagnosticInfo.LocationInfo.ToLocation(),
+                diagnosticInfo.LocationInfo?.ToLocation(),
                 diagnosticInfo.MessageArgs
             );
 

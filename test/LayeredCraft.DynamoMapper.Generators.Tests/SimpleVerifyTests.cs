@@ -12,6 +12,8 @@ public class SimpleVerifyTests
                 using Amazon.DynamoDBv2.Model;
                 using DynamoMapper.Runtime;
 
+                namespace MyNamespace;
+
                 [DynamoMapper]
                 public static partial class ExampleEntityMapper
                 {

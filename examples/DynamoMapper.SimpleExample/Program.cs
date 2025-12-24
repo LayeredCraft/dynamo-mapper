@@ -258,3 +258,13 @@ public enum OrderStatus
     Delivered,
     Cancelled,
 }
+
+public static partial class MyThing
+{
+    public static partial void DoStuff(int int1);
+}
+
+public static partial class MyThing
+{
+    public static partial void DoStuff(int x) { }
+}

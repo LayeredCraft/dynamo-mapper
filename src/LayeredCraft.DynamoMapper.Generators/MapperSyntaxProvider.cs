@@ -5,16 +5,40 @@ using WellKnownType = DynamoMapper.Generator.WellKnownTypeData.WellKnownType;
 
 namespace DynamoMapper.Generator;
 
+/*
+ * Items we need:
+ * - class name
+ * - class access level
+ * - full signature of ToItem
+ * - full signature of FromItem
+ */
+
 public readonly record struct MapperInfo(
     string ClassName,
     string ClassAccessibility,
-    string ModelType
+    string ModelType,
+    string? ToItemSignature,
+    string? FromItemSignature,
+    string? ClassNamespace
 );
 
 public static class MapperSyntaxProvider
 {
     private const string ToItemMethodName = "ToItem";
     private const string FromItemMethodName = "FromItem";
+
+    private static readonly SymbolDisplayFormat MethodFormat = new(
+        SymbolDisplayGlobalNamespaceStyle.Included,
+        SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
+        SymbolDisplayGenericsOptions.IncludeTypeParameters,
+        SymbolDisplayMemberOptions.IncludeParameters
+            | SymbolDisplayMemberOptions.IncludeModifiers
+            | SymbolDisplayMemberOptions.IncludeAccessibility
+            | SymbolDisplayMemberOptions.IncludeType,
+        parameterOptions: SymbolDisplayParameterOptions.IncludeType
+            | SymbolDisplayParameterOptions.IncludeName
+            | SymbolDisplayParameterOptions.IncludeParamsRefOut
+    );
 
     internal static bool Predicate(SyntaxNode node, CancellationToken _) =>
         node is ClassDeclarationSyntax;
@@ -50,10 +74,7 @@ public static class MapperSyntaxProvider
          * - the POCO type on both mapper methods must match.
          */
 
-        // TODO: add diagnostics around the above rules
-
         // TODO: add diagnostic to warn about invalid mapper methods
-
         var methodSymbols = classSymbol
             .GetMembers()
             .OfType<IMethodSymbol>()
@@ -61,20 +82,27 @@ public static class MapperSyntaxProvider
             .Where(m => HasSupportedSignature(m, wellKnownTypes))
             .ToArray();
 
-        var toItemMethod = methodSymbols.FirstOrDefault(static m =>
+        IMethodSymbol? toItemMethod = methodSymbols.FirstOrDefault(static m =>
             string.Equals(m.Name, ToItemMethodName, StringComparison.Ordinal)
         );
-        var fromItemMethod = methodSymbols.FirstOrDefault(static m =>
+        IMethodSymbol? fromItemMethod = methodSymbols.FirstOrDefault(static m =>
             string.Equals(m.Name, FromItemMethodName, StringComparison.Ordinal)
         );
 
         var modelType = EnsurePocoTypesMatch(toItemMethod, fromItemMethod);
+        var toItemSignature = GetMethodSignature(toItemMethod);
+        var fromItemSignature = GetMethodSignature(fromItemMethod);
 
-        return new MapperInfo(
+        var methodInfo = new MapperInfo(
             classSymbol.Name,
             classSymbol.DeclaredAccessibility.ToString(),
-            modelType
+            modelType,
+            toItemSignature,
+            fromItemSignature,
+            classSymbol.ContainingNamespace?.ToDisplayString()
         );
+
+        return methodInfo;
     }
 
     private static string EnsurePocoTypesMatch(
@@ -140,5 +168,13 @@ public static class MapperSyntaxProvider
         return typeArguments.Length == 2
             && SymbolEqualityComparer.Default.Equals(typeArguments[0], stringType)
             && SymbolEqualityComparer.Default.Equals(typeArguments[1], attributeValueType);
+    }
+
+    private static string? GetMethodSignature(IMethodSymbol? method)
+    {
+        if (method is null)
+            return null;
+
+        return method.ToDisplayString(MethodFormat);
     }
 }

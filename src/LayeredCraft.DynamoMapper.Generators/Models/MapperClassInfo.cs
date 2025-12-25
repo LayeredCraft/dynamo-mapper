@@ -198,6 +198,6 @@ internal static class MapperClassInfoExtensions
         var accessibility = method.DeclaredAccessibility.ToString().ToLowerInvariant();
         var modifiers = method.IsStatic ? "static " : "";
 
-        return $"{accessibility} {modifiers}{returnType} {method.Name}({parameterType} {parameterName})";
+        return $"{accessibility} {modifiers}partial {returnType} {method.Name}({parameterType} {parameterName})";
     }
 }

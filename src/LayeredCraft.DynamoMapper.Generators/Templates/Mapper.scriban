@@ -20,7 +20,6 @@ namespace {{ mapper_class_namespace }};
     {{ mapper_class.to_item_signature }}
         => new global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue>()
         {
-            
         };
     {{~ end ~}}
     {{~ if mapper_class.to_item_signature != null && mapper_class.from_item_signature != null ~}}

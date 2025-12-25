@@ -40,6 +40,6 @@ internal static class MapperEmitter
 
         var outputCode = TemplateHelper.Render("Templates.Mapper.scriban", model);
 
-        context.AddSource($"Generated{_counter}.g.cs", outputCode);
+        context.AddSource($"{mapperInfo.MapperClass.Name}.g.cs", outputCode);
     }
 }

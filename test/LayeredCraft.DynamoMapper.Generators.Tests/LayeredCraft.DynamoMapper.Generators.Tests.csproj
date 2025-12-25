@@ -32,4 +32,7 @@
     <ProjectReference Include="..\..\src\LayeredCraft.DynamoMapper.Generators\LayeredCraft.DynamoMapper.Generators.csproj" />
     <ProjectReference Include="..\LayeredCraft.DynamoMapper.TestKit\LayeredCraft.DynamoMapper.TestKit.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Snapshots\" />
+  </ItemGroup>
 </Project>

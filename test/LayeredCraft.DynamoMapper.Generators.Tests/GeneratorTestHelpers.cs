@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Amazon.DynamoDBv2.Model;
 using Basic.Reference.Assemblies;
 using DynamoMapper.Generator;
@@ -85,7 +86,17 @@ internal static class GeneratorTestHelpers
         if (options.ExpectedTrees is not null)
             result.GeneratedTrees.Length.Should().Be(options.ExpectedTrees);
 
-        return Verifier.Verify(driver).UseDirectory("Snapshots").DisableDiff();
+        return Verifier
+            .Verify(driver)
+            .UseDirectory("Snapshots")
+            .DisableDiff()
+            .ScrubLinesWithReplace(line =>
+            {
+                if (line.Contains("global::System.CodeDom.Compiler.GeneratedCode"))
+                    return RegexHelper.GeneratedCodeAttributeRegex().Replace(line, "REPLACED");
+
+                return line;
+            });
     }
 
     internal static (GeneratorDriver driver, Compilation compilation) GenerateFromSource(
@@ -141,4 +152,10 @@ internal static class GeneratorTestHelpers
 
         return (updatedDriver, compilation);
     }
+}
+
+internal static partial class RegexHelper
+{
+    [GeneratedRegex("""(\d+\.\d+\.\d+\.\d+)""", RegexOptions.None, "en-US")]
+    internal static partial Regex GeneratedCodeAttributeRegex();
 }

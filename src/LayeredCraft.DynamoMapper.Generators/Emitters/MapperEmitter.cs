@@ -5,7 +5,7 @@ namespace DynamoMapper.Generator;
 
 internal static class MapperEmitter
 {
-    internal static string GeneratedCodeAttribute
+    private static string GeneratedCodeAttribute
     {
         get
         {
@@ -23,12 +23,8 @@ internal static class MapperEmitter
         }
     }
 
-    private static int _counter;
-
     internal static void Generate(SourceProductionContext context, MapperInfo mapperInfo)
     {
-        _counter++;
-
         var model = new
         {
             GeneratedCodeAttribute,

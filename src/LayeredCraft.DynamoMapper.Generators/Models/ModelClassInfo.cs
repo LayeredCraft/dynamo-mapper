@@ -134,6 +134,7 @@ internal static class ModelClassInfoExtensions
                     new DiagnosticInfo(
                         Diagnostics.CannotConvertFromAttributeValue,
                         propertySymbol.Locations.FirstOrDefault()?.CreateLocationInfo(),
+                        name,
                         type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
                     )
                 ),
@@ -197,6 +198,7 @@ internal static class ModelClassInfoExtensions
                 new DiagnosticInfo(
                     Diagnostics.CannotConvertFromAttributeValue,
                     propertySymbol.Locations.FirstOrDefault()?.CreateLocationInfo(),
+                    name,
                     type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
                 )
             ),

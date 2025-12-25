@@ -11,8 +11,6 @@ namespace DynamoMapper.Generator;
 
 internal readonly record struct MapperClassInfo(
     string Name,
-    string FullyQualifiedType,
-    string Accessibility,
     string Namespace,
     string ClassSignature,
     string? ToItemSignature,
@@ -91,8 +89,6 @@ internal static class MapperClassInfoExtensions
 
         var mapperClassInfo = new MapperClassInfo(
             classSymbol.Name,
-            classSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-            classSymbol.DeclaredAccessibility.ToString(),
             classSymbol.ContainingNamespace?.ToDisplayString() ?? string.Empty,
             classSignature,
             toItemSignature,

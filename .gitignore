@@ -436,3 +436,4 @@ Thumbs.db
 *.received.*
 
 **/*.DotSettings.user
+/.claude/do_not_commit/

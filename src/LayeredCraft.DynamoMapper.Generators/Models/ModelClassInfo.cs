@@ -8,7 +8,7 @@ namespace DynamoMapper.Generator;
 
 internal readonly record struct ModelClassInfo(
     string FullyQualifiedType,
-    EquatableArray<string> PropertieAssignments
+    EquatableArray<string> PropertiedAssignments
 );
 
 internal static class ModelClassInfoExtensions
@@ -42,8 +42,7 @@ internal static class ModelClassInfoExtensions
                             },
                             error =>
                             {
-                                if (error is { } diagnostic)
-                                    acc.Diagnostics.Add(diagnostic);
+                                acc.Diagnostics.Add(error!.Value);
                                 return acc;
                             }
                         ),
@@ -82,47 +81,47 @@ internal static class ModelClassInfoExtensions
             {
                 // Nullable Boolean
                 { SpecialType: SpecialType.System_Boolean } => DiagnosticResult<string>.Success(
-                    $"""{name} = item.GetNullableBool("{name}");"""
+                    $"""{name} = item.GetNullableBool("{name}"),"""
                 ),
 
                 // Nullable Integer types
                 { SpecialType: SpecialType.System_Int32 } => DiagnosticResult<string>.Success(
-                    $"""{name} = item.GetNullableInt("{name}");"""
+                    $"""{name} = item.GetNullableInt("{name}"),"""
                 ),
                 { SpecialType: SpecialType.System_Int64 } => DiagnosticResult<string>.Success(
-                    $"""{name} = item.GetNullableLong("{name}");"""
+                    $"""{name} = item.GetNullableLong("{name}"),"""
                 ),
 
                 // Nullable Floating point types
                 { SpecialType: SpecialType.System_Double } => DiagnosticResult<string>.Success(
-                    $"""{name} = item.GetNullableDouble("{name}");"""
+                    $"""{name} = item.GetNullableDouble("{name}"),"""
                 ),
                 { SpecialType: SpecialType.System_Decimal } => DiagnosticResult<string>.Success(
-                    $"""{name} = item.GetNullableDecimal("{name}");"""
+                    $"""{name} = item.GetNullableDecimal("{name}"),"""
                 ),
 
                 // Nullable DateTime
                 { SpecialType: SpecialType.System_DateTime } => DiagnosticResult<string>.Success(
-                    $"""{name} = item.GetNullableDateTime("{name}");"""
+                    $"""{name} = item.GetNullableDateTime("{name}"),"""
                 ),
 
                 // Nullable DateTimeOffset
                 INamedTypeSymbol t
                     when t.IsAssignableTo(WellKnownType.System_DateTimeOffset, context) =>
                     DiagnosticResult<string>.Success(
-                        $"""{name} = item.GetNullableDateTimeOffset("{name}");"""
+                        $"""{name} = item.GetNullableDateTimeOffset("{name}"),"""
                     ),
 
                 // Nullable Guid
                 INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_Guid, context) =>
                     DiagnosticResult<string>.Success(
-                        $"""{name} = item.GetNullableGuid("{name}");"""
+                        $"""{name} = item.GetNullableGuid("{name}"),"""
                     ),
 
                 // Nullable TimeSpan
                 INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_TimeSpan, context) =>
                     DiagnosticResult<string>.Success(
-                        $"""{name} = item.GetNullableTimeSpan("{name}");"""
+                        $"""{name} = item.GetNullableTimeSpan("{name}"),"""
                     ),
 
                 _ => DiagnosticResult<string>.Failure(
@@ -140,47 +139,47 @@ internal static class ModelClassInfoExtensions
         {
             // String
             { SpecialType: SpecialType.System_String } => DiagnosticResult<string>.Success(
-                $"""{name} = item.GetString("{name}");"""
+                $"""{name} = item.GetString("{name}"),"""
             ),
 
             // Boolean
             { SpecialType: SpecialType.System_Boolean } => DiagnosticResult<string>.Success(
-                $"""{name} = item.GetBool("{name}");"""
+                $"""{name} = item.GetBool("{name}"),"""
             ),
 
             // Integer types
             { SpecialType: SpecialType.System_Int32 } => DiagnosticResult<string>.Success(
-                $"""{name} = item.GetInt("{name}");"""
+                $"""{name} = item.GetInt("{name}"),"""
             ),
             { SpecialType: SpecialType.System_Int64 } => DiagnosticResult<string>.Success(
-                $"""{name} = item.GetLong("{name}");"""
+                $"""{name} = item.GetLong("{name}"),"""
             ),
 
             // Floating point types
             { SpecialType: SpecialType.System_Double } => DiagnosticResult<string>.Success(
-                $"""{name} = item.GetDouble("{name}");"""
+                $"""{name} = item.GetDouble("{name}"),"""
             ),
             { SpecialType: SpecialType.System_Decimal } => DiagnosticResult<string>.Success(
-                $"""{name} = item.GetDecimal("{name}");"""
+                $"""{name} = item.GetDecimal("{name}"),"""
             ),
 
             // DateTime
             { SpecialType: SpecialType.System_DateTime } => DiagnosticResult<string>.Success(
-                $"""{name} = item.GetDateTime("{name}");"""
+                $"""{name} = item.GetDateTime("{name}"),"""
             ),
 
             // DateTimeOffset
             INamedTypeSymbol t
                 when t.IsAssignableTo(WellKnownType.System_DateTimeOffset, context) =>
-                DiagnosticResult<string>.Success($"""{name} = item.GetDateTimeOffset("{name}");"""),
+                DiagnosticResult<string>.Success($"""{name} = item.GetDateTimeOffset("{name}"),"""),
 
             // Guid
             INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_Guid, context) =>
-                DiagnosticResult<string>.Success($"""{name} = item.GetGuid("{name}");"""),
+                DiagnosticResult<string>.Success($"""{name} = item.GetGuid("{name}"),"""),
 
             // TimeSpan
             INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_TimeSpan, context) =>
-                DiagnosticResult<string>.Success($"""{name} = item.GetTimeSpan("{name}");"""),
+                DiagnosticResult<string>.Success($"""{name} = item.GetTimeSpan("{name}"),"""),
 
             // Enums
             INamedTypeSymbol { TypeKind: TypeKind.Enum } enumType =>

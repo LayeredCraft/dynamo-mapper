@@ -31,6 +31,9 @@ internal static class MapperEmitter
 
         var model = new
         {
+            GeneratedCodeAttribute,
+            mapperInfo.MapperClass,
+            ModelClass = mapperInfo.ModelClass!.Value,
             MapperClassNamespace = mapperInfo.MapperClass.Namespace,
             MapperClassSignature = mapperInfo.MapperClass.ClassSignature,
         };

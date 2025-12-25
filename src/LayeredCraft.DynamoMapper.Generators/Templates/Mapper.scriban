@@ -9,25 +9,31 @@
 
 #nullable enable
 
+using DynamoMapper.Runtime;
+
 namespace {{ mapper_class_namespace }};
 
 {{ mapper_class_signature }}
 {
-    {{~ if has_to_mapper_method ~}}
+    {{~ if mapper_class.to_item_signature != null ~}}
     {{ generated_code_attribute }}
-    {{ to_mapper_method_signature }};
-        => => new global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue>()
+    {{ mapper_class.to_item_signature }}
+        => new global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue>()
         {
             
         };
-            
     {{~ end ~}}
-    {{~ if has_from_mapper_method ~}}
+    {{~ if mapper_class.to_item_signature != null && mapper_class.from_item_signature != null ~}}
+    
+    {{~ end ~}}
+    {{~ if mapper_class.from_item_signature != null ~}}
     {{ generated_code_attribute }}
-    {{ from_mapper_method_signature }};
-        => new {{ model_type }}
+    {{ mapper_class.from_item_signature }}
+        => new {{ model_class.fully_qualified_type }}
         {
-            
+            {{~ for prop in model_class.propertied_assignments ~}}
+            {{ prop }}
+            {{~ end ~}}
         };
     {{~ end ~}}
 }

@@ -1,3 +1,4 @@
+using LayeredCraft.SourceGeneratorTools.Types;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -13,7 +14,8 @@ namespace DynamoMapper.Generator;
 
 internal readonly record struct MapperInfo(
     MapperClassInfo MapperClass,
-    ModelClassInfo ModelClassInfo
+    ModelClassInfo? ModelClass,
+    EquatableArray<DiagnosticInfo> Diagnostics
 );
 
 internal static class MapperSyntaxProvider
@@ -39,8 +41,8 @@ internal static class MapperSyntaxProvider
 
         var (mapperClassInfo, modelTypeSymbol) = mapperResult.Value;
 
-        var modelClassInfo = ModelClassInfo.Create(modelTypeSymbol, context);
+        var (modelClassInfo, diagnosticInfos) = ModelClassInfo.Create(modelTypeSymbol, context);
 
-        return new MapperInfo(mapperClassInfo, modelClassInfo);
+        return new MapperInfo(mapperClassInfo, modelClassInfo, diagnosticInfos.ToEquatableArray());
     }
 }

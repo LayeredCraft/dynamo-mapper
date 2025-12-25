@@ -11,8 +11,10 @@
 
 using DynamoMapper.Runtime;
 
+{{~ if mapper_class_namespace != string.Empty ~}}
 {{ mapper_class_namespace }}
 
+{{~ end ~}}
 {{ mapper_class_signature }}
 {
     {{~ if mapper_class.to_item_signature != null ~}}

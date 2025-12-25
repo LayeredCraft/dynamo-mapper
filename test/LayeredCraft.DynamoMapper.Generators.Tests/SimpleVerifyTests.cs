@@ -155,4 +155,33 @@ public class SimpleVerifyTests
             },
             TestContext.Current.CancellationToken
         );
+
+    [Fact]
+    public async Task Simple_MethodNamePrefixWorks() =>
+        await GeneratorTestHelpers.Verify(
+            new VerifyTestOptions
+            {
+                SourceCode = """
+                using System.Collections.Generic;
+                using Amazon.DynamoDBv2.Model;
+                using DynamoMapper.Runtime;
+
+                namespace MyNamespace;
+
+                [DynamoMapper]
+                public static partial class ExampleEntityMapper
+                {
+                    public static partial Dictionary<string, AttributeValue> ToAttributeValues(MyDto source);
+
+                    public static partial MyDto FromAttributeValues(Dictionary<string, AttributeValue> x);
+                }
+
+                public class MyDto
+                {
+                    public string Name { get; set; }
+                }
+                """,
+            },
+            TestContext.Current.CancellationToken
+        );
 }

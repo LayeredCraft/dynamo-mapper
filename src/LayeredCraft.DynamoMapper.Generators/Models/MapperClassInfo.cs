@@ -19,8 +19,8 @@ internal readonly record struct MapperClassInfo(
 
 internal static class MapperClassInfoExtensions
 {
-    private const string ToItemMethodName = "ToItem";
-    private const string FromItemMethodName = "FromItem";
+    private const string ToMethodPrefix = "To";
+    private const string FromMethodPrefix = "From";
 
     extension(MapperClassInfo)
     {
@@ -43,8 +43,10 @@ internal static class MapperClassInfoExtensions
 
             /*
              * to determine what mappers to generate, we need to look for methods using these rules:
-             * - `ToItem` -> method to map from POCO to AttributeValue
-             * - `FromItem` -> method to map from AttributeValue to POCO
+             * - Methods starting with `To` (e.g., ToItem, ToModel) -> map from POCO to
+             * AttributeValue
+             * - Methods starting with `From` (e.g., FromItem, FromModel) -> map from AttributeValue
+             * to POCO
              *
              * Rules:
              * - at least one is needed, but both are not required
@@ -60,10 +62,10 @@ internal static class MapperClassInfoExtensions
                 .ToArray();
 
             var toItemMethod = methodSymbols.FirstOrDefault(static m =>
-                string.Equals(m.Name, ToItemMethodName, StringComparison.Ordinal)
+                m.Name.StartsWith(ToMethodPrefix, StringComparison.Ordinal)
             );
             var fromItemMethod = methodSymbols.FirstOrDefault(static m =>
-                string.Equals(m.Name, FromItemMethodName, StringComparison.Ordinal)
+                m.Name.StartsWith(FromMethodPrefix, StringComparison.Ordinal)
             );
 
             var (mapperClassInfo, modelTypeSymbol) = BuildMapperClassInfoCore(
@@ -109,7 +111,7 @@ internal static class MapperClassInfoExtensions
         if (toItemMethod is null && fromItemMethod is null)
             // TODO: replace with diagnostic to warn about no mapper methods found
             throw new InvalidOperationException(
-                $"Neither '{ToItemMethodName}' nor '{FromItemMethodName}' is present on the mapper class."
+                $"No mapper methods found. Methods must start with '{ToMethodPrefix}' or '{FromMethodPrefix}'."
             );
 
         var toItemPocoType = toItemMethod?.Parameters[0].Type;
@@ -122,7 +124,7 @@ internal static class MapperClassInfoExtensions
         )
             // TODO: add propper diagnostic for ToItem and FromItem not using same POCO
             throw new InvalidOperationException(
-                $"Mapper methods '{ToItemMethodName}' and '{FromItemMethodName}' must use the same POCO type."
+                $"Mapper methods '{toItemMethod!.Name}' and '{fromItemMethod!.Name}' must use the same POCO type."
             );
 
         return toItemPocoType ?? fromItemPocoType!;
@@ -135,10 +137,10 @@ internal static class MapperClassInfoExtensions
         if (method.Parameters.Length != 1)
             return false;
 
-        if (string.Equals(method.Name, ToItemMethodName, StringComparison.Ordinal))
+        if (method.Name.StartsWith(ToMethodPrefix, StringComparison.Ordinal))
             return IsAttributeValueDictionary(method.ReturnType, context);
 
-        if (string.Equals(method.Name, FromItemMethodName, StringComparison.Ordinal))
+        if (method.Name.StartsWith(FromMethodPrefix, StringComparison.Ordinal))
             return !method.ReturnsVoid
                 && IsAttributeValueDictionary(method.Parameters[0].Type, context);
 
@@ -172,7 +174,7 @@ internal static class MapperClassInfoExtensions
     private static string GetClassSignature(INamedTypeSymbol classSymbol)
     {
         var accessibility = classSymbol.DeclaredAccessibility.ToString().ToLowerInvariant();
-        var modifiers = classSymbol.IsStatic ? "static " : "";
+        var modifiers = classSymbol.IsStatic ? "static " : string.Empty;
 
         return $"{accessibility} {modifiers}partial class {classSymbol.Name}";
     }
@@ -184,7 +186,7 @@ internal static class MapperClassInfoExtensions
 
         // Build signature manually with hardcoded parameter name
         var parameter = method.Parameters[0];
-        var parameterName = string.Equals(method.Name, ToItemMethodName, StringComparison.Ordinal)
+        var parameterName = method.Name.StartsWith(ToMethodPrefix, StringComparison.Ordinal)
             ? "source"
             : "item";
 
@@ -195,7 +197,7 @@ internal static class MapperClassInfoExtensions
             SymbolDisplayFormat.FullyQualifiedFormat
         );
         var accessibility = method.DeclaredAccessibility.ToString().ToLowerInvariant();
-        var modifiers = method.IsStatic ? "static " : "";
+        var modifiers = method.IsStatic ? "static " : string.Empty;
 
         return $"{accessibility} {modifiers}partial {returnType} {method.Name}({parameterType} {parameterName})";
     }

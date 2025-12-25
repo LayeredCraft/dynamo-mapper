@@ -97,4 +97,62 @@ public class SimpleVerifyTests
             },
             TestContext.Current.CancellationToken
         );
+
+    [Fact]
+    public async Task Simple_InitProperty() =>
+        await GeneratorTestHelpers.Verify(
+            new VerifyTestOptions
+            {
+                SourceCode = """
+                using System.Collections.Generic;
+                using Amazon.DynamoDBv2.Model;
+                using DynamoMapper.Runtime;
+
+                namespace MyNamespace;
+
+                [DynamoMapper]
+                public static partial class ExampleEntityMapper
+                {
+                    public static partial Dictionary<string, AttributeValue> ToItem(MyDto source);
+
+                    public static partial MyDto FromItem(Dictionary<string, AttributeValue> x);
+                }
+
+                public class MyDto
+                {
+                    public string Name { get; init; }
+                }
+                """,
+            },
+            TestContext.Current.CancellationToken
+        );
+
+    [Fact]
+    public async Task Simple_NoSetter() =>
+        await GeneratorTestHelpers.Verify(
+            new VerifyTestOptions
+            {
+                SourceCode = """
+                using System.Collections.Generic;
+                using Amazon.DynamoDBv2.Model;
+                using DynamoMapper.Runtime;
+
+                namespace MyNamespace;
+
+                [DynamoMapper]
+                public static partial class ExampleEntityMapper
+                {
+                    public static partial Dictionary<string, AttributeValue> ToItem(MyDto source);
+
+                    public static partial MyDto FromItem(Dictionary<string, AttributeValue> x);
+                }
+
+                public class MyDto
+                {
+                    public string Name { get; }
+                }
+                """,
+            },
+            TestContext.Current.CancellationToken
+        );
 }

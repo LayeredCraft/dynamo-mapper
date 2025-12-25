@@ -298,7 +298,7 @@ internal static class ModelClassInfoExtensions
 
                 // Nullable Enums - convert to string
                 INamedTypeSymbol { TypeKind: TypeKind.Enum } => DiagnosticResult<string>.Success(
-                    $$"""{ "{{name}}", source.{{name}}?.ToString().ToNullableAttributeValue() },"""
+                    $$"""{ "{{name}}", source.{{name}}.ToNullableAttributeValue() },"""
                 ),
 
                 _ => DiagnosticResult<string>.Failure(
@@ -370,7 +370,7 @@ internal static class ModelClassInfoExtensions
 
             // Enums - convert to string
             INamedTypeSymbol { TypeKind: TypeKind.Enum } => DiagnosticResult<string>.Success(
-                $$"""{ "{{name}}", source.{{name}}.ToString().ToAttributeValue() },"""
+                $$"""{ "{{name}}", source.{{name}}.ToAttributeValue() },"""
             ),
 
             _ => DiagnosticResult<string>.Failure(

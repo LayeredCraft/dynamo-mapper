@@ -18,8 +18,9 @@ public static partial class ExampleEntityMapper
 {
     [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
     public static partial global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> ToItem(global::MyNamespace.MyDto source)
-        => new global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue>()
+        => new global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue>(1)
         {
+            { "Name", source.Name.ToNullableAttributeValue() },
         };
     
     [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]

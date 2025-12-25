@@ -18,7 +18,7 @@ namespace {{ mapper_class_namespace }};
     {{~ if mapper_class.to_item_signature != null ~}}
     {{ generated_code_attribute }}
     {{ mapper_class.to_item_signature }}
-        => new global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue>()
+        => new global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue>({{ dictionary_capacity }})
         {
             {{~ for prop in model_class.to_attribute_assignments ~}}
             {{ prop }}

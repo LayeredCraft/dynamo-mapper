@@ -28,10 +28,8 @@ public static class AttributeValueExtensions
         /// </summary>
         /// <param name="key">The attribute key to retrieve.</param>
         /// <returns>The string value if the key exists, otherwise <see cref="string.Empty"/>.</returns>
-        public string GetString(string key)
-        {
-            return attributes.TryGetValue(key, out var value) ? value.S ?? string.Empty : string.Empty;
-        }
+        public string GetString(string key) =>
+            attributes.TryGetValue(key, out var value) ? value.S ?? string.Empty : string.Empty;
 
         #endregion
 
@@ -70,7 +68,14 @@ public static class AttributeValueExtensions
         public int GetInt(string key)
         {
             return attributes.TryGetValue(key, out var value)
-                ? int.TryParse(value.N, NumberStyles.Integer, CultureInfo.InvariantCulture, out var result) ? result : 0
+                ? int.TryParse(
+                    value.N,
+                    NumberStyles.Integer,
+                    CultureInfo.InvariantCulture,
+                    out var result
+                )
+                    ? result
+                    : 0
                 : 0;
         }
 
@@ -83,7 +88,14 @@ public static class AttributeValueExtensions
         public int? GetNullableInt(string key)
         {
             return attributes.TryGetValue(key, out var value)
-                ? int.TryParse(value.N, NumberStyles.Integer, CultureInfo.InvariantCulture, out var result) ? result : null
+                ? int.TryParse(
+                    value.N,
+                    NumberStyles.Integer,
+                    CultureInfo.InvariantCulture,
+                    out var result
+                )
+                    ? result
+                    : null
                 : null;
         }
 
@@ -96,7 +108,14 @@ public static class AttributeValueExtensions
         public long GetLong(string key)
         {
             return attributes.TryGetValue(key, out var value)
-                ? long.TryParse(value.N, NumberStyles.Integer, CultureInfo.InvariantCulture, out var result) ? result : 0
+                ? long.TryParse(
+                    value.N,
+                    NumberStyles.Integer,
+                    CultureInfo.InvariantCulture,
+                    out var result
+                )
+                    ? result
+                    : 0
                 : 0;
         }
 
@@ -109,7 +128,14 @@ public static class AttributeValueExtensions
         public long? GetNullableLong(string key)
         {
             return attributes.TryGetValue(key, out var value)
-                ? long.TryParse(value.N, NumberStyles.Integer, CultureInfo.InvariantCulture, out var result) ? result : null
+                ? long.TryParse(
+                    value.N,
+                    NumberStyles.Integer,
+                    CultureInfo.InvariantCulture,
+                    out var result
+                )
+                    ? result
+                    : null
                 : null;
         }
 
@@ -126,7 +152,14 @@ public static class AttributeValueExtensions
         public float GetFloat(string key)
         {
             return attributes.TryGetValue(key, out var value)
-                ? float.TryParse(value.N, NumberStyles.Float, CultureInfo.InvariantCulture, out var result) ? result : 0f
+                ? float.TryParse(
+                    value.N,
+                    NumberStyles.Float,
+                    CultureInfo.InvariantCulture,
+                    out var result
+                )
+                    ? result
+                    : 0f
                 : 0f;
         }
 
@@ -139,7 +172,14 @@ public static class AttributeValueExtensions
         public float? GetNullableFloat(string key)
         {
             return attributes.TryGetValue(key, out var value)
-                ? float.TryParse(value.N, NumberStyles.Float, CultureInfo.InvariantCulture, out var result) ? result : null
+                ? float.TryParse(
+                    value.N,
+                    NumberStyles.Float,
+                    CultureInfo.InvariantCulture,
+                    out var result
+                )
+                    ? result
+                    : null
                 : null;
         }
 
@@ -152,7 +192,14 @@ public static class AttributeValueExtensions
         public double GetDouble(string key)
         {
             return attributes.TryGetValue(key, out var value)
-                ? double.TryParse(value.N, NumberStyles.Float, CultureInfo.InvariantCulture, out var result) ? result : 0.0
+                ? double.TryParse(
+                    value.N,
+                    NumberStyles.Float,
+                    CultureInfo.InvariantCulture,
+                    out var result
+                )
+                    ? result
+                    : 0.0
                 : 0.0;
         }
 
@@ -165,7 +212,14 @@ public static class AttributeValueExtensions
         public double? GetNullableDouble(string key)
         {
             return attributes.TryGetValue(key, out var value)
-                ? double.TryParse(value.N, NumberStyles.Float, CultureInfo.InvariantCulture, out var result) ? result : null
+                ? double.TryParse(
+                    value.N,
+                    NumberStyles.Float,
+                    CultureInfo.InvariantCulture,
+                    out var result
+                )
+                    ? result
+                    : null
                 : null;
         }
 
@@ -178,7 +232,14 @@ public static class AttributeValueExtensions
         public decimal GetDecimal(string key)
         {
             return attributes.TryGetValue(key, out var value)
-                ? decimal.TryParse(value.N, NumberStyles.Float, CultureInfo.InvariantCulture, out var result) ? result : 0m
+                ? decimal.TryParse(
+                    value.N,
+                    NumberStyles.Float,
+                    CultureInfo.InvariantCulture,
+                    out var result
+                )
+                    ? result
+                    : 0m
                 : 0m;
         }
 
@@ -191,7 +252,14 @@ public static class AttributeValueExtensions
         public decimal? GetNullableDecimal(string key)
         {
             return attributes.TryGetValue(key, out var value)
-                ? decimal.TryParse(value.N, NumberStyles.Float, CultureInfo.InvariantCulture, out var result) ? result : null
+                ? decimal.TryParse(
+                    value.N,
+                    NumberStyles.Float,
+                    CultureInfo.InvariantCulture,
+                    out var result
+                )
+                    ? result
+                    : null
                 : null;
         }
 
@@ -207,7 +275,9 @@ public static class AttributeValueExtensions
         public Guid GetGuid(string key)
         {
             return attributes.TryGetValue(key, out var value)
-                ? Guid.TryParse(value.S, out var id) ? id : Guid.Empty
+                ? Guid.TryParse(value.S, out var id)
+                    ? id
+                    : Guid.Empty
                 : Guid.Empty;
         }
 
@@ -219,7 +289,9 @@ public static class AttributeValueExtensions
         public Guid? GetNullableGuid(string key)
         {
             return attributes.TryGetValue(key, out var value)
-                ? Guid.TryParse(value.S, out var id) ? id : null
+                ? Guid.TryParse(value.S, out var id)
+                    ? id
+                    : null
                 : null;
         }
 
@@ -236,7 +308,14 @@ public static class AttributeValueExtensions
         public DateTime GetDateTime(string key)
         {
             return attributes.TryGetValue(key, out var value)
-                ? DateTime.TryParse(value.S, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var date) ? date : DateTime.MinValue
+                ? DateTime.TryParse(
+                    value.S,
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.RoundtripKind,
+                    out var date
+                )
+                    ? date
+                    : DateTime.MinValue
                 : DateTime.MinValue;
         }
 
@@ -249,7 +328,14 @@ public static class AttributeValueExtensions
         public DateTime? GetNullableDateTime(string key)
         {
             return attributes.TryGetValue(key, out var value)
-                ? DateTime.TryParse(value.S, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var date) ? date : null
+                ? DateTime.TryParse(
+                    value.S,
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.RoundtripKind,
+                    out var date
+                )
+                    ? date
+                    : null
                 : null;
         }
 
@@ -262,7 +348,14 @@ public static class AttributeValueExtensions
         public DateTimeOffset GetDateTimeOffset(string key)
         {
             return attributes.TryGetValue(key, out var value)
-                ? DateTimeOffset.TryParse(value.S, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var date) ? date : DateTimeOffset.MinValue
+                ? DateTimeOffset.TryParse(
+                    value.S,
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.RoundtripKind,
+                    out var date
+                )
+                    ? date
+                    : DateTimeOffset.MinValue
                 : DateTimeOffset.MinValue;
         }
 
@@ -275,7 +368,14 @@ public static class AttributeValueExtensions
         public DateTimeOffset? GetNullableDateTimeOffset(string key)
         {
             return attributes.TryGetValue(key, out var value)
-                ? DateTimeOffset.TryParse(value.S, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var date) ? date : null
+                ? DateTimeOffset.TryParse(
+                    value.S,
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.RoundtripKind,
+                    out var date
+                )
+                    ? date
+                    : null
                 : null;
         }
 
@@ -288,7 +388,9 @@ public static class AttributeValueExtensions
         public TimeSpan GetTimeSpan(string key)
         {
             return attributes.TryGetValue(key, out var value)
-                ? TimeSpan.TryParse(value.S, CultureInfo.InvariantCulture, out var timeSpan) ? timeSpan : TimeSpan.Zero
+                ? TimeSpan.TryParse(value.S, CultureInfo.InvariantCulture, out var timeSpan)
+                    ? timeSpan
+                    : TimeSpan.Zero
                 : TimeSpan.Zero;
         }
 
@@ -301,7 +403,9 @@ public static class AttributeValueExtensions
         public TimeSpan? GetNullableTimeSpan(string key)
         {
             return attributes.TryGetValue(key, out var value)
-                ? TimeSpan.TryParse(value.S, CultureInfo.InvariantCulture, out var timeSpan) ? timeSpan : null
+                ? TimeSpan.TryParse(value.S, CultureInfo.InvariantCulture, out var timeSpan)
+                    ? timeSpan
+                    : null
                 : null;
         }
 
@@ -316,9 +420,13 @@ public static class AttributeValueExtensions
         /// <param name="key">The attribute key to retrieve.</param>
         /// <param name="defaultValue">The default value to return if the key doesn't exist or parsing fails.</param>
         /// <returns>The enum value if the key exists and is valid, otherwise <paramref name="defaultValue"/>.</returns>
-        public TEnum GetEnum<TEnum>(string key, TEnum defaultValue) where TEnum : struct
+        public TEnum GetEnum<TEnum>(string key, TEnum defaultValue)
+            where TEnum : struct
         {
-            if (attributes.TryGetValue(key, out var value) && Enum.TryParse(value.S, out TEnum valueEnum))
+            if (
+                attributes.TryGetValue(key, out var value)
+                && Enum.TryParse(value.S, out TEnum valueEnum)
+            )
             {
                 return valueEnum;
             }
@@ -332,9 +440,13 @@ public static class AttributeValueExtensions
         /// <typeparam name="TEnum">The enum type to parse.</typeparam>
         /// <param name="key">The attribute key to retrieve.</param>
         /// <returns>The enum value if the key exists and is valid, otherwise <c>null</c>.</returns>
-        public TEnum? GetNullableEnum<TEnum>(string key) where TEnum : struct
+        public TEnum? GetNullableEnum<TEnum>(string key)
+            where TEnum : struct
         {
-            if (attributes.TryGetValue(key, out var value) && Enum.TryParse(value.S, out TEnum valueEnum))
+            if (
+                attributes.TryGetValue(key, out var value)
+                && Enum.TryParse(value.S, out TEnum valueEnum)
+            )
             {
                 return valueEnum;
             }
@@ -344,4 +456,330 @@ public static class AttributeValueExtensions
 
         #endregion
     }
+
+    #region String Extensions
+
+    extension(string value)
+    {
+        /// <summary>Converts a string value to a DynamoDB <see cref="AttributeValue" />.</summary>
+        /// <returns>An <see cref="AttributeValue" /> containing the string value.</returns>
+        public AttributeValue ToAttributeValue() => new() { S = value };
+    }
+
+    extension(string? value)
+    {
+        /// <summary>Converts a nullable string value to a DynamoDB <see cref="AttributeValue" />.</summary>
+        /// <returns>
+        ///     An <see cref="AttributeValue" /> containing the string value, or a NULL attribute if the
+        ///     value is <c>null</c>.
+        /// </returns>
+        public AttributeValue ToNullableAttributeValue() =>
+            value is null ? new AttributeValue { NULL = true } : new AttributeValue { S = value };
+    }
+
+    #endregion
+
+    #region Boolean Extensions
+
+    extension(bool value)
+    {
+        /// <summary>Converts a boolean value to a DynamoDB <see cref="AttributeValue" />.</summary>
+        /// <returns>An <see cref="AttributeValue" /> containing the boolean value.</returns>
+        public AttributeValue ToAttributeValue() => new() { BOOL = value };
+    }
+
+    extension(bool? value)
+    {
+        /// <summary>Converts a nullable boolean value to a DynamoDB <see cref="AttributeValue" />.</summary>
+        /// <returns>
+        ///     An <see cref="AttributeValue" /> containing the boolean value, or a NULL attribute if the
+        ///     value is <c>null</c>.
+        /// </returns>
+        public AttributeValue ToNullableAttributeValue() =>
+            value is null
+                ? new AttributeValue { NULL = true }
+                : new AttributeValue { BOOL = value };
+    }
+
+    #endregion
+
+    #region Integer Extensions
+
+    extension(int value)
+    {
+        /// <summary>Converts an integer value to a DynamoDB <see cref="AttributeValue" />.</summary>
+        /// <returns>An <see cref="AttributeValue" /> containing the numeric value.</returns>
+        /// <remarks>Formatting uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
+        public AttributeValue ToAttributeValue() =>
+            new() { N = value.ToString(CultureInfo.InvariantCulture) };
+    }
+
+    extension(int? value)
+    {
+        /// <summary>Converts a nullable integer value to a DynamoDB <see cref="AttributeValue" />.</summary>
+        /// <returns>
+        ///     An <see cref="AttributeValue" /> containing the numeric value, or a NULL attribute if the
+        ///     value is <c>null</c>.
+        /// </returns>
+        /// <remarks>Formatting uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
+        public AttributeValue ToNullableAttributeValue() =>
+            value is null
+                ? new AttributeValue { NULL = true }
+                : new AttributeValue { N = value.Value.ToString(CultureInfo.InvariantCulture) };
+    }
+
+    extension(long value)
+    {
+        /// <summary>Converts a long integer value to a DynamoDB <see cref="AttributeValue" />.</summary>
+        /// <returns>An <see cref="AttributeValue" /> containing the numeric value.</returns>
+        /// <remarks>Formatting uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
+        public AttributeValue ToAttributeValue() =>
+            new() { N = value.ToString(CultureInfo.InvariantCulture) };
+    }
+
+    extension(long? value)
+    {
+        /// <summary>Converts a nullable long integer value to a DynamoDB <see cref="AttributeValue" />.</summary>
+        /// <returns>
+        ///     An <see cref="AttributeValue" /> containing the numeric value, or a NULL attribute if the
+        ///     value is <c>null</c>.
+        /// </returns>
+        /// <remarks>Formatting uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
+        public AttributeValue ToNullableAttributeValue() =>
+            value is null
+                ? new AttributeValue { NULL = true }
+                : new AttributeValue { N = value.Value.ToString(CultureInfo.InvariantCulture) };
+    }
+
+    #endregion
+
+    #region Floating Point Extensions
+
+    extension(float value)
+    {
+        /// <summary>
+        ///     Converts a single-precision floating-point value to a DynamoDB
+        ///     <see cref="AttributeValue" />.
+        /// </summary>
+        /// <returns>An <see cref="AttributeValue" /> containing the numeric value.</returns>
+        /// <remarks>Formatting uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
+        public AttributeValue ToAttributeValue() =>
+            new() { N = value.ToString(CultureInfo.InvariantCulture) };
+    }
+
+    extension(float? value)
+    {
+        /// <summary>
+        ///     Converts a nullable single-precision floating-point value to a DynamoDB
+        ///     <see cref="AttributeValue" />.
+        /// </summary>
+        /// <returns>
+        ///     An <see cref="AttributeValue" /> containing the numeric value, or a NULL attribute if the
+        ///     value is <c>null</c>.
+        /// </returns>
+        /// <remarks>Formatting uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
+        public AttributeValue ToNullableAttributeValue() =>
+            value is null
+                ? new AttributeValue { NULL = true }
+                : new AttributeValue { N = value.Value.ToString(CultureInfo.InvariantCulture) };
+    }
+
+    extension(double value)
+    {
+        /// <summary>
+        ///     Converts a double-precision floating-point value to a DynamoDB
+        ///     <see cref="AttributeValue" />.
+        /// </summary>
+        /// <returns>An <see cref="AttributeValue" /> containing the numeric value.</returns>
+        /// <remarks>Formatting uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
+        public AttributeValue ToAttributeValue() =>
+            new() { N = value.ToString(CultureInfo.InvariantCulture) };
+    }
+
+    extension(double? value)
+    {
+        /// <summary>
+        ///     Converts a nullable double-precision floating-point value to a DynamoDB
+        ///     <see cref="AttributeValue" />.
+        /// </summary>
+        /// <returns>
+        ///     An <see cref="AttributeValue" /> containing the numeric value, or a NULL attribute if the
+        ///     value is <c>null</c>.
+        /// </returns>
+        /// <remarks>Formatting uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
+        public AttributeValue ToNullableAttributeValue() =>
+            value is null
+                ? new AttributeValue { NULL = true }
+                : new AttributeValue { N = value.Value.ToString(CultureInfo.InvariantCulture) };
+    }
+
+    extension(decimal value)
+    {
+        /// <summary>Converts a decimal value to a DynamoDB <see cref="AttributeValue" />.</summary>
+        /// <returns>An <see cref="AttributeValue" /> containing the numeric value.</returns>
+        /// <remarks>Formatting uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
+        public AttributeValue ToAttributeValue() =>
+            new() { N = value.ToString(CultureInfo.InvariantCulture) };
+    }
+
+    extension(decimal? value)
+    {
+        /// <summary>Converts a nullable decimal value to a DynamoDB <see cref="AttributeValue" />.</summary>
+        /// <returns>
+        ///     An <see cref="AttributeValue" /> containing the numeric value, or a NULL attribute if the
+        ///     value is <c>null</c>.
+        /// </returns>
+        /// <remarks>Formatting uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
+        public AttributeValue ToNullableAttributeValue() =>
+            value is null
+                ? new AttributeValue { NULL = true }
+                : new AttributeValue { N = value.Value.ToString(CultureInfo.InvariantCulture) };
+    }
+
+    #endregion
+
+    #region Guid Extensions
+
+    extension(Guid value)
+    {
+        /// <summary>Converts a <see cref="Guid" /> value to a DynamoDB <see cref="AttributeValue" />.</summary>
+        /// <returns>An <see cref="AttributeValue" /> containing the <see cref="Guid" /> as a string.</returns>
+        public AttributeValue ToAttributeValue() => new() { S = value.ToString() };
+    }
+
+    extension(Guid? value)
+    {
+        /// <summary>Converts a nullable <see cref="Guid" /> value to a DynamoDB <see cref="AttributeValue" />.</summary>
+        /// <returns>
+        ///     An <see cref="AttributeValue" /> containing the <see cref="Guid" /> as a string, or a NULL
+        ///     attribute if the value is <c>null</c>.
+        /// </returns>
+        public AttributeValue ToNullableAttributeValue() =>
+            value is null
+                ? new AttributeValue { NULL = true }
+                : new AttributeValue { S = value.Value.ToString() };
+    }
+
+    #endregion
+
+    #region DateTime Extensions
+
+    extension(DateTime value)
+    {
+        /// <summary>Converts a <see cref="DateTime" /> value to a DynamoDB <see cref="AttributeValue" />.</summary>
+        /// <returns>
+        ///     An <see cref="AttributeValue" /> containing the <see cref="DateTime" /> in ISO-8601
+        ///     format.
+        /// </returns>
+        /// <remarks>
+        ///     Formatting uses <see cref="CultureInfo.InvariantCulture" /> with round-trip format
+        ///     specifier.
+        /// </remarks>
+        public AttributeValue ToAttributeValue() =>
+            new() { S = value.ToString("o", CultureInfo.InvariantCulture) };
+    }
+
+    extension(DateTime? value)
+    {
+        /// <summary>
+        ///     Converts a nullable <see cref="DateTime" /> value to a DynamoDB
+        ///     <see cref="AttributeValue" />.
+        /// </summary>
+        /// <returns>
+        ///     An <see cref="AttributeValue" /> containing the <see cref="DateTime" /> in ISO-8601
+        ///     format, or a NULL attribute if the value is <c>null</c>.
+        /// </returns>
+        /// <remarks>
+        ///     Formatting uses <see cref="CultureInfo.InvariantCulture" /> with round-trip format
+        ///     specifier.
+        /// </remarks>
+        public AttributeValue ToNullableAttributeValue() =>
+            value is null
+                ? new AttributeValue { NULL = true }
+                : new AttributeValue
+                {
+                    S = value.Value.ToString("o", CultureInfo.InvariantCulture),
+                };
+    }
+
+    extension(DateTimeOffset value)
+    {
+        /// <summary>
+        ///     Converts a <see cref="DateTimeOffset" /> value to a DynamoDB <see cref="AttributeValue" />
+        ///     .
+        /// </summary>
+        /// <returns>
+        ///     An <see cref="AttributeValue" /> containing the <see cref="DateTimeOffset" /> in ISO-8601
+        ///     format.
+        /// </returns>
+        /// <remarks>
+        ///     Formatting uses <see cref="CultureInfo.InvariantCulture" /> with round-trip format
+        ///     specifier.
+        /// </remarks>
+        public AttributeValue ToAttributeValue() =>
+            new() { S = value.ToString("o", CultureInfo.InvariantCulture) };
+    }
+
+    extension(DateTimeOffset? value)
+    {
+        /// <summary>
+        ///     Converts a nullable <see cref="DateTimeOffset" /> value to a DynamoDB
+        ///     <see cref="AttributeValue" />.
+        /// </summary>
+        /// <returns>
+        ///     An <see cref="AttributeValue" /> containing the <see cref="DateTimeOffset" /> in ISO-8601
+        ///     format, or a NULL attribute if the value is <c>null</c>.
+        /// </returns>
+        /// <remarks>
+        ///     Formatting uses <see cref="CultureInfo.InvariantCulture" /> with round-trip format
+        ///     specifier.
+        /// </remarks>
+        public AttributeValue ToNullableAttributeValue() =>
+            value is null
+                ? new AttributeValue { NULL = true }
+                : new AttributeValue
+                {
+                    S = value.Value.ToString("o", CultureInfo.InvariantCulture),
+                };
+    }
+
+    extension(TimeSpan value)
+    {
+        /// <summary>Converts a <see cref="TimeSpan" /> value to a DynamoDB <see cref="AttributeValue" />.</summary>
+        /// <returns>
+        ///     An <see cref="AttributeValue" /> containing the <see cref="TimeSpan" /> in constant
+        ///     format.
+        /// </returns>
+        /// <remarks>
+        ///     Formatting uses <see cref="CultureInfo.InvariantCulture" /> with constant format
+        ///     specifier.
+        /// </remarks>
+        public AttributeValue ToAttributeValue() =>
+            new() { S = value.ToString("c", CultureInfo.InvariantCulture) };
+    }
+
+    extension(TimeSpan? value)
+    {
+        /// <summary>
+        ///     Converts a nullable <see cref="TimeSpan" /> value to a DynamoDB
+        ///     <see cref="AttributeValue" />.
+        /// </summary>
+        /// <returns>
+        ///     An <see cref="AttributeValue" /> containing the <see cref="TimeSpan" /> in constant
+        ///     format, or a NULL attribute if the value is <c>null</c>.
+        /// </returns>
+        /// <remarks>
+        ///     Formatting uses <see cref="CultureInfo.InvariantCulture" /> with constant format
+        ///     specifier.
+        /// </remarks>
+        public AttributeValue ToNullableAttributeValue() =>
+            value is null
+                ? new AttributeValue { NULL = true }
+                : new AttributeValue
+                {
+                    S = value.Value.ToString("c", CultureInfo.InvariantCulture),
+                };
+    }
+
+    #endregion
 }

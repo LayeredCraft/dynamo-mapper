@@ -124,6 +124,12 @@ internal static class ModelClassInfoExtensions
                         $"""{name} = item.GetNullableTimeSpan("{name}"),"""
                     ),
 
+                // Nullable Enums
+                INamedTypeSymbol { TypeKind: TypeKind.Enum } enumType =>
+                    DiagnosticResult<string>.Success(
+                        $"""{name} = item.GetEnum("{name}", {enumType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}.{enumType.MemberNames.FirstOrDefault() ?? "Default"}),"""
+                    ),
+
                 _ => DiagnosticResult<string>.Failure(
                     new DiagnosticInfo(
                         Diagnostics.CannotConvertFromAttributeValue,
@@ -184,7 +190,7 @@ internal static class ModelClassInfoExtensions
             // Enums
             INamedTypeSymbol { TypeKind: TypeKind.Enum } enumType =>
                 DiagnosticResult<string>.Success(
-                    $"""{name} = item.GetEnum("{name}", {enumType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}.{enumType.MemberNames.FirstOrDefault() ?? "Default"});"""
+                    $"""{name} = item.GetEnum("{name}", {enumType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}.{enumType.MemberNames.FirstOrDefault() ?? "Default"}),"""
                 ),
 
             _ => DiagnosticResult<string>.Failure(

@@ -403,11 +403,9 @@ public class ExampleEntity
     public TimeSpan ShortDuration { get; set; }
 
     // Enum (stored as string name)
-    public Status Status { get; set; }
+    public Status? Status { get; set; }
     public double Temperature { get; set; }
     public DateTime UpdatedAt { get; set; }
-
-    // Guid
     public Guid UserId { get; set; }
 }
 

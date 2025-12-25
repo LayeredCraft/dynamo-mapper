@@ -22,32 +22,33 @@ internal static class ModelClassInfoExtensions
         {
             context.ThrowIfCancellationRequested();
 
-            var results = modelTypeSymbol
+            var (successfulMappings, diagnostics) = modelTypeSymbol
                 .GetMembers()
                 .OfType<IPropertySymbol>()
                 .Select(propertySymbol =>
-                {
-                    context.ThrowIfCancellationRequested();
-
-                    if (propertySymbol.IsStatic)
-                        return null;
-
-                    if (propertySymbol.SetMethod is null)
-                        return null;
-
-                    return BuildFromItemMapping(propertySymbol, context);
-                })
+                    propertySymbol.SetMethod is null || propertySymbol.IsStatic
+                        ? null
+                        : BuildFromItemMapping(propertySymbol, context)
+                )
                 .WhereNotNull()
-                .ToLookup(result => result.IsSuccess);
-
-            var successfulMappings = results[true]
-                .Select(result => result.Value!)
-                .ToEquatableArray();
-
-            var diagnostics = results[false]
-                .Select(result => result.Error)
-                .OfType<DiagnosticInfo>()
-                .ToArray();
+                .Aggregate(
+                    (Successes: new List<string>(), Diagnostics: new List<DiagnosticInfo>()),
+                    static (acc, result) =>
+                        result.Match(
+                            value =>
+                            {
+                                acc.Successes.Add(value);
+                                return acc;
+                            },
+                            error =>
+                            {
+                                if (error is { } diagnostic)
+                                    acc.Diagnostics.Add(diagnostic);
+                                return acc;
+                            }
+                        ),
+                    static acc => (acc.Successes.ToEquatableArray(), acc.Diagnostics.ToArray())
+                );
 
             var modelClassInfo = new ModelClassInfo(
                 modelTypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
@@ -63,6 +64,8 @@ internal static class ModelClassInfoExtensions
         GeneratorContext context
     )
     {
+        context.ThrowIfCancellationRequested();
+
         var type = propertySymbol.Type;
         var name = propertySymbol.Name;
 
@@ -77,33 +80,51 @@ internal static class ModelClassInfoExtensions
             var underlyingType = nullableType.TypeArguments[0];
             return underlyingType switch
             {
+                // Nullable Boolean
                 { SpecialType: SpecialType.System_Boolean } => DiagnosticResult<string>.Success(
-                    $"""item.GetNullableBool("{name}")"""
+                    $"""{name} = item.GetNullableBool("{name}");"""
                 ),
+
+                // Nullable Integer types
                 { SpecialType: SpecialType.System_Int32 } => DiagnosticResult<string>.Success(
-                    $"""item.GetNullableInt("{name}")"""
+                    $"""{name} = item.GetNullableInt("{name}");"""
                 ),
                 { SpecialType: SpecialType.System_Int64 } => DiagnosticResult<string>.Success(
-                    $"""item.GetNullableLong("{name}")"""
+                    $"""{name} = item.GetNullableLong("{name}");"""
                 ),
+
+                // Nullable Floating point types
                 { SpecialType: SpecialType.System_Double } => DiagnosticResult<string>.Success(
-                    $"""item.GetNullableDouble("{name}")"""
+                    $"""{name} = item.GetNullableDouble("{name}");"""
                 ),
                 { SpecialType: SpecialType.System_Decimal } => DiagnosticResult<string>.Success(
-                    $"""item.GetNullableDecimal("{name}")"""
+                    $"""{name} = item.GetNullableDecimal("{name}");"""
                 ),
+
+                // Nullable DateTime
                 { SpecialType: SpecialType.System_DateTime } => DiagnosticResult<string>.Success(
-                    $"""item.GetNullableDateTime("{name}")"""
+                    $"""{name} = item.GetNullableDateTime("{name}");"""
                 ),
+
+                // Nullable DateTimeOffset
                 INamedTypeSymbol t
                     when t.IsAssignableTo(WellKnownType.System_DateTimeOffset, context) =>
                     DiagnosticResult<string>.Success(
-                        $"""item.GetNullableDateTimeOffset("{name}")"""
+                        $"""{name} = item.GetNullableDateTimeOffset("{name}");"""
                     ),
+
+                // Nullable Guid
                 INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_Guid, context) =>
-                    DiagnosticResult<string>.Success($"""item.GetNullableGuid("{name}")"""),
+                    DiagnosticResult<string>.Success(
+                        $"""{name} = item.GetNullableGuid("{name}");"""
+                    ),
+
+                // Nullable TimeSpan
                 INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_TimeSpan, context) =>
-                    DiagnosticResult<string>.Success($"""item.GetNullableTimeSpan("{name}")"""),
+                    DiagnosticResult<string>.Success(
+                        $"""{name} = item.GetNullableTimeSpan("{name}");"""
+                    ),
+
                 _ => DiagnosticResult<string>.Failure(
                     new DiagnosticInfo(
                         Diagnostics.CannotConvertFromAttributeValue,
@@ -119,52 +140,52 @@ internal static class ModelClassInfoExtensions
         {
             // String
             { SpecialType: SpecialType.System_String } => DiagnosticResult<string>.Success(
-                $"""item.GetString("{name}")"""
+                $"""{name} = item.GetString("{name}");"""
             ),
 
             // Boolean
             { SpecialType: SpecialType.System_Boolean } => DiagnosticResult<string>.Success(
-                $"""item.GetBool("{name}")"""
+                $"""{name} = item.GetBool("{name}");"""
             ),
 
             // Integer types
             { SpecialType: SpecialType.System_Int32 } => DiagnosticResult<string>.Success(
-                $"""item.GetInt("{name}")"""
+                $"""{name} = item.GetInt("{name}");"""
             ),
             { SpecialType: SpecialType.System_Int64 } => DiagnosticResult<string>.Success(
-                $"""item.GetLong("{name}")"""
+                $"""{name} = item.GetLong("{name}");"""
             ),
 
             // Floating point types
             { SpecialType: SpecialType.System_Double } => DiagnosticResult<string>.Success(
-                $"""item.GetDouble("{name}")"""
+                $"""{name} = item.GetDouble("{name}");"""
             ),
             { SpecialType: SpecialType.System_Decimal } => DiagnosticResult<string>.Success(
-                $"""item.GetDecimal("{name}")"""
+                $"""{name} = item.GetDecimal("{name}");"""
             ),
 
             // DateTime
             { SpecialType: SpecialType.System_DateTime } => DiagnosticResult<string>.Success(
-                $"""item.GetDateTime("{name}")"""
+                $"""{name} = item.GetDateTime("{name}");"""
             ),
 
             // DateTimeOffset
             INamedTypeSymbol t
                 when t.IsAssignableTo(WellKnownType.System_DateTimeOffset, context) =>
-                DiagnosticResult<string>.Success($"""item.GetDateTimeOffset("{name}")"""),
+                DiagnosticResult<string>.Success($"""{name} = item.GetDateTimeOffset("{name}");"""),
 
             // Guid
             INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_Guid, context) =>
-                DiagnosticResult<string>.Success($"""item.GetGuid("{name}")"""),
+                DiagnosticResult<string>.Success($"""{name} = item.GetGuid("{name}");"""),
 
             // TimeSpan
             INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_TimeSpan, context) =>
-                DiagnosticResult<string>.Success($"""item.GetTimeSpan("{name}")"""),
+                DiagnosticResult<string>.Success($"""{name} = item.GetTimeSpan("{name}");"""),
 
             // Enums
             INamedTypeSymbol { TypeKind: TypeKind.Enum } enumType =>
                 DiagnosticResult<string>.Success(
-                    $"""item.GetEnum("{name}", {enumType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}.{enumType.MemberNames.FirstOrDefault() ?? "Default"})"""
+                    $"""{name} = item.GetEnum("{name}", {enumType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}.{enumType.MemberNames.FirstOrDefault() ?? "Default"});"""
                 ),
 
             _ => DiagnosticResult<string>.Failure(

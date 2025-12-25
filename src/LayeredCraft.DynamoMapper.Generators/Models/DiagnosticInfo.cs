@@ -17,6 +17,8 @@ internal readonly struct DiagnosticInfo(
         DiagnosticDescriptor.Id == other.DiagnosticDescriptor.Id
         && LocationInfo == other.LocationInfo;
 
+    public override bool Equals(object? obj) => obj is DiagnosticInfo other && Equals(other);
+
     public override int GetHashCode() =>
         HashCode.Combine(DiagnosticDescriptor.Id.GetHashCode(), LocationInfo.GetHashCode());
 }
@@ -25,7 +27,7 @@ internal static class DiagnosticInfoExtensions
 {
     extension(DiagnosticInfo diagnosticInfo)
     {
-        internal Diagnostic CreateDiagnostic() =>
+        internal Diagnostic ToDiagnostic() =>
             Diagnostic.Create(
                 diagnosticInfo.DiagnosticDescriptor,
                 diagnosticInfo.LocationInfo?.ToLocation(),
@@ -33,6 +35,6 @@ internal static class DiagnosticInfoExtensions
             );
 
         internal void ReportDiagnostic(SourceProductionContext context) =>
-            context.ReportDiagnostic(diagnosticInfo.CreateDiagnostic());
+            context.ReportDiagnostic(diagnosticInfo.ToDiagnostic());
     }
 }

@@ -8,7 +8,8 @@ namespace DynamoMapper.Generator;
 
 internal readonly record struct ModelClassInfo(
     string FullyQualifiedType,
-    EquatableArray<string> PropertiedAssignments
+    EquatableArray<string> PropertiedAssignments,
+    EquatableArray<string> ToAttributeAssignments
 );
 
 internal static class ModelClassInfoExtensions
@@ -22,15 +23,34 @@ internal static class ModelClassInfoExtensions
         {
             context.ThrowIfCancellationRequested();
 
-            var (successfulMappings, diagnostics) = modelTypeSymbol
+            var properties = modelTypeSymbol
                 .GetMembers()
                 .OfType<IPropertySymbol>()
-                .Select(propertySymbol =>
-                    propertySymbol.SetMethod is null || propertySymbol.IsStatic
-                        ? null
-                        : BuildFromItemMapping(propertySymbol, context)
-                )
-                .WhereNotNull()
+                .Where(p => p.SetMethod is not null && !p.IsStatic)
+                .ToList();
+
+            var (successfulFromMappings, fromDiagnostics) = properties
+                .Select(propertySymbol => BuildFromItemMapping(propertySymbol, context))
+                .Aggregate(
+                    (Successes: new List<string>(), Diagnostics: new List<DiagnosticInfo>()),
+                    static (acc, result) =>
+                        result.Match(
+                            value =>
+                            {
+                                acc.Successes.Add(value);
+                                return acc;
+                            },
+                            error =>
+                            {
+                                acc.Diagnostics.Add(error!.Value);
+                                return acc;
+                            }
+                        ),
+                    static acc => (acc.Successes.ToEquatableArray(), acc.Diagnostics.ToArray())
+                );
+
+            var (successfulToMappings, toDiagnostics) = properties
+                .Select(propertySymbol => BuildToItemMapping(propertySymbol, context))
                 .Aggregate(
                     (Successes: new List<string>(), Diagnostics: new List<DiagnosticInfo>()),
                     static (acc, result) =>
@@ -51,10 +71,12 @@ internal static class ModelClassInfoExtensions
 
             var modelClassInfo = new ModelClassInfo(
                 modelTypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-                successfulMappings
+                successfulFromMappings,
+                successfulToMappings
             );
 
-            return (modelClassInfo, diagnostics);
+            var allDiagnostics = fromDiagnostics.Concat(toDiagnostics).ToArray();
+            return (modelClassInfo, allDiagnostics);
         }
     }
 
@@ -193,6 +215,163 @@ internal static class ModelClassInfoExtensions
                 DiagnosticResult<string>.Success(
                     $"""{name} = item.GetEnum("{name}", {enumType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}.{enumType.MemberNames.FirstOrDefault() ?? "Default"}),"""
                 ),
+
+            _ => DiagnosticResult<string>.Failure(
+                new DiagnosticInfo(
+                    Diagnostics.CannotConvertFromAttributeValue,
+                    propertySymbol.Locations.FirstOrDefault()?.CreateLocationInfo(),
+                    name,
+                    type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
+                )
+            ),
+        };
+    }
+
+    private static DiagnosticResult<string> BuildToItemMapping(
+        IPropertySymbol propertySymbol,
+        GeneratorContext context
+    )
+    {
+        context.ThrowIfCancellationRequested();
+
+        var type = propertySymbol.Type;
+        var name = propertySymbol.Name;
+
+        // Handle nullable types
+        if (
+            type is INamedTypeSymbol
+            {
+                OriginalDefinition.SpecialType: SpecialType.System_Nullable_T,
+            } nullableType
+        )
+        {
+            var underlyingType = nullableType.TypeArguments[0];
+            return underlyingType switch
+            {
+                // Nullable Boolean
+                { SpecialType: SpecialType.System_Boolean } => DiagnosticResult<string>.Success(
+                    $$"""{ "{{name}}", source.{{name}}.ToNullableAttributeValue() },"""
+                ),
+
+                // Nullable Integer types
+                { SpecialType: SpecialType.System_Int32 } => DiagnosticResult<string>.Success(
+                    $$"""{ "{{name}}", source.{{name}}.ToNullableAttributeValue() },"""
+                ),
+                { SpecialType: SpecialType.System_Int64 } => DiagnosticResult<string>.Success(
+                    $$"""{ "{{name}}", source.{{name}}.ToNullableAttributeValue() },"""
+                ),
+
+                // Nullable Floating point types
+                { SpecialType: SpecialType.System_Single } => DiagnosticResult<string>.Success(
+                    $$"""{ "{{name}}", source.{{name}}.ToNullableAttributeValue() },"""
+                ),
+                { SpecialType: SpecialType.System_Double } => DiagnosticResult<string>.Success(
+                    $$"""{ "{{name}}", source.{{name}}.ToNullableAttributeValue() },"""
+                ),
+                { SpecialType: SpecialType.System_Decimal } => DiagnosticResult<string>.Success(
+                    $$"""{ "{{name}}", source.{{name}}.ToNullableAttributeValue() },"""
+                ),
+
+                // Nullable DateTime
+                { SpecialType: SpecialType.System_DateTime } => DiagnosticResult<string>.Success(
+                    $$"""{ "{{name}}", source.{{name}}.ToNullableAttributeValue() },"""
+                ),
+
+                // Nullable DateTimeOffset
+                INamedTypeSymbol t
+                    when t.IsAssignableTo(WellKnownType.System_DateTimeOffset, context) =>
+                    DiagnosticResult<string>.Success(
+                        $$"""{ "{{name}}", source.{{name}}.ToNullableAttributeValue() },"""
+                    ),
+
+                // Nullable Guid
+                INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_Guid, context) =>
+                    DiagnosticResult<string>.Success(
+                        $$"""{ "{{name}}", source.{{name}}.ToNullableAttributeValue() },"""
+                    ),
+
+                // Nullable TimeSpan
+                INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_TimeSpan, context) =>
+                    DiagnosticResult<string>.Success(
+                        $$"""{ "{{name}}", source.{{name}}.ToNullableAttributeValue() },"""
+                    ),
+
+                // Nullable Enums - convert to string
+                INamedTypeSymbol { TypeKind: TypeKind.Enum } => DiagnosticResult<string>.Success(
+                    $$"""{ "{{name}}", source.{{name}}?.ToString().ToNullableAttributeValue() },"""
+                ),
+
+                _ => DiagnosticResult<string>.Failure(
+                    new DiagnosticInfo(
+                        Diagnostics.CannotConvertFromAttributeValue,
+                        propertySymbol.Locations.FirstOrDefault()?.CreateLocationInfo(),
+                        name,
+                        type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
+                    )
+                ),
+            };
+        }
+
+        // Handle non-nullable types
+        return type switch
+        {
+            // String - use nullable version since strings are reference types
+            { SpecialType: SpecialType.System_String } => DiagnosticResult<string>.Success(
+                $$"""{ "{{name}}", source.{{name}}.ToNullableAttributeValue() },"""
+            ),
+
+            // Boolean
+            { SpecialType: SpecialType.System_Boolean } => DiagnosticResult<string>.Success(
+                $$"""{ "{{name}}", source.{{name}}.ToAttributeValue() },"""
+            ),
+
+            // Integer types
+            { SpecialType: SpecialType.System_Int32 } => DiagnosticResult<string>.Success(
+                $$"""{ "{{name}}", source.{{name}}.ToAttributeValue() },"""
+            ),
+            { SpecialType: SpecialType.System_Int64 } => DiagnosticResult<string>.Success(
+                $$"""{ "{{name}}", source.{{name}}.ToAttributeValue() },"""
+            ),
+
+            // Floating point types
+            { SpecialType: SpecialType.System_Single } => DiagnosticResult<string>.Success(
+                $$"""{ "{{name}}", source.{{name}}.ToAttributeValue() },"""
+            ),
+            { SpecialType: SpecialType.System_Double } => DiagnosticResult<string>.Success(
+                $$"""{ "{{name}}", source.{{name}}.ToAttributeValue() },"""
+            ),
+            { SpecialType: SpecialType.System_Decimal } => DiagnosticResult<string>.Success(
+                $$"""{ "{{name}}", source.{{name}}.ToAttributeValue() },"""
+            ),
+
+            // DateTime
+            { SpecialType: SpecialType.System_DateTime } => DiagnosticResult<string>.Success(
+                $$"""{ "{{name}}", source.{{name}}.ToAttributeValue() },"""
+            ),
+
+            // DateTimeOffset
+            INamedTypeSymbol t
+                when t.IsAssignableTo(WellKnownType.System_DateTimeOffset, context) =>
+                DiagnosticResult<string>.Success(
+                    $$"""{ "{{name}}", source.{{name}}.ToAttributeValue() },"""
+                ),
+
+            // Guid
+            INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_Guid, context) =>
+                DiagnosticResult<string>.Success(
+                    $$"""{ "{{name}}", source.{{name}}.ToAttributeValue() },"""
+                ),
+
+            // TimeSpan
+            INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_TimeSpan, context) =>
+                DiagnosticResult<string>.Success(
+                    $$"""{ "{{name}}", source.{{name}}.ToAttributeValue() },"""
+                ),
+
+            // Enums - convert to string
+            INamedTypeSymbol { TypeKind: TypeKind.Enum } => DiagnosticResult<string>.Success(
+                $$"""{ "{{name}}", source.{{name}}.ToString().ToAttributeValue() },"""
+            ),
 
             _ => DiagnosticResult<string>.Failure(
                 new DiagnosticInfo(

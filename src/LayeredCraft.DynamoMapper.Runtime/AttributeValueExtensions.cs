@@ -680,6 +680,30 @@ public static class AttributeValueExtensions
             return null;
         }
 
+        /// <summary>Sets an enum value in the attribute dictionary.</summary>
+        /// <typeparam name="TEnum">The enum type to set.</typeparam>
+        /// <param name="key">The attribute key to set.</param>
+        /// <param name="value">The enum value to set.</param>
+        /// <returns>The attribute dictionary for fluent chaining.</returns>
+        public Dictionary<string, AttributeValue> SetEnum<TEnum>(string key, TEnum value)
+            where TEnum : struct, Enum
+        {
+            attributes[key] = value.ToAttributeValue();
+            return attributes;
+        }
+
+        /// <summary>Sets a nullable enum value in the attribute dictionary.</summary>
+        /// <typeparam name="TEnum">The enum type to set.</typeparam>
+        /// <param name="key">The attribute key to set.</param>
+        /// <param name="value">The nullable enum value to set.</param>
+        /// <returns>The attribute dictionary for fluent chaining.</returns>
+        public Dictionary<string, AttributeValue> SetNullableEnum<TEnum>(string key, TEnum? value)
+            where TEnum : struct, Enum
+        {
+            attributes[key] = value.ToNullableAttributeValue();
+            return attributes;
+        }
+
         #endregion
     }
 
@@ -1005,6 +1029,34 @@ public static class AttributeValueExtensions
                 {
                     S = value.Value.ToString("c", CultureInfo.InvariantCulture),
                 };
+    }
+
+    #endregion
+
+    #region Enum Extensions
+
+    extension<TEnum>(TEnum value)
+        where TEnum : struct, Enum
+    {
+        /// <summary>Converts an enum value to a DynamoDB <see cref="AttributeValue" />.</summary>
+        /// <typeparam name="TEnum">The enum type.</typeparam>
+        /// <returns>An <see cref="AttributeValue" /> containing the enum value as a string.</returns>
+        public AttributeValue ToAttributeValue() => new() { S = value.ToString() };
+    }
+
+    extension<TEnum>(TEnum? value)
+        where TEnum : struct, Enum
+    {
+        /// <summary>Converts a nullable enum value to a DynamoDB <see cref="AttributeValue" />.</summary>
+        /// <typeparam name="TEnum">The enum type.</typeparam>
+        /// <returns>
+        ///     An <see cref="AttributeValue" /> containing the enum value as a string, or a NULL
+        ///     attribute if the value is <c>null</c>.
+        /// </returns>
+        public AttributeValue ToNullableAttributeValue() =>
+            value is null
+                ? new AttributeValue { NULL = true }
+                : new AttributeValue { S = value.Value.ToString() };
     }
 
     #endregion

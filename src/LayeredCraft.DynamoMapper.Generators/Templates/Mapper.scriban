@@ -11,7 +11,7 @@
 
 using DynamoMapper.Runtime;
 
-namespace {{ mapper_class_namespace }};
+{{ mapper_class_namespace }}
 
 {{ mapper_class_signature }}
 {

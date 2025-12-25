@@ -86,10 +86,17 @@ internal static class MapperClassInfoExtensions
         var classSignature = GetClassSignature(classSymbol);
         var toItemSignature = GetMethodSignature(toItemMethod);
         var fromItemSignature = GetMethodSignature(fromItemMethod);
+        var namespaceStatement =
+            classSymbol
+                .ContainingNamespace?.ToDisplayString()
+                .Map(@namespace =>
+                    @namespace == "<global namespace>" ? string.Empty : $"namespace {@namespace};"
+                )
+            ?? string.Empty;
 
         var mapperClassInfo = new MapperClassInfo(
             classSymbol.Name,
-            classSymbol.ContainingNamespace?.ToDisplayString() ?? string.Empty,
+            namespaceStatement,
             classSignature,
             toItemSignature,
             fromItemSignature

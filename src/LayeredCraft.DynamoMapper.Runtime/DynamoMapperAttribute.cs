@@ -35,6 +35,10 @@ public sealed class DynamoMapperAttribute : Attribute
     public string DateTimeFormat { get; set; } = "O";
 
     /// <summary>Gets or sets the default enum serialization format.</summary>
-    /// <remarks>Default is "Name". Alternative is "Numeric".</remarks>
-    public string EnumFormat { get; set; } = "Name";
+    /// <remarks>
+    ///     Default is <see cref="EnumFormat.Name" />, which serializes enums as their string name
+    ///     (e.g., "Active"). Use <see cref="EnumFormat.Numeric" /> to serialize as the underlying numeric
+    ///     value (e.g., 0).
+    /// </remarks>
+    public EnumFormat EnumFormat { get; set; } = EnumFormat.Name;
 }

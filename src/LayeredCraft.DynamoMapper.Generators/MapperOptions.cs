@@ -9,5 +9,5 @@ internal class MapperOptions
     internal bool OmitNullStrings { get; set; } = true;
     internal bool OmitEmptyStrings { get; set; } = false;
     internal string DateTimeFormat { get; set; } = "O";
-    internal string EnumFormat { get; set; } = "Name";
+    internal EnumFormat EnumFormat { get; set; } = EnumFormat.Name;
 }

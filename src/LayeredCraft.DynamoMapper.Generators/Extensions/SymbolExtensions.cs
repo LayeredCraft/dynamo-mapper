@@ -1,6 +1,6 @@
 using DynamoMapper.Generator;
 using Microsoft.CodeAnalysis.CSharp;
-using static DynamoMapper.Generator.WellKnownTypeData;
+using WellKnownType = DynamoMapper.Generator.WellKnownTypes.WellKnownTypeData.WellKnownType;
 
 namespace Microsoft.CodeAnalysis;
 

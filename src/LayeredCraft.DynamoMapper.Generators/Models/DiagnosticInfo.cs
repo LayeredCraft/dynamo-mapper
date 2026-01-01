@@ -2,25 +2,11 @@ using Microsoft.CodeAnalysis;
 
 namespace DynamoMapper.Generator.Models;
 
-internal readonly struct DiagnosticInfo(
-    DiagnosticDescriptor diagnosticDescriptor,
-    LocationInfo? locationInfo = null,
-    params object[] messageArgs
-) : IEquatable<DiagnosticInfo>
-{
-    public DiagnosticDescriptor DiagnosticDescriptor { get; } = diagnosticDescriptor;
-    public LocationInfo? LocationInfo { get; } = locationInfo;
-    public object[] MessageArgs { get; } = messageArgs;
-
-    public bool Equals(DiagnosticInfo other) =>
-        DiagnosticDescriptor.Id == other.DiagnosticDescriptor.Id
-        && LocationInfo == other.LocationInfo;
-
-    public override bool Equals(object? obj) => obj is DiagnosticInfo other && Equals(other);
-
-    public override int GetHashCode() =>
-        HashCode.Combine(DiagnosticDescriptor.Id.GetHashCode(), LocationInfo.GetHashCode());
-}
+internal sealed record DiagnosticInfo(
+    DiagnosticDescriptor DiagnosticDescriptor,
+    LocationInfo? LocationInfo = null,
+    params object[] MessageArgs
+);
 
 internal static class DiagnosticInfoExtensions
 {

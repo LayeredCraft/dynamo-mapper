@@ -2,7 +2,7 @@ using LayeredCraft.SourceGeneratorTools.Types;
 
 namespace DynamoMapper.Generator.Models;
 
-internal readonly record struct MapperInfo(
+internal sealed record MapperInfo(
     MapperClassInfo MapperClass,
     ModelClassInfo? ModelClass,
     EquatableArray<DiagnosticInfo> Diagnostics

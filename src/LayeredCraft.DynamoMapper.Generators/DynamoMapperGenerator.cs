@@ -1,3 +1,4 @@
+using DynamoMapper.Generator.Emitters;
 using DynamoMapper.Generator.Models;
 using DynamoMapper.Runtime;
 using Microsoft.CodeAnalysis;

@@ -1,11 +1,11 @@
 using DynamoMapper.Models;
 using LayeredCraft.SourceGeneratorTools.Types;
 using Microsoft.CodeAnalysis;
-using WellKnownType = DynamoMapper.Generator.WellKnownTypeData.WellKnownType;
+using WellKnownType = DynamoMapper.Generator.WellKnownTypes.WellKnownTypeData.WellKnownType;
 
 namespace DynamoMapper.Generator.Models;
 
-internal readonly record struct ModelClassInfo(
+internal sealed record ModelClassInfo(
     string FullyQualifiedType,
     EquatableArray<string> PropertiedAssignments,
     EquatableArray<string> ToAttributeAssignments
@@ -41,7 +41,7 @@ internal static class ModelClassInfoExtensions
                             },
                             error =>
                             {
-                                acc.Diagnostics.Add(error!.Value);
+                                acc.Diagnostics.Add(error!);
                                 return acc;
                             }
                         ),
@@ -61,7 +61,7 @@ internal static class ModelClassInfoExtensions
                             },
                             error =>
                             {
-                                acc.Diagnostics.Add(error!.Value);
+                                acc.Diagnostics.Add(error!);
                                 return acc;
                             }
                         ),

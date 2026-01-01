@@ -3,11 +3,7 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace DynamoMapper.Generator.Models;
 
-internal readonly record struct LocationInfo(
-    string FilePath,
-    TextSpan TextSpan,
-    LinePositionSpan LineSpan
-);
+internal sealed record LocationInfo(string FilePath, TextSpan TextSpan, LinePositionSpan LineSpan);
 
 internal static class LocationInfoExtensions
 {

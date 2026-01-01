@@ -2,7 +2,7 @@ using System.Reflection;
 using DynamoMapper.Generator.Models;
 using Microsoft.CodeAnalysis;
 
-namespace DynamoMapper.Generator;
+namespace DynamoMapper.Generator.Emitters;
 
 internal static class MapperEmitter
 {
@@ -30,10 +30,10 @@ internal static class MapperEmitter
         {
             GeneratedCodeAttribute,
             mapperInfo.MapperClass,
-            ModelClass = mapperInfo.ModelClass!.Value,
+            ModelClass = mapperInfo.ModelClass!,
             MapperClassNamespace = mapperInfo.MapperClass.Namespace,
             MapperClassSignature = mapperInfo.MapperClass.ClassSignature,
-            DictionaryCapacity = mapperInfo.ModelClass!.Value.ToAttributeAssignments.Count,
+            DictionaryCapacity = mapperInfo.ModelClass!.ToAttributeAssignments.Count,
         };
 
         var outputCode = TemplateHelper.Render("Templates.Mapper.scriban", model);

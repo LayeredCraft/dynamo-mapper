@@ -8,7 +8,7 @@
 
 // ReSharper disable InconsistentNaming
 
-namespace DynamoMapper.Generator;
+namespace DynamoMapper.Generator.WellKnownTypes;
 
 internal static class WellKnownTypeData
 {

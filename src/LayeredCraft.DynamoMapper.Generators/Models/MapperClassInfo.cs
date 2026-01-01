@@ -5,11 +5,11 @@ using MapperResult = (
     DynamoMapper.Generator.Models.MapperClassInfo MapperClass,
     Microsoft.CodeAnalysis.ITypeSymbol ModelType
 );
-using WellKnownType = DynamoMapper.Generator.WellKnownTypeData.WellKnownType;
+using WellKnownType = DynamoMapper.Generator.WellKnownTypes.WellKnownTypeData.WellKnownType;
 
 namespace DynamoMapper.Generator.Models;
 
-internal readonly record struct MapperClassInfo(
+internal sealed record MapperClassInfo(
     string Name,
     string Namespace,
     string ClassSignature,

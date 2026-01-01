@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 using System.Reflection;
 using Scriban;
 
-namespace DynamoMapper.Generator;
+namespace DynamoMapper.Generator.Emitters;
 
 /// <summary>
 ///     Helper class for loading, caching, and rendering Scriban templates from embedded

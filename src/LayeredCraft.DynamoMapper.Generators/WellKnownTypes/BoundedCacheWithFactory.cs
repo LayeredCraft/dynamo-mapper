@@ -6,7 +6,7 @@
 // See THIRD-PARTY-LICENSES.txt file in the project root or visit
 // https://github.com/dotnet/aspnetcore/blob/v10.0.0/LICENSE.txt
 
-namespace DynamoMapper.Generator;
+namespace DynamoMapper.Generator.WellKnownTypes;
 
 // This type is copied from
 // https://github.com/dotnet/roslyn-analyzers/blob/9b58ec3ad33353d1a523cda8c4be38eaefc80ad8/src/Utilities/Compiler/BoundedCacheWithFactory.cs

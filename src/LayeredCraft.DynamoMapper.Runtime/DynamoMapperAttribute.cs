@@ -14,12 +14,13 @@ public sealed class DynamoMapperAttribute : Attribute
     /// <remarks>Default is <see cref="DynamoNamingConvention.CamelCase" />.</remarks>
     public DynamoNamingConvention Convention { get; set; } = DynamoNamingConvention.CamelCase;
 
-    /// <summary>Gets or sets whether properties are required by default.</summary>
+    /// <summary>
+    ///     Gets or sets the default requiredness behavior for properties.
+    /// </summary>
     /// <remarks>
-    ///     When <c>null</c>, requiredness is inferred from nullability. Set to <c>true</c> to make
-    ///     all properties required by default, or <c>false</c> to make all optional.
+    ///     Default is <see cref="Requiredness.InferFromNullability" />.
     /// </remarks>
-    public bool? DefaultRequiredness { get; set; }
+    public Requiredness DefaultRequiredness { get; set; } = Requiredness.InferFromNullability;
 
     /// <summary>Gets or sets whether to omit null string values from the DynamoDB item.</summary>
     /// <remarks>Default is <c>true</c>.</remarks>

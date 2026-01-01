@@ -1,5 +1,6 @@
 using DynamoMapper.Generator.Models;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace DynamoMapper.Generator;
@@ -21,14 +22,9 @@ internal static class MapperSyntaxProvider
         if (syntaxContext.TargetNode is not ClassDeclarationSyntax classDeclaration)
             return null;
 
-        var mapperResult = MapperClassInfo.CreateAndResolveModelType(classDeclaration, context);
-        if (mapperResult is null)
+        if (!classDeclaration.Modifiers.Any(static m => m.IsKind(SyntaxKind.PartialKeyword)))
             return null;
 
-        var (mapperClassInfo, modelTypeSymbol) = mapperResult.Value;
-
-        var (modelClassInfo, diagnosticInfos) = ModelClassInfo.Create(modelTypeSymbol, context);
-
-        return new MapperInfo(mapperClassInfo, modelClassInfo, diagnosticInfos.ToEquatableArray());
+        return MapperInfo.Create(classDeclaration, context);
     }
 }

@@ -1,10 +1,6 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using MapperResult = (
-    DynamoMapper.Generator.Models.MapperClassInfo MapperClass,
-    Microsoft.CodeAnalysis.ITypeSymbol ModelType
-);
 using WellKnownType = DynamoMapper.Generator.WellKnownTypes.WellKnownTypeData.WellKnownType;
 
 namespace DynamoMapper.Generator.Models;
@@ -24,20 +20,17 @@ internal static class MapperClassInfoExtensions
 
     extension(MapperClassInfo)
     {
-        internal static (
-            MapperClassInfo MapperClassInfo,
-            ITypeSymbol ModelTypeSymbol
-        )? CreateAndResolveModelType(
+        internal static (MapperClassInfo Info, ITypeSymbol Type)? CreateAndResolveModelType(
             ClassDeclarationSyntax classDeclaration,
             GeneratorContext context
         )
         {
             context.ThrowIfCancellationRequested();
 
-            if (!classDeclaration.Modifiers.Any(static m => m.IsKind(SyntaxKind.PartialKeyword)))
-                return null;
-
-            var classSymbol = context.SemanticModel.GetDeclaredSymbol(classDeclaration);
+            var classSymbol = context.SemanticModel.GetDeclaredSymbol(
+                classDeclaration,
+                context.CancellationToken
+            );
             if (classSymbol is null)
                 return null;
 
@@ -68,39 +61,25 @@ internal static class MapperClassInfoExtensions
                 m.Name.StartsWith(FromMethodPrefix, StringComparison.Ordinal)
             );
 
-            var (mapperClassInfo, modelTypeSymbol) = BuildMapperClassInfoCore(
-                classSymbol,
-                toItemMethod,
-                fromItemMethod
+            var modelTypeSymbol = EnsurePocoTypesMatch(toItemMethod, fromItemMethod);
+            var classSignature = GetClassSignature(classSymbol);
+            var toItemSignature = GetMethodSignature(toItemMethod);
+            var fromItemSignature = GetMethodSignature(fromItemMethod);
+            var namespaceStatement = classSymbol.ContainingNamespace
+                is { IsGlobalNamespace: false } ns
+                ? $"namespace {ns.ToDisplayString()};"
+                : string.Empty;
+
+            var mapperClassInfo = new MapperClassInfo(
+                classSymbol.Name,
+                namespaceStatement,
+                classSignature,
+                toItemSignature,
+                fromItemSignature
             );
 
             return (mapperClassInfo, modelTypeSymbol);
         }
-    }
-
-    private static MapperResult BuildMapperClassInfoCore(
-        INamedTypeSymbol classSymbol,
-        IMethodSymbol? toItemMethod,
-        IMethodSymbol? fromItemMethod
-    )
-    {
-        var modelTypeSymbol = EnsurePocoTypesMatch(toItemMethod, fromItemMethod);
-        var classSignature = GetClassSignature(classSymbol);
-        var toItemSignature = GetMethodSignature(toItemMethod);
-        var fromItemSignature = GetMethodSignature(fromItemMethod);
-        var namespaceStatement = classSymbol.ContainingNamespace is { IsGlobalNamespace: false } ns
-            ? $"namespace {ns.ToDisplayString()};"
-            : string.Empty;
-
-        var mapperClassInfo = new MapperClassInfo(
-            classSymbol.Name,
-            namespaceStatement,
-            classSignature,
-            toItemSignature,
-            fromItemSignature
-        );
-
-        return (mapperClassInfo, modelTypeSymbol);
     }
 
     private static ITypeSymbol EnsurePocoTypesMatch(
@@ -151,24 +130,24 @@ internal static class MapperClassInfoExtensions
     {
         context.ThrowIfCancellationRequested();
 
-        var dictionaryType = context.WellKnownTypes.Get(
-            WellKnownType.System_Collections_Generic_Dictionary_2
-        );
-        var attributeValueType = context.WellKnownTypes.Get(
-            WellKnownType.Amazon_DynamoDBv2_Model_AttributeValue
-        );
-        var stringType = context.WellKnownTypes.Get(SpecialType.System_String);
-
         if (type is not INamedTypeSymbol { IsGenericType: true } namedType)
             return false;
 
-        if (!SymbolEqualityComparer.Default.Equals(namedType.ConstructedFrom, dictionaryType))
+        if (
+            !context.WellKnownTypes.IsType(
+                namedType.ConstructedFrom,
+                WellKnownType.System_Collections_Generic_Dictionary_2
+            )
+        )
             return false;
 
         var typeArguments = namedType.TypeArguments;
         return typeArguments.Length == 2
-            && SymbolEqualityComparer.Default.Equals(typeArguments[0], stringType)
-            && SymbolEqualityComparer.Default.Equals(typeArguments[1], attributeValueType);
+            && context.WellKnownTypes.IsType(typeArguments[0], WellKnownType.System_String)
+            && context.WellKnownTypes.IsType(
+                typeArguments[1],
+                WellKnownType.Amazon_DynamoDBv2_Model_AttributeValue
+            );
     }
 
     private static string GetClassSignature(INamedTypeSymbol classSymbol)

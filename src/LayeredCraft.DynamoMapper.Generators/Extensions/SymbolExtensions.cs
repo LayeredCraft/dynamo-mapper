@@ -8,23 +8,11 @@ internal static class SymbolExtensions
 {
     extension(INamedTypeSymbol sourceType)
     {
-        internal bool IsAssignableTo(INamedTypeSymbol targetType, GeneratorContext context)
-        {
-            var conversion = context.SemanticModel.Compilation.ClassifyConversion(
-                sourceType,
-                targetType
-            );
-            return conversion.IsImplicit;
-        }
+        internal bool IsAssignableTo(INamedTypeSymbol targetType, GeneratorContext context) =>
+            context.SemanticModel.Compilation.ClassifyConversion(sourceType, targetType).IsImplicit;
 
-        internal bool IsAssignableFrom(INamedTypeSymbol targetType, GeneratorContext context)
-        {
-            var conversion = context.SemanticModel.Compilation.ClassifyConversion(
-                targetType,
-                sourceType
-            );
-            return conversion.IsImplicit;
-        }
+        internal bool IsAssignableFrom(INamedTypeSymbol targetType, GeneratorContext context) =>
+            context.SemanticModel.Compilation.ClassifyConversion(targetType, sourceType).IsImplicit;
 
         internal bool IsAssignableFromOrTo(INamedTypeSymbol otherType, GeneratorContext context) =>
             sourceType.IsAssignableFrom(otherType, context)

@@ -1,8 +1,8 @@
 using Microsoft.CodeAnalysis;
 
-namespace DynamoMapper.Models;
+namespace DynamoMapper.Diagnostics;
 
-internal static class Diagnostics
+internal static class DiagnosticDescriptors
 {
     private const string UsageCategory = "DynamoMapper.Usage";
 

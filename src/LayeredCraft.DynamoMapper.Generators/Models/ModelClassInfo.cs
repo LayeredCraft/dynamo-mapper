@@ -1,4 +1,4 @@
-using DynamoMapper.Models;
+using DynamoMapper.Diagnostics;
 using LayeredCraft.SourceGeneratorTools.Types;
 using Microsoft.CodeAnalysis;
 using WellKnownType = DynamoMapper.Generator.WellKnownTypes.WellKnownTypeData.WellKnownType;
@@ -153,7 +153,7 @@ internal static class ModelClassInfoExtensions
 
                 _ => DiagnosticResult<string>.Failure(
                     new DiagnosticInfo(
-                        Diagnostics.CannotConvertFromAttributeValue,
+                        DiagnosticDescriptors.CannotConvertFromAttributeValue,
                         propertySymbol.Locations.FirstOrDefault()?.CreateLocationInfo(),
                         name,
                         type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
@@ -217,7 +217,7 @@ internal static class ModelClassInfoExtensions
 
             _ => DiagnosticResult<string>.Failure(
                 new DiagnosticInfo(
-                    Diagnostics.CannotConvertFromAttributeValue,
+                    DiagnosticDescriptors.CannotConvertFromAttributeValue,
                     propertySymbol.Locations.FirstOrDefault()?.CreateLocationInfo(),
                     name,
                     type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
@@ -302,7 +302,7 @@ internal static class ModelClassInfoExtensions
 
                 _ => DiagnosticResult<string>.Failure(
                     new DiagnosticInfo(
-                        Diagnostics.CannotConvertFromAttributeValue,
+                        DiagnosticDescriptors.CannotConvertFromAttributeValue,
                         propertySymbol.Locations.FirstOrDefault()?.CreateLocationInfo(),
                         name,
                         type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
@@ -374,7 +374,7 @@ internal static class ModelClassInfoExtensions
 
             _ => DiagnosticResult<string>.Failure(
                 new DiagnosticInfo(
-                    Diagnostics.CannotConvertFromAttributeValue,
+                    DiagnosticDescriptors.CannotConvertFromAttributeValue,
                     propertySymbol.Locations.FirstOrDefault()?.CreateLocationInfo(),
                     name,
                     type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)

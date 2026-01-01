@@ -1,22 +1,8 @@
-using LayeredCraft.SourceGeneratorTools.Types;
+using DynamoMapper.Generator.Models;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace DynamoMapper.Generator;
-
-/*
- * Items we need:
- * - class name
- * - class access level
- * - full signature of ToItem
- * - full signature of FromItem
- */
-
-internal readonly record struct MapperInfo(
-    MapperClassInfo MapperClass,
-    ModelClassInfo? ModelClass,
-    EquatableArray<DiagnosticInfo> Diagnostics
-);
 
 internal static class MapperSyntaxProvider
 {

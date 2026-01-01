@@ -1,7 +1,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 
-namespace MinimalLambda.SourceGenerators.Models;
+namespace DynamoMapper.Generator.Models;
 
 internal readonly record struct LocationInfo(
     string FilePath,

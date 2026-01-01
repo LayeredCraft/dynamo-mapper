@@ -1,4 +1,5 @@
 using System.Reflection;
+using DynamoMapper.Generator.Models;
 using Microsoft.CodeAnalysis;
 
 namespace DynamoMapper.Generator;

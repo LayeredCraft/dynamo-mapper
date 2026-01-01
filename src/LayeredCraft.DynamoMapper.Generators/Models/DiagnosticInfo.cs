@@ -1,7 +1,6 @@
 using Microsoft.CodeAnalysis;
-using MinimalLambda.SourceGenerators.Models;
 
-namespace DynamoMapper.Generator;
+namespace DynamoMapper.Generator.Models;
 
 internal readonly struct DiagnosticInfo(
     DiagnosticDescriptor diagnosticDescriptor,

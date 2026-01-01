@@ -1,10 +1,9 @@
 using DynamoMapper.Models;
 using LayeredCraft.SourceGeneratorTools.Types;
 using Microsoft.CodeAnalysis;
-using MinimalLambda.SourceGenerators.Models;
 using WellKnownType = DynamoMapper.Generator.WellKnownTypeData.WellKnownType;
 
-namespace DynamoMapper.Generator;
+namespace DynamoMapper.Generator.Models;
 
 internal readonly record struct ModelClassInfo(
     string FullyQualifiedType,

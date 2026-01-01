@@ -1,3 +1,5 @@
+using DynamoMapper.Generator.Models;
+using DynamoMapper.Runtime;
 using Microsoft.CodeAnalysis;
 
 namespace DynamoMapper.Generator;
@@ -5,11 +7,13 @@ namespace DynamoMapper.Generator;
 [Generator]
 public class DynamoMapperGenerator : IIncrementalGenerator
 {
+    private static readonly string DynamoMapperAttribute = typeof(DynamoMapperAttribute).FullName!;
+
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var mapperInfos = context
             .SyntaxProvider.ForAttributeWithMetadataName(
-                AttributeNames.DynamoMapperAttribute,
+                DynamoMapperAttribute,
                 MapperSyntaxProvider.Predicate,
                 MapperSyntaxProvider.Transformer
             )

@@ -2,12 +2,12 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using MapperResult = (
-    DynamoMapper.Generator.MapperClassInfo MapperClass,
+    DynamoMapper.Generator.Models.MapperClassInfo MapperClass,
     Microsoft.CodeAnalysis.ITypeSymbol ModelType
 );
 using WellKnownType = DynamoMapper.Generator.WellKnownTypeData.WellKnownType;
 
-namespace DynamoMapper.Generator;
+namespace DynamoMapper.Generator.Models;
 
 internal readonly record struct MapperClassInfo(
     string Name,

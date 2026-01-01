@@ -1,6 +1,4 @@
-using DynamoMapper.Generator;
-
-namespace DynamoMapper.Models;
+namespace DynamoMapper.Generator.Models;
 
 internal class Result<T, TError>
 {

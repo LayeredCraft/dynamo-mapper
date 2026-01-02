@@ -1,3 +1,4 @@
+using DynamoMapper.Generator.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -10,7 +11,8 @@ internal sealed record MapperClassInfo(
     string Namespace,
     string ClassSignature,
     string? ToItemSignature,
-    string? FromItemSignature
+    string? FromItemSignature,
+    LocationInfo? Location
 );
 
 internal static class MapperClassInfoExtensions
@@ -20,7 +22,7 @@ internal static class MapperClassInfoExtensions
 
     extension(MapperClassInfo)
     {
-        internal static (MapperClassInfo Info, ITypeSymbol Type)? CreateAndResolveModelType(
+        internal static DiagnosticResult<(MapperClassInfo, ITypeSymbol)> CreateAndResolveModelType(
             ClassDeclarationSyntax classDeclaration,
             GeneratorContext context
         )
@@ -32,7 +34,11 @@ internal static class MapperClassInfoExtensions
                 context.CancellationToken
             );
             if (classSymbol is null)
-                return null;
+                return DiagnosticResult<(MapperClassInfo, ITypeSymbol)>.Failure(
+                    DiagnosticDescriptors.InternalGeneratorError,
+                    classDeclaration.CreateLocationInfo(),
+                    "Failed to resolve class symbol"
+                );
 
             /*
              * to determine what mappers to generate, we need to look for methods using these rules:
@@ -61,7 +67,15 @@ internal static class MapperClassInfoExtensions
                 m.Name.StartsWith(FromMethodPrefix, StringComparison.Ordinal)
             );
 
-            var modelTypeSymbol = EnsurePocoTypesMatch(toItemMethod, fromItemMethod);
+            var modelTypeResult = EnsurePocoTypesMatch(toItemMethod, fromItemMethod, classSymbol);
+
+            // If there's an error in POCO type matching, propagate it
+            if (!modelTypeResult.IsSuccess)
+                return DiagnosticResult<(MapperClassInfo, ITypeSymbol)>.Failure(
+                    modelTypeResult.Error!
+                );
+
+            var modelTypeSymbol = modelTypeResult.Value!;
             var classSignature = GetClassSignature(classSymbol);
             var toItemSignature = GetMethodSignature(toItemMethod);
             var fromItemSignature = GetMethodSignature(fromItemMethod);
@@ -75,23 +89,30 @@ internal static class MapperClassInfoExtensions
                 namespaceStatement,
                 classSignature,
                 toItemSignature,
-                fromItemSignature
+                fromItemSignature,
+                classDeclaration.CreateLocationInfo()
             );
 
-            return (mapperClassInfo, modelTypeSymbol);
+            return DiagnosticResult<(MapperClassInfo, ITypeSymbol)>.Success(
+                (mapperClassInfo, modelTypeSymbol)
+            );
         }
     }
 
-    private static ITypeSymbol EnsurePocoTypesMatch(
+    private static DiagnosticResult<ITypeSymbol> EnsurePocoTypesMatch(
         IMethodSymbol? toItemMethod,
-        IMethodSymbol? fromItemMethod
+        IMethodSymbol? fromItemMethod,
+        INamedTypeSymbol mapperClassSymbol
     )
     {
         if (toItemMethod is null && fromItemMethod is null)
-            // TODO: replace with diagnostic to warn about no mapper methods found
-            throw new InvalidOperationException(
-                $"No mapper methods found. Methods must start with '{ToMethodPrefix}' or '{FromMethodPrefix}'."
+        {
+            return DiagnosticResult<ITypeSymbol>.Failure(
+                DiagnosticDescriptors.NoMapperMethodsFound,
+                mapperClassSymbol.CreateLocationInfo(),
+                mapperClassSymbol.Name
             );
+        }
 
         var toItemPocoType = toItemMethod?.Parameters[0].Type;
         var fromItemPocoType = fromItemMethod?.ReturnType;
@@ -101,12 +122,18 @@ internal static class MapperClassInfoExtensions
             && fromItemPocoType is not null
             && !SymbolEqualityComparer.Default.Equals(toItemPocoType, fromItemPocoType)
         )
-            // TODO: add propper diagnostic for ToItem and FromItem not using same POCO
-            throw new InvalidOperationException(
-                $"Mapper methods '{toItemMethod!.Name}' and '{fromItemMethod!.Name}' must use the same POCO type."
+        {
+            return DiagnosticResult<ITypeSymbol>.Failure(
+                DiagnosticDescriptors.MismatchedPocoTypes,
+                toItemMethod?.CreateLocationInfo(),
+                toItemMethod?.Name,
+                fromItemMethod?.Name,
+                toItemPocoType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                fromItemPocoType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
             );
+        }
 
-        return toItemPocoType ?? fromItemPocoType!;
+        return DiagnosticResult<ITypeSymbol>.Success(toItemPocoType ?? fromItemPocoType!);
     }
 
     private static bool HasSupportedSignature(IMethodSymbol method, GeneratorContext context)

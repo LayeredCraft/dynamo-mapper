@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis;
 
 // ReSharper disable MemberCanBePrivate.Global
 
-namespace DynamoMapper.Diagnostics;
+namespace DynamoMapper.Generator.Diagnostics;
 
 internal class DiagnosticResult<T>
 {

@@ -1,4 +1,4 @@
-using DynamoMapper.Diagnostics;
+using DynamoMapper.Generator.Diagnostics;
 using LayeredCraft.SourceGeneratorTools.Types;
 using Microsoft.CodeAnalysis;
 using WellKnownType = DynamoMapper.Generator.WellKnownTypes.WellKnownTypeData.WellKnownType;

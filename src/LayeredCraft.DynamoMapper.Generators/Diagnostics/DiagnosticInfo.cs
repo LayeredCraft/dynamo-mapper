@@ -1,12 +1,21 @@
+using DynamoMapper.Generator.Models;
 using Microsoft.CodeAnalysis;
 
-namespace DynamoMapper.Generator.Models;
+namespace DynamoMapper.Generator.Diagnostics;
 
 internal sealed record DiagnosticInfo(
     DiagnosticDescriptor DiagnosticDescriptor,
     LocationInfo? LocationInfo = null,
     params object[] MessageArgs
-);
+)
+{
+    public bool Equals(DiagnosticInfo? other) =>
+        other is not null
+        && Equals(DiagnosticDescriptor.Id, other.DiagnosticDescriptor.Id)
+        && Equals(LocationInfo, other.LocationInfo);
+
+    public override int GetHashCode() => HashCode.Combine(DiagnosticDescriptor, LocationInfo);
+}
 
 internal static class DiagnosticInfoExtensions
 {

@@ -1,10 +1,11 @@
+using DynamoMapper.Generator.Diagnostics;
 using LayeredCraft.SourceGeneratorTools.Types;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace DynamoMapper.Generator.Models;
 
 internal sealed record MapperInfo(
-    MapperClassInfo MapperClass,
+    MapperClassInfo? MapperClass,
     ModelClassInfo? ModelClass,
     EquatableArray<DiagnosticInfo> Diagnostics
 );
@@ -24,8 +25,11 @@ internal static class MapperInfoExtensions
                 classDeclarationSyntax,
                 context
             );
-            if (mapperResult is null)
-                return null;
+
+            // If there's an error creating the mapper class info, return a MapperInfo with the
+            // error
+            if (!mapperResult.IsSuccess)
+                return MapperInfo.CreateWithDiagnostics([mapperResult.Error!]);
 
             var (mapperClassInfo, modelTypeSymbol) = mapperResult.Value;
 
@@ -37,5 +41,12 @@ internal static class MapperInfoExtensions
                 diagnosticInfos.ToEquatableArray()
             );
         }
+
+        /// <summary>
+        ///     Creates a MapperInfo containing only error diagnostics. Used when an exception prevents
+        ///     normal analysis.
+        /// </summary>
+        internal static MapperInfo CreateWithDiagnostics(IEnumerable<DiagnosticInfo> diagnostics) =>
+            new(null, null, diagnostics.ToEquatableArray());
     }
 }

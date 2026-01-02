@@ -13,72 +13,6 @@ internal sealed record ModelClassInfo(
 
 internal static class ModelClassInfoExtensions
 {
-    extension(ModelClassInfo)
-    {
-        internal static (ModelClassInfo?, DiagnosticInfo[]) Create(
-            ITypeSymbol modelTypeSymbol,
-            GeneratorContext context
-        )
-        {
-            context.ThrowIfCancellationRequested();
-
-            var properties = modelTypeSymbol
-                .GetMembers()
-                .OfType<IPropertySymbol>()
-                .Where(p => p.SetMethod is not null && !p.IsStatic)
-                .ToList();
-
-            var (successfulFromMappings, fromDiagnostics) = properties
-                .Select(propertySymbol => BuildFromItemMapping(propertySymbol, context))
-                .Aggregate(
-                    (Successes: new List<string>(), Diagnostics: new List<DiagnosticInfo>()),
-                    static (acc, result) =>
-                        result.Match(
-                            value =>
-                            {
-                                acc.Successes.Add(value);
-                                return acc;
-                            },
-                            error =>
-                            {
-                                acc.Diagnostics.Add(error!);
-                                return acc;
-                            }
-                        ),
-                    static acc => (acc.Successes.ToEquatableArray(), acc.Diagnostics.ToArray())
-                );
-
-            var (successfulToMappings, toDiagnostics) = properties
-                .Select(propertySymbol => BuildToItemMapping(propertySymbol, context))
-                .Aggregate(
-                    (Successes: new List<string>(), Diagnostics: new List<DiagnosticInfo>()),
-                    static (acc, result) =>
-                        result.Match(
-                            value =>
-                            {
-                                acc.Successes.Add(value);
-                                return acc;
-                            },
-                            error =>
-                            {
-                                acc.Diagnostics.Add(error!);
-                                return acc;
-                            }
-                        ),
-                    static acc => (acc.Successes.ToEquatableArray(), acc.Diagnostics.ToArray())
-                );
-
-            var modelClassInfo = new ModelClassInfo(
-                modelTypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-                successfulFromMappings,
-                successfulToMappings
-            );
-
-            var allDiagnostics = fromDiagnostics.Concat(toDiagnostics).ToArray();
-            return (modelClassInfo, allDiagnostics);
-        }
-    }
-
     private static DiagnosticResult<string> BuildFromItemMapping(
         IPropertySymbol propertySymbol,
         GeneratorContext context
@@ -381,5 +315,71 @@ internal static class ModelClassInfoExtensions
                 )
             ),
         };
+    }
+
+    extension(ModelClassInfo)
+    {
+        internal static (ModelClassInfo?, DiagnosticInfo[]) Create(
+            ITypeSymbol modelTypeSymbol,
+            GeneratorContext context
+        )
+        {
+            context.ThrowIfCancellationRequested();
+
+            var properties = modelTypeSymbol
+                .GetMembers()
+                .OfType<IPropertySymbol>()
+                .Where(p => p.SetMethod is not null && !p.IsStatic)
+                .ToList();
+
+            var (successfulFromMappings, fromDiagnostics) = properties
+                .Select(propertySymbol => BuildFromItemMapping(propertySymbol, context))
+                .Aggregate(
+                    (Successes: new List<string>(), Diagnostics: new List<DiagnosticInfo>()),
+                    static (acc, result) =>
+                        result.Match(
+                            value =>
+                            {
+                                acc.Successes.Add(value);
+                                return acc;
+                            },
+                            error =>
+                            {
+                                acc.Diagnostics.Add(error!);
+                                return acc;
+                            }
+                        ),
+                    static acc => (acc.Successes.ToEquatableArray(), acc.Diagnostics.ToArray())
+                );
+
+            var (successfulToMappings, toDiagnostics) = properties
+                .Select(propertySymbol => BuildToItemMapping(propertySymbol, context))
+                .Aggregate(
+                    (Successes: new List<string>(), Diagnostics: new List<DiagnosticInfo>()),
+                    static (acc, result) =>
+                        result.Match(
+                            value =>
+                            {
+                                acc.Successes.Add(value);
+                                return acc;
+                            },
+                            error =>
+                            {
+                                acc.Diagnostics.Add(error!);
+                                return acc;
+                            }
+                        ),
+                    static acc => (acc.Successes.ToEquatableArray(), acc.Diagnostics.ToArray())
+                );
+
+            var modelClassInfo = new ModelClassInfo(
+                modelTypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                successfulFromMappings,
+                successfulToMappings
+            );
+
+            var allDiagnostics = fromDiagnostics.Concat(toDiagnostics).ToArray();
+            return (modelClassInfo, allDiagnostics);
+        }
     }
 }

@@ -20,6 +20,111 @@ internal static class MapperClassInfoExtensions
     private const string ToMethodPrefix = "To";
     private const string FromMethodPrefix = "From";
 
+    private static DiagnosticResult<ITypeSymbol> EnsurePocoTypesMatch(
+        IMethodSymbol? toItemMethod,
+        IMethodSymbol? fromItemMethod,
+        INamedTypeSymbol mapperClassSymbol
+    )
+    {
+        if (toItemMethod is null && fromItemMethod is null)
+            return DiagnosticResult<ITypeSymbol>.Failure(
+                DiagnosticDescriptors.NoMapperMethodsFound,
+                mapperClassSymbol.CreateLocationInfo(),
+                mapperClassSymbol.Name
+            );
+
+        var toItemPocoType = toItemMethod?.Parameters[0].Type;
+        var fromItemPocoType = fromItemMethod?.ReturnType;
+
+        if (
+            toItemPocoType is not null
+            && fromItemPocoType is not null
+            && !SymbolEqualityComparer.Default.Equals(toItemPocoType, fromItemPocoType)
+        )
+            return DiagnosticResult<ITypeSymbol>.Failure(
+                DiagnosticDescriptors.MismatchedPocoTypes,
+                toItemMethod?.CreateLocationInfo(),
+                toItemMethod?.Name,
+                fromItemMethod?.Name,
+                toItemPocoType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                fromItemPocoType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
+            );
+
+        return DiagnosticResult<ITypeSymbol>.Success(toItemPocoType ?? fromItemPocoType!);
+    }
+
+    private static bool HasSupportedSignature(IMethodSymbol method, GeneratorContext context)
+    {
+        context.ThrowIfCancellationRequested();
+
+        if (method.Parameters.Length != 1)
+            return false;
+
+        if (method.Name.StartsWith(ToMethodPrefix, StringComparison.Ordinal))
+            return IsAttributeValueDictionary(method.ReturnType, context);
+
+        if (method.Name.StartsWith(FromMethodPrefix, StringComparison.Ordinal))
+            return !method.ReturnsVoid
+                && IsAttributeValueDictionary(method.Parameters[0].Type, context);
+
+        return false;
+    }
+
+    private static bool IsAttributeValueDictionary(ITypeSymbol type, GeneratorContext context)
+    {
+        context.ThrowIfCancellationRequested();
+
+        if (type is not INamedTypeSymbol { IsGenericType: true } namedType)
+            return false;
+
+        if (
+            !context.WellKnownTypes.IsType(
+                namedType.ConstructedFrom,
+                WellKnownType.System_Collections_Generic_Dictionary_2
+            )
+        )
+            return false;
+
+        var typeArguments = namedType.TypeArguments;
+        return typeArguments.Length == 2
+            && context.WellKnownTypes.IsType(typeArguments[0], WellKnownType.System_String)
+            && context.WellKnownTypes.IsType(
+                typeArguments[1],
+                WellKnownType.Amazon_DynamoDBv2_Model_AttributeValue
+            );
+    }
+
+    private static string GetClassSignature(INamedTypeSymbol classSymbol)
+    {
+        var accessibility = classSymbol.DeclaredAccessibility.ToString().ToLowerInvariant();
+        var modifiers = classSymbol.IsStatic ? "static " : string.Empty;
+
+        return $"{accessibility} {modifiers}partial class {classSymbol.Name}";
+    }
+
+    private static string? GetMethodSignature(IMethodSymbol? method)
+    {
+        if (method is null)
+            return null;
+
+        // Build signature manually with hardcoded parameter name
+        var parameter = method.Parameters[0];
+        var parameterName = method.Name.StartsWith(ToMethodPrefix, StringComparison.Ordinal)
+            ? "source"
+            : "item";
+
+        var returnType = method.ReturnType.ToDisplayString(
+            SymbolDisplayFormat.FullyQualifiedFormat
+        );
+        var parameterType = parameter.Type.ToDisplayString(
+            SymbolDisplayFormat.FullyQualifiedFormat
+        );
+        var accessibility = method.DeclaredAccessibility.ToString().ToLowerInvariant();
+        var modifiers = method.IsStatic ? "static " : string.Empty;
+
+        return $"{accessibility} {modifiers}partial {returnType} {method.Name}({parameterType} {parameterName})";
+    }
+
     extension(MapperClassInfo)
     {
         internal static DiagnosticResult<(MapperClassInfo, ITypeSymbol)> CreateAndResolveModelType(
@@ -97,114 +202,5 @@ internal static class MapperClassInfoExtensions
                 (mapperClassInfo, modelTypeSymbol)
             );
         }
-    }
-
-    private static DiagnosticResult<ITypeSymbol> EnsurePocoTypesMatch(
-        IMethodSymbol? toItemMethod,
-        IMethodSymbol? fromItemMethod,
-        INamedTypeSymbol mapperClassSymbol
-    )
-    {
-        if (toItemMethod is null && fromItemMethod is null)
-        {
-            return DiagnosticResult<ITypeSymbol>.Failure(
-                DiagnosticDescriptors.NoMapperMethodsFound,
-                mapperClassSymbol.CreateLocationInfo(),
-                mapperClassSymbol.Name
-            );
-        }
-
-        var toItemPocoType = toItemMethod?.Parameters[0].Type;
-        var fromItemPocoType = fromItemMethod?.ReturnType;
-
-        if (
-            toItemPocoType is not null
-            && fromItemPocoType is not null
-            && !SymbolEqualityComparer.Default.Equals(toItemPocoType, fromItemPocoType)
-        )
-        {
-            return DiagnosticResult<ITypeSymbol>.Failure(
-                DiagnosticDescriptors.MismatchedPocoTypes,
-                toItemMethod?.CreateLocationInfo(),
-                toItemMethod?.Name,
-                fromItemMethod?.Name,
-                toItemPocoType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-                fromItemPocoType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
-            );
-        }
-
-        return DiagnosticResult<ITypeSymbol>.Success(toItemPocoType ?? fromItemPocoType!);
-    }
-
-    private static bool HasSupportedSignature(IMethodSymbol method, GeneratorContext context)
-    {
-        context.ThrowIfCancellationRequested();
-
-        if (method.Parameters.Length != 1)
-            return false;
-
-        if (method.Name.StartsWith(ToMethodPrefix, StringComparison.Ordinal))
-            return IsAttributeValueDictionary(method.ReturnType, context);
-
-        if (method.Name.StartsWith(FromMethodPrefix, StringComparison.Ordinal))
-            return !method.ReturnsVoid
-                && IsAttributeValueDictionary(method.Parameters[0].Type, context);
-
-        return false;
-    }
-
-    private static bool IsAttributeValueDictionary(ITypeSymbol type, GeneratorContext context)
-    {
-        context.ThrowIfCancellationRequested();
-
-        if (type is not INamedTypeSymbol { IsGenericType: true } namedType)
-            return false;
-
-        if (
-            !context.WellKnownTypes.IsType(
-                namedType.ConstructedFrom,
-                WellKnownType.System_Collections_Generic_Dictionary_2
-            )
-        )
-            return false;
-
-        var typeArguments = namedType.TypeArguments;
-        return typeArguments.Length == 2
-            && context.WellKnownTypes.IsType(typeArguments[0], WellKnownType.System_String)
-            && context.WellKnownTypes.IsType(
-                typeArguments[1],
-                WellKnownType.Amazon_DynamoDBv2_Model_AttributeValue
-            );
-    }
-
-    private static string GetClassSignature(INamedTypeSymbol classSymbol)
-    {
-        var accessibility = classSymbol.DeclaredAccessibility.ToString().ToLowerInvariant();
-        var modifiers = classSymbol.IsStatic ? "static " : string.Empty;
-
-        return $"{accessibility} {modifiers}partial class {classSymbol.Name}";
-    }
-
-    private static string? GetMethodSignature(IMethodSymbol? method)
-    {
-        if (method is null)
-            return null;
-
-        // Build signature manually with hardcoded parameter name
-        var parameter = method.Parameters[0];
-        var parameterName = method.Name.StartsWith(ToMethodPrefix, StringComparison.Ordinal)
-            ? "source"
-            : "item";
-
-        var returnType = method.ReturnType.ToDisplayString(
-            SymbolDisplayFormat.FullyQualifiedFormat
-        );
-        var parameterType = parameter.Type.ToDisplayString(
-            SymbolDisplayFormat.FullyQualifiedFormat
-        );
-        var accessibility = method.DeclaredAccessibility.ToString().ToLowerInvariant();
-        var modifiers = method.IsStatic ? "static " : string.Empty;
-
-        return $"{accessibility} {modifiers}partial {returnType} {method.Name}({parameterType} {parameterName})";
     }
 }

@@ -4,11 +4,6 @@ namespace DynamoMapper.Generator;
 
 internal class GeneratorContext
 {
-    internal WellKnownTypes.WellKnownTypes WellKnownTypes { get; }
-    internal CancellationToken CancellationToken { get; }
-    internal SemanticModel SemanticModel { get; }
-    internal GeneratorAttributeSyntaxContext GeneratorAttributeSyntaxContext { get; }
-
     internal GeneratorContext(
         GeneratorAttributeSyntaxContext context,
         CancellationToken cancellationToken
@@ -21,6 +16,11 @@ internal class GeneratorContext
             context.SemanticModel.Compilation
         );
     }
+
+    internal CancellationToken CancellationToken { get; }
+    internal GeneratorAttributeSyntaxContext GeneratorAttributeSyntaxContext { get; }
+    internal SemanticModel SemanticModel { get; }
+    internal WellKnownTypes.WellKnownTypes WellKnownTypes { get; }
 }
 
 internal static class GeneratorContextExtensions

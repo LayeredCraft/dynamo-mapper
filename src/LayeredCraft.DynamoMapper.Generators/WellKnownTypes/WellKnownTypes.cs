@@ -19,13 +19,20 @@ internal class WellKnownTypes
         WellKnownTypes
     > LazyWellKnownTypesCache = new();
 
-    public static WellKnownTypes GetOrCreate(Compilation compilation) =>
-        LazyWellKnownTypesCache.GetOrCreateValue(compilation, static c => new WellKnownTypes(c));
-
-    private readonly INamedTypeSymbol?[] _lazyWellKnownTypes;
     private readonly Compilation _compilation;
 
+    private readonly INamedTypeSymbol?[] _lazyWellKnownTypes;
+
     static WellKnownTypes() => AssertEnumAndTableInSync();
+
+    private WellKnownTypes(Compilation compilation)
+    {
+        _lazyWellKnownTypes = new INamedTypeSymbol?[WellKnownTypeData.WellKnownTypeNames.Length];
+        _compilation = compilation;
+    }
+
+    public static WellKnownTypes GetOrCreate(Compilation compilation) =>
+        LazyWellKnownTypesCache.GetOrCreateValue(compilation, static c => new WellKnownTypes(c));
 
     [Conditional("DEBUG")]
     private static void AssertEnumAndTableInSync()
@@ -50,12 +57,6 @@ internal class WellKnownTypes
                 $"Enum name ({typeIdName}) and type name ({name}) must match at {i}"
             );
         }
-    }
-
-    private WellKnownTypes(Compilation compilation)
-    {
-        _lazyWellKnownTypes = new INamedTypeSymbol?[WellKnownTypeData.WellKnownTypeNames.Length];
-        _compilation = compilation;
     }
 
     public INamedTypeSymbol Get(SpecialType type) => _compilation.GetSpecialType(type);

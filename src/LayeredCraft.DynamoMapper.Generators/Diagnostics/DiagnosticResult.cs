@@ -7,16 +7,16 @@ namespace DynamoMapper.Generator.Diagnostics;
 
 internal class DiagnosticResult<T>
 {
-    internal bool IsSuccess { get; }
-    internal T? Value { get; }
-    internal DiagnosticInfo? Error { get; }
-
     private DiagnosticResult(bool isSuccess, T? value, DiagnosticInfo? error)
     {
         IsSuccess = isSuccess;
         Value = value;
         Error = error;
     }
+
+    internal DiagnosticInfo? Error { get; }
+    internal bool IsSuccess { get; }
+    internal T? Value { get; }
 
     public static DiagnosticResult<T> Success(T value) => new(true, value, null);
 

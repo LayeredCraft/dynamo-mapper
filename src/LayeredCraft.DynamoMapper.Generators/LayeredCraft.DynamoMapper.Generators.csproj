@@ -19,7 +19,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\LayeredCraft.DynamoMapper.Runtime\LayeredCraft.DynamoMapper.Runtime.csproj" />
+    <ProjectReference
+      Include="..\LayeredCraft.DynamoMapper.Runtime\LayeredCraft.DynamoMapper.Runtime.csproj"
+      PrivateAssets="all"
+    />
   </ItemGroup>
 
   <ItemGroup>
@@ -31,8 +34,8 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.CodeAnalysis.Common" />
-    <PackageReference Include="Microsoft.CSharp" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CSharp" PrivateAssets="all" />
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" />
     <PackageReference Include="Scriban" IncludeAssets="Build" />

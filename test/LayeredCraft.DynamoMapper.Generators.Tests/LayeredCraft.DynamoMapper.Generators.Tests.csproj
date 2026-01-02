@@ -18,6 +18,7 @@
     <Using Include="Xunit" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="AWSSDK.DynamoDBv2" />
     <PackageReference Include="Basic.Reference.Assemblies.Net100" />
     <PackageReference Include="Basic.Reference.Assemblies.Net80" />
     <PackageReference Include="Basic.Reference.Assemblies.Net90" />
@@ -30,6 +31,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\LayeredCraft.DynamoMapper.Generators\LayeredCraft.DynamoMapper.Generators.csproj" />
+    <ProjectReference Include="..\..\src\LayeredCraft.DynamoMapper.Runtime\LayeredCraft.DynamoMapper.Runtime.csproj" />
     <ProjectReference Include="..\LayeredCraft.DynamoMapper.TestKit\LayeredCraft.DynamoMapper.TestKit.csproj" />
   </ItemGroup>
   <ItemGroup>

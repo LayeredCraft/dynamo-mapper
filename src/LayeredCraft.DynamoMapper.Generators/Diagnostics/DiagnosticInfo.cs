@@ -6,7 +6,7 @@ namespace DynamoMapper.Generator.Diagnostics;
 internal sealed record DiagnosticInfo(
     DiagnosticDescriptor DiagnosticDescriptor,
     LocationInfo? LocationInfo = null,
-    params object[] MessageArgs
+    params object?[] MessageArgs
 )
 {
     public bool Equals(DiagnosticInfo? other) =>
@@ -14,7 +14,7 @@ internal sealed record DiagnosticInfo(
         && Equals(DiagnosticDescriptor.Id, other.DiagnosticDescriptor.Id)
         && Equals(LocationInfo, other.LocationInfo);
 
-    public override int GetHashCode() => HashCode.Combine(DiagnosticDescriptor, LocationInfo);
+    public override int GetHashCode() => HashCode.Combine(DiagnosticDescriptor.Id, LocationInfo);
 }
 
 internal static class DiagnosticInfoExtensions

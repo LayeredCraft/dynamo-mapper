@@ -31,6 +31,26 @@ public static class AttributeValueExtensions
         public string GetString(string key) =>
             attributes.TryGetValue(key, out var value) ? value.S ?? string.Empty : string.Empty;
 
+        /// <summary>Sets a string value in the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to set.</param>
+        /// <param name="value">The string value to set.</param>
+        /// <returns>The attribute dictionary for fluent chaining.</returns>
+        public Dictionary<string, AttributeValue> SetString(string key, string value)
+        {
+            attributes[key] = value.ToAttributeValue();
+            return attributes;
+        }
+
+        /// <summary>Sets a nullable string value in the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to set.</param>
+        /// <param name="value">The nullable string value to set.</param>
+        /// <returns>The attribute dictionary for fluent chaining.</returns>
+        public Dictionary<string, AttributeValue> SetNullableString(string key, string? value)
+        {
+            attributes[key] = value.ToNullableAttributeValue();
+            return attributes;
+        }
+
         #endregion
 
         #region Boolean Methods
@@ -53,6 +73,26 @@ public static class AttributeValueExtensions
         public bool? GetNullableBool(string key)
         {
             return attributes.TryGetValue(key, out var value) ? value.BOOL : null;
+        }
+
+        /// <summary>Sets a boolean value in the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to set.</param>
+        /// <param name="value">The boolean value to set.</param>
+        /// <returns>The attribute dictionary for fluent chaining.</returns>
+        public Dictionary<string, AttributeValue> SetBool(string key, bool value)
+        {
+            attributes[key] = value.ToAttributeValue();
+            return attributes;
+        }
+
+        /// <summary>Sets a nullable boolean value in the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to set.</param>
+        /// <param name="value">The nullable boolean value to set.</param>
+        /// <returns>The attribute dictionary for fluent chaining.</returns>
+        public Dictionary<string, AttributeValue> SetNullableBool(string key, bool? value)
+        {
+            attributes[key] = value.ToNullableAttributeValue();
+            return attributes;
         }
 
         #endregion
@@ -137,6 +177,46 @@ public static class AttributeValueExtensions
                     ? result
                     : null
                 : null;
+        }
+
+        /// <summary>Sets an integer value in the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to set.</param>
+        /// <param name="value">The integer value to set.</param>
+        /// <returns>The attribute dictionary for fluent chaining.</returns>
+        public Dictionary<string, AttributeValue> SetInt(string key, int value)
+        {
+            attributes[key] = value.ToAttributeValue();
+            return attributes;
+        }
+
+        /// <summary>Sets a nullable integer value in the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to set.</param>
+        /// <param name="value">The nullable integer value to set.</param>
+        /// <returns>The attribute dictionary for fluent chaining.</returns>
+        public Dictionary<string, AttributeValue> SetNullableInt(string key, int? value)
+        {
+            attributes[key] = value.ToNullableAttributeValue();
+            return attributes;
+        }
+
+        /// <summary>Sets a long integer value in the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to set.</param>
+        /// <param name="value">The long value to set.</param>
+        /// <returns>The attribute dictionary for fluent chaining.</returns>
+        public Dictionary<string, AttributeValue> SetLong(string key, long value)
+        {
+            attributes[key] = value.ToAttributeValue();
+            return attributes;
+        }
+
+        /// <summary>Sets a nullable long integer value in the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to set.</param>
+        /// <param name="value">The nullable long value to set.</param>
+        /// <returns>The attribute dictionary for fluent chaining.</returns>
+        public Dictionary<string, AttributeValue> SetNullableLong(string key, long? value)
+        {
+            attributes[key] = value.ToNullableAttributeValue();
+            return attributes;
         }
 
         #endregion
@@ -263,6 +343,66 @@ public static class AttributeValueExtensions
                 : null;
         }
 
+        /// <summary>Sets a single-precision floating-point value in the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to set.</param>
+        /// <param name="value">The float value to set.</param>
+        /// <returns>The attribute dictionary for fluent chaining.</returns>
+        public Dictionary<string, AttributeValue> SetFloat(string key, float value)
+        {
+            attributes[key] = value.ToAttributeValue();
+            return attributes;
+        }
+
+        /// <summary>Sets a nullable single-precision floating-point value in the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to set.</param>
+        /// <param name="value">The nullable float value to set.</param>
+        /// <returns>The attribute dictionary for fluent chaining.</returns>
+        public Dictionary<string, AttributeValue> SetNullableFloat(string key, float? value)
+        {
+            attributes[key] = value.ToNullableAttributeValue();
+            return attributes;
+        }
+
+        /// <summary>Sets a double-precision floating-point value in the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to set.</param>
+        /// <param name="value">The double value to set.</param>
+        /// <returns>The attribute dictionary for fluent chaining.</returns>
+        public Dictionary<string, AttributeValue> SetDouble(string key, double value)
+        {
+            attributes[key] = value.ToAttributeValue();
+            return attributes;
+        }
+
+        /// <summary>Sets a nullable double-precision floating-point value in the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to set.</param>
+        /// <param name="value">The nullable double value to set.</param>
+        /// <returns>The attribute dictionary for fluent chaining.</returns>
+        public Dictionary<string, AttributeValue> SetNullableDouble(string key, double? value)
+        {
+            attributes[key] = value.ToNullableAttributeValue();
+            return attributes;
+        }
+
+        /// <summary>Sets a decimal value in the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to set.</param>
+        /// <param name="value">The decimal value to set.</param>
+        /// <returns>The attribute dictionary for fluent chaining.</returns>
+        public Dictionary<string, AttributeValue> SetDecimal(string key, decimal value)
+        {
+            attributes[key] = value.ToAttributeValue();
+            return attributes;
+        }
+
+        /// <summary>Sets a nullable decimal value in the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to set.</param>
+        /// <param name="value">The nullable decimal value to set.</param>
+        /// <returns>The attribute dictionary for fluent chaining.</returns>
+        public Dictionary<string, AttributeValue> SetNullableDecimal(string key, decimal? value)
+        {
+            attributes[key] = value.ToNullableAttributeValue();
+            return attributes;
+        }
+
         #endregion
 
         #region Guid Methods
@@ -334,6 +474,26 @@ public static class AttributeValueExtensions
                     ? id
                     : null
                 : null;
+
+        /// <summary>Sets a <see cref="Guid" /> value in the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to set.</param>
+        /// <param name="value">The <see cref="Guid" /> value to set.</param>
+        /// <returns>The attribute dictionary for fluent chaining.</returns>
+        public Dictionary<string, AttributeValue> SetGuid(string key, Guid value)
+        {
+            attributes[key] = value.ToAttributeValue();
+            return attributes;
+        }
+
+        /// <summary>Sets a nullable <see cref="Guid" /> value in the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to set.</param>
+        /// <param name="value">The nullable <see cref="Guid" /> value to set.</param>
+        /// <returns>The attribute dictionary for fluent chaining.</returns>
+        public Dictionary<string, AttributeValue> SetNullableGuid(string key, Guid? value)
+        {
+            attributes[key] = value.ToNullableAttributeValue();
+            return attributes;
+        }
 
         #endregion
 
@@ -621,6 +781,72 @@ public static class AttributeValueExtensions
                     : null
                 : null;
 
+        /// <summary>Sets a <see cref="DateTime" /> value in the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to set.</param>
+        /// <param name="value">The <see cref="DateTime" /> value to set.</param>
+        /// <returns>The attribute dictionary for fluent chaining.</returns>
+        public Dictionary<string, AttributeValue> SetDateTime(string key, DateTime value)
+        {
+            attributes[key] = value.ToAttributeValue();
+            return attributes;
+        }
+
+        /// <summary>Sets a nullable <see cref="DateTime" /> value in the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to set.</param>
+        /// <param name="value">The nullable <see cref="DateTime" /> value to set.</param>
+        /// <returns>The attribute dictionary for fluent chaining.</returns>
+        public Dictionary<string, AttributeValue> SetNullableDateTime(string key, DateTime? value)
+        {
+            attributes[key] = value.ToNullableAttributeValue();
+            return attributes;
+        }
+
+        /// <summary>Sets a <see cref="DateTimeOffset" /> value in the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to set.</param>
+        /// <param name="value">The <see cref="DateTimeOffset" /> value to set.</param>
+        /// <returns>The attribute dictionary for fluent chaining.</returns>
+        public Dictionary<string, AttributeValue> SetDateTimeOffset(
+            string key,
+            DateTimeOffset value
+        )
+        {
+            attributes[key] = value.ToAttributeValue();
+            return attributes;
+        }
+
+        /// <summary>Sets a nullable <see cref="DateTimeOffset" /> value in the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to set.</param>
+        /// <param name="value">The nullable <see cref="DateTimeOffset" /> value to set.</param>
+        /// <returns>The attribute dictionary for fluent chaining.</returns>
+        public Dictionary<string, AttributeValue> SetNullableDateTimeOffset(
+            string key,
+            DateTimeOffset? value
+        )
+        {
+            attributes[key] = value.ToNullableAttributeValue();
+            return attributes;
+        }
+
+        /// <summary>Sets a <see cref="TimeSpan" /> value in the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to set.</param>
+        /// <param name="value">The <see cref="TimeSpan" /> value to set.</param>
+        /// <returns>The attribute dictionary for fluent chaining.</returns>
+        public Dictionary<string, AttributeValue> SetTimeSpan(string key, TimeSpan value)
+        {
+            attributes[key] = value.ToAttributeValue();
+            return attributes;
+        }
+
+        /// <summary>Sets a nullable <see cref="TimeSpan" /> value in the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to set.</param>
+        /// <param name="value">The nullable <see cref="TimeSpan" /> value to set.</param>
+        /// <returns>The attribute dictionary for fluent chaining.</returns>
+        public Dictionary<string, AttributeValue> SetNullableTimeSpan(string key, TimeSpan? value)
+        {
+            attributes[key] = value.ToNullableAttributeValue();
+            return attributes;
+        }
+
         #endregion
 
         #region Enum Methods
@@ -664,6 +890,30 @@ public static class AttributeValueExtensions
             }
 
             return null;
+        }
+
+        /// <summary>Sets an enum value in the attribute dictionary.</summary>
+        /// <typeparam name="TEnum">The enum type to set.</typeparam>
+        /// <param name="key">The attribute key to set.</param>
+        /// <param name="value">The enum value to set.</param>
+        /// <returns>The attribute dictionary for fluent chaining.</returns>
+        public Dictionary<string, AttributeValue> SetEnum<TEnum>(string key, TEnum value)
+            where TEnum : struct, Enum
+        {
+            attributes[key] = value.ToAttributeValue();
+            return attributes;
+        }
+
+        /// <summary>Sets a nullable enum value in the attribute dictionary.</summary>
+        /// <typeparam name="TEnum">The enum type to set.</typeparam>
+        /// <param name="key">The attribute key to set.</param>
+        /// <param name="value">The nullable enum value to set.</param>
+        /// <returns>The attribute dictionary for fluent chaining.</returns>
+        public Dictionary<string, AttributeValue> SetNullableEnum<TEnum>(string key, TEnum? value)
+            where TEnum : struct, Enum
+        {
+            attributes[key] = value.ToNullableAttributeValue();
+            return attributes;
         }
 
         #endregion
@@ -1143,7 +1393,7 @@ public static class AttributeValueExtensions
         /// <summary>Converts an enum value to a DynamoDB <see cref="AttributeValue" />.</summary>
         /// <typeparam name="TEnum">The enum type.</typeparam>
         /// <returns>An <see cref="AttributeValue" /> containing the enum value as a string.</returns>
-        public AttributeValue ToAttributeValue() => new() { S = value.ToString("") };
+        public AttributeValue ToAttributeValue() => new() { S = value.ToString() };
     }
 
     extension<TEnum>(TEnum? value)

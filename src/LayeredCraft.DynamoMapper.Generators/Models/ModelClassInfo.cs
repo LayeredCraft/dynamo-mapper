@@ -344,6 +344,10 @@ internal static class ModelClassInfoExtensions
                 propertySymbol => BuildToItemMapping(propertySymbol, context)
             );
 
+            var (propertyInfo, propertyDiagnostics) = properties.CollectDiagnosticResults(
+                propertySymbol => PropertyInfo.Create(propertySymbol, context)
+            );
+
             var modelClassInfo = new ModelClassInfo(
                 modelTypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
                 successfulFromMappings.ToEquatableArray(),

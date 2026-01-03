@@ -1,5 +1,4 @@
-using DynamoMapper.Runtime;
-using Humanizer;
+using DynamoMapper.Extensions;
 using Microsoft.CodeAnalysis;
 
 namespace DynamoMapper.Generator;
@@ -32,18 +31,7 @@ internal class GeneratorContext
     {
         get
         {
-            field ??= MapperOptions.Convention switch
-            {
-                DynamoNamingConvention.Exact => s => s,
-                DynamoNamingConvention.CamelCase => InflectorExtensions.Camelize,
-                DynamoNamingConvention.PascalCase => InflectorExtensions.Pascalize,
-                DynamoNamingConvention.SnakeCase => InflectorExtensions.Underscore,
-                DynamoNamingConvention.KebabCase => InflectorExtensions.Kebaberize,
-                _ => throw new InvalidOperationException(
-                    $"Unknown {nameof(DynamoNamingConvention)} of {MapperOptions.Convention}"
-                ),
-            };
-
+            field ??= MapperOptions.Convention.GetConverter();
             return field;
         }
     }

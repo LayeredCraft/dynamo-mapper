@@ -495,51 +495,6 @@ public static class AttributeValueExtensions
             return attributes;
         }
 
-        /// <summary>
-        ///     Sets a <see cref="Guid" /> value in the attribute dictionary using a specific format
-        ///     string.
-        /// </summary>
-        /// <param name="key">The attribute key to set.</param>
-        /// <param name="value">The <see cref="Guid" /> value to set.</param>
-        /// <param name="format">
-        ///     The format string to use when converting the value to a string. Valid formats:
-        ///     "N", "D", "B", "P", "X".
-        /// </param>
-        /// <returns>The attribute dictionary for fluent chaining.</returns>
-        public Dictionary<string, AttributeValue> SetGuidExact(
-            string key,
-            Guid value,
-            string format
-        )
-        {
-            attributes[key] = new AttributeValue { S = value.ToString(format) };
-            return attributes;
-        }
-
-        /// <summary>
-        ///     Sets a nullable <see cref="Guid" /> value in the attribute dictionary using a specific
-        ///     format string.
-        /// </summary>
-        /// <param name="key">The attribute key to set.</param>
-        /// <param name="value">The nullable <see cref="Guid" /> value to set.</param>
-        /// <param name="format">
-        ///     The format string to use when converting the value to a string. Valid formats:
-        ///     "N", "D", "B", "P", "X".
-        /// </param>
-        /// <returns>The attribute dictionary for fluent chaining.</returns>
-        /// <remarks>Sets a NULL attribute if the value is <c>null</c>.</remarks>
-        public Dictionary<string, AttributeValue> SetNullableGuidExact(
-            string key,
-            Guid? value,
-            string format
-        )
-        {
-            attributes[key] = value is null
-                ? new AttributeValue { NULL = true }
-                : new AttributeValue { S = value.Value.ToString(format) };
-            return attributes;
-        }
-
         #endregion
 
         #region DateTime Methods
@@ -846,61 +801,6 @@ public static class AttributeValueExtensions
             return attributes;
         }
 
-        /// <summary>
-        ///     Sets a <see cref="DateTime" /> value in the attribute dictionary using a specific format
-        ///     string.
-        /// </summary>
-        /// <param name="key">The attribute key to set.</param>
-        /// <param name="value">The <see cref="DateTime" /> value to set.</param>
-        /// <param name="format">
-        ///     The format string to use when converting the value to a string (e.g.,
-        ///     "yyyy-MM-dd", "yyyyMMdd").
-        /// </param>
-        /// <returns>The attribute dictionary for fluent chaining.</returns>
-        /// <remarks>Formatting uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
-        public Dictionary<string, AttributeValue> SetDateTimeExact(
-            string key,
-            DateTime value,
-            string format
-        )
-        {
-            attributes[key] = new AttributeValue
-            {
-                S = value.ToString(format, CultureInfo.InvariantCulture),
-            };
-            return attributes;
-        }
-
-        /// <summary>
-        ///     Sets a nullable <see cref="DateTime" /> value in the attribute dictionary using a specific
-        ///     format string.
-        /// </summary>
-        /// <param name="key">The attribute key to set.</param>
-        /// <param name="value">The nullable <see cref="DateTime" /> value to set.</param>
-        /// <param name="format">
-        ///     The format string to use when converting the value to a string (e.g.,
-        ///     "yyyy-MM-dd", "yyyyMMdd").
-        /// </param>
-        /// <returns>The attribute dictionary for fluent chaining.</returns>
-        /// <remarks>
-        ///     Formatting uses <see cref="CultureInfo.InvariantCulture" />. Sets a NULL attribute if the
-        ///     value is <c>null</c>.
-        /// </remarks>
-        public Dictionary<string, AttributeValue> SetNullableDateTimeExact(
-            string key,
-            DateTime? value,
-            string format
-        )
-        {
-            attributes[key] = value is null
-                ? new AttributeValue { NULL = true }
-                : new AttributeValue
-                {
-                    S = value.Value.ToString(format, CultureInfo.InvariantCulture),
-                };
-            return attributes;
-        }
-
         /// <summary>Sets a <see cref="DateTimeOffset" /> value in the attribute dictionary.</summary>
         /// <param name="key">The attribute key to set.</param>
         /// <param name="value">The <see cref="DateTimeOffset" /> value to set.</param>
@@ -927,61 +827,6 @@ public static class AttributeValueExtensions
             return attributes;
         }
 
-        /// <summary>
-        ///     Sets a <see cref="DateTimeOffset" /> value in the attribute dictionary using a specific
-        ///     format string.
-        /// </summary>
-        /// <param name="key">The attribute key to set.</param>
-        /// <param name="value">The <see cref="DateTimeOffset" /> value to set.</param>
-        /// <param name="format">
-        ///     The format string to use when converting the value to a string (e.g.,
-        ///     "yyyy-MM-dd", "o").
-        /// </param>
-        /// <returns>The attribute dictionary for fluent chaining.</returns>
-        /// <remarks>Formatting uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
-        public Dictionary<string, AttributeValue> SetDateTimeOffsetExact(
-            string key,
-            DateTimeOffset value,
-            string format
-        )
-        {
-            attributes[key] = new AttributeValue
-            {
-                S = value.ToString(format, CultureInfo.InvariantCulture),
-            };
-            return attributes;
-        }
-
-        /// <summary>
-        ///     Sets a nullable <see cref="DateTimeOffset" /> value in the attribute dictionary using a
-        ///     specific format string.
-        /// </summary>
-        /// <param name="key">The attribute key to set.</param>
-        /// <param name="value">The nullable <see cref="DateTimeOffset" /> value to set.</param>
-        /// <param name="format">
-        ///     The format string to use when converting the value to a string (e.g.,
-        ///     "yyyy-MM-dd", "o").
-        /// </param>
-        /// <returns>The attribute dictionary for fluent chaining.</returns>
-        /// <remarks>
-        ///     Formatting uses <see cref="CultureInfo.InvariantCulture" />. Sets a NULL attribute if the
-        ///     value is <c>null</c>.
-        /// </remarks>
-        public Dictionary<string, AttributeValue> SetNullableDateTimeOffsetExact(
-            string key,
-            DateTimeOffset? value,
-            string format
-        )
-        {
-            attributes[key] = value is null
-                ? new AttributeValue { NULL = true }
-                : new AttributeValue
-                {
-                    S = value.Value.ToString(format, CultureInfo.InvariantCulture),
-                };
-            return attributes;
-        }
-
         /// <summary>Sets a <see cref="TimeSpan" /> value in the attribute dictionary.</summary>
         /// <param name="key">The attribute key to set.</param>
         /// <param name="value">The <see cref="TimeSpan" /> value to set.</param>
@@ -999,61 +844,6 @@ public static class AttributeValueExtensions
         public Dictionary<string, AttributeValue> SetNullableTimeSpan(string key, TimeSpan? value)
         {
             attributes[key] = value.ToNullableAttributeValue();
-            return attributes;
-        }
-
-        /// <summary>
-        ///     Sets a <see cref="TimeSpan" /> value in the attribute dictionary using a specific format
-        ///     string.
-        /// </summary>
-        /// <param name="key">The attribute key to set.</param>
-        /// <param name="value">The <see cref="TimeSpan" /> value to set.</param>
-        /// <param name="format">
-        ///     The format string to use when converting the value to a string (e.g., "c",
-        ///     "g", "G").
-        /// </param>
-        /// <returns>The attribute dictionary for fluent chaining.</returns>
-        /// <remarks>Formatting uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
-        public Dictionary<string, AttributeValue> SetTimeSpanExact(
-            string key,
-            TimeSpan value,
-            string format
-        )
-        {
-            attributes[key] = new AttributeValue
-            {
-                S = value.ToString(format, CultureInfo.InvariantCulture),
-            };
-            return attributes;
-        }
-
-        /// <summary>
-        ///     Sets a nullable <see cref="TimeSpan" /> value in the attribute dictionary using a specific
-        ///     format string.
-        /// </summary>
-        /// <param name="key">The attribute key to set.</param>
-        /// <param name="value">The nullable <see cref="TimeSpan" /> value to set.</param>
-        /// <param name="format">
-        ///     The format string to use when converting the value to a string (e.g., "c",
-        ///     "g", "G").
-        /// </param>
-        /// <returns>The attribute dictionary for fluent chaining.</returns>
-        /// <remarks>
-        ///     Formatting uses <see cref="CultureInfo.InvariantCulture" />. Sets a NULL attribute if the
-        ///     value is <c>null</c>.
-        /// </remarks>
-        public Dictionary<string, AttributeValue> SetNullableTimeSpanExact(
-            string key,
-            TimeSpan? value,
-            string format
-        )
-        {
-            attributes[key] = value is null
-                ? new AttributeValue { NULL = true }
-                : new AttributeValue
-                {
-                    S = value.Value.ToString(format, CultureInfo.InvariantCulture),
-                };
             return attributes;
         }
 

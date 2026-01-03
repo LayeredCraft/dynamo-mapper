@@ -58,14 +58,14 @@ internal static class ModelClassInfoExtensions
 
                 // Nullable DateTime
                 { SpecialType: SpecialType.System_DateTime } => DiagnosticResult<string>.Success(
-                    $"""{name} = item.GetNullableDateTime("{key}"),"""
+                    $"""{name} = item.GetNullableDateTimeExact("{key}", "{context.MapperOptions.DateTimeFormat}"),"""
                 ),
 
                 // Nullable DateTimeOffset
                 INamedTypeSymbol t
                     when t.IsAssignableTo(WellKnownType.System_DateTimeOffset, context) =>
                     DiagnosticResult<string>.Success(
-                        $"""{name} = item.GetNullableDateTimeOffset("{key}"),"""
+                        $"""{name} = item.GetNullableDateTimeOffsetExact("{key}", "{context.MapperOptions.DateTimeFormat}"),"""
                     ),
 
                 // Nullable Guid
@@ -128,13 +128,15 @@ internal static class ModelClassInfoExtensions
 
             // DateTime
             { SpecialType: SpecialType.System_DateTime } => DiagnosticResult<string>.Success(
-                $"""{name} = item.GetDateTime("{key}"),"""
+                $"""{name} = item.GetDateTimeExact("{key}", "{context.MapperOptions.DateTimeFormat}"),"""
             ),
 
             // DateTimeOffset
             INamedTypeSymbol t
                 when t.IsAssignableTo(WellKnownType.System_DateTimeOffset, context) =>
-                DiagnosticResult<string>.Success($"""{name} = item.GetDateTimeOffset("{key}"),"""),
+                DiagnosticResult<string>.Success(
+                    $"""{name} = item.GetDateTimeOffsetExact("{key}", "{context.MapperOptions.DateTimeFormat}"),"""
+                ),
 
             // Guid
             INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_Guid, context) =>
@@ -209,14 +211,14 @@ internal static class ModelClassInfoExtensions
 
                 // Nullable DateTime
                 { SpecialType: SpecialType.System_DateTime } => DiagnosticResult<string>.Success(
-                    $$"""{ "{{key}}", source.{{name}}.ToNullableAttributeValue() },"""
+                    $$"""{ "{{key}}", source.{{name}}.ToNullableAttributeValue("{{context.MapperOptions.DateTimeFormat}}") },"""
                 ),
 
                 // Nullable DateTimeOffset
                 INamedTypeSymbol t
                     when t.IsAssignableTo(WellKnownType.System_DateTimeOffset, context) =>
                     DiagnosticResult<string>.Success(
-                        $$"""{ "{{key}}", source.{{name}}.ToNullableAttributeValue() },"""
+                        $$"""{ "{{key}}", source.{{name}}.ToNullableAttributeValue("{{context.MapperOptions.DateTimeFormat}}") },"""
                     ),
 
                 // Nullable Guid
@@ -281,14 +283,14 @@ internal static class ModelClassInfoExtensions
 
             // DateTime
             { SpecialType: SpecialType.System_DateTime } => DiagnosticResult<string>.Success(
-                $$"""{ "{{key}}", source.{{name}}.ToAttributeValue() },"""
+                $$"""{ "{{key}}", source.{{name}}.ToAttributeValue("{{context.MapperOptions.DateTimeFormat}}") },"""
             ),
 
             // DateTimeOffset
             INamedTypeSymbol t
                 when t.IsAssignableTo(WellKnownType.System_DateTimeOffset, context) =>
                 DiagnosticResult<string>.Success(
-                    $$"""{ "{{key}}", source.{{name}}.ToAttributeValue() },"""
+                    $$"""{ "{{key}}", source.{{name}}.ToAttributeValue("{{context.MapperOptions.DateTimeFormat}}") },"""
                 ),
 
             // Guid
@@ -334,50 +336,18 @@ internal static class ModelClassInfoExtensions
                 .Where(p => p.SetMethod is not null && !p.IsStatic)
                 .ToList();
 
-            var (successfulFromMappings, fromDiagnostics) = properties
-                .Select(propertySymbol => BuildFromItemMapping(propertySymbol, context))
-                .Aggregate(
-                    (Successes: new List<string>(), Diagnostics: new List<DiagnosticInfo>()),
-                    static (acc, result) =>
-                        result.Match(
-                            value =>
-                            {
-                                acc.Successes.Add(value);
-                                return acc;
-                            },
-                            error =>
-                            {
-                                acc.Diagnostics.Add(error!);
-                                return acc;
-                            }
-                        ),
-                    static acc => (acc.Successes.ToEquatableArray(), acc.Diagnostics.ToArray())
-                );
+            var (successfulFromMappings, fromDiagnostics) = properties.CollectDiagnosticResults(
+                propertySymbol => BuildFromItemMapping(propertySymbol, context)
+            );
 
-            var (successfulToMappings, toDiagnostics) = properties
-                .Select(propertySymbol => BuildToItemMapping(propertySymbol, context))
-                .Aggregate(
-                    (Successes: new List<string>(), Diagnostics: new List<DiagnosticInfo>()),
-                    static (acc, result) =>
-                        result.Match(
-                            value =>
-                            {
-                                acc.Successes.Add(value);
-                                return acc;
-                            },
-                            error =>
-                            {
-                                acc.Diagnostics.Add(error!);
-                                return acc;
-                            }
-                        ),
-                    static acc => (acc.Successes.ToEquatableArray(), acc.Diagnostics.ToArray())
-                );
+            var (successfulToMappings, toDiagnostics) = properties.CollectDiagnosticResults(
+                propertySymbol => BuildToItemMapping(propertySymbol, context)
+            );
 
             var modelClassInfo = new ModelClassInfo(
                 modelTypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-                successfulFromMappings,
-                successfulToMappings
+                successfulFromMappings.ToEquatableArray(),
+                successfulToMappings.ToEquatableArray()
             );
 
             var allDiagnostics = fromDiagnostics.Concat(toDiagnostics).ToArray();

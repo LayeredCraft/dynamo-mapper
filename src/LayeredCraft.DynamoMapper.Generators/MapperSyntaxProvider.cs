@@ -34,7 +34,6 @@ internal static class MapperSyntaxProvider
             syntaxContext.SemanticModel.Compilation
         );
 
-        // get mapper attribute
         if (
             classSymbol
                 .GetAttributes()
@@ -51,7 +50,12 @@ internal static class MapperSyntaxProvider
 
         var mapperOptions = mapperAttribute.PopulateOptions<MapperOptions>();
 
-        var context = new GeneratorContext(syntaxContext, wellKnownTypes, cancellationToken);
+        var context = new GeneratorContext(
+            syntaxContext,
+            wellKnownTypes,
+            mapperOptions,
+            cancellationToken
+        );
 
         return MapperInfo.Create(classSymbol, context);
     }

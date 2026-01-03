@@ -2,6 +2,7 @@ using DynamoMapper.Generator.Models;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using WellKnownType = DynamoMapper.Generator.WellKnownTypes.WellKnownTypeData.WellKnownType;
 
 namespace DynamoMapper.Generator;
 
@@ -17,14 +18,41 @@ internal static class MapperSyntaxProvider
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        var context = new GeneratorContext(syntaxContext, cancellationToken);
-
         if (syntaxContext.TargetNode is not ClassDeclarationSyntax classDeclaration)
             return null;
 
         if (!classDeclaration.Modifiers.Any(static m => m.IsKind(SyntaxKind.PartialKeyword)))
             return null;
 
-        return MapperInfo.Create(classDeclaration, context);
+        if (
+            syntaxContext.SemanticModel.GetDeclaredSymbol(classDeclaration, cancellationToken)
+            is not { } classSymbol
+        )
+            return null;
+
+        var wellKnownTypes = WellKnownTypes.WellKnownTypes.GetOrCreate(
+            syntaxContext.SemanticModel.Compilation
+        );
+
+        // get mapper attribute
+        if (
+            classSymbol
+                .GetAttributes()
+                .FirstOrDefault(attr =>
+                    attr.AttributeClass is not null
+                    && wellKnownTypes.IsType(
+                        attr.AttributeClass,
+                        WellKnownType.DynamoMapper_Runtime_DynamoMapperAttribute
+                    )
+                )
+            is not { } mapperAttribute
+        )
+            return null;
+
+        var mapperOptions = mapperAttribute.PopulateOptions<MapperOptions>();
+
+        var context = new GeneratorContext(syntaxContext, wellKnownTypes, cancellationToken);
+
+        return MapperInfo.Create(classSymbol, context);
     }
 }

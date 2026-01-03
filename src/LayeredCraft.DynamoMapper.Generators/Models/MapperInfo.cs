@@ -1,6 +1,6 @@
 using DynamoMapper.Generator.Diagnostics;
 using LayeredCraft.SourceGeneratorTools.Types;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis;
 
 namespace DynamoMapper.Generator.Models;
 
@@ -14,17 +14,11 @@ internal static class MapperInfoExtensions
 {
     extension(MapperInfo)
     {
-        internal static MapperInfo Create(
-            ClassDeclarationSyntax classDeclarationSyntax,
-            GeneratorContext context
-        )
+        internal static MapperInfo Create(INamedTypeSymbol classSymbol, GeneratorContext context)
         {
             context.ThrowIfCancellationRequested();
 
-            var mapperResult = MapperClassInfo.CreateAndResolveModelType(
-                classDeclarationSyntax,
-                context
-            );
+            var mapperResult = MapperClassInfo.CreateAndResolveModelType(classSymbol, context);
 
             // If there's an error creating the mapper class info, return a MapperInfo with the
             // error

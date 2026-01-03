@@ -202,7 +202,7 @@ public class SimpleVerifyTests
                     DefaultRequiredness = Requiredness.Required,
                     OmitNullStrings = false,
                     OmitEmptyStrings = true,
-                    DateTimeFormat = "O",
+                    DateTimeFormat = "I",
                     EnumFormat = EnumFormat.Numeric
                 )]
                 public static partial class ExampleEntityMapper

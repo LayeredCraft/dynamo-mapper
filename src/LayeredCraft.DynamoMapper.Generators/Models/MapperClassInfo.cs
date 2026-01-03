@@ -1,7 +1,5 @@
 using DynamoMapper.Generator.Diagnostics;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using WellKnownType = DynamoMapper.Generator.WellKnownTypes.WellKnownTypeData.WellKnownType;
 
 namespace DynamoMapper.Generator.Models;
@@ -128,22 +126,11 @@ internal static class MapperClassInfoExtensions
     extension(MapperClassInfo)
     {
         internal static DiagnosticResult<(MapperClassInfo, ITypeSymbol)> CreateAndResolveModelType(
-            ClassDeclarationSyntax classDeclaration,
+            INamedTypeSymbol classSymbol,
             GeneratorContext context
         )
         {
             context.ThrowIfCancellationRequested();
-
-            var classSymbol = context.SemanticModel.GetDeclaredSymbol(
-                classDeclaration,
-                context.CancellationToken
-            );
-            if (classSymbol is null)
-                return DiagnosticResult<(MapperClassInfo, ITypeSymbol)>.Failure(
-                    DiagnosticDescriptors.InternalGeneratorError,
-                    classDeclaration.CreateLocationInfo(),
-                    "Failed to resolve class symbol"
-                );
 
             /*
              * to determine what mappers to generate, we need to look for methods using these rules:
@@ -195,7 +182,7 @@ internal static class MapperClassInfoExtensions
                 classSignature,
                 toItemSignature,
                 fromItemSignature,
-                classDeclaration.CreateLocationInfo()
+                context.TargetNode.CreateLocationInfo()
             );
 
             return DiagnosticResult<(MapperClassInfo, ITypeSymbol)>.Success(

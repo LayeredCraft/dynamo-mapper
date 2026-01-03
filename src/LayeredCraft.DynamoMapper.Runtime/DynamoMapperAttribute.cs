@@ -36,9 +36,14 @@ public sealed class DynamoMapperAttribute : Attribute
 
     /// <summary>Gets or sets the default enum serialization format.</summary>
     /// <remarks>
-    ///     Default is <see cref="EnumFormat.Name" />, which serializes enums as their string name
-    ///     (e.g., "Active"). Use <see cref="EnumFormat.Numeric" /> to serialize as the underlying numeric
-    ///     value (e.g., 0).
+    ///     <para>The default is "G" (General format), which serializes enums as their string name (e.g., "Active").</para>
+    ///     <para>Valid format strings:</para>
+    ///     <list type="bullet">
+    ///         <item>"G" or "g" - General format (displays string name if defined, otherwise numeric value)</item>
+    ///         <item>"F" or "f" - Flags format (treats enum as bit flags)</item>
+    ///         <item>"D" or "d" - Decimal format (displays as integer value)</item>
+    ///         <item>"X" or "x" - Hexadecimal format (displays as hex value)</item>
+    ///     </list>
     /// </remarks>
-    public EnumFormat EnumFormat { get; set; } = EnumFormat.Name;
+    public string EnumFormat { get; set; } = "G";
 }

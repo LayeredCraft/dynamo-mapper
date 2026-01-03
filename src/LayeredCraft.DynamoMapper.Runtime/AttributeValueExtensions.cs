@@ -1143,7 +1143,7 @@ public static class AttributeValueExtensions
         /// <summary>Converts an enum value to a DynamoDB <see cref="AttributeValue" />.</summary>
         /// <typeparam name="TEnum">The enum type.</typeparam>
         /// <returns>An <see cref="AttributeValue" /> containing the enum value as a string.</returns>
-        public AttributeValue ToAttributeValue() => new() { S = value.ToString() };
+        public AttributeValue ToAttributeValue() => new() { S = value.ToString("") };
     }
 
     extension<TEnum>(TEnum? value)

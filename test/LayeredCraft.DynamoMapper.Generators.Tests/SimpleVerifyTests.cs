@@ -191,6 +191,7 @@ public class SimpleVerifyTests
             new VerifyTestOptions
             {
                 SourceCode = """
+                using System;
                 using System.Collections.Generic;
                 using Amazon.DynamoDBv2.Model;
                 using DynamoMapper.Runtime;
@@ -207,14 +208,51 @@ public class SimpleVerifyTests
                 )]
                 public static partial class ExampleEntityMapper
                 {
-                    public static partial Dictionary<string, AttributeValue> ToAttributeValues(MyDto source);
+                    public static partial Dictionary<string, AttributeValue> ToItem(ExampleEntity source);
 
-                    public static partial MyDto FromAttributeValues(Dictionary<string, AttributeValue> x);
+                    public static partial ExampleEntity FromItem(Dictionary<string, AttributeValue> x);
                 }
 
-                public class MyDto
+                public class ExampleEntity
                 {
-                    public string Name { get; set; }
+                    public int Age { get; set; }
+                    public decimal Amount { get; set; }
+                    public DateTimeOffset? CompletedAt { get; set; }
+                    public Guid CorrelationId { get; set; }
+                    public DateTime CreatedAt { get; set; }
+                    public DateTime? DeletedAt { get; set; }
+                    public TimeSpan Duration { get; set; }
+                    public string EmptyString { get; set; }
+                    public DateTimeOffset EventTime { get; set; }
+                    public bool IsDeleted { get; set; }
+                    public bool? IsOptional { get; set; }
+                    public long LongValue { get; set; }
+                    public string? Name { get; set; }
+                    public decimal? NullableDecimal { get; set; }
+                    public double? NullableDouble { get; set; }
+                    public int? NullableInt { get; set; }
+                    public long? NullableLong { get; set; }
+                    public Guid? NullGuid { get; set; }
+                    public TimeSpan? NullTimeSpan { get; set; }
+                    public OrderStatus OrderStatus { get; set; }
+                    public double Price { get; set; }
+                    public Status? Status { get; set; }
+                }
+
+                public enum OrderStatus
+                {
+                    Pending,
+                    Processing,
+                    Shipped,
+                    Delivered,
+                    Cancelled,
+                }
+
+                public enum Status
+                {
+                    Active,
+                    Inactive,
+                    Suspended,
                 }
                 """,
             },

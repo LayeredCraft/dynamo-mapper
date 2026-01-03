@@ -20,13 +20,13 @@ public static partial class ExampleEntityMapper
     public static partial global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> ToAttributeValues(global::MyNamespace.MyDto source)
         => new global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue>(1)
         {
-            { "Name", source.Name.ToNullableAttributeValue() },
+            { "name", source.Name.ToNullableAttributeValue() },
         };
     
     [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
     public static partial global::MyNamespace.MyDto FromAttributeValues(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> item)
         => new global::MyNamespace.MyDto
         {
-            Name = item.GetString("Name"),
+            Name = item.GetString("name"),
         };
 }

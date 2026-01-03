@@ -328,14 +328,6 @@ public static class ExampleEntityMapper
     }
 }
 
-[DynamoMapper]
-public static partial class ExampleEntityMapper2
-{
-    public static partial Dictionary<string, AttributeValue> ToItem(ExampleEntity source);
-
-    public static partial ExampleEntity FromItem(Dictionary<string, AttributeValue> item);
-}
-
 // POCO with properties matching the dictionary
 public class ExampleEntity
 {

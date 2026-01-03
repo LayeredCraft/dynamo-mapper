@@ -33,7 +33,5 @@ internal static class GeneratorContextExtensions
     {
         public void ThrowIfCancellationRequested() =>
             context.CancellationToken.ThrowIfCancellationRequested();
-
-        internal void PopulateMapperOptions() { }
     }
 }

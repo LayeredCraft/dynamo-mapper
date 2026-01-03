@@ -1,4 +1,5 @@
 using DynamoMapper.Generator.Models;
+using Humanizer;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -56,6 +57,8 @@ internal static class MapperSyntaxProvider
             mapperOptions,
             cancellationToken
         );
+
+        "SomeTitle".Underscore();
 
         return MapperInfo.Create(classSymbol, context);
     }

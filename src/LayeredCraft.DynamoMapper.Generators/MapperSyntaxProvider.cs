@@ -58,8 +58,6 @@ internal static class MapperSyntaxProvider
             cancellationToken
         );
 
-        "SomeTitle".Underscore();
-
         return MapperInfo.Create(classSymbol, context);
     }
 }

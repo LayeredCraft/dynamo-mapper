@@ -1317,6 +1317,18 @@ public static class AttributeValueExtensions
         /// <summary>Converts a <see cref="Guid" /> value to a DynamoDB <see cref="AttributeValue" />.</summary>
         /// <returns>An <see cref="AttributeValue" /> containing the <see cref="Guid" /> as a string.</returns>
         public AttributeValue ToAttributeValue() => new() { S = value.ToString() };
+
+        /// <summary>
+        ///     Converts a <see cref="Guid" /> value to a DynamoDB <see cref="AttributeValue" /> using a
+        ///     specific format string.
+        /// </summary>
+        /// <param name="format">
+        ///     The format string to use when converting the value to a string. Valid formats:
+        ///     "N", "D", "B", "P", "X".
+        /// </param>
+        /// <returns>An <see cref="AttributeValue" /> containing the <see cref="Guid" /> as a string.</returns>
+        public AttributeValue ToAttributeValue(string format) =>
+            new() { S = value.ToString(format) };
     }
 
     extension(Guid? value)
@@ -1330,6 +1342,23 @@ public static class AttributeValueExtensions
             value is null
                 ? new AttributeValue { NULL = true }
                 : new AttributeValue { S = value.Value.ToString() };
+
+        /// <summary>
+        ///     Converts a nullable <see cref="Guid" /> value to a DynamoDB <see cref="AttributeValue" />
+        ///     using a specific format string.
+        /// </summary>
+        /// <param name="format">
+        ///     The format string to use when converting the value to a string. Valid formats:
+        ///     "N", "D", "B", "P", "X".
+        /// </param>
+        /// <returns>
+        ///     An <see cref="AttributeValue" /> containing the <see cref="Guid" /> as a string, or a NULL
+        ///     attribute if the value is <c>null</c>.
+        /// </returns>
+        public AttributeValue ToNullableAttributeValue(string format) =>
+            value is null
+                ? new AttributeValue { NULL = true }
+                : new AttributeValue { S = value.Value.ToString(format) };
     }
 
     #endregion
@@ -1349,6 +1378,22 @@ public static class AttributeValueExtensions
         /// </remarks>
         public AttributeValue ToAttributeValue() =>
             new() { S = value.ToString("o", CultureInfo.InvariantCulture) };
+
+        /// <summary>
+        ///     Converts a <see cref="DateTime" /> value to a DynamoDB <see cref="AttributeValue" /> using
+        ///     a specific format string.
+        /// </summary>
+        /// <param name="format">
+        ///     The format string to use when converting the value to a string (e.g.,
+        ///     "yyyy-MM-dd", "yyyyMMdd", "o").
+        /// </param>
+        /// <returns>
+        ///     An <see cref="AttributeValue" /> containing the <see cref="DateTime" /> in the specified
+        ///     format.
+        /// </returns>
+        /// <remarks>Formatting uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
+        public AttributeValue ToAttributeValue(string format) =>
+            new() { S = value.ToString(format, CultureInfo.InvariantCulture) };
     }
 
     extension(DateTime? value)
@@ -1372,6 +1417,27 @@ public static class AttributeValueExtensions
                 {
                     S = value.Value.ToString("o", CultureInfo.InvariantCulture),
                 };
+
+        /// <summary>
+        ///     Converts a nullable <see cref="DateTime" /> value to a DynamoDB
+        ///     <see cref="AttributeValue" /> using a specific format string.
+        /// </summary>
+        /// <param name="format">
+        ///     The format string to use when converting the value to a string (e.g.,
+        ///     "yyyy-MM-dd", "yyyyMMdd", "o").
+        /// </param>
+        /// <returns>
+        ///     An <see cref="AttributeValue" /> containing the <see cref="DateTime" /> in the specified
+        ///     format, or a NULL attribute if the value is <c>null</c>.
+        /// </returns>
+        /// <remarks>Formatting uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
+        public AttributeValue ToNullableAttributeValue(string format) =>
+            value is null
+                ? new AttributeValue { NULL = true }
+                : new AttributeValue
+                {
+                    S = value.Value.ToString(format, CultureInfo.InvariantCulture),
+                };
     }
 
     extension(DateTimeOffset value)
@@ -1390,6 +1456,22 @@ public static class AttributeValueExtensions
         /// </remarks>
         public AttributeValue ToAttributeValue() =>
             new() { S = value.ToString("o", CultureInfo.InvariantCulture) };
+
+        /// <summary>
+        ///     Converts a <see cref="DateTimeOffset" /> value to a DynamoDB <see cref="AttributeValue" />
+        ///     using a specific format string.
+        /// </summary>
+        /// <param name="format">
+        ///     The format string to use when converting the value to a string (e.g.,
+        ///     "yyyy-MM-dd", "o").
+        /// </param>
+        /// <returns>
+        ///     An <see cref="AttributeValue" /> containing the <see cref="DateTimeOffset" /> in the
+        ///     specified format.
+        /// </returns>
+        /// <remarks>Formatting uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
+        public AttributeValue ToAttributeValue(string format) =>
+            new() { S = value.ToString(format, CultureInfo.InvariantCulture) };
     }
 
     extension(DateTimeOffset? value)
@@ -1413,6 +1495,27 @@ public static class AttributeValueExtensions
                 {
                     S = value.Value.ToString("o", CultureInfo.InvariantCulture),
                 };
+
+        /// <summary>
+        ///     Converts a nullable <see cref="DateTimeOffset" /> value to a DynamoDB
+        ///     <see cref="AttributeValue" /> using a specific format string.
+        /// </summary>
+        /// <param name="format">
+        ///     The format string to use when converting the value to a string (e.g.,
+        ///     "yyyy-MM-dd", "o").
+        /// </param>
+        /// <returns>
+        ///     An <see cref="AttributeValue" /> containing the <see cref="DateTimeOffset" /> in the
+        ///     specified format, or a NULL attribute if the value is <c>null</c>.
+        /// </returns>
+        /// <remarks>Formatting uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
+        public AttributeValue ToNullableAttributeValue(string format) =>
+            value is null
+                ? new AttributeValue { NULL = true }
+                : new AttributeValue
+                {
+                    S = value.Value.ToString(format, CultureInfo.InvariantCulture),
+                };
     }
 
     extension(TimeSpan value)
@@ -1428,6 +1531,22 @@ public static class AttributeValueExtensions
         /// </remarks>
         public AttributeValue ToAttributeValue() =>
             new() { S = value.ToString("c", CultureInfo.InvariantCulture) };
+
+        /// <summary>
+        ///     Converts a <see cref="TimeSpan" /> value to a DynamoDB <see cref="AttributeValue" /> using
+        ///     a specific format string.
+        /// </summary>
+        /// <param name="format">
+        ///     The format string to use when converting the value to a string (e.g., "c",
+        ///     "g", "G").
+        /// </param>
+        /// <returns>
+        ///     An <see cref="AttributeValue" /> containing the <see cref="TimeSpan" /> in the specified
+        ///     format.
+        /// </returns>
+        /// <remarks>Formatting uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
+        public AttributeValue ToAttributeValue(string format) =>
+            new() { S = value.ToString(format, CultureInfo.InvariantCulture) };
     }
 
     extension(TimeSpan? value)
@@ -1450,6 +1569,27 @@ public static class AttributeValueExtensions
                 : new AttributeValue
                 {
                     S = value.Value.ToString("c", CultureInfo.InvariantCulture),
+                };
+
+        /// <summary>
+        ///     Converts a nullable <see cref="TimeSpan" /> value to a DynamoDB
+        ///     <see cref="AttributeValue" /> using a specific format string.
+        /// </summary>
+        /// <param name="format">
+        ///     The format string to use when converting the value to a string (e.g., "c",
+        ///     "g", "G").
+        /// </param>
+        /// <returns>
+        ///     An <see cref="AttributeValue" /> containing the <see cref="TimeSpan" /> in the specified
+        ///     format, or a NULL attribute if the value is <c>null</c>.
+        /// </returns>
+        /// <remarks>Formatting uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
+        public AttributeValue ToNullableAttributeValue(string format) =>
+            value is null
+                ? new AttributeValue { NULL = true }
+                : new AttributeValue
+                {
+                    S = value.Value.ToString(format, CultureInfo.InvariantCulture),
                 };
     }
 

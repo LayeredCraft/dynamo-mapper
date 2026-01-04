@@ -19,7 +19,9 @@ internal static class PropertyInfoExtensions
             var toParamName = "source";
             var fromParamName = "item";
             var propertyName = propertySymbol.Name;
-            var key = context.KeyNamingConventionConverter(propertyName).Map(k => $"\"{k}\"");
+            var key = context
+                .MapperOptions.KeyNamingConventionConverter(propertyName)
+                .Map(k => $"\"{k}\"");
             var sourceProperty = $"{toParamName}.{propertyName}";
             var type = propertySymbol.Type as INamedTypeSymbol;
             var isNullableType =

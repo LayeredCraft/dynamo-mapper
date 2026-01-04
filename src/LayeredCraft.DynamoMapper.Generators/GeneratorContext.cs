@@ -26,15 +26,6 @@ internal class GeneratorContext
     internal SemanticModel SemanticModel { get; }
     internal WellKnownTypes.WellKnownTypes WellKnownTypes { get; }
     internal MapperOptions MapperOptions { get; }
-
-    internal Func<string, string> KeyNamingConventionConverter
-    {
-        get
-        {
-            field ??= MapperOptions.Convention.GetConverter();
-            return field;
-        }
-    }
 }
 
 internal static class GeneratorContextExtensions

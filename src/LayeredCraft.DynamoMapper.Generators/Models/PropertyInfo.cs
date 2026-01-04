@@ -37,7 +37,7 @@ internal static class PropertyInfoExtensions
             string[] baseFromArgs = [key];
             string[] baseToArgs = [key, sourceProperty];
 
-            var datetimeFormat = $"\"{context.MapperOptions.DateTimeFormat}\"";
+            var dateFmt = $"\"{context.MapperOptions.DateTimeFormat}\"";
 
             Props? props = propertyType switch
             {
@@ -48,16 +48,12 @@ internal static class PropertyInfoExtensions
                 { SpecialType: SpecialType.System_Single } => ("Float", [], []),
                 { SpecialType: SpecialType.System_Double } => ("Double", [], []),
                 { SpecialType: SpecialType.System_Decimal } => ("Decimal", [], []),
-                { SpecialType: SpecialType.System_DateTime } => (
-                    "DateTime",
-                    [datetimeFormat],
-                    [datetimeFormat]
-                ),
+                { SpecialType: SpecialType.System_DateTime } => ("DateTime", [dateFmt], [dateFmt]),
                 INamedTypeSymbol t
                     when t.IsAssignableTo(WellKnownType.System_DateTimeOffset, context) => (
                     "DateTimeOffset",
-                    [datetimeFormat],
-                    [datetimeFormat]
+                    [dateFmt],
+                    [dateFmt]
                 ),
                 INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_Guid, context) => (
                     "Guid",
@@ -68,9 +64,7 @@ internal static class PropertyInfoExtensions
                     ("TimeSpan", [], []),
                 INamedTypeSymbol { TypeKind: TypeKind.Enum } enumType => (
                     "Enum",
-                    [
-                        $"{enumType.ToNotNullableGloballyQualifiedName()}.{enumType.MemberNames.First()}",
-                    ],
+                    [$"{enumType.QualifiedName}.{enumType.MemberNames.First()}"],
                     []
                 ),
                 _ => null,

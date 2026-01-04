@@ -1,11 +1,10 @@
 using DynamoMapper.Generator;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using WellKnownType = DynamoMapper.Generator.WellKnownTypes.WellKnownTypeData.WellKnownType;
 
 namespace Microsoft.CodeAnalysis;
 
-internal static class SymbolExtensions
+internal static class NamedTypeSymbolExtensions
 {
     extension(INamedTypeSymbol sourceType)
     {
@@ -27,30 +26,5 @@ internal static class SymbolExtensions
 
         internal bool IsAssignableFromOrTo(WellKnownType otherType, GeneratorContext context) =>
             sourceType.IsAssignableFromOrTo(context.WellKnownTypes.Get(otherType), context);
-    }
-
-    private static readonly SymbolDisplayFormat NullableFormat =
-        SymbolDisplayFormat.FullyQualifiedFormat.AddMiscellaneousOptions(
-            SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier
-        );
-
-    private static readonly SymbolDisplayFormat NotNullableFormat =
-        SymbolDisplayFormat.FullyQualifiedFormat.AddMiscellaneousOptions(
-            SymbolDisplayMiscellaneousOptions.ExpandNullable
-        );
-
-    extension(ITypeSymbol typeSymbol)
-    {
-        internal string ToGloballyQualifiedName(TypeSyntax? typeSyntax = null)
-        {
-            var baseTypeName = typeSymbol.ToDisplayString(NullableFormat);
-
-            return typeSyntax is NullableTypeSyntax && !baseTypeName.EndsWith("?")
-                ? baseTypeName + "?"
-                : baseTypeName;
-        }
-
-        internal string ToNotNullableGloballyQualifiedName() =>
-            typeSymbol.ToDisplayString(NotNullableFormat);
     }
 }

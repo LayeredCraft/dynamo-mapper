@@ -16,40 +16,43 @@ internal static class PropertyInfoExtensions
         {
             var toParamName = "source";
             var fromParamName = "item";
-            var name = propertySymbol.Name;
-            var key = context.KeyNamingConventionConverter(name);
+            var propertyName = propertySymbol.Name;
+            var key = context.KeyNamingConventionConverter(propertyName);
             var type = propertySymbol.Type as INamedTypeSymbol;
             var isINamedTypeSymbol = type is not null;
             var isNullableType =
                 type is { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T };
 
-            var nullableWord = isNullableType ? "Nullable" : string.Empty;
+            var nullable = isNullableType ? "Nullable" : string.Empty;
 
             var propertyType = isNullableType ? type!.TypeArguments[0] : type;
 
-            return propertyType switch
+            var propertyInfo = propertyType switch
             {
                 // String
-                // { SpecialType: SpecialType.System_String } => String(props),
+                { SpecialType: SpecialType.System_String } => new PropertyInfo(
+                    $"""{propertyName} = {fromParamName}.Get{nullable}String("{key}"),""",
+                    $$"""{ "{{key}}", {{toParamName}}.{{fromParamName}}.To{{nullable}}AttributeValue() },"""
+                ),
 
                 // Boolean
-                { SpecialType: SpecialType.System_Boolean } =>
-                    DiagnosticResult<PropertyInfo>.Success(
-                        new PropertyInfo(
-                            $"""{name} = {fromParamName}.Get{nullableWord}Bool("{key}"),""",
-                            $"""item.Set{nullableWord}Bool("{key}", {toParamName}.{name});"""
-                        )
-                    ),
-
-                _ => DiagnosticResult<PropertyInfo>.Failure(
-                    new DiagnosticInfo(
-                        DiagnosticDescriptors.CannotConvertFromAttributeValue,
-                        propertySymbol.Locations.FirstOrDefault()?.CreateLocationInfo(),
-                        name,
-                        type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
-                    )
+                // $"""item.Set{nullable}Bool("{key}", {toParamName}.{propertyName});"""
+                { SpecialType: SpecialType.System_Boolean } => new PropertyInfo(
+                    $"""{propertyName} = {fromParamName}.Get{nullable}Bool("{key}"),""",
+                    $$"""{ "{{key}}", {{toParamName}}.{{fromParamName}}.To{{nullable}}AttributeValue() },"""
                 ),
+
+                _ => null,
             };
+
+            return propertyInfo is not null
+                ? DiagnosticResult<PropertyInfo>.Success(propertyInfo)
+                : DiagnosticResult<PropertyInfo>.Failure(
+                    DiagnosticDescriptors.CannotConvertFromAttributeValue,
+                    propertySymbol.Locations.FirstOrDefault()?.CreateLocationInfo(),
+                    propertyName,
+                    type?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
+                );
         }
     }
 }

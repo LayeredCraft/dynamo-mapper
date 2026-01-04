@@ -20,31 +20,32 @@ public static partial class ExampleEntityMapper
 {
     [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
     public static partial global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> ToItem(global::MyNamespace.ExampleEntity source)
-        => new Dictionary<string, AttributeValue>(22)
-        {
-            { "bool", source.Bool.ToAttributeValue() },
-            { "nullable_bool", source.NullableBool.ToNullableAttributeValue() },
-            { "date_time", source.DateTime.ToAttributeValue("I") },
-            { "nullable_date_time", source.NullableDateTime.ToNullableAttributeValue("I") },
-            { "date_time_offset", source.DateTimeOffset.ToAttributeValue("I") },
-            { "nullable_date_time_offset", source.NullableDateTimeOffset.ToNullableAttributeValue("I") },
-            { "decimal", source.Decimal.ToAttributeValue() },
-            { "nullable_decimal", source.NullableDecimal.ToNullableAttributeValue() },
-            { "double", source.Double.ToAttributeValue() },
-            { "nullable_double", source.NullableDouble.ToNullableAttributeValue() },
-            { "guid", source.Guid.ToAttributeValue() },
-            { "nullable_guid", source.NullableGuid.ToNullableAttributeValue() },
-            { "int", source.Int.ToAttributeValue() },
-            { "nullable_int", source.NullableInt.ToNullableAttributeValue() },
-            { "long", source.Long.ToAttributeValue() },
-            { "nullable_long", source.NullableLong.ToNullableAttributeValue() },
-            { "string", source.String.ToAttributeValue() },
-            { "nullable_string", source.NullableString.ToNullableAttributeValue() },
-            { "time_span", source.TimeSpan.ToAttributeValue() },
-            { "nullable_time_span", source.NullableTimeSpan.ToNullableAttributeValue() },
-            { "enum", source.Enum.ToAttributeValue() },
-            { "nullable_enum", source.NullableEnum.ToNullableAttributeValue() },
-        };
+    {
+        var item = new Dictionary<string, AttributeValue>(22);
+        item.SetBool("bool", source.Bool);
+        item.SetNullableBool("nullable_bool", source.NullableBool);
+        item.SetDateTime("date_time", source.DateTime, "I");
+        item.SetNullableDateTime("nullable_date_time", source.NullableDateTime, "I");
+        item.SetDateTimeOffset("date_time_offset", source.DateTimeOffset, "I");
+        item.SetNullableDateTimeOffset("nullable_date_time_offset", source.NullableDateTimeOffset, "I");
+        item.SetDecimal("decimal", source.Decimal);
+        item.SetNullableDecimal("nullable_decimal", source.NullableDecimal);
+        item.SetDouble("double", source.Double);
+        item.SetNullableDouble("nullable_double", source.NullableDouble);
+        item.SetGuid("guid", source.Guid);
+        item.SetNullableGuid("nullable_guid", source.NullableGuid);
+        item.SetInt("int", source.Int);
+        item.SetNullableInt("nullable_int", source.NullableInt);
+        item.SetLong("long", source.Long);
+        item.SetNullableLong("nullable_long", source.NullableLong);
+        item.SetString("string", source.String);
+        item.SetNullableString("nullable_string", source.NullableString);
+        item.SetTimeSpan("time_span", source.TimeSpan);
+        item.SetNullableTimeSpan("nullable_time_span", source.NullableTimeSpan);
+        item.SetEnum("enum", source.Enum);
+        item.SetNullableEnum("nullable_enum", source.NullableEnum);
+        return item;
+    }
     
     [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
     public static partial global::MyNamespace.ExampleEntity FromItem(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> item)
@@ -52,10 +53,10 @@ public static partial class ExampleEntityMapper
         {
             Bool = item.GetBool("bool"),
             NullableBool = item.GetNullableBool("nullable_bool"),
-            DateTime = item.GetDateTimeExact("date_time", "I"),
-            NullableDateTime = item.GetNullableDateTimeExact("nullable_date_time", "I"),
-            DateTimeOffset = item.GetDateTimeOffsetExact("date_time_offset", "I"),
-            NullableDateTimeOffset = item.GetNullableDateTimeOffsetExact("nullable_date_time_offset", "I"),
+            DateTime = item.GetDateTime("date_time", "I"),
+            NullableDateTime = item.GetNullableDateTime("nullable_date_time", "I"),
+            DateTimeOffset = item.GetDateTimeOffset("date_time_offset", "I"),
+            NullableDateTimeOffset = item.GetNullableDateTimeOffset("nullable_date_time_offset", "I"),
             Decimal = item.GetDecimal("decimal"),
             NullableDecimal = item.GetNullableDecimal("nullable_decimal"),
             Double = item.GetDouble("double"),
@@ -71,6 +72,6 @@ public static partial class ExampleEntityMapper
             TimeSpan = item.GetTimeSpan("time_span"),
             NullableTimeSpan = item.GetNullableTimeSpan("nullable_time_span"),
             Enum = item.GetEnum("enum", global::MyNamespace.OrderStatus.Pending),
-            NullableEnum = item.GetNullableEnum<global::MyNamespace.OrderStatus>("nullable_enum"),
+            NullableEnum = item.GetNullableEnum("nullable_enum", global::MyNamespace.OrderStatus.Pending),
         };
 }

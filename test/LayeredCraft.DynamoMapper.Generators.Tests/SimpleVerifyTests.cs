@@ -204,7 +204,7 @@ public class SimpleVerifyTests
                     OmitNullStrings = false,
                     OmitEmptyStrings = true,
                     DateTimeFormat = "I",
-                    EnumFormat = EnumFormat.Numeric
+                    EnumFormat = "G"
                 )]
                 public static partial class ExampleEntityMapper
                 {

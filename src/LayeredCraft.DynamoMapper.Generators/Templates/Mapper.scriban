@@ -22,8 +22,8 @@ using DynamoMapper.Runtime;
     {{ mapper_class.to_item_signature }}
         => new global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue>({{ dictionary_capacity }})
         {
-            {{~ for prop in model_class.to_attribute_assignments ~}}
-            {{ prop }}
+            {{~ for prop in model_class.properties ~}}
+            {{ prop.to_assignments }}
             {{~ end ~}}
         };
     {{~ end ~}}
@@ -35,8 +35,8 @@ using DynamoMapper.Runtime;
     {{ mapper_class.from_item_signature }}
         => new {{ model_class.fully_qualified_type }}
         {
-            {{~ for prop in model_class.propertied_assignments ~}}
-            {{ prop }}
+            {{~ for prop in model_class.properties ~}}
+            {{ prop.from_assignment }}
             {{~ end ~}}
         };
     {{~ end ~}}

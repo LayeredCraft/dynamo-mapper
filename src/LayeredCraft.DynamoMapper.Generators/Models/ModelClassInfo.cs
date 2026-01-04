@@ -8,7 +8,8 @@ namespace DynamoMapper.Generator.Models;
 internal sealed record ModelClassInfo(
     string FullyQualifiedType,
     EquatableArray<string> PropertiedAssignments,
-    EquatableArray<string> ToAttributeAssignments
+    EquatableArray<string> ToAttributeAssignments,
+    EquatableArray<PropertyInfo> Properties
 );
 
 internal static class ModelClassInfoExtensions
@@ -344,17 +345,21 @@ internal static class ModelClassInfoExtensions
                 propertySymbol => BuildToItemMapping(propertySymbol, context)
             );
 
-            var (propertyInfo, propertyDiagnostics) = properties.CollectDiagnosticResults(
+            var (propertyInfos, propertyDiagnostics) = properties.CollectDiagnosticResults(
                 propertySymbol => PropertyInfo.Create(propertySymbol, context)
             );
 
             var modelClassInfo = new ModelClassInfo(
                 modelTypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
                 successfulFromMappings.ToEquatableArray(),
-                successfulToMappings.ToEquatableArray()
+                successfulToMappings.ToEquatableArray(),
+                propertyInfos.ToEquatableArray()
             );
 
-            var allDiagnostics = fromDiagnostics.Concat(toDiagnostics).ToArray();
+            var allDiagnostics = fromDiagnostics
+                .Concat(toDiagnostics)
+                .Concat(propertyDiagnostics)
+                .ToArray();
             return (modelClassInfo, allDiagnostics);
         }
     }

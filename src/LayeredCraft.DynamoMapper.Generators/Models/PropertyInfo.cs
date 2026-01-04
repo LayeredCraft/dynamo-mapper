@@ -21,11 +21,16 @@ internal static class PropertyInfoExtensions
             var key = context.KeyNamingConventionConverter(propertyName);
             var type = propertySymbol.Type as INamedTypeSymbol;
             var isNullableType =
-                type is { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T };
+                type
+                is { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T }
+                    or { IsReferenceType: true, NullableAnnotation: NullableAnnotation.Annotated };
 
             var nullable = isNullableType ? "Nullable" : string.Empty;
 
-            var propertyType = isNullableType ? type!.TypeArguments[0] : propertySymbol.Type;
+            var propertyType = type
+                is { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T }
+                ? type.TypeArguments[0]
+                : propertySymbol.Type;
 
             var propertyInfo = propertyType switch
             {

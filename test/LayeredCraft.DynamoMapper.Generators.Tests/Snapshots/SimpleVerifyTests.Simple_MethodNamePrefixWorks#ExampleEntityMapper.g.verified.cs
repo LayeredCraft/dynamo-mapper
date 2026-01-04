@@ -11,6 +11,8 @@
 #nullable enable
 
 using DynamoMapper.Runtime;
+using System.Collections.Generic;
+using Amazon.DynamoDBv2.Model;
 
 namespace MyNamespace;
 
@@ -18,7 +20,7 @@ public static partial class ExampleEntityMapper
 {
     [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
     public static partial global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> ToAttributeValues(global::MyNamespace.MyDto source)
-        => new global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue>(1)
+        => new Dictionary<string, AttributeValue>(1)
         {
             { "name", source.Name.ToAttributeValue() },
         };

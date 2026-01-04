@@ -10,6 +10,8 @@
 #nullable enable
 
 using DynamoMapper.Runtime;
+using System.Collections.Generic;
+using Amazon.DynamoDBv2.Model;
 
 {{~ if mapper_class_namespace != string.Empty ~}}
 {{ mapper_class_namespace }}
@@ -20,7 +22,7 @@ using DynamoMapper.Runtime;
     {{~ if mapper_class.to_item_signature != null ~}}
     {{ generated_code_attribute }}
     {{ mapper_class.to_item_signature }}
-        => new global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue>({{ dictionary_capacity }})
+        => new Dictionary<string, AttributeValue>({{ dictionary_capacity }})
         {
             {{~ for prop in model_class.properties ~}}
             {{ prop.to_assignments }}

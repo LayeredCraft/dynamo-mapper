@@ -1,5 +1,6 @@
 using DynamoMapper.Generator.Diagnostics;
 using Microsoft.CodeAnalysis;
+using WellKnownType = DynamoMapper.Generator.WellKnownTypes.WellKnownTypeData.WellKnownType;
 
 namespace DynamoMapper.Generator.Models;
 
@@ -19,27 +20,84 @@ internal static class PropertyInfoExtensions
             var propertyName = propertySymbol.Name;
             var key = context.KeyNamingConventionConverter(propertyName);
             var type = propertySymbol.Type as INamedTypeSymbol;
-            var isINamedTypeSymbol = type is not null;
             var isNullableType =
                 type is { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T };
 
             var nullable = isNullableType ? "Nullable" : string.Empty;
 
-            var propertyType = isNullableType ? type!.TypeArguments[0] : type;
+            var propertyType = isNullableType ? type!.TypeArguments[0] : propertySymbol.Type;
 
             var propertyInfo = propertyType switch
             {
                 // String
                 { SpecialType: SpecialType.System_String } => new PropertyInfo(
                     $"""{propertyName} = {fromParamName}.Get{nullable}String("{key}"),""",
-                    $$"""{ "{{key}}", {{toParamName}}.{{fromParamName}}.To{{nullable}}AttributeValue() },"""
+                    $$"""{ "{{key}}", {{toParamName}}.{{propertyName}}.To{{nullable}}AttributeValue() },"""
                 ),
 
                 // Boolean
                 // $"""item.Set{nullable}Bool("{key}", {toParamName}.{propertyName});"""
                 { SpecialType: SpecialType.System_Boolean } => new PropertyInfo(
                     $"""{propertyName} = {fromParamName}.Get{nullable}Bool("{key}"),""",
-                    $$"""{ "{{key}}", {{toParamName}}.{{fromParamName}}.To{{nullable}}AttributeValue() },"""
+                    $$"""{ "{{key}}", {{toParamName}}.{{propertyName}}.To{{nullable}}AttributeValue() },"""
+                ),
+
+                // Integer types
+                { SpecialType: SpecialType.System_Int32 } => new PropertyInfo(
+                    $"""{propertyName} = {fromParamName}.Get{nullable}Int("{key}"),""",
+                    $$"""{ "{{key}}", {{toParamName}}.{{propertyName}}.To{{nullable}}AttributeValue() },"""
+                ),
+                { SpecialType: SpecialType.System_Int64 } => new PropertyInfo(
+                    $"""{propertyName} = {fromParamName}.Get{nullable}Long("{key}"),""",
+                    $$"""{ "{{key}}", {{toParamName}}.{{propertyName}}.To{{nullable}}AttributeValue() },"""
+                ),
+
+                // Floating point types
+                { SpecialType: SpecialType.System_Single } => new PropertyInfo(
+                    $"""{propertyName} = {fromParamName}.Get{nullable}Float("{key}"),""",
+                    $$"""{ "{{key}}", {{toParamName}}.{{propertyName}}.To{{nullable}}AttributeValue() },"""
+                ),
+                { SpecialType: SpecialType.System_Double } => new PropertyInfo(
+                    $"""{propertyName} = {fromParamName}.Get{nullable}Double("{key}"),""",
+                    $$"""{ "{{key}}", {{toParamName}}.{{propertyName}}.To{{nullable}}AttributeValue() },"""
+                ),
+                { SpecialType: SpecialType.System_Decimal } => new PropertyInfo(
+                    $"""{propertyName} = {fromParamName}.Get{nullable}Decimal("{key}"),""",
+                    $$"""{ "{{key}}", {{toParamName}}.{{propertyName}}.To{{nullable}}AttributeValue() },"""
+                ),
+
+                // DateTime
+                { SpecialType: SpecialType.System_DateTime } => new PropertyInfo(
+                    $"""{propertyName} = {fromParamName}.Get{nullable}DateTimeExact("{key}", "{context.MapperOptions.DateTimeFormat}"),""",
+                    $$"""{ "{{key}}", {{toParamName}}.{{propertyName}}.To{{nullable}}AttributeValue("{{context.MapperOptions.DateTimeFormat}}") },"""
+                ),
+
+                // DateTimeOffset
+                INamedTypeSymbol t
+                    when t.IsAssignableTo(WellKnownType.System_DateTimeOffset, context) =>
+                    new PropertyInfo(
+                        $"""{propertyName} = {fromParamName}.Get{nullable}DateTimeOffsetExact("{key}", "{context.MapperOptions.DateTimeFormat}"),""",
+                        $$"""{ "{{key}}", {{toParamName}}.{{propertyName}}.To{{nullable}}AttributeValue("{{context.MapperOptions.DateTimeFormat}}") },"""
+                    ),
+
+                // Guid
+                INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_Guid, context) =>
+                    new PropertyInfo(
+                        $"""{propertyName} = {fromParamName}.Get{nullable}Guid("{key}"),""",
+                        $$"""{ "{{key}}", {{toParamName}}.{{propertyName}}.To{{nullable}}AttributeValue() },"""
+                    ),
+
+                // TimeSpan
+                INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_TimeSpan, context) =>
+                    new PropertyInfo(
+                        $"""{propertyName} = {fromParamName}.Get{nullable}TimeSpan("{key}"),""",
+                        $$"""{ "{{key}}", {{toParamName}}.{{propertyName}}.To{{nullable}}AttributeValue() },"""
+                    ),
+
+                // Enums
+                INamedTypeSymbol { TypeKind: TypeKind.Enum } enumType => new PropertyInfo(
+                    $"""{propertyName} = {fromParamName}.GetEnum("{key}", {enumType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}.{enumType.MemberNames.FirstOrDefault() ?? "Default"}),""",
+                    $$"""{ "{{key}}", {{toParamName}}.{{propertyName}}.To{{nullable}}AttributeValue() },"""
                 ),
 
                 _ => null,

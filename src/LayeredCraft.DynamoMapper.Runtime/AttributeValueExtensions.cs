@@ -37,7 +37,7 @@ public static class AttributeValueExtensions
         /// <returns>The attribute dictionary for fluent chaining.</returns>
         public Dictionary<string, AttributeValue> SetString(string key, string value)
         {
-            attributes[key] = value.ToAttributeValue();
+            attributes[key] = new AttributeValue { S = value };
             return attributes;
         }
 
@@ -47,7 +47,9 @@ public static class AttributeValueExtensions
         /// <returns>The attribute dictionary for fluent chaining.</returns>
         public Dictionary<string, AttributeValue> SetNullableString(string key, string? value)
         {
-            attributes[key] = value.ToNullableAttributeValue();
+            attributes[key] = value is null
+                ? new AttributeValue { NULL = true }
+                : new AttributeValue { S = value };
             return attributes;
         }
 
@@ -81,7 +83,7 @@ public static class AttributeValueExtensions
         /// <returns>The attribute dictionary for fluent chaining.</returns>
         public Dictionary<string, AttributeValue> SetBool(string key, bool value)
         {
-            attributes[key] = value.ToAttributeValue();
+            attributes[key] = new AttributeValue { BOOL = value };
             return attributes;
         }
 
@@ -91,7 +93,9 @@ public static class AttributeValueExtensions
         /// <returns>The attribute dictionary for fluent chaining.</returns>
         public Dictionary<string, AttributeValue> SetNullableBool(string key, bool? value)
         {
-            attributes[key] = value.ToNullableAttributeValue();
+            attributes[key] = value is null
+                ? new AttributeValue { NULL = true }
+                : new AttributeValue { BOOL = value };
             return attributes;
         }
 
@@ -185,7 +189,10 @@ public static class AttributeValueExtensions
         /// <returns>The attribute dictionary for fluent chaining.</returns>
         public Dictionary<string, AttributeValue> SetInt(string key, int value)
         {
-            attributes[key] = value.ToAttributeValue();
+            attributes[key] = new AttributeValue
+            {
+                N = value.ToString(CultureInfo.InvariantCulture),
+            };
             return attributes;
         }
 
@@ -195,7 +202,9 @@ public static class AttributeValueExtensions
         /// <returns>The attribute dictionary for fluent chaining.</returns>
         public Dictionary<string, AttributeValue> SetNullableInt(string key, int? value)
         {
-            attributes[key] = value.ToNullableAttributeValue();
+            attributes[key] = value is null
+                ? new AttributeValue { NULL = true }
+                : new AttributeValue { N = value.Value.ToString(CultureInfo.InvariantCulture) };
             return attributes;
         }
 
@@ -205,7 +214,10 @@ public static class AttributeValueExtensions
         /// <returns>The attribute dictionary for fluent chaining.</returns>
         public Dictionary<string, AttributeValue> SetLong(string key, long value)
         {
-            attributes[key] = value.ToAttributeValue();
+            attributes[key] = new AttributeValue
+            {
+                N = value.ToString(CultureInfo.InvariantCulture),
+            };
             return attributes;
         }
 
@@ -215,7 +227,9 @@ public static class AttributeValueExtensions
         /// <returns>The attribute dictionary for fluent chaining.</returns>
         public Dictionary<string, AttributeValue> SetNullableLong(string key, long? value)
         {
-            attributes[key] = value.ToNullableAttributeValue();
+            attributes[key] = value is null
+                ? new AttributeValue { NULL = true }
+                : new AttributeValue { N = value.Value.ToString(CultureInfo.InvariantCulture) };
             return attributes;
         }
 
@@ -349,7 +363,10 @@ public static class AttributeValueExtensions
         /// <returns>The attribute dictionary for fluent chaining.</returns>
         public Dictionary<string, AttributeValue> SetFloat(string key, float value)
         {
-            attributes[key] = value.ToAttributeValue();
+            attributes[key] = new AttributeValue
+            {
+                N = value.ToString(CultureInfo.InvariantCulture),
+            };
             return attributes;
         }
 
@@ -359,7 +376,9 @@ public static class AttributeValueExtensions
         /// <returns>The attribute dictionary for fluent chaining.</returns>
         public Dictionary<string, AttributeValue> SetNullableFloat(string key, float? value)
         {
-            attributes[key] = value.ToNullableAttributeValue();
+            attributes[key] = value is null
+                ? new AttributeValue { NULL = true }
+                : new AttributeValue { N = value.Value.ToString(CultureInfo.InvariantCulture) };
             return attributes;
         }
 
@@ -369,7 +388,10 @@ public static class AttributeValueExtensions
         /// <returns>The attribute dictionary for fluent chaining.</returns>
         public Dictionary<string, AttributeValue> SetDouble(string key, double value)
         {
-            attributes[key] = value.ToAttributeValue();
+            attributes[key] = new AttributeValue
+            {
+                N = value.ToString(CultureInfo.InvariantCulture),
+            };
             return attributes;
         }
 
@@ -379,7 +401,9 @@ public static class AttributeValueExtensions
         /// <returns>The attribute dictionary for fluent chaining.</returns>
         public Dictionary<string, AttributeValue> SetNullableDouble(string key, double? value)
         {
-            attributes[key] = value.ToNullableAttributeValue();
+            attributes[key] = value is null
+                ? new AttributeValue { NULL = true }
+                : new AttributeValue { N = value.Value.ToString(CultureInfo.InvariantCulture) };
             return attributes;
         }
 
@@ -389,7 +413,10 @@ public static class AttributeValueExtensions
         /// <returns>The attribute dictionary for fluent chaining.</returns>
         public Dictionary<string, AttributeValue> SetDecimal(string key, decimal value)
         {
-            attributes[key] = value.ToAttributeValue();
+            attributes[key] = new AttributeValue
+            {
+                N = value.ToString(CultureInfo.InvariantCulture),
+            };
             return attributes;
         }
 
@@ -399,7 +426,9 @@ public static class AttributeValueExtensions
         /// <returns>The attribute dictionary for fluent chaining.</returns>
         public Dictionary<string, AttributeValue> SetNullableDecimal(string key, decimal? value)
         {
-            attributes[key] = value.ToNullableAttributeValue();
+            attributes[key] = value is null
+                ? new AttributeValue { NULL = true }
+                : new AttributeValue { N = value.Value.ToString(CultureInfo.InvariantCulture) };
             return attributes;
         }
 
@@ -481,7 +510,7 @@ public static class AttributeValueExtensions
         /// <returns>The attribute dictionary for fluent chaining.</returns>
         public Dictionary<string, AttributeValue> SetGuid(string key, Guid value)
         {
-            attributes[key] = value.ToAttributeValue();
+            attributes[key] = new AttributeValue { S = value.ToString() };
             return attributes;
         }
 
@@ -491,7 +520,9 @@ public static class AttributeValueExtensions
         /// <returns>The attribute dictionary for fluent chaining.</returns>
         public Dictionary<string, AttributeValue> SetNullableGuid(string key, Guid? value)
         {
-            attributes[key] = value.ToNullableAttributeValue();
+            attributes[key] = value is null
+                ? new AttributeValue { NULL = true }
+                : new AttributeValue { S = value.Value.ToString() };
             return attributes;
         }
 
@@ -505,7 +536,7 @@ public static class AttributeValueExtensions
         /// <returns>The attribute dictionary for fluent chaining.</returns>
         public Dictionary<string, AttributeValue> SetGuid(string key, Guid value, string format)
         {
-            attributes[key] = value.ToAttributeValue(format);
+            attributes[key] = new AttributeValue { S = value.ToString(format) };
             return attributes;
         }
 
@@ -526,7 +557,9 @@ public static class AttributeValueExtensions
             string format
         )
         {
-            attributes[key] = value.ToNullableAttributeValue(format);
+            attributes[key] = value is null
+                ? new AttributeValue { NULL = true }
+                : new AttributeValue { S = value.Value.ToString(format) };
             return attributes;
         }
 
@@ -822,7 +855,10 @@ public static class AttributeValueExtensions
         /// <returns>The attribute dictionary for fluent chaining.</returns>
         public Dictionary<string, AttributeValue> SetDateTime(string key, DateTime value)
         {
-            attributes[key] = value.ToAttributeValue();
+            attributes[key] = new AttributeValue
+            {
+                S = value.ToString("o", CultureInfo.InvariantCulture),
+            };
             return attributes;
         }
 
@@ -832,7 +868,12 @@ public static class AttributeValueExtensions
         /// <returns>The attribute dictionary for fluent chaining.</returns>
         public Dictionary<string, AttributeValue> SetNullableDateTime(string key, DateTime? value)
         {
-            attributes[key] = value.ToNullableAttributeValue();
+            attributes[key] = value is null
+                ? new AttributeValue { NULL = true }
+                : new AttributeValue
+                {
+                    S = value.Value.ToString("o", CultureInfo.InvariantCulture),
+                };
             return attributes;
         }
 
@@ -845,7 +886,10 @@ public static class AttributeValueExtensions
             DateTimeOffset value
         )
         {
-            attributes[key] = value.ToAttributeValue();
+            attributes[key] = new AttributeValue
+            {
+                S = value.ToString("o", CultureInfo.InvariantCulture),
+            };
             return attributes;
         }
 
@@ -858,7 +902,12 @@ public static class AttributeValueExtensions
             DateTimeOffset? value
         )
         {
-            attributes[key] = value.ToNullableAttributeValue();
+            attributes[key] = value is null
+                ? new AttributeValue { NULL = true }
+                : new AttributeValue
+                {
+                    S = value.Value.ToString("o", CultureInfo.InvariantCulture),
+                };
             return attributes;
         }
 
@@ -868,7 +917,10 @@ public static class AttributeValueExtensions
         /// <returns>The attribute dictionary for fluent chaining.</returns>
         public Dictionary<string, AttributeValue> SetTimeSpan(string key, TimeSpan value)
         {
-            attributes[key] = value.ToAttributeValue();
+            attributes[key] = new AttributeValue
+            {
+                S = value.ToString("c", CultureInfo.InvariantCulture),
+            };
             return attributes;
         }
 
@@ -878,7 +930,12 @@ public static class AttributeValueExtensions
         /// <returns>The attribute dictionary for fluent chaining.</returns>
         public Dictionary<string, AttributeValue> SetNullableTimeSpan(string key, TimeSpan? value)
         {
-            attributes[key] = value.ToNullableAttributeValue();
+            attributes[key] = value is null
+                ? new AttributeValue { NULL = true }
+                : new AttributeValue
+                {
+                    S = value.Value.ToString("c", CultureInfo.InvariantCulture),
+                };
             return attributes;
         }
 
@@ -897,7 +954,10 @@ public static class AttributeValueExtensions
             string format
         )
         {
-            attributes[key] = value.ToAttributeValue(format);
+            attributes[key] = new AttributeValue
+            {
+                S = value.ToString(format, CultureInfo.InvariantCulture),
+            };
             return attributes;
         }
 
@@ -919,7 +979,12 @@ public static class AttributeValueExtensions
             string format
         )
         {
-            attributes[key] = value.ToNullableAttributeValue(format);
+            attributes[key] = value is null
+                ? new AttributeValue { NULL = true }
+                : new AttributeValue
+                {
+                    S = value.Value.ToString(format, CultureInfo.InvariantCulture),
+                };
             return attributes;
         }
 
@@ -941,7 +1006,10 @@ public static class AttributeValueExtensions
             string format
         )
         {
-            attributes[key] = value.ToAttributeValue(format);
+            attributes[key] = new AttributeValue
+            {
+                S = value.ToString(format, CultureInfo.InvariantCulture),
+            };
             return attributes;
         }
 
@@ -963,7 +1031,12 @@ public static class AttributeValueExtensions
             string format
         )
         {
-            attributes[key] = value.ToNullableAttributeValue(format);
+            attributes[key] = value is null
+                ? new AttributeValue { NULL = true }
+                : new AttributeValue
+                {
+                    S = value.Value.ToString(format, CultureInfo.InvariantCulture),
+                };
             return attributes;
         }
 
@@ -982,7 +1055,10 @@ public static class AttributeValueExtensions
             string format
         )
         {
-            attributes[key] = value.ToAttributeValue(format);
+            attributes[key] = new AttributeValue
+            {
+                S = value.ToString(format, CultureInfo.InvariantCulture),
+            };
             return attributes;
         }
 
@@ -1004,7 +1080,12 @@ public static class AttributeValueExtensions
             string format
         )
         {
-            attributes[key] = value.ToNullableAttributeValue(format);
+            attributes[key] = value is null
+                ? new AttributeValue { NULL = true }
+                : new AttributeValue
+                {
+                    S = value.Value.ToString(format, CultureInfo.InvariantCulture),
+                };
             return attributes;
         }
 
@@ -1072,7 +1153,7 @@ public static class AttributeValueExtensions
         public Dictionary<string, AttributeValue> SetEnum<TEnum>(string key, TEnum value)
             where TEnum : struct, Enum
         {
-            attributes[key] = value.ToAttributeValue();
+            attributes[key] = new AttributeValue { S = value.ToString() };
             return attributes;
         }
 
@@ -1084,504 +1165,20 @@ public static class AttributeValueExtensions
         public Dictionary<string, AttributeValue> SetNullableEnum<TEnum>(string key, TEnum? value)
             where TEnum : struct, Enum
         {
-            attributes[key] = value.ToNullableAttributeValue();
+            attributes[key] = value is null
+                ? new AttributeValue { NULL = true }
+                : new AttributeValue { S = value.Value.ToString() };
             return attributes;
         }
 
         #endregion
     }
 
-    #region String Extensions
-
-    extension(string value)
-    {
-        /// <summary>Converts a string value to a DynamoDB <see cref="AttributeValue" />.</summary>
-        /// <returns>An <see cref="AttributeValue" /> containing the string value.</returns>
-        public AttributeValue ToAttributeValue() => new() { S = value };
-    }
-
-    extension(string? value)
-    {
-        /// <summary>Converts a nullable string value to a DynamoDB <see cref="AttributeValue" />.</summary>
-        /// <returns>
-        ///     An <see cref="AttributeValue" /> containing the string value, or a NULL attribute if the
-        ///     value is <c>null</c>.
-        /// </returns>
-        public AttributeValue ToNullableAttributeValue() =>
-            value is null ? new AttributeValue { NULL = true } : new AttributeValue { S = value };
-    }
-
-    #endregion
-
-    #region Boolean Extensions
-
-    extension(bool value)
-    {
-        /// <summary>Converts a boolean value to a DynamoDB <see cref="AttributeValue" />.</summary>
-        /// <returns>An <see cref="AttributeValue" /> containing the boolean value.</returns>
-        public AttributeValue ToAttributeValue() => new() { BOOL = value };
-    }
-
-    extension(bool? value)
-    {
-        /// <summary>Converts a nullable boolean value to a DynamoDB <see cref="AttributeValue" />.</summary>
-        /// <returns>
-        ///     An <see cref="AttributeValue" /> containing the boolean value, or a NULL attribute if the
-        ///     value is <c>null</c>.
-        /// </returns>
-        public AttributeValue ToNullableAttributeValue() =>
-            value is null
-                ? new AttributeValue { NULL = true }
-                : new AttributeValue { BOOL = value };
-    }
-
-    #endregion
-
-    #region Integer Extensions
-
-    extension(int value)
-    {
-        /// <summary>Converts an integer value to a DynamoDB <see cref="AttributeValue" />.</summary>
-        /// <returns>An <see cref="AttributeValue" /> containing the numeric value.</returns>
-        /// <remarks>Formatting uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
-        public AttributeValue ToAttributeValue() =>
-            new() { N = value.ToString(CultureInfo.InvariantCulture) };
-    }
-
-    extension(int? value)
-    {
-        /// <summary>Converts a nullable integer value to a DynamoDB <see cref="AttributeValue" />.</summary>
-        /// <returns>
-        ///     An <see cref="AttributeValue" /> containing the numeric value, or a NULL attribute if the
-        ///     value is <c>null</c>.
-        /// </returns>
-        /// <remarks>Formatting uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
-        public AttributeValue ToNullableAttributeValue() =>
-            value is null
-                ? new AttributeValue { NULL = true }
-                : new AttributeValue { N = value.Value.ToString(CultureInfo.InvariantCulture) };
-    }
-
-    extension(long value)
-    {
-        /// <summary>Converts a long integer value to a DynamoDB <see cref="AttributeValue" />.</summary>
-        /// <returns>An <see cref="AttributeValue" /> containing the numeric value.</returns>
-        /// <remarks>Formatting uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
-        public AttributeValue ToAttributeValue() =>
-            new() { N = value.ToString(CultureInfo.InvariantCulture) };
-    }
-
-    extension(long? value)
-    {
-        /// <summary>Converts a nullable long integer value to a DynamoDB <see cref="AttributeValue" />.</summary>
-        /// <returns>
-        ///     An <see cref="AttributeValue" /> containing the numeric value, or a NULL attribute if the
-        ///     value is <c>null</c>.
-        /// </returns>
-        /// <remarks>Formatting uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
-        public AttributeValue ToNullableAttributeValue() =>
-            value is null
-                ? new AttributeValue { NULL = true }
-                : new AttributeValue { N = value.Value.ToString(CultureInfo.InvariantCulture) };
-    }
-
-    #endregion
-
-    #region Floating Point Extensions
-
-    extension(float value)
-    {
-        /// <summary>
-        ///     Converts a single-precision floating-point value to a DynamoDB
-        ///     <see cref="AttributeValue" />.
-        /// </summary>
-        /// <returns>An <see cref="AttributeValue" /> containing the numeric value.</returns>
-        /// <remarks>Formatting uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
-        public AttributeValue ToAttributeValue() =>
-            new() { N = value.ToString(CultureInfo.InvariantCulture) };
-    }
-
-    extension(float? value)
-    {
-        /// <summary>
-        ///     Converts a nullable single-precision floating-point value to a DynamoDB
-        ///     <see cref="AttributeValue" />.
-        /// </summary>
-        /// <returns>
-        ///     An <see cref="AttributeValue" /> containing the numeric value, or a NULL attribute if the
-        ///     value is <c>null</c>.
-        /// </returns>
-        /// <remarks>Formatting uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
-        public AttributeValue ToNullableAttributeValue() =>
-            value is null
-                ? new AttributeValue { NULL = true }
-                : new AttributeValue { N = value.Value.ToString(CultureInfo.InvariantCulture) };
-    }
-
-    extension(double value)
-    {
-        /// <summary>
-        ///     Converts a double-precision floating-point value to a DynamoDB
-        ///     <see cref="AttributeValue" />.
-        /// </summary>
-        /// <returns>An <see cref="AttributeValue" /> containing the numeric value.</returns>
-        /// <remarks>Formatting uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
-        public AttributeValue ToAttributeValue() =>
-            new() { N = value.ToString(CultureInfo.InvariantCulture) };
-    }
-
-    extension(double? value)
-    {
-        /// <summary>
-        ///     Converts a nullable double-precision floating-point value to a DynamoDB
-        ///     <see cref="AttributeValue" />.
-        /// </summary>
-        /// <returns>
-        ///     An <see cref="AttributeValue" /> containing the numeric value, or a NULL attribute if the
-        ///     value is <c>null</c>.
-        /// </returns>
-        /// <remarks>Formatting uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
-        public AttributeValue ToNullableAttributeValue() =>
-            value is null
-                ? new AttributeValue { NULL = true }
-                : new AttributeValue { N = value.Value.ToString(CultureInfo.InvariantCulture) };
-    }
-
-    extension(decimal value)
-    {
-        /// <summary>Converts a decimal value to a DynamoDB <see cref="AttributeValue" />.</summary>
-        /// <returns>An <see cref="AttributeValue" /> containing the numeric value.</returns>
-        /// <remarks>Formatting uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
-        public AttributeValue ToAttributeValue() =>
-            new() { N = value.ToString(CultureInfo.InvariantCulture) };
-    }
-
-    extension(decimal? value)
-    {
-        /// <summary>Converts a nullable decimal value to a DynamoDB <see cref="AttributeValue" />.</summary>
-        /// <returns>
-        ///     An <see cref="AttributeValue" /> containing the numeric value, or a NULL attribute if the
-        ///     value is <c>null</c>.
-        /// </returns>
-        /// <remarks>Formatting uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
-        public AttributeValue ToNullableAttributeValue() =>
-            value is null
-                ? new AttributeValue { NULL = true }
-                : new AttributeValue { N = value.Value.ToString(CultureInfo.InvariantCulture) };
-    }
-
-    #endregion
-
-    #region Guid Extensions
-
-    extension(Guid value)
-    {
-        /// <summary>Converts a <see cref="Guid" /> value to a DynamoDB <see cref="AttributeValue" />.</summary>
-        /// <returns>An <see cref="AttributeValue" /> containing the <see cref="Guid" /> as a string.</returns>
-        public AttributeValue ToAttributeValue() => new() { S = value.ToString() };
-
-        /// <summary>
-        ///     Converts a <see cref="Guid" /> value to a DynamoDB <see cref="AttributeValue" /> using a
-        ///     specific format string.
-        /// </summary>
-        /// <param name="format">
-        ///     The format string to use when converting the value to a string. Valid formats:
-        ///     "N", "D", "B", "P", "X".
-        /// </param>
-        /// <returns>An <see cref="AttributeValue" /> containing the <see cref="Guid" /> as a string.</returns>
-        public AttributeValue ToAttributeValue(string format) =>
-            new() { S = value.ToString(format) };
-    }
-
-    extension(Guid? value)
-    {
-        /// <summary>Converts a nullable <see cref="Guid" /> value to a DynamoDB <see cref="AttributeValue" />.</summary>
-        /// <returns>
-        ///     An <see cref="AttributeValue" /> containing the <see cref="Guid" /> as a string, or a NULL
-        ///     attribute if the value is <c>null</c>.
-        /// </returns>
-        public AttributeValue ToNullableAttributeValue() =>
-            value is null
-                ? new AttributeValue { NULL = true }
-                : new AttributeValue { S = value.Value.ToString() };
-
-        /// <summary>
-        ///     Converts a nullable <see cref="Guid" /> value to a DynamoDB <see cref="AttributeValue" />
-        ///     using a specific format string.
-        /// </summary>
-        /// <param name="format">
-        ///     The format string to use when converting the value to a string. Valid formats:
-        ///     "N", "D", "B", "P", "X".
-        /// </param>
-        /// <returns>
-        ///     An <see cref="AttributeValue" /> containing the <see cref="Guid" /> as a string, or a NULL
-        ///     attribute if the value is <c>null</c>.
-        /// </returns>
-        public AttributeValue ToNullableAttributeValue(string format) =>
-            value is null
-                ? new AttributeValue { NULL = true }
-                : new AttributeValue { S = value.Value.ToString(format) };
-    }
-
-    #endregion
-
-    #region DateTime Extensions
-
-    extension(DateTime value)
-    {
-        /// <summary>Converts a <see cref="DateTime" /> value to a DynamoDB <see cref="AttributeValue" />.</summary>
-        /// <returns>
-        ///     An <see cref="AttributeValue" /> containing the <see cref="DateTime" /> in ISO-8601
-        ///     format.
-        /// </returns>
-        /// <remarks>
-        ///     Formatting uses <see cref="CultureInfo.InvariantCulture" /> with round-trip format
-        ///     specifier.
-        /// </remarks>
-        public AttributeValue ToAttributeValue() =>
-            new() { S = value.ToString("o", CultureInfo.InvariantCulture) };
-
-        /// <summary>
-        ///     Converts a <see cref="DateTime" /> value to a DynamoDB <see cref="AttributeValue" /> using
-        ///     a specific format string.
-        /// </summary>
-        /// <param name="format">
-        ///     The format string to use when converting the value to a string (e.g.,
-        ///     "yyyy-MM-dd", "yyyyMMdd", "o").
-        /// </param>
-        /// <returns>
-        ///     An <see cref="AttributeValue" /> containing the <see cref="DateTime" /> in the specified
-        ///     format.
-        /// </returns>
-        /// <remarks>Formatting uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
-        public AttributeValue ToAttributeValue(string format) =>
-            new() { S = value.ToString(format, CultureInfo.InvariantCulture) };
-    }
-
-    extension(DateTime? value)
-    {
-        /// <summary>
-        ///     Converts a nullable <see cref="DateTime" /> value to a DynamoDB
-        ///     <see cref="AttributeValue" />.
-        /// </summary>
-        /// <returns>
-        ///     An <see cref="AttributeValue" /> containing the <see cref="DateTime" /> in ISO-8601
-        ///     format, or a NULL attribute if the value is <c>null</c>.
-        /// </returns>
-        /// <remarks>
-        ///     Formatting uses <see cref="CultureInfo.InvariantCulture" /> with round-trip format
-        ///     specifier.
-        /// </remarks>
-        public AttributeValue ToNullableAttributeValue() =>
-            value is null
-                ? new AttributeValue { NULL = true }
-                : new AttributeValue
-                {
-                    S = value.Value.ToString("o", CultureInfo.InvariantCulture),
-                };
-
-        /// <summary>
-        ///     Converts a nullable <see cref="DateTime" /> value to a DynamoDB
-        ///     <see cref="AttributeValue" /> using a specific format string.
-        /// </summary>
-        /// <param name="format">
-        ///     The format string to use when converting the value to a string (e.g.,
-        ///     "yyyy-MM-dd", "yyyyMMdd", "o").
-        /// </param>
-        /// <returns>
-        ///     An <see cref="AttributeValue" /> containing the <see cref="DateTime" /> in the specified
-        ///     format, or a NULL attribute if the value is <c>null</c>.
-        /// </returns>
-        /// <remarks>Formatting uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
-        public AttributeValue ToNullableAttributeValue(string format) =>
-            value is null
-                ? new AttributeValue { NULL = true }
-                : new AttributeValue
-                {
-                    S = value.Value.ToString(format, CultureInfo.InvariantCulture),
-                };
-    }
-
-    extension(DateTimeOffset value)
-    {
-        /// <summary>
-        ///     Converts a <see cref="DateTimeOffset" /> value to a DynamoDB <see cref="AttributeValue" />
-        ///     .
-        /// </summary>
-        /// <returns>
-        ///     An <see cref="AttributeValue" /> containing the <see cref="DateTimeOffset" /> in ISO-8601
-        ///     format.
-        /// </returns>
-        /// <remarks>
-        ///     Formatting uses <see cref="CultureInfo.InvariantCulture" /> with round-trip format
-        ///     specifier.
-        /// </remarks>
-        public AttributeValue ToAttributeValue() =>
-            new() { S = value.ToString("o", CultureInfo.InvariantCulture) };
-
-        /// <summary>
-        ///     Converts a <see cref="DateTimeOffset" /> value to a DynamoDB <see cref="AttributeValue" />
-        ///     using a specific format string.
-        /// </summary>
-        /// <param name="format">
-        ///     The format string to use when converting the value to a string (e.g.,
-        ///     "yyyy-MM-dd", "o").
-        /// </param>
-        /// <returns>
-        ///     An <see cref="AttributeValue" /> containing the <see cref="DateTimeOffset" /> in the
-        ///     specified format.
-        /// </returns>
-        /// <remarks>Formatting uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
-        public AttributeValue ToAttributeValue(string format) =>
-            new() { S = value.ToString(format, CultureInfo.InvariantCulture) };
-    }
-
-    extension(DateTimeOffset? value)
-    {
-        /// <summary>
-        ///     Converts a nullable <see cref="DateTimeOffset" /> value to a DynamoDB
-        ///     <see cref="AttributeValue" />.
-        /// </summary>
-        /// <returns>
-        ///     An <see cref="AttributeValue" /> containing the <see cref="DateTimeOffset" /> in ISO-8601
-        ///     format, or a NULL attribute if the value is <c>null</c>.
-        /// </returns>
-        /// <remarks>
-        ///     Formatting uses <see cref="CultureInfo.InvariantCulture" /> with round-trip format
-        ///     specifier.
-        /// </remarks>
-        public AttributeValue ToNullableAttributeValue() =>
-            value is null
-                ? new AttributeValue { NULL = true }
-                : new AttributeValue
-                {
-                    S = value.Value.ToString("o", CultureInfo.InvariantCulture),
-                };
-
-        /// <summary>
-        ///     Converts a nullable <see cref="DateTimeOffset" /> value to a DynamoDB
-        ///     <see cref="AttributeValue" /> using a specific format string.
-        /// </summary>
-        /// <param name="format">
-        ///     The format string to use when converting the value to a string (e.g.,
-        ///     "yyyy-MM-dd", "o").
-        /// </param>
-        /// <returns>
-        ///     An <see cref="AttributeValue" /> containing the <see cref="DateTimeOffset" /> in the
-        ///     specified format, or a NULL attribute if the value is <c>null</c>.
-        /// </returns>
-        /// <remarks>Formatting uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
-        public AttributeValue ToNullableAttributeValue(string format) =>
-            value is null
-                ? new AttributeValue { NULL = true }
-                : new AttributeValue
-                {
-                    S = value.Value.ToString(format, CultureInfo.InvariantCulture),
-                };
-    }
-
-    extension(TimeSpan value)
-    {
-        /// <summary>Converts a <see cref="TimeSpan" /> value to a DynamoDB <see cref="AttributeValue" />.</summary>
-        /// <returns>
-        ///     An <see cref="AttributeValue" /> containing the <see cref="TimeSpan" /> in constant
-        ///     format.
-        /// </returns>
-        /// <remarks>
-        ///     Formatting uses <see cref="CultureInfo.InvariantCulture" /> with constant format
-        ///     specifier.
-        /// </remarks>
-        public AttributeValue ToAttributeValue() =>
-            new() { S = value.ToString("c", CultureInfo.InvariantCulture) };
-
-        /// <summary>
-        ///     Converts a <see cref="TimeSpan" /> value to a DynamoDB <see cref="AttributeValue" /> using
-        ///     a specific format string.
-        /// </summary>
-        /// <param name="format">
-        ///     The format string to use when converting the value to a string (e.g., "c",
-        ///     "g", "G").
-        /// </param>
-        /// <returns>
-        ///     An <see cref="AttributeValue" /> containing the <see cref="TimeSpan" /> in the specified
-        ///     format.
-        /// </returns>
-        /// <remarks>Formatting uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
-        public AttributeValue ToAttributeValue(string format) =>
-            new() { S = value.ToString(format, CultureInfo.InvariantCulture) };
-    }
-
-    extension(TimeSpan? value)
-    {
-        /// <summary>
-        ///     Converts a nullable <see cref="TimeSpan" /> value to a DynamoDB
-        ///     <see cref="AttributeValue" />.
-        /// </summary>
-        /// <returns>
-        ///     An <see cref="AttributeValue" /> containing the <see cref="TimeSpan" /> in constant
-        ///     format, or a NULL attribute if the value is <c>null</c>.
-        /// </returns>
-        /// <remarks>
-        ///     Formatting uses <see cref="CultureInfo.InvariantCulture" /> with constant format
-        ///     specifier.
-        /// </remarks>
-        public AttributeValue ToNullableAttributeValue() =>
-            value is null
-                ? new AttributeValue { NULL = true }
-                : new AttributeValue
-                {
-                    S = value.Value.ToString("c", CultureInfo.InvariantCulture),
-                };
-
-        /// <summary>
-        ///     Converts a nullable <see cref="TimeSpan" /> value to a DynamoDB
-        ///     <see cref="AttributeValue" /> using a specific format string.
-        /// </summary>
-        /// <param name="format">
-        ///     The format string to use when converting the value to a string (e.g., "c",
-        ///     "g", "G").
-        /// </param>
-        /// <returns>
-        ///     An <see cref="AttributeValue" /> containing the <see cref="TimeSpan" /> in the specified
-        ///     format, or a NULL attribute if the value is <c>null</c>.
-        /// </returns>
-        /// <remarks>Formatting uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
-        public AttributeValue ToNullableAttributeValue(string format) =>
-            value is null
-                ? new AttributeValue { NULL = true }
-                : new AttributeValue
-                {
-                    S = value.Value.ToString(format, CultureInfo.InvariantCulture),
-                };
-    }
-
-    #endregion
-
-    #region Enum Extensions
-
-    extension<TEnum>(TEnum value)
-        where TEnum : struct, Enum
-    {
-        /// <summary>Converts an enum value to a DynamoDB <see cref="AttributeValue" />.</summary>
-        /// <typeparam name="TEnum">The enum type.</typeparam>
-        /// <returns>An <see cref="AttributeValue" /> containing the enum value as a string.</returns>
-        public AttributeValue ToAttributeValue() => new() { S = value.ToString() };
-    }
-
-    extension<TEnum>(TEnum? value)
-        where TEnum : struct, Enum
-    {
-        /// <summary>Converts a nullable enum value to a DynamoDB <see cref="AttributeValue" />.</summary>
-        /// <typeparam name="TEnum">The enum type.</typeparam>
-        /// <returns>
-        ///     An <see cref="AttributeValue" /> containing the enum value as a string, or a NULL
-        ///     attribute if the value is <c>null</c>.
-        /// </returns>
-        public AttributeValue ToNullableAttributeValue() =>
-            value is null
-                ? new AttributeValue { NULL = true }
-                : new AttributeValue { S = value.Value.ToString() };
-    }
-
-    #endregion
+    private static bool ShouldSet(string? value, bool omitEmptyStrings, bool omitNullStrings) =>
+        value switch
+        {
+            null when omitNullStrings => false,
+            { Length: 0 } when omitEmptyStrings => false,
+            _ => true,
+        };
 }

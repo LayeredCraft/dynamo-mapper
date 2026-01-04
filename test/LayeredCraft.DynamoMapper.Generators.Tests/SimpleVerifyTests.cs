@@ -54,28 +54,28 @@ public class SimpleVerifyTests
 
                 public class ExampleEntity
                 {
-                    public int Age { get; set; }
-                    public decimal Amount { get; set; }
-                    public DateTimeOffset? CompletedAt { get; set; }
-                    public Guid CorrelationId { get; set; }
-                    public DateTime CreatedAt { get; set; }
-                    public DateTime? DeletedAt { get; set; }
-                    public TimeSpan Duration { get; set; }
-                    public string EmptyString { get; set; }
-                    public DateTimeOffset EventTime { get; set; }
-                    public bool IsDeleted { get; set; }
-                    public bool? IsOptional { get; set; }
-                    public long LongValue { get; set; }
-                    public string? Name { get; set; }
+                    public bool Bool { get; set; }
+                    public bool? NullableBool { get; set; }
+                    public DateTime DateTime { get; set; }
+                    public DateTime? NullableDateTime { get; set; }
+                    public DateTimeOffset DateTimeOffset { get; set; }
+                    public DateTimeOffset? NullableDateTimeOffset { get; set; }
+                    public decimal Decimal { get; set; }
                     public decimal? NullableDecimal { get; set; }
+                    public double Double { get; set; }
                     public double? NullableDouble { get; set; }
+                    public Guid Guid { get; set; }
+                    public Guid? NullableGuid { get; set; }
+                    public int Int { get; set; }
                     public int? NullableInt { get; set; }
+                    public long Long { get; set; }
                     public long? NullableLong { get; set; }
-                    public Guid? NullGuid { get; set; }
-                    public TimeSpan? NullTimeSpan { get; set; }
-                    public OrderStatus OrderStatus { get; set; }
-                    public double Price { get; set; }
-                    public Status? Status { get; set; }
+                    public string String { get; set; }
+                    public string? NullableString { get; set; }
+                    public TimeSpan TimeSpan { get; set; }
+                    public TimeSpan? NullableTimeSpan { get; set; }
+                    public OrderStatus Enum { get; set; }
+                    public OrderStatus? NullableEnum { get; set; }
                 }
 
                 public enum OrderStatus
@@ -85,13 +85,6 @@ public class SimpleVerifyTests
                     Shipped,
                     Delivered,
                     Cancelled,
-                }
-
-                public enum Status
-                {
-                    Active,
-                    Inactive,
-                    Suspended,
                 }
                 """,
             },
@@ -215,28 +208,28 @@ public class SimpleVerifyTests
 
                 public class ExampleEntity
                 {
-                    public int Age { get; set; }
-                    public decimal Amount { get; set; }
-                    public DateTimeOffset? CompletedAt { get; set; }
-                    public Guid CorrelationId { get; set; }
-                    public DateTime CreatedAt { get; set; }
-                    public DateTime? DeletedAt { get; set; }
-                    public TimeSpan Duration { get; set; }
-                    public string EmptyString { get; set; }
-                    public DateTimeOffset EventTime { get; set; }
-                    public bool IsDeleted { get; set; }
-                    public bool? IsOptional { get; set; }
-                    public long LongValue { get; set; }
-                    public string? Name { get; set; }
+                    public bool Bool { get; set; }
+                    public bool? NullableBool { get; set; }
+                    public DateTime DateTime { get; set; }
+                    public DateTime? NullableDateTime { get; set; }
+                    public DateTimeOffset DateTimeOffset { get; set; }
+                    public DateTimeOffset? NullableDateTimeOffset { get; set; }
+                    public decimal Decimal { get; set; }
                     public decimal? NullableDecimal { get; set; }
+                    public double Double { get; set; }
                     public double? NullableDouble { get; set; }
+                    public Guid Guid { get; set; }
+                    public Guid? NullableGuid { get; set; }
+                    public int Int { get; set; }
                     public int? NullableInt { get; set; }
+                    public long Long { get; set; }
                     public long? NullableLong { get; set; }
-                    public Guid? NullGuid { get; set; }
-                    public TimeSpan? NullTimeSpan { get; set; }
-                    public OrderStatus OrderStatus { get; set; }
-                    public double Price { get; set; }
-                    public Status? Status { get; set; }
+                    public string String { get; set; }
+                    public string? NullableString { get; set; }
+                    public TimeSpan TimeSpan { get; set; }
+                    public TimeSpan? NullableTimeSpan { get; set; }
+                    public OrderStatus Enum { get; set; }
+                    public OrderStatus? NullableEnum { get; set; }
                 }
 
                 public enum OrderStatus
@@ -246,13 +239,6 @@ public class SimpleVerifyTests
                     Shipped,
                     Delivered,
                     Cancelled,
-                }
-
-                public enum Status
-                {
-                    Active,
-                    Inactive,
-                    Suspended,
                 }
                 """,
             },

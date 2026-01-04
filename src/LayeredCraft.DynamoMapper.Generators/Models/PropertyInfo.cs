@@ -101,7 +101,9 @@ internal static class PropertyInfoExtensions
 
                 // Enums
                 INamedTypeSymbol { TypeKind: TypeKind.Enum } enumType => new PropertyInfo(
-                    $"""{propertyName} = {fromParamName}.GetEnum("{key}", {enumType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}.{enumType.MemberNames.FirstOrDefault() ?? "Default"}),""",
+                    isNullableType
+                        ? $"""{propertyName} = {fromParamName}.Get{nullable}Enum<{enumType.ToNotNullableGloballyQualifiedName()}>("{key}"),"""
+                        : $"""{propertyName} = {fromParamName}.Get{nullable}Enum("{key}", {enumType.ToNotNullableGloballyQualifiedName()}.{enumType.MemberNames.First()}),""",
                     $$"""{ "{{key}}", {{toParamName}}.{{propertyName}}.To{{nullable}}AttributeValue() },"""
                 ),
 

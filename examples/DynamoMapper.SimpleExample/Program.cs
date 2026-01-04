@@ -89,9 +89,10 @@ var exampleAttributes = new Dictionary<string, AttributeValue>
     ["OrderStatus"] = new() { S = "Pending" },
 };
 
+exampleAttributes.GetNullableEnum("key", (OrderStatus)0);
+
 var myEntity = ExampleEntityMapper.FromItem(exampleAttributes);
 
-[DynamoMapper]
 public static class ExampleEntityMapper
 {
     public static Dictionary<string, AttributeValue> ToItem(ExampleEntity source) =>
@@ -432,14 +433,4 @@ public enum OrderStatus
     Shipped,
     Delivered,
     Cancelled,
-}
-
-public static partial class MyThing
-{
-    public static partial void DoStuff(int int1);
-}
-
-public static partial class MyThing
-{
-    public static partial void DoStuff(int x) { }
 }

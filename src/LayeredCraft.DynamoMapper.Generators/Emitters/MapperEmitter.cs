@@ -33,7 +33,7 @@ internal static class MapperEmitter
             ModelClass = mapperInfo.ModelClass!,
             MapperClassNamespace = mapperInfo.MapperClass?.Namespace,
             MapperClassSignature = mapperInfo.MapperClass?.ClassSignature,
-            DictionaryCapacity = mapperInfo.ModelClass!.ToAttributeAssignments.Count,
+            DictionaryCapacity = mapperInfo.ModelClass!.Properties.Count,
         };
 
         var outputCode = TemplateHelper.Render("Templates.Mapper.scriban", model);

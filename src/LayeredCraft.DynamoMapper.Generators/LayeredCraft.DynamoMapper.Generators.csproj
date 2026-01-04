@@ -53,6 +53,10 @@
     <Compile Remove="Templates\*.scriban" />
     <EmbeddedResource Include="Templates\*.scriban" />
   </ItemGroup>
+  <ItemGroup>
+    <AdditionalFiles Include="AnalyzerReleases.Shipped.md"/>
+    <AdditionalFiles Include="AnalyzerReleases.Unshipped.md"/>
+  </ItemGroup>
   <PropertyGroup>
     <!-- Disable PolySharp's ModuleInitializerAttribute shim -->
     <PolySharpExcludeGeneratedTypes>System.Runtime.CompilerServices.ModuleInitializerAttribute</PolySharpExcludeGeneratedTypes>

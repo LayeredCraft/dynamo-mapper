@@ -22,12 +22,13 @@ using Amazon.DynamoDBv2.Model;
     {{~ if mapper_class.to_item_signature != null ~}}
     {{ generated_code_attribute }}
     {{ mapper_class.to_item_signature }}
-        => new Dictionary<string, AttributeValue>({{ dictionary_capacity }})
-        {
-            {{~ for prop in model_class.properties ~}}
-            {{ prop.to_assignments }}
-            {{~ end ~}}
-        };
+    {
+        var item = new Dictionary<string, AttributeValue>({{ dictionary_capacity }});
+        {{~ for prop in model_class.properties ~}}
+        {{ prop.to_assignments }}
+        {{~ end ~}}
+        return item;
+    }
     {{~ end ~}}
     {{~ if mapper_class.to_item_signature != null && mapper_class.from_item_signature != null ~}}
     

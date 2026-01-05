@@ -263,7 +263,7 @@ public static class AttributeValueExtensions
             if (ShouldSet(stringValue, omitEmptyStrings, omitNullStrings))
                 attributes[key] = value is null
                     ? new AttributeValue { NULL = true }
-                    : new AttributeValue { N = value.Value.ToString(CultureInfo.InvariantCulture) };
+                    : new AttributeValue { N = stringValue };
 
             return attributes;
         }
@@ -316,7 +316,7 @@ public static class AttributeValueExtensions
             if (ShouldSet(stringValue, omitEmptyStrings, omitNullStrings))
                 attributes[key] = value is null
                     ? new AttributeValue { NULL = true }
-                    : new AttributeValue { N = value.Value.ToString(CultureInfo.InvariantCulture) };
+                    : new AttributeValue { N = stringValue };
 
             return attributes;
         }
@@ -469,7 +469,7 @@ public static class AttributeValueExtensions
             if (ShouldSet(stringValue, omitEmptyStrings, omitNullStrings))
                 attributes[key] = value is null
                     ? new AttributeValue { NULL = true }
-                    : new AttributeValue { N = value.Value.ToString(CultureInfo.InvariantCulture) };
+                    : new AttributeValue { N = stringValue };
 
             return attributes;
         }
@@ -522,7 +522,7 @@ public static class AttributeValueExtensions
             if (ShouldSet(stringValue, omitEmptyStrings, omitNullStrings))
                 attributes[key] = value is null
                     ? new AttributeValue { NULL = true }
-                    : new AttributeValue { N = value.Value.ToString(CultureInfo.InvariantCulture) };
+                    : new AttributeValue { N = stringValue };
 
             return attributes;
         }
@@ -575,7 +575,7 @@ public static class AttributeValueExtensions
             if (ShouldSet(stringValue, omitEmptyStrings, omitNullStrings))
                 attributes[key] = value is null
                     ? new AttributeValue { NULL = true }
-                    : new AttributeValue { N = value.Value.ToString(CultureInfo.InvariantCulture) };
+                    : new AttributeValue { N = stringValue };
 
             return attributes;
         }
@@ -695,7 +695,7 @@ public static class AttributeValueExtensions
             if (ShouldSet(stringValue, omitEmptyStrings, omitNullStrings))
                 attributes[key] = value is null
                     ? new AttributeValue { NULL = true }
-                    : new AttributeValue { S = value.Value.ToString() };
+                    : new AttributeValue { S = stringValue };
 
             return attributes;
         }
@@ -761,7 +761,7 @@ public static class AttributeValueExtensions
             if (ShouldSet(stringValue, omitEmptyStrings, omitNullStrings))
                 attributes[key] = value is null
                     ? new AttributeValue { NULL = true }
-                    : new AttributeValue { S = value.Value.ToString(format) };
+                    : new AttributeValue { S = stringValue };
 
             return attributes;
         }
@@ -1100,10 +1100,7 @@ public static class AttributeValueExtensions
             if (ShouldSet(stringValue, omitEmptyStrings, omitNullStrings))
                 attributes[key] = value is null
                     ? new AttributeValue { NULL = true }
-                    : new AttributeValue
-                    {
-                        S = value.Value.ToString("o", CultureInfo.InvariantCulture),
-                    };
+                    : new AttributeValue { S = stringValue };
 
             return attributes;
         }
@@ -1156,10 +1153,7 @@ public static class AttributeValueExtensions
             if (ShouldSet(stringValue, omitEmptyStrings, omitNullStrings))
                 attributes[key] = value is null
                     ? new AttributeValue { NULL = true }
-                    : new AttributeValue
-                    {
-                        S = value.Value.ToString("o", CultureInfo.InvariantCulture),
-                    };
+                    : new AttributeValue { S = stringValue };
 
             return attributes;
         }
@@ -1212,10 +1206,7 @@ public static class AttributeValueExtensions
             if (ShouldSet(stringValue, omitEmptyStrings, omitNullStrings))
                 attributes[key] = value is null
                     ? new AttributeValue { NULL = true }
-                    : new AttributeValue
-                    {
-                        S = value.Value.ToString("c", CultureInfo.InvariantCulture),
-                    };
+                    : new AttributeValue { S = stringValue };
 
             return attributes;
         }
@@ -1283,10 +1274,7 @@ public static class AttributeValueExtensions
             if (ShouldSet(stringValue, omitEmptyStrings, omitNullStrings))
                 attributes[key] = value is null
                     ? new AttributeValue { NULL = true }
-                    : new AttributeValue
-                    {
-                        S = value.Value.ToString(format, CultureInfo.InvariantCulture),
-                    };
+                    : new AttributeValue { S = stringValue };
 
             return attributes;
         }
@@ -1357,10 +1345,7 @@ public static class AttributeValueExtensions
             if (ShouldSet(stringValue, omitEmptyStrings, omitNullStrings))
                 attributes[key] = value is null
                     ? new AttributeValue { NULL = true }
-                    : new AttributeValue
-                    {
-                        S = value.Value.ToString(format, CultureInfo.InvariantCulture),
-                    };
+                    : new AttributeValue { S = stringValue };
 
             return attributes;
         }
@@ -1428,10 +1413,7 @@ public static class AttributeValueExtensions
             if (ShouldSet(stringValue, omitEmptyStrings, omitNullStrings))
                 attributes[key] = value is null
                     ? new AttributeValue { NULL = true }
-                    : new AttributeValue
-                    {
-                        S = value.Value.ToString(format, CultureInfo.InvariantCulture),
-                    };
+                    : new AttributeValue { S = stringValue };
 
             return attributes;
         }
@@ -1536,7 +1518,7 @@ public static class AttributeValueExtensions
             if (ShouldSet(stringValue, omitEmptyStrings, omitNullStrings))
                 attributes[key] = value is null
                     ? new AttributeValue { NULL = true }
-                    : new AttributeValue { S = value.Value.ToString() };
+                    : new AttributeValue { S = stringValue };
 
             return attributes;
         }

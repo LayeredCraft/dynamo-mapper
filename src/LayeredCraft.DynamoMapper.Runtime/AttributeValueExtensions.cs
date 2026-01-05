@@ -34,10 +34,18 @@ public static class AttributeValueExtensions
         /// <summary>Sets a string value in the attribute dictionary.</summary>
         /// <param name="key">The attribute key to set.</param>
         /// <param name="value">The string value to set.</param>
+        /// <param name="omitEmptyStrings">Whether to omit empty string values from the DynamoDB item. Default is <c>false</c>.</param>
+        /// <param name="omitNullStrings">Whether to omit null string values from the DynamoDB item. Default is <c>true</c>.</param>
         /// <returns>The attribute dictionary for fluent chaining.</returns>
-        public Dictionary<string, AttributeValue> SetString(string key, string value)
+        public Dictionary<string, AttributeValue> SetString(
+            string key,
+            string value,
+            bool omitEmptyStrings = false,
+            bool omitNullStrings = true
+        )
         {
-            attributes[key] = new AttributeValue { S = value };
+            if (ShouldSet(value, omitEmptyStrings, omitNullStrings))
+                attributes[key] = new AttributeValue { S = value };
             return attributes;
         }
 

@@ -1047,25 +1047,10 @@ public static class AttributeValueExtensions
             return null;
         }
 
-        /// <summary>Gets a nullable enum value from the attribute dictionary.</summary>
-        /// <typeparam name="TEnum">The enum type to parse.</typeparam>
-        /// <param name="key">The attribute key to retrieve.</param>
-        /// <param name="_">
-        ///     Unused parameter that enables type inference. Allows calling without explicitly
-        ///     specifying the generic type argument.
-        /// </param>
-        /// <returns>The enum value if the key exists and is valid, otherwise <c>null</c>.</returns>
-        public TEnum? GetNullableEnum<TEnum>(string key, TEnum _)
-            where TEnum : struct => attributes.GetNullableEnum<TEnum>(key);
-
         /// <summary>Sets an enum value in the attribute dictionary.</summary>
         /// <typeparam name="TEnum">The enum type to set.</typeparam>
         /// <param name="key">The attribute key to set.</param>
         /// <param name="value">The enum value to set (can be null).</param>
-        /// <param name="omitEmptyStrings">
-        ///     Whether to omit empty string values from the DynamoDB item. Default
-        ///     is <c>false</c>.
-        /// </param>
         /// <param name="omitNullStrings">
         ///     Whether to omit null string values from the DynamoDB item. Default is
         ///     <c>true</c>.

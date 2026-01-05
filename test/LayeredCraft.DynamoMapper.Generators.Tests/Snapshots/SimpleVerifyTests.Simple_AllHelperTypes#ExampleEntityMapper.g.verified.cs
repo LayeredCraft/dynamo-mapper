@@ -23,27 +23,27 @@ public static partial class ExampleEntityMapper
     {
         var item = new Dictionary<string, AttributeValue>(22);
         item.SetBool("bool", source.Bool);
-        item.SetNullableBool("nullableBool", source.NullableBool);
+        item.SetBool("nullableBool", source.NullableBool);
         item.SetDateTime("dateTime", source.DateTime, "O");
-        item.SetNullableDateTime("nullableDateTime", source.NullableDateTime, "O");
+        item.SetDateTime("nullableDateTime", source.NullableDateTime, "O");
         item.SetDateTimeOffset("dateTimeOffset", source.DateTimeOffset, "O");
-        item.SetNullableDateTimeOffset("nullableDateTimeOffset", source.NullableDateTimeOffset, "O");
+        item.SetDateTimeOffset("nullableDateTimeOffset", source.NullableDateTimeOffset, "O");
         item.SetDecimal("decimal", source.Decimal);
-        item.SetNullableDecimal("nullableDecimal", source.NullableDecimal);
+        item.SetDecimal("nullableDecimal", source.NullableDecimal);
         item.SetDouble("double", source.Double);
-        item.SetNullableDouble("nullableDouble", source.NullableDouble);
+        item.SetDouble("nullableDouble", source.NullableDouble);
         item.SetGuid("guid", source.Guid);
-        item.SetNullableGuid("nullableGuid", source.NullableGuid);
+        item.SetGuid("nullableGuid", source.NullableGuid);
         item.SetInt("int", source.Int);
-        item.SetNullableInt("nullableInt", source.NullableInt);
+        item.SetInt("nullableInt", source.NullableInt);
         item.SetLong("long", source.Long);
-        item.SetNullableLong("nullableLong", source.NullableLong);
+        item.SetLong("nullableLong", source.NullableLong);
         item.SetString("string", source.String);
-        item.SetNullableString("nullableString", source.NullableString);
+        item.SetString("nullableString", source.NullableString);
         item.SetTimeSpan("timeSpan", source.TimeSpan);
-        item.SetNullableTimeSpan("nullableTimeSpan", source.NullableTimeSpan);
-        item.SetEnum("enum", source.Enum);
-        item.SetNullableEnum("nullableEnum", source.NullableEnum);
+        item.SetTimeSpan("nullableTimeSpan", source.NullableTimeSpan);
+        item.SetEnum<global::MyNamespace.OrderStatus>("enum", source.Enum);
+        item.SetEnum<global::MyNamespace.OrderStatus>("nullableEnum", source.NullableEnum);
         return item;
     }
     
@@ -71,7 +71,7 @@ public static partial class ExampleEntityMapper
             NullableString = item.GetNullableString("nullableString"),
             TimeSpan = item.GetTimeSpan("timeSpan"),
             NullableTimeSpan = item.GetNullableTimeSpan("nullableTimeSpan"),
-            Enum = item.GetEnum("enum", global::MyNamespace.OrderStatus.Pending),
-            NullableEnum = item.GetNullableEnum("nullableEnum", global::MyNamespace.OrderStatus.Pending),
+            Enum = item.GetEnum<global::MyNamespace.OrderStatus>("enum", global::MyNamespace.OrderStatus.Pending),
+            NullableEnum = item.GetNullableEnum<global::MyNamespace.OrderStatus>("nullableEnum"),
         };
 }

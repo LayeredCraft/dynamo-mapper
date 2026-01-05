@@ -1,6 +1,6 @@
 using DynamoMapper.Generator.Diagnostics;
 using Microsoft.CodeAnalysis;
-using Props = (string Type, string[] FromArgs, string[] ToArgs);
+using Props = (string Type, string[] FromArgs, string[] ToArgs, string Generic);
 using WellKnownType = DynamoMapper.Generator.WellKnownTypes.WellKnownTypeData.WellKnownType;
 
 namespace DynamoMapper.Generator.Models;
@@ -43,31 +43,42 @@ internal static class PropertyInfoExtensions
 
             Props? props = propertyType switch
             {
-                { SpecialType: SpecialType.System_String } => ("String", [], []),
-                { SpecialType: SpecialType.System_Boolean } => ("Bool", [], []),
-                { SpecialType: SpecialType.System_Int32 } => ("Int", [], []),
-                { SpecialType: SpecialType.System_Int64 } => ("Long", [], []),
-                { SpecialType: SpecialType.System_Single } => ("Float", [], []),
-                { SpecialType: SpecialType.System_Double } => ("Double", [], []),
-                { SpecialType: SpecialType.System_Decimal } => ("Decimal", [], []),
-                { SpecialType: SpecialType.System_DateTime } => ("DateTime", [dateFmt], [dateFmt]),
+                { SpecialType: SpecialType.System_String } => ("String", [], [], string.Empty),
+                { SpecialType: SpecialType.System_Boolean } => ("Bool", [], [], string.Empty),
+                { SpecialType: SpecialType.System_Int32 } => ("Int", [], [], string.Empty),
+                { SpecialType: SpecialType.System_Int64 } => ("Long", [], [], string.Empty),
+                { SpecialType: SpecialType.System_Single } => ("Float", [], [], string.Empty),
+                { SpecialType: SpecialType.System_Double } => ("Double", [], [], string.Empty),
+                { SpecialType: SpecialType.System_Decimal } => ("Decimal", [], [], string.Empty),
+                { SpecialType: SpecialType.System_DateTime } => (
+                    "DateTime",
+                    [dateFmt],
+                    [dateFmt],
+                    string.Empty
+                ),
                 INamedTypeSymbol t
                     when t.IsAssignableTo(WellKnownType.System_DateTimeOffset, context) => (
                     "DateTimeOffset",
                     [dateFmt],
-                    [dateFmt]
+                    [dateFmt],
+                    string.Empty
                 ),
                 INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_Guid, context) => (
                     "Guid",
                     [],
-                    []
+                    [],
+                    string.Empty
                 ),
                 INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_TimeSpan, context) =>
-                    ("TimeSpan", [], []),
-                INamedTypeSymbol { TypeKind: TypeKind.Enum } enumType => (
-                    "Enum",
-                    [$"{enumType.QualifiedName}.{enumType.MemberNames.First()}"],
-                    []
+                    ("TimeSpan", [], [], string.Empty),
+                INamedTypeSymbol { TypeKind: TypeKind.Enum } enumType => enumType.QualifiedName.Map(
+                    Props (name) =>
+                        (
+                            "Enum",
+                            isNullableType ? [] : [$"{name}.{enumType.MemberNames.First()}"],
+                            [],
+                            $"<{name}>"
+                        )
                 ),
                 _ => null,
             };
@@ -75,8 +86,8 @@ internal static class PropertyInfoExtensions
             return props is { } p
                 ? DiagnosticResult<PropertyInfo>.Success(
                     new PropertyInfo(
-                        $"{propertyName} = {fromParamName}.Get{nullable}{p.Type}({baseFromArgs.Concat(p.FromArgs).MakeArgs()}),",
-                        $"item.Set{nullable}{p.Type}({baseToArgs.Concat(p.ToArgs).MakeArgs()});"
+                        $"{propertyName} = {fromParamName}.Get{nullable}{p.Type}{p.Generic}({baseFromArgs.Concat(p.FromArgs).MakeArgs()}),",
+                        $"item.Set{p.Type}{p.Generic}({baseToArgs.Concat(p.ToArgs).MakeArgs()});"
                     )
                 )
                 : DiagnosticResult<PropertyInfo>.Failure(

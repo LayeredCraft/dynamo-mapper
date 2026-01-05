@@ -31,7 +31,7 @@ public static class AttributeValueExtensions
 
         /// <summary>Sets a string value in the attribute dictionary.</summary>
         /// <param name="key">The attribute key to set.</param>
-        /// <param name="value">The string value to set.</param>
+        /// <param name="value">The string value to set (can be null).</param>
         /// <param name="omitEmptyStrings">
         ///     Whether to omit empty string values from the DynamoDB item. Default
         ///     is <c>false</c>.
@@ -42,30 +42,6 @@ public static class AttributeValueExtensions
         /// </param>
         /// <returns>The attribute dictionary for fluent chaining.</returns>
         public Dictionary<string, AttributeValue> SetString(
-            string key,
-            string value,
-            bool omitEmptyStrings = false,
-            bool omitNullStrings = true
-        )
-        {
-            if (ShouldSet(value, omitEmptyStrings, omitNullStrings))
-                attributes[key] = new AttributeValue { S = value };
-            return attributes;
-        }
-
-        /// <summary>Sets a nullable string value in the attribute dictionary.</summary>
-        /// <param name="key">The attribute key to set.</param>
-        /// <param name="value">The nullable string value to set.</param>
-        /// <param name="omitEmptyStrings">
-        ///     Whether to omit empty string values from the DynamoDB item. Default
-        ///     is <c>false</c>.
-        /// </param>
-        /// <param name="omitNullStrings">
-        ///     Whether to omit null string values from the DynamoDB item. Default is
-        ///     <c>true</c>.
-        /// </param>
-        /// <returns>The attribute dictionary for fluent chaining.</returns>
-        public Dictionary<string, AttributeValue> SetNullableString(
             string key,
             string? value,
             bool omitEmptyStrings = false,
@@ -98,7 +74,7 @@ public static class AttributeValueExtensions
 
         /// <summary>Sets a boolean value in the attribute dictionary.</summary>
         /// <param name="key">The attribute key to set.</param>
-        /// <param name="value">The boolean value to set.</param>
+        /// <param name="value">The boolean value to set (can be null).</param>
         /// <param name="omitEmptyStrings">
         ///     Whether to omit empty string values from the DynamoDB item. Default
         ///     is <c>false</c>.
@@ -109,30 +85,6 @@ public static class AttributeValueExtensions
         /// </param>
         /// <returns>The attribute dictionary for fluent chaining.</returns>
         public Dictionary<string, AttributeValue> SetBool(
-            string key,
-            bool value,
-            bool omitEmptyStrings = false,
-            bool omitNullStrings = true
-        )
-        {
-            if (ShouldSet(value, omitNullStrings))
-                attributes[key] = new AttributeValue { BOOL = value };
-            return attributes;
-        }
-
-        /// <summary>Sets a nullable boolean value in the attribute dictionary.</summary>
-        /// <param name="key">The attribute key to set.</param>
-        /// <param name="value">The nullable boolean value to set.</param>
-        /// <param name="omitEmptyStrings">
-        ///     Whether to omit empty string values from the DynamoDB item. Default
-        ///     is <c>false</c>.
-        /// </param>
-        /// <param name="omitNullStrings">
-        ///     Whether to omit null string values from the DynamoDB item. Default is
-        ///     <c>true</c>.
-        /// </param>
-        /// <returns>The attribute dictionary for fluent chaining.</returns>
-        public Dictionary<string, AttributeValue> SetNullableBool(
             string key,
             bool? value,
             bool omitEmptyStrings = false,
@@ -217,7 +169,7 @@ public static class AttributeValueExtensions
 
         /// <summary>Sets an integer value in the attribute dictionary.</summary>
         /// <param name="key">The attribute key to set.</param>
-        /// <param name="value">The integer value to set.</param>
+        /// <param name="value">The integer value to set (can be null).</param>
         /// <param name="omitEmptyStrings">
         ///     Whether to omit empty string values from the DynamoDB item. Default
         ///     is <c>false</c>.
@@ -228,31 +180,6 @@ public static class AttributeValueExtensions
         /// </param>
         /// <returns>The attribute dictionary for fluent chaining.</returns>
         public Dictionary<string, AttributeValue> SetInt(
-            string key,
-            int value,
-            bool omitEmptyStrings = false,
-            bool omitNullStrings = true
-        )
-        {
-            var stringValue = value.ToString(CultureInfo.InvariantCulture);
-            if (ShouldSet(stringValue, omitEmptyStrings, omitNullStrings))
-                attributes[key] = new AttributeValue { N = stringValue };
-            return attributes;
-        }
-
-        /// <summary>Sets a nullable integer value in the attribute dictionary.</summary>
-        /// <param name="key">The attribute key to set.</param>
-        /// <param name="value">The nullable integer value to set.</param>
-        /// <param name="omitEmptyStrings">
-        ///     Whether to omit empty string values from the DynamoDB item. Default
-        ///     is <c>false</c>.
-        /// </param>
-        /// <param name="omitNullStrings">
-        ///     Whether to omit null string values from the DynamoDB item. Default is
-        ///     <c>true</c>.
-        /// </param>
-        /// <returns>The attribute dictionary for fluent chaining.</returns>
-        public Dictionary<string, AttributeValue> SetNullableInt(
             string key,
             int? value,
             bool omitEmptyStrings = false,
@@ -270,7 +197,7 @@ public static class AttributeValueExtensions
 
         /// <summary>Sets a long integer value in the attribute dictionary.</summary>
         /// <param name="key">The attribute key to set.</param>
-        /// <param name="value">The long value to set.</param>
+        /// <param name="value">The long value to set (can be null).</param>
         /// <param name="omitEmptyStrings">
         ///     Whether to omit empty string values from the DynamoDB item. Default
         ///     is <c>false</c>.
@@ -281,31 +208,6 @@ public static class AttributeValueExtensions
         /// </param>
         /// <returns>The attribute dictionary for fluent chaining.</returns>
         public Dictionary<string, AttributeValue> SetLong(
-            string key,
-            long value,
-            bool omitEmptyStrings = false,
-            bool omitNullStrings = true
-        )
-        {
-            var stringValue = value.ToString(CultureInfo.InvariantCulture);
-            if (ShouldSet(stringValue, omitEmptyStrings, omitNullStrings))
-                attributes[key] = new AttributeValue { N = stringValue };
-            return attributes;
-        }
-
-        /// <summary>Sets a nullable long integer value in the attribute dictionary.</summary>
-        /// <param name="key">The attribute key to set.</param>
-        /// <param name="value">The nullable long value to set.</param>
-        /// <param name="omitEmptyStrings">
-        ///     Whether to omit empty string values from the DynamoDB item. Default
-        ///     is <c>false</c>.
-        /// </param>
-        /// <param name="omitNullStrings">
-        ///     Whether to omit null string values from the DynamoDB item. Default is
-        ///     <c>true</c>.
-        /// </param>
-        /// <returns>The attribute dictionary for fluent chaining.</returns>
-        public Dictionary<string, AttributeValue> SetNullableLong(
             string key,
             long? value,
             bool omitEmptyStrings = false,
@@ -423,7 +325,7 @@ public static class AttributeValueExtensions
 
         /// <summary>Sets a single-precision floating-point value in the attribute dictionary.</summary>
         /// <param name="key">The attribute key to set.</param>
-        /// <param name="value">The float value to set.</param>
+        /// <param name="value">The float value to set (can be null).</param>
         /// <param name="omitEmptyStrings">
         ///     Whether to omit empty string values from the DynamoDB item. Default
         ///     is <c>false</c>.
@@ -434,31 +336,6 @@ public static class AttributeValueExtensions
         /// </param>
         /// <returns>The attribute dictionary for fluent chaining.</returns>
         public Dictionary<string, AttributeValue> SetFloat(
-            string key,
-            float value,
-            bool omitEmptyStrings = false,
-            bool omitNullStrings = true
-        )
-        {
-            var stringValue = value.ToString(CultureInfo.InvariantCulture);
-            if (ShouldSet(stringValue, omitEmptyStrings, omitNullStrings))
-                attributes[key] = new AttributeValue { N = stringValue };
-            return attributes;
-        }
-
-        /// <summary>Sets a nullable single-precision floating-point value in the attribute dictionary.</summary>
-        /// <param name="key">The attribute key to set.</param>
-        /// <param name="value">The nullable float value to set.</param>
-        /// <param name="omitEmptyStrings">
-        ///     Whether to omit empty string values from the DynamoDB item. Default
-        ///     is <c>false</c>.
-        /// </param>
-        /// <param name="omitNullStrings">
-        ///     Whether to omit null string values from the DynamoDB item. Default is
-        ///     <c>true</c>.
-        /// </param>
-        /// <returns>The attribute dictionary for fluent chaining.</returns>
-        public Dictionary<string, AttributeValue> SetNullableFloat(
             string key,
             float? value,
             bool omitEmptyStrings = false,
@@ -476,7 +353,7 @@ public static class AttributeValueExtensions
 
         /// <summary>Sets a double-precision floating-point value in the attribute dictionary.</summary>
         /// <param name="key">The attribute key to set.</param>
-        /// <param name="value">The double value to set.</param>
+        /// <param name="value">The double value to set (can be null).</param>
         /// <param name="omitEmptyStrings">
         ///     Whether to omit empty string values from the DynamoDB item. Default
         ///     is <c>false</c>.
@@ -487,31 +364,6 @@ public static class AttributeValueExtensions
         /// </param>
         /// <returns>The attribute dictionary for fluent chaining.</returns>
         public Dictionary<string, AttributeValue> SetDouble(
-            string key,
-            double value,
-            bool omitEmptyStrings = false,
-            bool omitNullStrings = true
-        )
-        {
-            var stringValue = value.ToString(CultureInfo.InvariantCulture);
-            if (ShouldSet(stringValue, omitEmptyStrings, omitNullStrings))
-                attributes[key] = new AttributeValue { N = stringValue };
-            return attributes;
-        }
-
-        /// <summary>Sets a nullable double-precision floating-point value in the attribute dictionary.</summary>
-        /// <param name="key">The attribute key to set.</param>
-        /// <param name="value">The nullable double value to set.</param>
-        /// <param name="omitEmptyStrings">
-        ///     Whether to omit empty string values from the DynamoDB item. Default
-        ///     is <c>false</c>.
-        /// </param>
-        /// <param name="omitNullStrings">
-        ///     Whether to omit null string values from the DynamoDB item. Default is
-        ///     <c>true</c>.
-        /// </param>
-        /// <returns>The attribute dictionary for fluent chaining.</returns>
-        public Dictionary<string, AttributeValue> SetNullableDouble(
             string key,
             double? value,
             bool omitEmptyStrings = false,
@@ -529,7 +381,7 @@ public static class AttributeValueExtensions
 
         /// <summary>Sets a decimal value in the attribute dictionary.</summary>
         /// <param name="key">The attribute key to set.</param>
-        /// <param name="value">The decimal value to set.</param>
+        /// <param name="value">The decimal value to set (can be null).</param>
         /// <param name="omitEmptyStrings">
         ///     Whether to omit empty string values from the DynamoDB item. Default
         ///     is <c>false</c>.
@@ -540,31 +392,6 @@ public static class AttributeValueExtensions
         /// </param>
         /// <returns>The attribute dictionary for fluent chaining.</returns>
         public Dictionary<string, AttributeValue> SetDecimal(
-            string key,
-            decimal value,
-            bool omitEmptyStrings = false,
-            bool omitNullStrings = true
-        )
-        {
-            var stringValue = value.ToString(CultureInfo.InvariantCulture);
-            if (ShouldSet(stringValue, omitEmptyStrings, omitNullStrings))
-                attributes[key] = new AttributeValue { N = stringValue };
-            return attributes;
-        }
-
-        /// <summary>Sets a nullable decimal value in the attribute dictionary.</summary>
-        /// <param name="key">The attribute key to set.</param>
-        /// <param name="value">The nullable decimal value to set.</param>
-        /// <param name="omitEmptyStrings">
-        ///     Whether to omit empty string values from the DynamoDB item. Default
-        ///     is <c>false</c>.
-        /// </param>
-        /// <param name="omitNullStrings">
-        ///     Whether to omit null string values from the DynamoDB item. Default is
-        ///     <c>true</c>.
-        /// </param>
-        /// <returns>The attribute dictionary for fluent chaining.</returns>
-        public Dictionary<string, AttributeValue> SetNullableDecimal(
             string key,
             decimal? value,
             bool omitEmptyStrings = false,
@@ -649,7 +476,7 @@ public static class AttributeValueExtensions
 
         /// <summary>Sets a <see cref="Guid" /> value in the attribute dictionary.</summary>
         /// <param name="key">The attribute key to set.</param>
-        /// <param name="value">The <see cref="Guid" /> value to set.</param>
+        /// <param name="value">The <see cref="Guid" /> value to set (can be null).</param>
         /// <param name="omitEmptyStrings">
         ///     Whether to omit empty string values from the DynamoDB item. Default
         ///     is <c>false</c>.
@@ -660,31 +487,6 @@ public static class AttributeValueExtensions
         /// </param>
         /// <returns>The attribute dictionary for fluent chaining.</returns>
         public Dictionary<string, AttributeValue> SetGuid(
-            string key,
-            Guid value,
-            bool omitEmptyStrings = false,
-            bool omitNullStrings = true
-        )
-        {
-            var stringValue = value.ToString();
-            if (ShouldSet(stringValue, omitEmptyStrings, omitNullStrings))
-                attributes[key] = new AttributeValue { S = stringValue };
-            return attributes;
-        }
-
-        /// <summary>Sets a nullable <see cref="Guid" /> value in the attribute dictionary.</summary>
-        /// <param name="key">The attribute key to set.</param>
-        /// <param name="value">The nullable <see cref="Guid" /> value to set.</param>
-        /// <param name="omitEmptyStrings">
-        ///     Whether to omit empty string values from the DynamoDB item. Default
-        ///     is <c>false</c>.
-        /// </param>
-        /// <param name="omitNullStrings">
-        ///     Whether to omit null string values from the DynamoDB item. Default is
-        ///     <c>true</c>.
-        /// </param>
-        /// <returns>The attribute dictionary for fluent chaining.</returns>
-        public Dictionary<string, AttributeValue> SetNullableGuid(
             string key,
             Guid? value,
             bool omitEmptyStrings = false,
@@ -702,7 +504,7 @@ public static class AttributeValueExtensions
 
         /// <summary>Sets a <see cref="Guid" /> value in the attribute dictionary using a specific format.</summary>
         /// <param name="key">The attribute key to set.</param>
-        /// <param name="value">The <see cref="Guid" /> value to set.</param>
+        /// <param name="value">The <see cref="Guid" /> value to set (can be null).</param>
         /// <param name="format">
         ///     The format string to use when converting the value to a string. Valid formats:
         ///     "N", "D", "B", "P", "X".
@@ -717,39 +519,6 @@ public static class AttributeValueExtensions
         /// </param>
         /// <returns>The attribute dictionary for fluent chaining.</returns>
         public Dictionary<string, AttributeValue> SetGuid(
-            string key,
-            Guid value,
-            string format,
-            bool omitEmptyStrings = false,
-            bool omitNullStrings = true
-        )
-        {
-            var stringValue = value.ToString(format);
-            if (ShouldSet(stringValue, omitEmptyStrings, omitNullStrings))
-                attributes[key] = new AttributeValue { S = stringValue };
-            return attributes;
-        }
-
-        /// <summary>
-        ///     Sets a nullable <see cref="Guid" /> value in the attribute dictionary using a specific
-        ///     format.
-        /// </summary>
-        /// <param name="key">The attribute key to set.</param>
-        /// <param name="value">The nullable <see cref="Guid" /> value to set.</param>
-        /// <param name="format">
-        ///     The format string to use when converting the value to a string. Valid formats:
-        ///     "N", "D", "B", "P", "X".
-        /// </param>
-        /// <param name="omitEmptyStrings">
-        ///     Whether to omit empty string values from the DynamoDB item. Default
-        ///     is <c>false</c>.
-        /// </param>
-        /// <param name="omitNullStrings">
-        ///     Whether to omit null string values from the DynamoDB item. Default is
-        ///     <c>true</c>.
-        /// </param>
-        /// <returns>The attribute dictionary for fluent chaining.</returns>
-        public Dictionary<string, AttributeValue> SetNullableGuid(
             string key,
             Guid? value,
             string format,
@@ -1054,7 +823,7 @@ public static class AttributeValueExtensions
 
         /// <summary>Sets a <see cref="DateTime" /> value in the attribute dictionary.</summary>
         /// <param name="key">The attribute key to set.</param>
-        /// <param name="value">The <see cref="DateTime" /> value to set.</param>
+        /// <param name="value">The <see cref="DateTime" /> value to set (can be null).</param>
         /// <param name="omitEmptyStrings">
         ///     Whether to omit empty string values from the DynamoDB item. Default
         ///     is <c>false</c>.
@@ -1065,31 +834,6 @@ public static class AttributeValueExtensions
         /// </param>
         /// <returns>The attribute dictionary for fluent chaining.</returns>
         public Dictionary<string, AttributeValue> SetDateTime(
-            string key,
-            DateTime value,
-            bool omitEmptyStrings = false,
-            bool omitNullStrings = true
-        )
-        {
-            var stringValue = value.ToString("o", CultureInfo.InvariantCulture);
-            if (ShouldSet(stringValue, omitEmptyStrings, omitNullStrings))
-                attributes[key] = new AttributeValue { S = stringValue };
-            return attributes;
-        }
-
-        /// <summary>Sets a nullable <see cref="DateTime" /> value in the attribute dictionary.</summary>
-        /// <param name="key">The attribute key to set.</param>
-        /// <param name="value">The nullable <see cref="DateTime" /> value to set.</param>
-        /// <param name="omitEmptyStrings">
-        ///     Whether to omit empty string values from the DynamoDB item. Default
-        ///     is <c>false</c>.
-        /// </param>
-        /// <param name="omitNullStrings">
-        ///     Whether to omit null string values from the DynamoDB item. Default is
-        ///     <c>true</c>.
-        /// </param>
-        /// <returns>The attribute dictionary for fluent chaining.</returns>
-        public Dictionary<string, AttributeValue> SetNullableDateTime(
             string key,
             DateTime? value,
             bool omitEmptyStrings = false,
@@ -1107,7 +851,7 @@ public static class AttributeValueExtensions
 
         /// <summary>Sets a <see cref="DateTimeOffset" /> value in the attribute dictionary.</summary>
         /// <param name="key">The attribute key to set.</param>
-        /// <param name="value">The <see cref="DateTimeOffset" /> value to set.</param>
+        /// <param name="value">The <see cref="DateTimeOffset" /> value to set (can be null).</param>
         /// <param name="omitEmptyStrings">
         ///     Whether to omit empty string values from the DynamoDB item. Default
         ///     is <c>false</c>.
@@ -1118,31 +862,6 @@ public static class AttributeValueExtensions
         /// </param>
         /// <returns>The attribute dictionary for fluent chaining.</returns>
         public Dictionary<string, AttributeValue> SetDateTimeOffset(
-            string key,
-            DateTimeOffset value,
-            bool omitEmptyStrings = false,
-            bool omitNullStrings = true
-        )
-        {
-            var stringValue = value.ToString("o", CultureInfo.InvariantCulture);
-            if (ShouldSet(stringValue, omitEmptyStrings, omitNullStrings))
-                attributes[key] = new AttributeValue { S = stringValue };
-            return attributes;
-        }
-
-        /// <summary>Sets a nullable <see cref="DateTimeOffset" /> value in the attribute dictionary.</summary>
-        /// <param name="key">The attribute key to set.</param>
-        /// <param name="value">The nullable <see cref="DateTimeOffset" /> value to set.</param>
-        /// <param name="omitEmptyStrings">
-        ///     Whether to omit empty string values from the DynamoDB item. Default
-        ///     is <c>false</c>.
-        /// </param>
-        /// <param name="omitNullStrings">
-        ///     Whether to omit null string values from the DynamoDB item. Default is
-        ///     <c>true</c>.
-        /// </param>
-        /// <returns>The attribute dictionary for fluent chaining.</returns>
-        public Dictionary<string, AttributeValue> SetNullableDateTimeOffset(
             string key,
             DateTimeOffset? value,
             bool omitEmptyStrings = false,
@@ -1160,7 +879,7 @@ public static class AttributeValueExtensions
 
         /// <summary>Sets a <see cref="TimeSpan" /> value in the attribute dictionary.</summary>
         /// <param name="key">The attribute key to set.</param>
-        /// <param name="value">The <see cref="TimeSpan" /> value to set.</param>
+        /// <param name="value">The <see cref="TimeSpan" /> value to set (can be null).</param>
         /// <param name="omitEmptyStrings">
         ///     Whether to omit empty string values from the DynamoDB item. Default
         ///     is <c>false</c>.
@@ -1171,31 +890,6 @@ public static class AttributeValueExtensions
         /// </param>
         /// <returns>The attribute dictionary for fluent chaining.</returns>
         public Dictionary<string, AttributeValue> SetTimeSpan(
-            string key,
-            TimeSpan value,
-            bool omitEmptyStrings = false,
-            bool omitNullStrings = true
-        )
-        {
-            var stringValue = value.ToString("c", CultureInfo.InvariantCulture);
-            if (ShouldSet(stringValue, omitEmptyStrings, omitNullStrings))
-                attributes[key] = new AttributeValue { S = stringValue };
-            return attributes;
-        }
-
-        /// <summary>Sets a nullable <see cref="TimeSpan" /> value in the attribute dictionary.</summary>
-        /// <param name="key">The attribute key to set.</param>
-        /// <param name="value">The nullable <see cref="TimeSpan" /> value to set.</param>
-        /// <param name="omitEmptyStrings">
-        ///     Whether to omit empty string values from the DynamoDB item. Default
-        ///     is <c>false</c>.
-        /// </param>
-        /// <param name="omitNullStrings">
-        ///     Whether to omit null string values from the DynamoDB item. Default is
-        ///     <c>true</c>.
-        /// </param>
-        /// <returns>The attribute dictionary for fluent chaining.</returns>
-        public Dictionary<string, AttributeValue> SetNullableTimeSpan(
             string key,
             TimeSpan? value,
             bool omitEmptyStrings = false,
@@ -1213,7 +907,7 @@ public static class AttributeValueExtensions
 
         /// <summary>Sets a <see cref="DateTime" /> value in the attribute dictionary using a specific format.</summary>
         /// <param name="key">The attribute key to set.</param>
-        /// <param name="value">The <see cref="DateTime" /> value to set.</param>
+        /// <param name="value">The <see cref="DateTime" /> value to set (can be null).</param>
         /// <param name="format">
         ///     The format string to use when converting the value to a string (e.g.,
         ///     "yyyy-MM-dd", "yyyyMMdd", "o").
@@ -1229,40 +923,6 @@ public static class AttributeValueExtensions
         /// <returns>The attribute dictionary for fluent chaining.</returns>
         /// <remarks>Formatting uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
         public Dictionary<string, AttributeValue> SetDateTime(
-            string key,
-            DateTime value,
-            string format,
-            bool omitEmptyStrings = false,
-            bool omitNullStrings = true
-        )
-        {
-            var stringValue = value.ToString(format, CultureInfo.InvariantCulture);
-            if (ShouldSet(stringValue, omitEmptyStrings, omitNullStrings))
-                attributes[key] = new AttributeValue { S = stringValue };
-            return attributes;
-        }
-
-        /// <summary>
-        ///     Sets a nullable <see cref="DateTime" /> value in the attribute dictionary using a specific
-        ///     format.
-        /// </summary>
-        /// <param name="key">The attribute key to set.</param>
-        /// <param name="value">The nullable <see cref="DateTime" /> value to set.</param>
-        /// <param name="format">
-        ///     The format string to use when converting the value to a string (e.g.,
-        ///     "yyyy-MM-dd", "yyyyMMdd", "o").
-        /// </param>
-        /// <param name="omitEmptyStrings">
-        ///     Whether to omit empty string values from the DynamoDB item. Default
-        ///     is <c>false</c>.
-        /// </param>
-        /// <param name="omitNullStrings">
-        ///     Whether to omit null string values from the DynamoDB item. Default is
-        ///     <c>true</c>.
-        /// </param>
-        /// <returns>The attribute dictionary for fluent chaining.</returns>
-        /// <remarks>Formatting uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
-        public Dictionary<string, AttributeValue> SetNullableDateTime(
             string key,
             DateTime? value,
             string format,
@@ -1284,7 +944,7 @@ public static class AttributeValueExtensions
         ///     format.
         /// </summary>
         /// <param name="key">The attribute key to set.</param>
-        /// <param name="value">The <see cref="DateTimeOffset" /> value to set.</param>
+        /// <param name="value">The <see cref="DateTimeOffset" /> value to set (can be null).</param>
         /// <param name="format">
         ///     The format string to use when converting the value to a string (e.g.,
         ///     "yyyy-MM-dd", "o").
@@ -1300,40 +960,6 @@ public static class AttributeValueExtensions
         /// <returns>The attribute dictionary for fluent chaining.</returns>
         /// <remarks>Formatting uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
         public Dictionary<string, AttributeValue> SetDateTimeOffset(
-            string key,
-            DateTimeOffset value,
-            string format,
-            bool omitEmptyStrings = false,
-            bool omitNullStrings = true
-        )
-        {
-            var stringValue = value.ToString(format, CultureInfo.InvariantCulture);
-            if (ShouldSet(stringValue, omitEmptyStrings, omitNullStrings))
-                attributes[key] = new AttributeValue { S = stringValue };
-            return attributes;
-        }
-
-        /// <summary>
-        ///     Sets a nullable <see cref="DateTimeOffset" /> value in the attribute dictionary using a
-        ///     specific format.
-        /// </summary>
-        /// <param name="key">The attribute key to set.</param>
-        /// <param name="value">The nullable <see cref="DateTimeOffset" /> value to set.</param>
-        /// <param name="format">
-        ///     The format string to use when converting the value to a string (e.g.,
-        ///     "yyyy-MM-dd", "o").
-        /// </param>
-        /// <param name="omitEmptyStrings">
-        ///     Whether to omit empty string values from the DynamoDB item. Default
-        ///     is <c>false</c>.
-        /// </param>
-        /// <param name="omitNullStrings">
-        ///     Whether to omit null string values from the DynamoDB item. Default is
-        ///     <c>true</c>.
-        /// </param>
-        /// <returns>The attribute dictionary for fluent chaining.</returns>
-        /// <remarks>Formatting uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
-        public Dictionary<string, AttributeValue> SetNullableDateTimeOffset(
             string key,
             DateTimeOffset? value,
             string format,
@@ -1352,7 +978,7 @@ public static class AttributeValueExtensions
 
         /// <summary>Sets a <see cref="TimeSpan" /> value in the attribute dictionary using a specific format.</summary>
         /// <param name="key">The attribute key to set.</param>
-        /// <param name="value">The <see cref="TimeSpan" /> value to set.</param>
+        /// <param name="value">The <see cref="TimeSpan" /> value to set (can be null).</param>
         /// <param name="format">
         ///     The format string to use when converting the value to a string (e.g., "c",
         ///     "g", "G").
@@ -1368,40 +994,6 @@ public static class AttributeValueExtensions
         /// <returns>The attribute dictionary for fluent chaining.</returns>
         /// <remarks>Formatting uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
         public Dictionary<string, AttributeValue> SetTimeSpan(
-            string key,
-            TimeSpan value,
-            string format,
-            bool omitEmptyStrings = false,
-            bool omitNullStrings = true
-        )
-        {
-            var stringValue = value.ToString(format, CultureInfo.InvariantCulture);
-            if (ShouldSet(stringValue, omitEmptyStrings, omitNullStrings))
-                attributes[key] = new AttributeValue { S = stringValue };
-            return attributes;
-        }
-
-        /// <summary>
-        ///     Sets a nullable <see cref="TimeSpan" /> value in the attribute dictionary using a specific
-        ///     format.
-        /// </summary>
-        /// <param name="key">The attribute key to set.</param>
-        /// <param name="value">The nullable <see cref="TimeSpan" /> value to set.</param>
-        /// <param name="format">
-        ///     The format string to use when converting the value to a string (e.g., "c",
-        ///     "g", "G").
-        /// </param>
-        /// <param name="omitEmptyStrings">
-        ///     Whether to omit empty string values from the DynamoDB item. Default
-        ///     is <c>false</c>.
-        /// </param>
-        /// <param name="omitNullStrings">
-        ///     Whether to omit null string values from the DynamoDB item. Default is
-        ///     <c>true</c>.
-        /// </param>
-        /// <returns>The attribute dictionary for fluent chaining.</returns>
-        /// <remarks>Formatting uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
-        public Dictionary<string, AttributeValue> SetNullableTimeSpan(
             string key,
             TimeSpan? value,
             string format,
@@ -1469,7 +1061,7 @@ public static class AttributeValueExtensions
         /// <summary>Sets an enum value in the attribute dictionary.</summary>
         /// <typeparam name="TEnum">The enum type to set.</typeparam>
         /// <param name="key">The attribute key to set.</param>
-        /// <param name="value">The enum value to set.</param>
+        /// <param name="value">The enum value to set (can be null).</param>
         /// <param name="omitEmptyStrings">
         ///     Whether to omit empty string values from the DynamoDB item. Default
         ///     is <c>false</c>.
@@ -1480,33 +1072,6 @@ public static class AttributeValueExtensions
         /// </param>
         /// <returns>The attribute dictionary for fluent chaining.</returns>
         public Dictionary<string, AttributeValue> SetEnum<TEnum>(
-            string key,
-            TEnum value,
-            bool omitEmptyStrings = false,
-            bool omitNullStrings = true
-        )
-            where TEnum : struct, Enum
-        {
-            var stringValue = value.ToString();
-            if (ShouldSet(stringValue, omitEmptyStrings, omitNullStrings))
-                attributes[key] = new AttributeValue { S = stringValue };
-            return attributes;
-        }
-
-        /// <summary>Sets a nullable enum value in the attribute dictionary.</summary>
-        /// <typeparam name="TEnum">The enum type to set.</typeparam>
-        /// <param name="key">The attribute key to set.</param>
-        /// <param name="value">The nullable enum value to set.</param>
-        /// <param name="omitEmptyStrings">
-        ///     Whether to omit empty string values from the DynamoDB item. Default
-        ///     is <c>false</c>.
-        /// </param>
-        /// <param name="omitNullStrings">
-        ///     Whether to omit null string values from the DynamoDB item. Default is
-        ///     <c>true</c>.
-        /// </param>
-        /// <returns>The attribute dictionary for fluent chaining.</returns>
-        public Dictionary<string, AttributeValue> SetNullableEnum<TEnum>(
             string key,
             TEnum? value,
             bool omitEmptyStrings = false,

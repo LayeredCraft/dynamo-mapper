@@ -22,7 +22,7 @@ public static partial class ExampleEntityMapper
     public static partial global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> ToAttributeValues(global::MyNamespace.MyDto source)
     {
         var item = new Dictionary<string, AttributeValue>(1);
-        item.SetString("name", source.Name);
+        item.SetString("name", source.Name, false, true);
         return item;
     }
     
@@ -30,6 +30,6 @@ public static partial class ExampleEntityMapper
     public static partial global::MyNamespace.MyDto FromAttributeValues(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> item)
         => new global::MyNamespace.MyDto
         {
-            Name = item.GetString("name"),
+            Name = item.GetString("name", Requiredness.InferFromNullability),
         };
 }

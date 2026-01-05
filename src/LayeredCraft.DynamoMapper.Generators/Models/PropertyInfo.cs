@@ -83,11 +83,16 @@ internal static class PropertyInfoExtensions
                 _ => null,
             };
 
+            var requiredness =
+                $"Requiredness.{context.MapperOptions.DefaultRequiredness.ToString()}";
+            var omitOptions =
+                $"{context.MapperOptions.OmitEmptyStrings.ToString().ToLowerInvariant()}, {context.MapperOptions.OmitNullStrings.ToString().ToLowerInvariant()}";
+
             return props is { } p
                 ? DiagnosticResult<PropertyInfo>.Success(
                     new PropertyInfo(
-                        $"{propertyName} = {fromParamName}.Get{nullable}{p.Type}{p.Generic}({baseFromArgs.Concat(p.FromArgs).MakeArgs()}),",
-                        $"item.Set{p.Type}{p.Generic}({baseToArgs.Concat(p.ToArgs).MakeArgs()});"
+                        $"{propertyName} = {fromParamName}.Get{nullable}{p.Type}{p.Generic}({baseFromArgs.Concat([.. p.FromArgs, requiredness]).MakeArgs()}),",
+                        $"item.Set{p.Type}{p.Generic}({baseToArgs.Concat([.. p.ToArgs, omitOptions]).MakeArgs()});"
                     )
                 )
                 : DiagnosticResult<PropertyInfo>.Failure(

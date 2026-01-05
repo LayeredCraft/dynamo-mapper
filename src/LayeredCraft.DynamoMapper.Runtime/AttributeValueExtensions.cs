@@ -1,6 +1,8 @@
 using System.Globalization;
 using Amazon.DynamoDBv2.Model;
 
+// ReSharper disable MemberCanBePrivate.Global
+
 // ReSharper disable UnusedMember.Global
 // ReSharper disable UnusedParameter.Global
 
@@ -24,17 +26,16 @@ public static class AttributeValueExtensions
         ///     <see cref="Requiredness.InferFromNullability" />.
         /// </param>
         /// <returns>
-        ///     The string value if the key exists and contains a non-NULL value; otherwise <c>null</c>
-        ///     if the key is missing or the attribute has a DynamoDB NULL value.
+        ///     The string value if the key exists and contains a non-NULL value; otherwise <c>null</c> if
+        ///     the key is missing or the attribute has a DynamoDB NULL value.
         /// </returns>
         public string? GetNullableString(
             string key,
             Requiredness requiredness = Requiredness.InferFromNullability
-        )
-        {
-            var value = attributes.GetNullableValue(key, requiredness);
-            return value.NULL is true ? null : value.S;
-        }
+        ) =>
+            attributes
+                .GetNullableValue(key, requiredness)
+                .Map(static value => value.IsNull ? null : value.S);
 
         /// <summary>Gets a string value from the attribute dictionary.</summary>
         /// <param name="key">The attribute key to retrieve.</param>
@@ -50,9 +51,9 @@ public static class AttributeValueExtensions
             string key,
             Requiredness requiredness = Requiredness.InferFromNullability
         ) =>
-            !attributes.TryGetValue(key, requiredness, out var value) || value!.NULL is true
-                ? string.Empty
-                : value.S;
+            attributes.TryGetValue(key, requiredness, out var value) && value.IsNotNull
+                ? value!.S
+                : string.Empty;
 
         /// <summary>Sets a string value in the attribute dictionary.</summary>
         /// <param name="key">The attribute key to set.</param>
@@ -87,15 +88,36 @@ public static class AttributeValueExtensions
 
         /// <summary>Gets a boolean value from the attribute dictionary.</summary>
         /// <param name="key">The attribute key to retrieve.</param>
-        /// <returns>The boolean value if the key exists, otherwise <c>false</c>.</returns>
-        public bool GetBool(string key) =>
-            attributes.TryGetValue(key, out var value) && (value.BOOL ?? false);
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <returns>
+        ///     The boolean value if the key exists and contains a non-NULL value; otherwise <c>false</c>
+        ///     if the key is missing or the attribute has a DynamoDB NULL value.
+        /// </returns>
+        public bool GetBool(
+            string key,
+            Requiredness requiredness = Requiredness.InferFromNullability
+        ) => attributes.TryGetValue(key, requiredness, out var value) && value.IsNotNull;
 
         /// <summary>Gets a nullable boolean value from the attribute dictionary.</summary>
         /// <param name="key">The attribute key to retrieve.</param>
-        /// <returns>The boolean value if the key exists, otherwise <c>null</c>.</returns>
-        public bool? GetNullableBool(string key) =>
-            attributes.TryGetValue(key, out var value) ? value.BOOL : null;
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <returns>
+        ///     The boolean value if the key exists and contains a non-NULL value; otherwise <c>null</c>
+        ///     if the key is missing or the attribute has a DynamoDB NULL value.
+        /// </returns>
+        public bool? GetNullableBool(
+            string key,
+            Requiredness requiredness = Requiredness.InferFromNullability
+        ) =>
+            attributes
+                .GetNullableValue(key, requiredness)
+                .Map(static value => value.IsNull ? null : value.BOOL);
 
         /// <summary>Sets a boolean value in the attribute dictionary.</summary>
         /// <param name="key">The attribute key to set.</param>
@@ -130,67 +152,93 @@ public static class AttributeValueExtensions
 
         /// <summary>Gets an integer value from the attribute dictionary.</summary>
         /// <param name="key">The attribute key to retrieve.</param>
-        /// <returns>The integer value if the key exists and is valid, otherwise <c>0</c>.</returns>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <returns>
+        ///     The integer value if the key exists and is valid; otherwise <c>0</c> if the key is missing
+        ///     or the attribute has a DynamoDB NULL value.
+        /// </returns>
         /// <remarks>Parsing uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
-        public int GetInt(string key) =>
-            attributes.TryGetValue(key, out var value)
-                ? int.TryParse(
-                    value.N,
-                    NumberStyles.Integer,
-                    CultureInfo.InvariantCulture,
-                    out var result
-                )
-                    ? result
-                    : 0
+        public int GetInt(
+            string key,
+            Requiredness requiredness = Requiredness.InferFromNullability
+        ) =>
+            attributes.TryGetValue(key, requiredness, out var value) && value.IsNotNull
+                ? int.Parse(value!.N, NumberStyles.Integer, CultureInfo.InvariantCulture)
                 : 0;
 
         /// <summary>Gets a nullable integer value from the attribute dictionary.</summary>
         /// <param name="key">The attribute key to retrieve.</param>
-        /// <returns>The integer value if the key exists and is valid, otherwise <c>null</c>.</returns>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <returns>
+        ///     The integer value if the key exists and is valid; otherwise <c>null</c> if the key is
+        ///     missing or the attribute has a DynamoDB NULL value.
+        /// </returns>
         /// <remarks>Parsing uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
-        public int? GetNullableInt(string key) =>
-            attributes.TryGetValue(key, out var value)
-                ? int.TryParse(
-                    value.N,
-                    NumberStyles.Integer,
-                    CultureInfo.InvariantCulture,
-                    out var result
-                )
-                    ? result
-                    : null
-                : null;
+        public int? GetNullableInt(
+            string key,
+            Requiredness requiredness = Requiredness.InferFromNullability
+        ) =>
+            attributes
+                .GetNullableValue(key, requiredness)
+                .Map(
+                    static int? (value) =>
+                        value.IsNotNull
+                            ? int.Parse(value.N, NumberStyles.Integer, CultureInfo.InvariantCulture)
+                            : null
+                );
 
         /// <summary>Gets a long integer value from the attribute dictionary.</summary>
         /// <param name="key">The attribute key to retrieve.</param>
-        /// <returns>The long value if the key exists and is valid, otherwise <c>0</c>.</returns>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <returns>
+        ///     The long value if the key exists and is valid; otherwise <c>0</c> if the key is missing or
+        ///     the attribute has a DynamoDB NULL value.
+        /// </returns>
         /// <remarks>Parsing uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
-        public long GetLong(string key) =>
-            attributes.TryGetValue(key, out var value)
-                ? long.TryParse(
-                    value.N,
-                    NumberStyles.Integer,
-                    CultureInfo.InvariantCulture,
-                    out var result
-                )
-                    ? result
-                    : 0
+        public long GetLong(
+            string key,
+            Requiredness requiredness = Requiredness.InferFromNullability
+        ) =>
+            attributes.TryGetValue(key, requiredness, out var value) && value.IsNotNull
+                ? long.Parse(value!.N, NumberStyles.Integer, CultureInfo.InvariantCulture)
                 : 0;
 
         /// <summary>Gets a nullable long integer value from the attribute dictionary.</summary>
         /// <param name="key">The attribute key to retrieve.</param>
-        /// <returns>The long value if the key exists and is valid, otherwise <c>null</c>.</returns>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <returns>
+        ///     The long value if the key exists and is valid; otherwise <c>null</c> if the key is missing
+        ///     or the attribute has a DynamoDB NULL value.
+        /// </returns>
         /// <remarks>Parsing uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
-        public long? GetNullableLong(string key) =>
-            attributes.TryGetValue(key, out var value)
-                ? long.TryParse(
-                    value.N,
-                    NumberStyles.Integer,
-                    CultureInfo.InvariantCulture,
-                    out var result
-                )
-                    ? result
-                    : null
-                : null;
+        public long? GetNullableLong(
+            string key,
+            Requiredness requiredness = Requiredness.InferFromNullability
+        ) =>
+            attributes
+                .GetNullableValue(key, requiredness)
+                .Map(
+                    static long? (value) =>
+                        value.IsNotNull
+                            ? long.Parse(
+                                value.N,
+                                NumberStyles.Integer,
+                                CultureInfo.InvariantCulture
+                            )
+                            : null
+                );
 
         /// <summary>Sets an integer value in the attribute dictionary.</summary>
         /// <param name="key">The attribute key to set.</param>
@@ -254,99 +302,140 @@ public static class AttributeValueExtensions
 
         /// <summary>Gets a single-precision floating-point value from the attribute dictionary.</summary>
         /// <param name="key">The attribute key to retrieve.</param>
-        /// <returns>The float value if the key exists and is valid, otherwise <c>0f</c>.</returns>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <returns>
+        ///     The float value if the key exists and is valid; otherwise <c>0f</c> if the key is missing
+        ///     or the attribute has a DynamoDB NULL value.
+        /// </returns>
         /// <remarks>Parsing uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
-        public float GetFloat(string key) =>
-            attributes.TryGetValue(key, out var value)
-                ? float.TryParse(
-                    value.N,
-                    NumberStyles.Float,
-                    CultureInfo.InvariantCulture,
-                    out var result
-                )
-                    ? result
-                    : 0f
+        public float GetFloat(
+            string key,
+            Requiredness requiredness = Requiredness.InferFromNullability
+        ) =>
+            attributes.TryGetValue(key, requiredness, out var value) && value.IsNotNull
+                ? float.Parse(value!.N, NumberStyles.Float, CultureInfo.InvariantCulture)
                 : 0f;
 
         /// <summary>Gets a nullable single-precision floating-point value from the attribute dictionary.</summary>
         /// <param name="key">The attribute key to retrieve.</param>
-        /// <returns>The float value if the key exists and is valid, otherwise <c>null</c>.</returns>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <returns>
+        ///     The float value if the key exists and is valid; otherwise <c>null</c> if the key is
+        ///     missing or the attribute has a DynamoDB NULL value.
+        /// </returns>
         /// <remarks>Parsing uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
-        public float? GetNullableFloat(string key) =>
-            attributes.TryGetValue(key, out var value)
-                ? float.TryParse(
-                    value.N,
-                    NumberStyles.Float,
-                    CultureInfo.InvariantCulture,
-                    out var result
-                )
-                    ? result
-                    : null
-                : null;
+        public float? GetNullableFloat(
+            string key,
+            Requiredness requiredness = Requiredness.InferFromNullability
+        ) =>
+            attributes
+                .GetNullableValue(key, requiredness)
+                .Map(
+                    static float? (value) =>
+                        value.IsNotNull
+                            ? float.Parse(value.N, NumberStyles.Float, CultureInfo.InvariantCulture)
+                            : null
+                );
 
         /// <summary>Gets a double-precision floating-point value from the attribute dictionary.</summary>
         /// <param name="key">The attribute key to retrieve.</param>
-        /// <returns>The double value if the key exists and is valid, otherwise <c>0.0</c>.</returns>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <returns>
+        ///     The double value if the key exists and is valid; otherwise <c>0.0</c> if the key is
+        ///     missing or the attribute has a DynamoDB NULL value.
+        /// </returns>
         /// <remarks>Parsing uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
-        public double GetDouble(string key) =>
-            attributes.TryGetValue(key, out var value)
-                ? double.TryParse(
-                    value.N,
-                    NumberStyles.Float,
-                    CultureInfo.InvariantCulture,
-                    out var result
-                )
-                    ? result
-                    : 0.0
+        public double GetDouble(
+            string key,
+            Requiredness requiredness = Requiredness.InferFromNullability
+        ) =>
+            attributes.TryGetValue(key, requiredness, out var value) && value.IsNotNull
+                ? double.Parse(value!.N, NumberStyles.Float, CultureInfo.InvariantCulture)
                 : 0.0;
 
         /// <summary>Gets a nullable double-precision floating-point value from the attribute dictionary.</summary>
         /// <param name="key">The attribute key to retrieve.</param>
-        /// <returns>The double value if the key exists and is valid, otherwise <c>null</c>.</returns>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <returns>
+        ///     The double value if the key exists and is valid; otherwise <c>null</c> if the key is
+        ///     missing or the attribute has a DynamoDB NULL value.
+        /// </returns>
         /// <remarks>Parsing uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
-        public double? GetNullableDouble(string key) =>
-            attributes.TryGetValue(key, out var value)
-                ? double.TryParse(
-                    value.N,
-                    NumberStyles.Float,
-                    CultureInfo.InvariantCulture,
-                    out var result
-                )
-                    ? result
-                    : null
-                : null;
+        public double? GetNullableDouble(
+            string key,
+            Requiredness requiredness = Requiredness.InferFromNullability
+        ) =>
+            attributes
+                .GetNullableValue(key, requiredness)
+                .Map(
+                    static double? (value) =>
+                        value.IsNotNull
+                            ? double.Parse(
+                                value.N,
+                                NumberStyles.Float,
+                                CultureInfo.InvariantCulture
+                            )
+                            : null
+                );
 
         /// <summary>Gets a decimal value from the attribute dictionary.</summary>
         /// <param name="key">The attribute key to retrieve.</param>
-        /// <returns>The decimal value if the key exists and is valid, otherwise <c>0m</c>.</returns>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <returns>
+        ///     The decimal value if the key exists and is valid; otherwise <c>0m</c> if the key is
+        ///     missing or the attribute has a DynamoDB NULL value.
+        /// </returns>
         /// <remarks>Parsing uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
-        public decimal GetDecimal(string key) =>
-            attributes.TryGetValue(key, out var value)
-                ? decimal.TryParse(
-                    value.N,
-                    NumberStyles.Float,
-                    CultureInfo.InvariantCulture,
-                    out var result
-                )
-                    ? result
-                    : 0m
+        public decimal GetDecimal(
+            string key,
+            Requiredness requiredness = Requiredness.InferFromNullability
+        ) =>
+            attributes.TryGetValue(key, requiredness, out var value) && value.IsNotNull
+                ? decimal.Parse(value!.N, NumberStyles.Float, CultureInfo.InvariantCulture)
                 : 0m;
 
         /// <summary>Gets a nullable decimal value from the attribute dictionary.</summary>
         /// <param name="key">The attribute key to retrieve.</param>
-        /// <returns>The decimal value if the key exists and is valid, otherwise <c>null</c>.</returns>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <returns>
+        ///     The decimal value if the key exists and is valid; otherwise <c>null</c> if the key is
+        ///     missing or the attribute has a DynamoDB NULL value.
+        /// </returns>
         /// <remarks>Parsing uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
-        public decimal? GetNullableDecimal(string key) =>
-            attributes.TryGetValue(key, out var value)
-                ? decimal.TryParse(
-                    value.N,
-                    NumberStyles.Float,
-                    CultureInfo.InvariantCulture,
-                    out var result
-                )
-                    ? result
-                    : null
-                : null;
+        public decimal? GetNullableDecimal(
+            string key,
+            Requiredness requiredness = Requiredness.InferFromNullability
+        ) =>
+            attributes
+                .GetNullableValue(key, requiredness)
+                .Map(
+                    static decimal? (value) =>
+                        value.IsNotNull
+                            ? decimal.Parse(
+                                value.N,
+                                NumberStyles.Float,
+                                CultureInfo.InvariantCulture
+                            )
+                            : null
+                );
 
         /// <summary>Sets a single-precision floating-point value in the attribute dictionary.</summary>
         /// <param name="key">The attribute key to set.</param>
@@ -438,26 +527,39 @@ public static class AttributeValueExtensions
 
         /// <summary>Gets a <see cref="Guid" /> value from the attribute dictionary.</summary>
         /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
         /// <returns>
-        ///     The <see cref="Guid" /> value if the key exists and is valid, otherwise
-        ///     <see cref="Guid.Empty" />.
+        ///     The <see cref="Guid" /> value if the key exists and is valid; otherwise
+        ///     <see cref="Guid.Empty" /> if the key is missing or the attribute has a DynamoDB NULL value.
         /// </returns>
-        public Guid GetGuid(string key) =>
-            attributes.TryGetValue(key, out var value)
-                ? Guid.TryParse(value.S, out var id)
-                    ? id
-                    : Guid.Empty
+        public Guid GetGuid(
+            string key,
+            Requiredness requiredness = Requiredness.InferFromNullability
+        ) =>
+            attributes.TryGetValue(key, requiredness, out var value) && value.IsNotNull
+                ? Guid.Parse(value!.S)
                 : Guid.Empty;
 
         /// <summary>Gets a nullable <see cref="Guid" /> value from the attribute dictionary.</summary>
         /// <param name="key">The attribute key to retrieve.</param>
-        /// <returns>The <see cref="Guid" /> value if the key exists and is valid, otherwise <c>null</c>.</returns>
-        public Guid? GetNullableGuid(string key) =>
-            attributes.TryGetValue(key, out var value)
-                ? Guid.TryParse(value.S, out var id)
-                    ? id
-                    : null
-                : null;
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <returns>
+        ///     The <see cref="Guid" /> value if the key exists and is valid; otherwise <c>null</c> if the
+        ///     key is missing or the attribute has a DynamoDB NULL value.
+        /// </returns>
+        public Guid? GetNullableGuid(
+            string key,
+            Requiredness requiredness = Requiredness.InferFromNullability
+        ) =>
+            attributes
+                .GetNullableValue(key, requiredness)
+                .Map(static Guid? (value) => value.IsNotNull ? Guid.Parse(value.N) : null);
 
         /// <summary>
         ///     Gets a <see cref="Guid" /> value from the attribute dictionary using an exact format
@@ -468,15 +570,21 @@ public static class AttributeValueExtensions
         ///     The exact format string to use for parsing. Valid formats: "N" (32 digits),
         ///     "D" (hyphens), "B" (braces), "P" (parentheses), "X" (hexadecimal).
         /// </param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
         /// <returns>
-        ///     The <see cref="Guid" /> value if the key exists and matches the format, otherwise
-        ///     <see cref="Guid.Empty" />.
+        ///     The <see cref="Guid" /> value if the key exists and matches the format; otherwise
+        ///     <see cref="Guid.Empty" /> if the key is missing or the attribute has a DynamoDB NULL value.
         /// </returns>
-        public Guid GetGuid(string key, string format) =>
-            attributes.TryGetValue(key, out var value)
-                ? Guid.TryParseExact(value.S, format, out var id)
-                    ? id
-                    : Guid.Empty
+        public Guid GetGuid(
+            string key,
+            string format,
+            Requiredness requiredness = Requiredness.InferFromNullability
+        ) =>
+            attributes.TryGetValue(key, requiredness, out var value) && value.IsNotNull
+                ? Guid.ParseExact(value!.S, format)
                 : Guid.Empty;
 
         /// <summary>
@@ -488,16 +596,22 @@ public static class AttributeValueExtensions
         ///     The exact format string to use for parsing. Valid formats: "N" (32 digits),
         ///     "D" (hyphens), "B" (braces), "P" (parentheses), "X" (hexadecimal).
         /// </param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
         /// <returns>
-        ///     The <see cref="Guid" /> value if the key exists and matches the format, otherwise
-        ///     <c>null</c>.
+        ///     The <see cref="Guid" /> value if the key exists and matches the format; otherwise
+        ///     <c>null</c> if the key is missing or the attribute has a DynamoDB NULL value.
         /// </returns>
-        public Guid? GetNullableGuid(string key, string format) =>
-            attributes.TryGetValue(key, out var value)
-                ? Guid.TryParseExact(value.S, format, out var id)
-                    ? id
-                    : null
-                : null;
+        public Guid? GetNullableGuid(
+            string key,
+            string format,
+            Requiredness requiredness = Requiredness.InferFromNullability
+        ) =>
+            attributes
+                .GetNullableValue(key, requiredness)
+                .Map(Guid? (value) => value.IsNotNull ? Guid.ParseExact(value.N, format) : null);
 
         /// <summary>Sets a <see cref="Guid" /> value in the attribute dictionary.</summary>
         /// <param name="key">The attribute key to set.</param>
@@ -566,24 +680,29 @@ public static class AttributeValueExtensions
 
         /// <summary>Gets a <see cref="DateTime" /> value from the attribute dictionary.</summary>
         /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
         /// <returns>
-        ///     The <see cref="DateTime" /> value if the key exists and is valid, otherwise
-        ///     <see cref="DateTime.MinValue" />.
+        ///     The <see cref="DateTime" /> value if the key exists and is valid; otherwise
+        ///     <see cref="DateTime.MinValue" /> if the key is missing or the attribute has a DynamoDB NULL
+        ///     value.
         /// </returns>
         /// <remarks>
         ///     Parsing uses <see cref="CultureInfo.InvariantCulture" /> with
         ///     <see cref="DateTimeStyles.RoundtripKind" /> for ISO-8601 format.
         /// </remarks>
-        public DateTime GetDateTime(string key) =>
-            attributes.TryGetValue(key, out var value)
-                ? DateTime.TryParse(
-                    value.S,
+        public DateTime GetDateTime(
+            string key,
+            Requiredness requiredness = Requiredness.InferFromNullability
+        ) =>
+            attributes.TryGetValue(key, requiredness, out var value) && value.IsNotNull
+                ? DateTime.Parse(
+                    value!.S,
                     CultureInfo.InvariantCulture,
-                    DateTimeStyles.RoundtripKind,
-                    out var date
+                    DateTimeStyles.RoundtripKind
                 )
-                    ? date
-                    : DateTime.MinValue
                 : DateTime.MinValue;
 
         /// <summary>
@@ -595,26 +714,63 @@ public static class AttributeValueExtensions
         ///     The exact format string to use for parsing (e.g., "yyyy-MM-dd", "yyyyMMdd",
         ///     "MM/dd/yyyy").
         /// </param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
         /// <returns>
-        ///     The <see cref="DateTime" /> value if the key exists and matches the format, otherwise
-        ///     <see cref="DateTime.MinValue" />.
+        ///     The <see cref="DateTime" /> value if the key exists and matches the format; otherwise
+        ///     <see cref="DateTime.MinValue" /> if the key is missing or the attribute has a DynamoDB NULL
+        ///     value.
         /// </returns>
         /// <remarks>
         ///     Parsing uses <see cref="CultureInfo.InvariantCulture" /> with
         ///     <see cref="DateTimeStyles.RoundtripKind" />.
         /// </remarks>
-        public DateTime GetDateTime(string key, string format) =>
-            attributes.TryGetValue(key, out var value)
-                ? DateTime.TryParseExact(
-                    value.S,
+        public DateTime GetDateTime(
+            string key,
+            string format,
+            Requiredness requiredness = Requiredness.InferFromNullability
+        ) =>
+            attributes.TryGetValue(key, requiredness, out var value) && value.IsNotNull
+                ? DateTime.ParseExact(
+                    value!.S,
                     format,
                     CultureInfo.InvariantCulture,
-                    DateTimeStyles.RoundtripKind,
-                    out var date
+                    DateTimeStyles.RoundtripKind
                 )
-                    ? date
-                    : DateTime.MinValue
                 : DateTime.MinValue;
+
+        /// <summary>Gets a nullable <see cref="DateTime" /> value from the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <returns>
+        ///     The <see cref="DateTime" /> value if the key exists and is valid; otherwise <c>null</c> if
+        ///     the key is missing or the attribute has a DynamoDB NULL value.
+        /// </returns>
+        /// <remarks>
+        ///     Parsing uses <see cref="CultureInfo.InvariantCulture" /> with
+        ///     <see cref="DateTimeStyles.RoundtripKind" /> for ISO-8601 format.
+        /// </remarks>
+        public DateTime? GetNullableDateTime(
+            string key,
+            Requiredness requiredness = Requiredness.InferFromNullability
+        ) =>
+            attributes
+                .GetNullableValue(key, requiredness)
+                .Map(
+                    static DateTime? (value) =>
+                        value.IsNotNull
+                            ? DateTime.Parse(
+                                value.N,
+                                CultureInfo.InvariantCulture,
+                                DateTimeStyles.RoundtripKind
+                            )
+                            : null
+                );
 
         /// <summary>
         ///     Gets a nullable <see cref="DateTime" /> value from the attribute dictionary using an exact
@@ -625,89 +781,94 @@ public static class AttributeValueExtensions
         ///     The exact format string to use for parsing (e.g., "yyyy-MM-dd", "yyyyMMdd",
         ///     "MM/dd/yyyy").
         /// </param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
         /// <returns>
-        ///     The <see cref="DateTime" /> value if the key exists and matches the format, otherwise
-        ///     <c>null</c>.
+        ///     The <see cref="DateTime" /> value if the key exists and matches the format; otherwise
+        ///     <c>null</c> if the key is missing or the attribute has a DynamoDB NULL value.
         /// </returns>
         /// <remarks>
         ///     Parsing uses <see cref="CultureInfo.InvariantCulture" /> with
         ///     <see cref="DateTimeStyles.RoundtripKind" />.
         /// </remarks>
-        public DateTime? GetNullableDateTime(string key, string format) =>
-            attributes.TryGetValue(key, out var value)
-                ? DateTime.TryParseExact(
-                    value.S,
-                    format,
-                    CultureInfo.InvariantCulture,
-                    DateTimeStyles.RoundtripKind,
-                    out var date
-                )
-                    ? date
-                    : null
-                : null;
-
-        /// <summary>Gets a nullable <see cref="DateTime" /> value from the attribute dictionary.</summary>
-        /// <param name="key">The attribute key to retrieve.</param>
-        /// <returns>The <see cref="DateTime" /> value if the key exists and is valid, otherwise <c>null</c>.</returns>
-        /// <remarks>
-        ///     Parsing uses <see cref="CultureInfo.InvariantCulture" /> with
-        ///     <see cref="DateTimeStyles.RoundtripKind" /> for ISO-8601 format.
-        /// </remarks>
-        public DateTime? GetNullableDateTime(string key) =>
-            attributes.TryGetValue(key, out var value)
-                ? DateTime.TryParse(
-                    value.S,
-                    CultureInfo.InvariantCulture,
-                    DateTimeStyles.RoundtripKind,
-                    out var date
-                )
-                    ? date
-                    : null
-                : null;
+        public DateTime? GetNullableDateTime(
+            string key,
+            string format,
+            Requiredness requiredness = Requiredness.InferFromNullability
+        ) =>
+            attributes
+                .GetNullableValue(key, requiredness)
+                .Map(
+                    DateTime? (value) =>
+                        value.IsNotNull
+                            ? DateTime.ParseExact(
+                                value.N,
+                                format,
+                                CultureInfo.InvariantCulture,
+                                DateTimeStyles.RoundtripKind
+                            )
+                            : null
+                );
 
         /// <summary>Gets a <see cref="DateTimeOffset" /> value from the attribute dictionary.</summary>
         /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
         /// <returns>
-        ///     The <see cref="DateTimeOffset" /> value if the key exists and is valid, otherwise
-        ///     <see cref="DateTimeOffset.MinValue" />.
+        ///     The <see cref="DateTimeOffset" /> value if the key exists and is valid; otherwise
+        ///     <see cref="DateTimeOffset.MinValue" /> if the key is missing or the attribute has a DynamoDB
+        ///     NULL value.
         /// </returns>
         /// <remarks>
         ///     Parsing uses <see cref="CultureInfo.InvariantCulture" /> with
         ///     <see cref="DateTimeStyles.RoundtripKind" /> for ISO-8601 format.
         /// </remarks>
-        public DateTimeOffset GetDateTimeOffset(string key) =>
-            attributes.TryGetValue(key, out var value)
-                ? DateTimeOffset.TryParse(
-                    value.S,
+        public DateTimeOffset GetDateTimeOffset(
+            string key,
+            Requiredness requiredness = Requiredness.InferFromNullability
+        ) =>
+            attributes.TryGetValue(key, requiredness, out var value) && value.IsNotNull
+                ? DateTimeOffset.Parse(
+                    value!.S,
                     CultureInfo.InvariantCulture,
-                    DateTimeStyles.RoundtripKind,
-                    out var date
+                    DateTimeStyles.RoundtripKind
                 )
-                    ? date
-                    : DateTimeOffset.MinValue
                 : DateTimeOffset.MinValue;
 
         /// <summary>Gets a nullable <see cref="DateTimeOffset" /> value from the attribute dictionary.</summary>
         /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
         /// <returns>
-        ///     The <see cref="DateTimeOffset" /> value if the key exists and is valid, otherwise
-        ///     <c>null</c>.
+        ///     The <see cref="DateTimeOffset" /> value if the key exists and is valid; otherwise
+        ///     <c>null</c> if the key is missing or the attribute has a DynamoDB NULL value.
         /// </returns>
         /// <remarks>
         ///     Parsing uses <see cref="CultureInfo.InvariantCulture" /> with
         ///     <see cref="DateTimeStyles.RoundtripKind" /> for ISO-8601 format.
         /// </remarks>
-        public DateTimeOffset? GetNullableDateTimeOffset(string key) =>
-            attributes.TryGetValue(key, out var value)
-                ? DateTimeOffset.TryParse(
-                    value.S,
-                    CultureInfo.InvariantCulture,
-                    DateTimeStyles.RoundtripKind,
-                    out var date
-                )
-                    ? date
-                    : null
-                : null;
+        public DateTimeOffset? GetNullableDateTimeOffset(
+            string key,
+            Requiredness requiredness = Requiredness.InferFromNullability
+        ) =>
+            attributes
+                .GetNullableValue(key, requiredness)
+                .Map(
+                    static DateTimeOffset? (value) =>
+                        value.IsNotNull
+                            ? DateTimeOffset.Parse(
+                                value.N,
+                                CultureInfo.InvariantCulture,
+                                DateTimeStyles.RoundtripKind
+                            )
+                            : null
+                );
 
         /// <summary>
         ///     Gets a <see cref="DateTimeOffset" /> value from the attribute dictionary using an exact
@@ -718,25 +879,31 @@ public static class AttributeValueExtensions
         ///     The exact format string to use for parsing (e.g., "yyyy-MM-dd", "yyyyMMdd",
         ///     "o").
         /// </param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
         /// <returns>
-        ///     The <see cref="DateTimeOffset" /> value if the key exists and matches the format,
-        ///     otherwise <see cref="DateTimeOffset.MinValue" />.
+        ///     The <see cref="DateTimeOffset" /> value if the key exists and matches the format;
+        ///     otherwise <see cref="DateTimeOffset.MinValue" /> if the key is missing or the attribute has a
+        ///     DynamoDB NULL value.
         /// </returns>
         /// <remarks>
         ///     Parsing uses <see cref="CultureInfo.InvariantCulture" /> with
         ///     <see cref="DateTimeStyles.RoundtripKind" />.
         /// </remarks>
-        public DateTimeOffset GetDateTimeOffset(string key, string format) =>
-            attributes.TryGetValue(key, out var value)
-                ? DateTimeOffset.TryParseExact(
-                    value.S,
+        public DateTimeOffset GetDateTimeOffset(
+            string key,
+            string format,
+            Requiredness requiredness = Requiredness.InferFromNullability
+        ) =>
+            attributes.TryGetValue(key, requiredness, out var value) && value.IsNotNull
+                ? DateTimeOffset.ParseExact(
+                    value!.S,
                     format,
                     CultureInfo.InvariantCulture,
-                    DateTimeStyles.RoundtripKind,
-                    out var date
+                    DateTimeStyles.RoundtripKind
                 )
-                    ? date
-                    : DateTimeOffset.MinValue
                 : DateTimeOffset.MinValue;
 
         /// <summary>
@@ -748,51 +915,79 @@ public static class AttributeValueExtensions
         ///     The exact format string to use for parsing (e.g., "yyyy-MM-dd", "yyyyMMdd",
         ///     "o").
         /// </param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
         /// <returns>
-        ///     The <see cref="DateTimeOffset" /> value if the key exists and matches the format,
-        ///     otherwise <c>null</c>.
+        ///     The <see cref="DateTimeOffset" /> value if the key exists and matches the format;
+        ///     otherwise <c>null</c> if the key is missing or the attribute has a DynamoDB NULL value.
         /// </returns>
         /// <remarks>
         ///     Parsing uses <see cref="CultureInfo.InvariantCulture" /> with
         ///     <see cref="DateTimeStyles.RoundtripKind" />.
         /// </remarks>
-        public DateTimeOffset? GetNullableDateTimeOffset(string key, string format) =>
-            attributes.TryGetValue(key, out var value)
-                ? DateTimeOffset.TryParseExact(
-                    value.S,
-                    format,
-                    CultureInfo.InvariantCulture,
-                    DateTimeStyles.RoundtripKind,
-                    out var date
-                )
-                    ? date
-                    : null
-                : null;
+        public DateTimeOffset? GetNullableDateTimeOffset(
+            string key,
+            string format,
+            Requiredness requiredness = Requiredness.InferFromNullability
+        ) =>
+            attributes
+                .GetNullableValue(key, requiredness)
+                .Map(
+                    DateTimeOffset? (value) =>
+                        value.IsNotNull
+                            ? DateTimeOffset.ParseExact(
+                                value.N,
+                                format,
+                                CultureInfo.InvariantCulture,
+                                DateTimeStyles.RoundtripKind
+                            )
+                            : null
+                );
 
         /// <summary>Gets a <see cref="TimeSpan" /> value from the attribute dictionary.</summary>
         /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
         /// <returns>
-        ///     The <see cref="TimeSpan" /> value if the key exists and is valid, otherwise
-        ///     <see cref="TimeSpan.Zero" />.
+        ///     The <see cref="TimeSpan" /> value if the key exists and is valid; otherwise
+        ///     <see cref="TimeSpan.Zero" /> if the key is missing or the attribute has a DynamoDB NULL value.
         /// </returns>
         /// <remarks>Parsing uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
-        public TimeSpan GetTimeSpan(string key) =>
-            attributes.TryGetValue(key, out var value)
-                ? TimeSpan.TryParse(value.S, CultureInfo.InvariantCulture, out var timeSpan)
-                    ? timeSpan
-                    : TimeSpan.Zero
+        public TimeSpan GetTimeSpan(
+            string key,
+            Requiredness requiredness = Requiredness.InferFromNullability
+        ) =>
+            attributes.TryGetValue(key, requiredness, out var value) && value.IsNotNull
+                ? TimeSpan.Parse(value!.S, CultureInfo.InvariantCulture)
                 : TimeSpan.Zero;
 
         /// <summary>Gets a nullable <see cref="TimeSpan" /> value from the attribute dictionary.</summary>
         /// <param name="key">The attribute key to retrieve.</param>
-        /// <returns>The <see cref="TimeSpan" /> value if the key exists and is valid, otherwise <c>null</c>.</returns>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <returns>
+        ///     The <see cref="TimeSpan" /> value if the key exists and is valid; otherwise <c>null</c> if
+        ///     the key is missing or the attribute has a DynamoDB NULL value.
+        /// </returns>
         /// <remarks>Parsing uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
-        public TimeSpan? GetNullableTimeSpan(string key) =>
-            attributes.TryGetValue(key, out var value)
-                ? TimeSpan.TryParse(value.S, CultureInfo.InvariantCulture, out var timeSpan)
-                    ? timeSpan
-                    : null
-                : null;
+        public TimeSpan? GetNullableTimeSpan(
+            string key,
+            Requiredness requiredness = Requiredness.InferFromNullability
+        ) =>
+            attributes
+                .GetNullableValue(key, requiredness)
+                .Map(
+                    static TimeSpan? (value) =>
+                        value.IsNotNull
+                            ? TimeSpan.Parse(value.S, CultureInfo.InvariantCulture)
+                            : null
+                );
 
         /// <summary>
         ///     Gets a <see cref="TimeSpan" /> value from the attribute dictionary using an exact format
@@ -803,21 +998,22 @@ public static class AttributeValueExtensions
         ///     The exact format string to use for parsing (e.g., "c", "g", "G", or custom
         ///     patterns like "hh\\:mm\\:ss").
         /// </param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
         /// <returns>
-        ///     The <see cref="TimeSpan" /> value if the key exists and matches the format, otherwise
-        ///     <see cref="TimeSpan.Zero" />.
+        ///     The <see cref="TimeSpan" /> value if the key exists and matches the format; otherwise
+        ///     <see cref="TimeSpan.Zero" /> if the key is missing or the attribute has a DynamoDB NULL value.
         /// </returns>
         /// <remarks>Parsing uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
-        public TimeSpan GetTimeSpan(string key, string format) =>
-            attributes.TryGetValue(key, out var value)
-                ? TimeSpan.TryParseExact(
-                    value.S,
-                    format,
-                    CultureInfo.InvariantCulture,
-                    out var timeSpan
-                )
-                    ? timeSpan
-                    : TimeSpan.Zero
+        public TimeSpan GetTimeSpan(
+            string key,
+            string format,
+            Requiredness requiredness = Requiredness.InferFromNullability
+        ) =>
+            attributes.TryGetValue(key, requiredness, out var value) && value.IsNotNull
+                ? TimeSpan.ParseExact(value!.S, format, CultureInfo.InvariantCulture)
                 : TimeSpan.Zero;
 
         /// <summary>
@@ -829,22 +1025,28 @@ public static class AttributeValueExtensions
         ///     The exact format string to use for parsing (e.g., "c", "g", "G", or custom
         ///     patterns like "hh\\:mm\\:ss").
         /// </param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
         /// <returns>
-        ///     The <see cref="TimeSpan" /> value if the key exists and matches the format, otherwise
-        ///     <c>null</c>.
+        ///     The <see cref="TimeSpan" /> value if the key exists and matches the format; otherwise
+        ///     <c>null</c> if the key is missing or the attribute has a DynamoDB NULL value.
         /// </returns>
         /// <remarks>Parsing uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
-        public TimeSpan? GetNullableTimeSpan(string key, string format) =>
-            attributes.TryGetValue(key, out var value)
-                ? TimeSpan.TryParseExact(
-                    value.S,
-                    format,
-                    CultureInfo.InvariantCulture,
-                    out var timeSpan
-                )
-                    ? timeSpan
-                    : null
-                : null;
+        public TimeSpan? GetNullableTimeSpan(
+            string key,
+            string format,
+            Requiredness requiredness = Requiredness.InferFromNullability
+        ) =>
+            attributes
+                .GetNullableValue(key, requiredness)
+                .Map(
+                    TimeSpan? (value) =>
+                        value.IsNotNull
+                            ? TimeSpan.ParseExact(value.S, format, CultureInfo.InvariantCulture)
+                            : null
+                );
 
         /// <summary>Sets a <see cref="DateTime" /> value in the attribute dictionary.</summary>
         /// <param name="key">The attribute key to set.</param>
@@ -1043,39 +1245,55 @@ public static class AttributeValueExtensions
         /// <typeparam name="TEnum">The enum type to parse.</typeparam>
         /// <param name="key">The attribute key to retrieve.</param>
         /// <param name="defaultValue">The default value to return if the key doesn't exist or parsing fails.</param>
-        /// <returns>The enum value if the key exists and is valid, otherwise <paramref name="defaultValue" />.</returns>
-        public TEnum GetEnum<TEnum>(string key, TEnum defaultValue)
-            where TEnum : struct
-        {
-            if (
-                attributes.TryGetValue(key, out var value)
-                && Enum.TryParse(value.S, out TEnum valueEnum)
-            )
-                return valueEnum;
-
-            return defaultValue;
-        }
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <returns>
+        ///     The enum value if the key exists and is valid; otherwise <paramref name="defaultValue" />
+        ///     if the key is missing (when Optional) or parsing fails.
+        /// </returns>
+        public TEnum GetEnum<TEnum>(
+            string key,
+            TEnum defaultValue,
+            Requiredness requiredness = Requiredness.InferFromNullability
+        )
+            where TEnum : struct =>
+            attributes.TryGetValue(key, requiredness, out var value) && value.IsNotNull
+                ? (TEnum)Enum.Parse(typeof(TEnum), value!.S)
+                : defaultValue;
 
         /// <summary>Gets a nullable enum value from the attribute dictionary.</summary>
         /// <typeparam name="TEnum">The enum type to parse.</typeparam>
         /// <param name="key">The attribute key to retrieve.</param>
-        /// <returns>The enum value if the key exists and is valid, otherwise <c>null</c>.</returns>
-        public TEnum? GetNullableEnum<TEnum>(string key)
-            where TEnum : struct
-        {
-            if (
-                attributes.TryGetValue(key, out var value)
-                && Enum.TryParse(value.S, out TEnum valueEnum)
-            )
-                return valueEnum;
-
-            return null;
-        }
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <returns>
+        ///     The enum value if the key exists and is valid; otherwise <c>null</c> if the key is missing
+        ///     or the attribute has a DynamoDB NULL value.
+        /// </returns>
+        public TEnum? GetNullableEnum<TEnum>(
+            string key,
+            Requiredness requiredness = Requiredness.InferFromNullability
+        )
+            where TEnum : struct =>
+            attributes
+                .GetNullableValue(key, requiredness)
+                .Map(
+                    static TEnum? (value) =>
+                        value.IsNotNull ? (TEnum)Enum.Parse(typeof(TEnum), value!.S) : null
+                );
 
         /// <summary>Sets an enum value in the attribute dictionary.</summary>
         /// <typeparam name="TEnum">The enum type to set.</typeparam>
         /// <param name="key">The attribute key to set.</param>
         /// <param name="value">The enum value to set (can be null).</param>
+        /// <param name="omitEmptyStrings">
+        ///     Whether to omit empty string values from the DynamoDB item. Default
+        ///     is <c>false</c>.
+        /// </param>
         /// <param name="omitNullStrings">
         ///     Whether to omit null string values from the DynamoDB item. Default is
         ///     <c>true</c>.
@@ -1102,13 +1320,34 @@ public static class AttributeValueExtensions
 
         #region Utilities
 
+        /// <summary>
+        ///     Retrieves an attribute value from the dictionary, returning a NULL AttributeValue if the
+        ///     key is missing and the attribute is optional.
+        /// </summary>
+        /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="requiredness">Specifies whether the attribute is required.</param>
+        /// <returns>
+        ///     The <see cref="AttributeValue" /> if the key exists; otherwise a NULL
+        ///     <see cref="AttributeValue" /> if <paramref name="requiredness" /> is
+        ///     <see cref="Requiredness.Optional" /> or <see cref="Requiredness.InferFromNullability" />.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">
+        ///     Thrown when the key is missing and
+        ///     <paramref name="requiredness" /> is <see cref="Requiredness.Required" />.
+        /// </exception>
+        /// <remarks>
+        ///     This helper is used by <c>GetNullable*</c> methods to handle missing attributes. When the
+        ///     key is missing and the attribute is optional, it returns an AttributeValue with NULL = true,
+        ///     allowing the caller to distinguish between a missing attribute and an explicit DynamoDB NULL
+        ///     value.
+        /// </remarks>
         private AttributeValue GetNullableValue(string key, Requiredness requiredness)
         {
             if (!attributes.TryGetValue(key, out var attributeValue))
                 return requiredness switch
                 {
                     Requiredness.Required => throw new InvalidOperationException(
-                        $"Property '{key}' is missing from DynamoDB item."
+                        $"The DynamoDB item does not contain an attribute named '{key}'."
                     ),
                     Requiredness.Optional or Requiredness.InferFromNullability => new AttributeValue
                     {
@@ -1120,6 +1359,29 @@ public static class AttributeValueExtensions
             return attributeValue;
         }
 
+        /// <summary>Attempts to retrieve an attribute value from the dictionary with requiredness validation.</summary>
+        /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="requiredness">Specifies whether the attribute is required.</param>
+        /// <param name="value">
+        ///     When this method returns, contains the <see cref="AttributeValue" /> if the key
+        ///     exists; otherwise <c>null</c> if the key is missing and <paramref name="requiredness" /> is
+        ///     <see cref="Requiredness.Optional" />.
+        /// </param>
+        /// <returns>
+        ///     <c>true</c> if the key exists in the dictionary; otherwise <c>false</c> if the key is
+        ///     missing and <paramref name="requiredness" /> is <see cref="Requiredness.Optional" />.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">
+        ///     Thrown when the key is missing and
+        ///     <paramref name="requiredness" /> is <see cref="Requiredness.Required" /> or
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </exception>
+        /// <remarks>
+        ///     This helper is used by non-nullable <c>Get*</c> methods to handle missing attributes.
+        ///     Unlike <see cref="GetNullableValue" />, this method returns <c>false</c> with a <c>null</c> out
+        ///     parameter when the key is missing and the attribute is optional, allowing callers to provide
+        ///     default values for non-nullable types.
+        /// </remarks>
         private bool TryGetValue(string key, Requiredness requiredness, out AttributeValue? value)
         {
             value = null;
@@ -1130,7 +1392,7 @@ public static class AttributeValueExtensions
                 {
                     Requiredness.Required or Requiredness.InferFromNullability =>
                         throw new InvalidOperationException(
-                            $"Property '{key}' is missing from DynamoDB item."
+                            $"The DynamoDB item does not contain an attribute named '{key}'."
                         ),
                     Requiredness.Optional => null,
                     _ => throw new ArgumentOutOfRangeException(nameof(requiredness)),
@@ -1144,6 +1406,26 @@ public static class AttributeValueExtensions
         }
 
         #endregion
+    }
+
+    extension(AttributeValue? attributeValue)
+    {
+        /// <summary>
+        ///     Gets a value indicating whether this <see cref="AttributeValue" /> represents a DynamoDB
+        ///     NULL value.
+        /// </summary>
+        /// <value>
+        ///     <c>true</c> if the attribute value is <c>null</c> or has its
+        ///     <see cref="AttributeValue.NULL" /> property set to <c>true</c>; otherwise <c>false</c>.
+        /// </value>
+        /// <remarks>
+        ///     This extension property provides a convenient way to check if an AttributeValue represents
+        ///     a DynamoDB NULL. It handles both the case where the AttributeValue itself is null and where it
+        ///     explicitly has NULL = true.
+        /// </remarks>
+        public bool IsNull => attributeValue?.NULL is true;
+
+        public bool IsNotNull => attributeValue?.NULL is null or false;
     }
 
     private static bool ShouldSet(string? value, bool omitEmptyStrings, bool omitNullStrings) =>

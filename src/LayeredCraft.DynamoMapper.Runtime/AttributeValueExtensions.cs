@@ -19,15 +19,40 @@ public static class AttributeValueExtensions
 
         /// <summary>Gets a nullable string value from the attribute dictionary.</summary>
         /// <param name="key">The attribute key to retrieve.</param>
-        /// <returns>The string value if the key exists, otherwise <c>null</c>.</returns>
-        public string? GetNullableString(string key) =>
-            attributes.TryGetValue(key, out var value) ? value.S : null;
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <returns>
+        ///     The string value if the key exists and contains a non-NULL value; otherwise <c>null</c>
+        ///     if the key is missing or the attribute has a DynamoDB NULL value.
+        /// </returns>
+        public string? GetNullableString(
+            string key,
+            Requiredness requiredness = Requiredness.InferFromNullability
+        )
+        {
+            var value = attributes.GetNullableValue(key, requiredness);
+            return value.NULL is true ? null : value.S;
+        }
 
         /// <summary>Gets a string value from the attribute dictionary.</summary>
         /// <param name="key">The attribute key to retrieve.</param>
-        /// <returns>The string value if the key exists, otherwise <see cref="string.Empty" />.</returns>
-        public string GetString(string key) =>
-            attributes.TryGetValue(key, out var value) ? value.S ?? string.Empty : string.Empty;
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <returns>
+        ///     The string value if the key exists and contains a non-NULL value; otherwise
+        ///     <see cref="string.Empty" /> if the key is missing or the attribute has a DynamoDB NULL value.
+        /// </returns>
+        public string GetString(
+            string key,
+            Requiredness requiredness = Requiredness.InferFromNullability
+        ) =>
+            !attributes.TryGetValue(key, requiredness, out var value) || value!.NULL is true
+                ? string.Empty
+                : value.S;
 
         /// <summary>Sets a string value in the attribute dictionary.</summary>
         /// <param name="key">The attribute key to set.</param>
@@ -1071,6 +1096,51 @@ public static class AttributeValueExtensions
                     : new AttributeValue { S = stringValue };
 
             return attributes;
+        }
+
+        #endregion
+
+        #region Utilities
+
+        private AttributeValue GetNullableValue(string key, Requiredness requiredness)
+        {
+            if (!attributes.TryGetValue(key, out var attributeValue))
+                return requiredness switch
+                {
+                    Requiredness.Required => throw new InvalidOperationException(
+                        $"Property '{key}' is missing from DynamoDB item."
+                    ),
+                    Requiredness.Optional or Requiredness.InferFromNullability => new AttributeValue
+                    {
+                        NULL = true,
+                    },
+                    _ => throw new ArgumentOutOfRangeException(nameof(requiredness)),
+                };
+
+            return attributeValue;
+        }
+
+        private bool TryGetValue(string key, Requiredness requiredness, out AttributeValue? value)
+        {
+            value = null;
+
+            if (!attributes.TryGetValue(key, out var attributeValue))
+            {
+                value = requiredness switch
+                {
+                    Requiredness.Required or Requiredness.InferFromNullability =>
+                        throw new InvalidOperationException(
+                            $"Property '{key}' is missing from DynamoDB item."
+                        ),
+                    Requiredness.Optional => null,
+                    _ => throw new ArgumentOutOfRangeException(nameof(requiredness)),
+                };
+
+                return false;
+            }
+
+            value = attributeValue;
+            return true;
         }
 
         #endregion

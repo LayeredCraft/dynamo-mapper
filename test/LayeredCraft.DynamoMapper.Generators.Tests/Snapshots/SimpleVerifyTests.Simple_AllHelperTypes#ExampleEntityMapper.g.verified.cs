@@ -42,8 +42,8 @@ public static partial class ExampleEntityMapper
         item.SetString("nullableString", source.NullableString, false, true);
         item.SetTimeSpan("timeSpan", source.TimeSpan, false, true);
         item.SetTimeSpan("nullableTimeSpan", source.NullableTimeSpan, false, true);
-        item.SetEnum<global::MyNamespace.OrderStatus>("enum", source.Enum, false, true);
-        item.SetEnum<global::MyNamespace.OrderStatus>("nullableEnum", source.NullableEnum, false, true);
+        item.SetEnum<global::MyNamespace.OrderStatus>("enum", source.Enum, "G", false, true);
+        item.SetEnum<global::MyNamespace.OrderStatus>("nullableEnum", source.NullableEnum, "G", false, true);
         return item;
     }
     
@@ -71,7 +71,7 @@ public static partial class ExampleEntityMapper
             NullableString = x.GetNullableString("nullableString", Requiredness.InferFromNullability),
             TimeSpan = x.GetTimeSpan("timeSpan", Requiredness.InferFromNullability),
             NullableTimeSpan = x.GetNullableTimeSpan("nullableTimeSpan", Requiredness.InferFromNullability),
-            Enum = x.GetEnum<global::MyNamespace.OrderStatus>("enum", global::MyNamespace.OrderStatus.Pending, Requiredness.InferFromNullability),
-            NullableEnum = x.GetNullableEnum<global::MyNamespace.OrderStatus>("nullableEnum", Requiredness.InferFromNullability),
+            Enum = x.GetEnum<global::MyNamespace.OrderStatus>("enum", global::MyNamespace.OrderStatus.Pending, "G", Requiredness.InferFromNullability),
+            NullableEnum = x.GetNullableEnum<global::MyNamespace.OrderStatus>("nullableEnum", "G", Requiredness.InferFromNullability),
         };
 }

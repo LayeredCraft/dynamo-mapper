@@ -110,12 +110,14 @@ internal static class PropertyInfoExtensions
             ),
             INamedTypeSymbol { TypeKind: TypeKind.Enum } enumType => enumType.QualifiedName.Map(
                 Props (name) =>
-                    (
-                        "Enum",
-                        isNullableType ? [] : [$"{name}.{enumType.MemberNames.First()}"],
-                        [],
-                        $"<{name}>"
-                    )
+                {
+                    var enumFormat = $"\"{context.MapperOptions.EnumFormat}\"";
+                    string[] fromArgs = isNullableType
+                        ? [enumFormat]
+                        : [$"{name}.{enumType.MemberNames.First()}", enumFormat];
+
+                    return ("Enum", fromArgs, [enumFormat], $"<{name}>");
+                }
             ),
             _ => DiagnosticResult<Props>.Failure(
                 DiagnosticDescriptors.CannotConvertFromAttributeValue,

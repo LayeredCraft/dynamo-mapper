@@ -20,6 +20,8 @@ internal class DiagnosticResult<T>
 
     public static DiagnosticResult<T> Success(T value) => new(true, value, null);
 
+    public static implicit operator DiagnosticResult<T>(T value) => Success(value);
+
     public static DiagnosticResult<T> Failure(DiagnosticInfo error) => new(false, default, error);
 
     public static DiagnosticResult<T> Failure(

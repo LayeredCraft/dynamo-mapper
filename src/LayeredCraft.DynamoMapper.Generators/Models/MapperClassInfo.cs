@@ -18,6 +18,78 @@ internal static class MapperClassInfoExtensions
     private const string ToMethodPrefix = "To";
     private const string FromMethodPrefix = "From";
 
+    extension(MapperClassInfo)
+    {
+        internal static DiagnosticResult<(MapperClassInfo, ITypeSymbol)> CreateAndResolveModelType(
+            INamedTypeSymbol classSymbol,
+            GeneratorContext context
+        )
+        {
+            context.ThrowIfCancellationRequested();
+
+            /*
+             * to determine what mappers to generate, we need to look for methods using these rules:
+             * - Methods starting with `To` (e.g., ToItem, ToModel) -> map from POCO to
+             * AttributeValue
+             * - Methods starting with `From` (e.g., FromItem, FromModel) -> map from AttributeValue
+             * to POCO
+             *
+             * Rules:
+             * - at least one is needed, but both are not required
+             * - the POCO type on both mapper methods must match.
+             */
+
+            // TODO: add diagnostic to warn about invalid mapper methods
+            var methodSymbols = classSymbol
+                .GetMembers()
+                .OfType<IMethodSymbol>()
+                .Where(static m => m.IsPartialDefinition && m.PartialImplementationPart is null)
+                .Where(m => HasSupportedSignature(m, context))
+                .ToArray();
+
+            var toItemMethod = methodSymbols.FirstOrDefault(static m =>
+                m.Name.StartsWith(ToMethodPrefix, StringComparison.Ordinal)
+            );
+            var fromItemMethod = methodSymbols.FirstOrDefault(static m =>
+                m.Name.StartsWith(FromMethodPrefix, StringComparison.Ordinal)
+            );
+
+            // If there's an error in POCO type matching, propagate it
+            return EnsurePocoTypesMatch(toItemMethod, fromItemMethod, classSymbol)
+                .Bind(modelType =>
+                {
+                    var classSignature = GetClassSignature(classSymbol);
+                    var toItemSignature = toItemMethod?.Map(GetMethodSignature);
+                    var fromItemSignature = fromItemMethod?.Map(GetMethodSignature);
+                    var namespaceStatement = classSymbol.ContainingNamespace
+                        is { IsGlobalNamespace: false } ns
+                        ? $"namespace {ns.ToDisplayString()};"
+                        : string.Empty;
+
+                    toItemMethod
+                        ?.Parameters.FirstOrDefault()
+                        ?.Name.Tap(name => context.MapperOptions.ToMethodParameterName = name);
+                    fromItemMethod
+                        ?.Parameters.FirstOrDefault()
+                        ?.Name.Tap(name => context.MapperOptions.FromMethodParameterName = name);
+
+                    return DiagnosticResult<(MapperClassInfo, ITypeSymbol)>.Success(
+                        (
+                            new MapperClassInfo(
+                                classSymbol.Name,
+                                namespaceStatement,
+                                classSignature,
+                                toItemSignature,
+                                fromItemSignature,
+                                context.TargetNode.CreateLocationInfo()
+                            ),
+                            modelType
+                        )
+                    );
+                });
+        }
+    }
+
     private static DiagnosticResult<ITypeSymbol> EnsurePocoTypesMatch(
         IMethodSymbol? toItemMethod,
         IMethodSymbol? fromItemMethod,
@@ -99,77 +171,5 @@ internal static class MapperClassInfoExtensions
         var modifiers = method.IsStatic ? "static " : string.Empty;
 
         return $"{accessibility} {modifiers}partial {returnType} {method.Name}({parameterType} {parameterName})";
-    }
-
-    extension(MapperClassInfo)
-    {
-        internal static DiagnosticResult<(MapperClassInfo, ITypeSymbol)> CreateAndResolveModelType(
-            INamedTypeSymbol classSymbol,
-            GeneratorContext context
-        )
-        {
-            context.ThrowIfCancellationRequested();
-
-            /*
-             * to determine what mappers to generate, we need to look for methods using these rules:
-             * - Methods starting with `To` (e.g., ToItem, ToModel) -> map from POCO to
-             * AttributeValue
-             * - Methods starting with `From` (e.g., FromItem, FromModel) -> map from AttributeValue
-             * to POCO
-             *
-             * Rules:
-             * - at least one is needed, but both are not required
-             * - the POCO type on both mapper methods must match.
-             */
-
-            // TODO: add diagnostic to warn about invalid mapper methods
-            var methodSymbols = classSymbol
-                .GetMembers()
-                .OfType<IMethodSymbol>()
-                .Where(static m => m.IsPartialDefinition && m.PartialImplementationPart is null)
-                .Where(m => HasSupportedSignature(m, context))
-                .ToArray();
-
-            var toItemMethod = methodSymbols.FirstOrDefault(static m =>
-                m.Name.StartsWith(ToMethodPrefix, StringComparison.Ordinal)
-            );
-            var fromItemMethod = methodSymbols.FirstOrDefault(static m =>
-                m.Name.StartsWith(FromMethodPrefix, StringComparison.Ordinal)
-            );
-
-            // If there's an error in POCO type matching, propagate it
-            return EnsurePocoTypesMatch(toItemMethod, fromItemMethod, classSymbol)
-                .Bind(modelType =>
-                {
-                    var classSignature = GetClassSignature(classSymbol);
-                    var toItemSignature = toItemMethod?.Map(GetMethodSignature);
-                    var fromItemSignature = fromItemMethod?.Map(GetMethodSignature);
-                    var namespaceStatement = classSymbol.ContainingNamespace
-                        is { IsGlobalNamespace: false } ns
-                        ? $"namespace {ns.ToDisplayString()};"
-                        : string.Empty;
-
-                    toItemMethod
-                        ?.Parameters.FirstOrDefault()
-                        ?.Name.Tap(name => context.MapperOptions.ToMethodParameterName = name);
-                    fromItemMethod
-                        ?.Parameters.FirstOrDefault()
-                        ?.Name.Tap(name => context.MapperOptions.FromMethodParameterName = name);
-
-                    return DiagnosticResult<(MapperClassInfo, ITypeSymbol)>.Success(
-                        (
-                            new MapperClassInfo(
-                                classSymbol.Name,
-                                namespaceStatement,
-                                classSignature,
-                                toItemSignature,
-                                fromItemSignature,
-                                context.TargetNode.CreateLocationInfo()
-                            ),
-                            modelType
-                        )
-                    );
-                });
-        }
     }
 }

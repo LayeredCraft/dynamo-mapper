@@ -68,29 +68,18 @@ internal static class MapperClassInfoExtensions
         return false;
     }
 
-    private static bool IsAttributeValueDictionary(ITypeSymbol type, GeneratorContext context)
-    {
-        context.ThrowIfCancellationRequested();
-
-        if (type is not INamedTypeSymbol { IsGenericType: true } namedType)
-            return false;
-
-        if (
-            !context.WellKnownTypes.IsType(
-                namedType.ConstructedFrom,
-                WellKnownType.System_Collections_Generic_Dictionary_2
-            )
+    private static bool IsAttributeValueDictionary(ITypeSymbol type, GeneratorContext context) =>
+        type is INamedTypeSymbol { IsGenericType: true } namedType
+        && context.WellKnownTypes.IsType(
+            namedType.ConstructedFrom,
+            WellKnownType.System_Collections_Generic_Dictionary_2
         )
-            return false;
-
-        var typeArguments = namedType.TypeArguments;
-        return typeArguments.Length == 2
-            && context.WellKnownTypes.IsType(typeArguments[0], WellKnownType.System_String)
-            && context.WellKnownTypes.IsType(
-                typeArguments[1],
-                WellKnownType.Amazon_DynamoDBv2_Model_AttributeValue
-            );
-    }
+        && namedType.TypeArguments.Length == 2
+        && context.WellKnownTypes.IsType(namedType.TypeArguments[0], WellKnownType.System_String)
+        && context.WellKnownTypes.IsType(
+            namedType.TypeArguments[1],
+            WellKnownType.Amazon_DynamoDBv2_Model_AttributeValue
+        );
 
     private static string GetClassSignature(INamedTypeSymbol classSymbol)
     {
@@ -102,7 +91,6 @@ internal static class MapperClassInfoExtensions
 
     private static string GetMethodSignature(IMethodSymbol method)
     {
-        // Build signature manually with a hardcoded parameter name
         var parameter = method.Parameters.FirstOrDefault();
         var parameterName = parameter?.Name;
         var returnType = method.ReturnType.QualifiedNullableName;
@@ -163,10 +151,10 @@ internal static class MapperClassInfoExtensions
 
                     toItemMethod
                         ?.Parameters.FirstOrDefault()
-                        ?.Name.Map(name => context.MapperOptions.ToMethodParameterName = name);
+                        ?.Name.Tap(name => context.MapperOptions.ToMethodParameterName = name);
                     fromItemMethod
                         ?.Parameters.FirstOrDefault()
-                        ?.Name.Map(name => context.MapperOptions.FromMethodParameterName = name);
+                        ?.Name.Tap(name => context.MapperOptions.FromMethodParameterName = name);
 
                     return DiagnosticResult<(MapperClassInfo, ITypeSymbol)>.Success(
                         (

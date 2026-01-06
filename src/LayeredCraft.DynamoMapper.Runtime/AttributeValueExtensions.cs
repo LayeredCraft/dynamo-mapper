@@ -99,7 +99,10 @@ public static class AttributeValueExtensions
         public bool GetBool(
             string key,
             Requiredness requiredness = Requiredness.InferFromNullability
-        ) => attributes.TryGetValue(key, requiredness, out var value) && value.IsNotNull;
+        ) =>
+            attributes.TryGetValue(key, requiredness, out var value)
+            && value.IsNotNull
+            && (value?.BOOL ?? false);
 
         /// <summary>Gets a nullable boolean value from the attribute dictionary.</summary>
         /// <param name="key">The attribute key to retrieve.</param>
@@ -559,7 +562,7 @@ public static class AttributeValueExtensions
         ) =>
             attributes
                 .GetNullableValue(key, requiredness)
-                .Map(static Guid? (value) => value.IsNotNull ? Guid.Parse(value.N) : null);
+                .Map(static Guid? (value) => value.IsNotNull ? Guid.Parse(value.S) : null);
 
         /// <summary>
         ///     Gets a <see cref="Guid" /> value from the attribute dictionary using an exact format
@@ -611,7 +614,7 @@ public static class AttributeValueExtensions
         ) =>
             attributes
                 .GetNullableValue(key, requiredness)
-                .Map(Guid? (value) => value.IsNotNull ? Guid.ParseExact(value.N, format) : null);
+                .Map(Guid? (value) => value.IsNotNull ? Guid.ParseExact(value.S, format) : null);
 
         /// <summary>Sets a <see cref="Guid" /> value in the attribute dictionary.</summary>
         /// <param name="key">The attribute key to set.</param>
@@ -765,7 +768,7 @@ public static class AttributeValueExtensions
                     static DateTime? (value) =>
                         value.IsNotNull
                             ? DateTime.Parse(
-                                value.N,
+                                value.S,
                                 CultureInfo.InvariantCulture,
                                 DateTimeStyles.RoundtripKind
                             )
@@ -804,7 +807,7 @@ public static class AttributeValueExtensions
                     DateTime? (value) =>
                         value.IsNotNull
                             ? DateTime.ParseExact(
-                                value.N,
+                                value.S,
                                 format,
                                 CultureInfo.InvariantCulture,
                                 DateTimeStyles.RoundtripKind
@@ -863,7 +866,7 @@ public static class AttributeValueExtensions
                     static DateTimeOffset? (value) =>
                         value.IsNotNull
                             ? DateTimeOffset.Parse(
-                                value.N,
+                                value.S,
                                 CultureInfo.InvariantCulture,
                                 DateTimeStyles.RoundtripKind
                             )
@@ -938,7 +941,7 @@ public static class AttributeValueExtensions
                     DateTimeOffset? (value) =>
                         value.IsNotNull
                             ? DateTimeOffset.ParseExact(
-                                value.N,
+                                value.S,
                                 format,
                                 CultureInfo.InvariantCulture,
                                 DateTimeStyles.RoundtripKind

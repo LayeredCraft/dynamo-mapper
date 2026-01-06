@@ -100,23 +100,13 @@ internal static class MapperClassInfoExtensions
         return $"{accessibility} {modifiers}partial class {classSymbol.Name}";
     }
 
-    private static string? GetMethodSignature(IMethodSymbol? method)
+    private static string GetMethodSignature(IMethodSymbol method)
     {
-        if (method is null)
-            return null;
-
-        // Build signature manually with hardcoded parameter name
-        var parameter = method.Parameters[0];
-        var parameterName = method.Name.StartsWith(ToMethodPrefix, StringComparison.Ordinal)
-            ? "source"
-            : "item";
-
-        var returnType = method.ReturnType.ToDisplayString(
-            SymbolDisplayFormat.FullyQualifiedFormat
-        );
-        var parameterType = parameter.Type.ToDisplayString(
-            SymbolDisplayFormat.FullyQualifiedFormat
-        );
+        // Build signature manually with a hardcoded parameter name
+        var parameter = method.Parameters.FirstOrDefault();
+        var parameterName = parameter?.Name;
+        var returnType = method.ReturnType.QualifiedNullableName;
+        var parameterType = parameter?.Type.QualifiedNullableName;
         var accessibility = method.DeclaredAccessibility.ToString().ToLowerInvariant();
         var modifiers = method.IsStatic ? "static " : string.Empty;
 
@@ -159,35 +149,39 @@ internal static class MapperClassInfoExtensions
                 m.Name.StartsWith(FromMethodPrefix, StringComparison.Ordinal)
             );
 
-            var modelTypeResult = EnsurePocoTypesMatch(toItemMethod, fromItemMethod, classSymbol);
-
             // If there's an error in POCO type matching, propagate it
-            if (!modelTypeResult.IsSuccess)
-                return DiagnosticResult<(MapperClassInfo, ITypeSymbol)>.Failure(
-                    modelTypeResult.Error!
-                );
+            return EnsurePocoTypesMatch(toItemMethod, fromItemMethod, classSymbol)
+                .Bind(modelType =>
+                {
+                    var classSignature = GetClassSignature(classSymbol);
+                    var toItemSignature = toItemMethod?.Map(GetMethodSignature);
+                    var fromItemSignature = fromItemMethod?.Map(GetMethodSignature);
+                    var namespaceStatement = classSymbol.ContainingNamespace
+                        is { IsGlobalNamespace: false } ns
+                        ? $"namespace {ns.ToDisplayString()};"
+                        : string.Empty;
 
-            var modelTypeSymbol = modelTypeResult.Value!;
-            var classSignature = GetClassSignature(classSymbol);
-            var toItemSignature = GetMethodSignature(toItemMethod);
-            var fromItemSignature = GetMethodSignature(fromItemMethod);
-            var namespaceStatement = classSymbol.ContainingNamespace
-                is { IsGlobalNamespace: false } ns
-                ? $"namespace {ns.ToDisplayString()};"
-                : string.Empty;
+                    toItemMethod
+                        ?.Parameters.FirstOrDefault()
+                        ?.Name.Map(name => context.MapperOptions.ToMethodParameterName = name);
+                    fromItemMethod
+                        ?.Parameters.FirstOrDefault()
+                        ?.Name.Map(name => context.MapperOptions.FromMethodParameterName = name);
 
-            var mapperClassInfo = new MapperClassInfo(
-                classSymbol.Name,
-                namespaceStatement,
-                classSignature,
-                toItemSignature,
-                fromItemSignature,
-                context.TargetNode.CreateLocationInfo()
-            );
-
-            return DiagnosticResult<(MapperClassInfo, ITypeSymbol)>.Success(
-                (mapperClassInfo, modelTypeSymbol)
-            );
+                    return DiagnosticResult<(MapperClassInfo, ITypeSymbol)>.Success(
+                        (
+                            new MapperClassInfo(
+                                classSymbol.Name,
+                                namespaceStatement,
+                                classSignature,
+                                toItemSignature,
+                                fromItemSignature,
+                                context.TargetNode.CreateLocationInfo()
+                            ),
+                            modelType
+                        )
+                    );
+                });
         }
     }
 }

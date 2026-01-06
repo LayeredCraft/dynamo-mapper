@@ -15,5 +15,6 @@ internal static class TypeSymbolExtensions
     extension(ITypeSymbol typeSymbol)
     {
         internal string QualifiedName => typeSymbol.ToDisplayString(NotNullableFormat);
+        internal string QualifiedNullableName => typeSymbol.ToDisplayString(NullableFormat);
     }
 }

@@ -16,8 +16,10 @@ internal static class PropertyInfoExtensions
             GeneratorContext context
         )
         {
-            var toParamName = "source";
-            var fromParamName = "item";
+            context.ThrowIfCancellationRequested();
+
+            var toParamName = context.MapperOptions.ToMethodParameterName;
+            var fromParamName = context.MapperOptions.FromMethodParameterName;
             var propertyName = propertySymbol.Name;
             var key = context
                 .MapperOptions.KeyNamingConventionConverter(propertyName)

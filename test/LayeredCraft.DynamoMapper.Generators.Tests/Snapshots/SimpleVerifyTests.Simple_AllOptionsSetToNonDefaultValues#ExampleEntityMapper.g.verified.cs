@@ -48,30 +48,30 @@ public static partial class ExampleEntityMapper
     }
     
     [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
-    public static partial global::MyNamespace.ExampleEntity FromItem(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> item)
+    public static partial global::MyNamespace.ExampleEntity FromItem(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> x)
         => new global::MyNamespace.ExampleEntity
         {
-            Bool = item.GetBool("bool", Requiredness.Required),
-            NullableBool = item.GetNullableBool("nullable_bool", Requiredness.Required),
-            DateTime = item.GetDateTime("date_time", "I", Requiredness.Required),
-            NullableDateTime = item.GetNullableDateTime("nullable_date_time", "I", Requiredness.Required),
-            DateTimeOffset = item.GetDateTimeOffset("date_time_offset", "I", Requiredness.Required),
-            NullableDateTimeOffset = item.GetNullableDateTimeOffset("nullable_date_time_offset", "I", Requiredness.Required),
-            Decimal = item.GetDecimal("decimal", Requiredness.Required),
-            NullableDecimal = item.GetNullableDecimal("nullable_decimal", Requiredness.Required),
-            Double = item.GetDouble("double", Requiredness.Required),
-            NullableDouble = item.GetNullableDouble("nullable_double", Requiredness.Required),
-            Guid = item.GetGuid("guid", Requiredness.Required),
-            NullableGuid = item.GetNullableGuid("nullable_guid", Requiredness.Required),
-            Int = item.GetInt("int", Requiredness.Required),
-            NullableInt = item.GetNullableInt("nullable_int", Requiredness.Required),
-            Long = item.GetLong("long", Requiredness.Required),
-            NullableLong = item.GetNullableLong("nullable_long", Requiredness.Required),
-            String = item.GetString("string", Requiredness.Required),
-            NullableString = item.GetNullableString("nullable_string", Requiredness.Required),
-            TimeSpan = item.GetTimeSpan("time_span", Requiredness.Required),
-            NullableTimeSpan = item.GetNullableTimeSpan("nullable_time_span", Requiredness.Required),
-            Enum = item.GetEnum<global::MyNamespace.OrderStatus>("enum", global::MyNamespace.OrderStatus.Pending, Requiredness.Required),
-            NullableEnum = item.GetNullableEnum<global::MyNamespace.OrderStatus>("nullable_enum", Requiredness.Required),
+            Bool = x.GetBool("bool", Requiredness.Required),
+            NullableBool = x.GetNullableBool("nullable_bool", Requiredness.Required),
+            DateTime = x.GetDateTime("date_time", "I", Requiredness.Required),
+            NullableDateTime = x.GetNullableDateTime("nullable_date_time", "I", Requiredness.Required),
+            DateTimeOffset = x.GetDateTimeOffset("date_time_offset", "I", Requiredness.Required),
+            NullableDateTimeOffset = x.GetNullableDateTimeOffset("nullable_date_time_offset", "I", Requiredness.Required),
+            Decimal = x.GetDecimal("decimal", Requiredness.Required),
+            NullableDecimal = x.GetNullableDecimal("nullable_decimal", Requiredness.Required),
+            Double = x.GetDouble("double", Requiredness.Required),
+            NullableDouble = x.GetNullableDouble("nullable_double", Requiredness.Required),
+            Guid = x.GetGuid("guid", Requiredness.Required),
+            NullableGuid = x.GetNullableGuid("nullable_guid", Requiredness.Required),
+            Int = x.GetInt("int", Requiredness.Required),
+            NullableInt = x.GetNullableInt("nullable_int", Requiredness.Required),
+            Long = x.GetLong("long", Requiredness.Required),
+            NullableLong = x.GetNullableLong("nullable_long", Requiredness.Required),
+            String = x.GetString("string", Requiredness.Required),
+            NullableString = x.GetNullableString("nullable_string", Requiredness.Required),
+            TimeSpan = x.GetTimeSpan("time_span", Requiredness.Required),
+            NullableTimeSpan = x.GetNullableTimeSpan("nullable_time_span", Requiredness.Required),
+            Enum = x.GetEnum<global::MyNamespace.OrderStatus>("enum", global::MyNamespace.OrderStatus.Pending, Requiredness.Required),
+            NullableEnum = x.GetNullableEnum<global::MyNamespace.OrderStatus>("nullable_enum", Requiredness.Required),
         };
 }

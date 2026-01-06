@@ -28,6 +28,13 @@
     <PackageReference Include="Verify.XunitV3" />
     <PackageReference Include="xunit.v3" />
     <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="Humanizer.Core" PrivateAssets="all" GeneratePathProperty="true" />
+    <None
+      Include="$(PkgHumanizer_Core)\lib\netstandard2.0\*.dll"
+      Pack="true"
+      PackagePath="analyzers/dotnet/cs"
+      Visible="false"
+    />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\LayeredCraft.DynamoMapper.Generators\LayeredCraft.DynamoMapper.Generators.csproj" />

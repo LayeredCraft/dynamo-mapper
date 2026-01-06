@@ -29,12 +29,13 @@
 
   <ItemGroup>
     <PackageReference Include="Humanizer.Core" PrivateAssets="all" GeneratePathProperty="true" />
-    <None
-      Include="$(PkgHumanizer_Core)\lib\netstandard2.0\*.dll"
-      Pack="true"
-      PackagePath="analyzers/dotnet/cs"
-      Visible="false"
-    />
+    <AnalyzerDependency Include="$(PkgHumanizer_Core)\lib\netstandard2.0\Humanizer.dll" />
+    <!--    <None-->
+    <!--      Include="$(PkgHumanizer_Core)\lib\netstandard2.0\*.dll"-->
+    <!--      Pack="true"-->
+    <!--      PackagePath="analyzers/dotnet/cs"-->
+    <!--      Visible="false"-->
+    <!--    />-->
     <PackageReference Include="LayeredCraft.SourceGeneratorTools.Generator">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -54,13 +55,9 @@
     <EmbeddedResource Include="Templates\*.scriban" />
   </ItemGroup>
   <ItemGroup>
-    <AdditionalFiles Include="AnalyzerReleases.Shipped.md"/>
-    <AdditionalFiles Include="AnalyzerReleases.Unshipped.md"/>
+    <AdditionalFiles Include="AnalyzerReleases.Shipped.md" />
+    <AdditionalFiles Include="AnalyzerReleases.Unshipped.md" />
   </ItemGroup>
-  <PropertyGroup>
-    <!-- Disable PolySharp's ModuleInitializerAttribute shim -->
-    <PolySharpExcludeGeneratedTypes>System.Runtime.CompilerServices.ModuleInitializerAttribute</PolySharpExcludeGeneratedTypes>
-  </PropertyGroup>
   <PropertyGroup>
     <GetTargetPathDependsOn>
       $(GetTargetPathDependsOn);GetDependencyTargetPaths

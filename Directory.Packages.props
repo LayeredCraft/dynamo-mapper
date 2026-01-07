@@ -14,7 +14,7 @@
     <PackageVersion Include="Basic.Reference.Assemblies.Net80" Version="1.8.4" />
     <PackageVersion Include="Basic.Reference.Assemblies.Net90" Version="1.8.4" />
     <PackageVersion Include="Humanizer.Core" Version="3.0.1" />
-    <PackageVersion Include="LayeredCraft.SourceGeneratorTools.Generator" Version="0.1.0-beta.10" />
+    <PackageVersion Include="LayeredCraft.SourceGeneratorTools" Version="0.1.0-beta.10" />
     <PackageVersion Include="Meziantou.Polyfill" Version="1.0.71" />
     <PackageVersion Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis" Version="5.0.0" />

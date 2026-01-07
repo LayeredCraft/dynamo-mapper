@@ -40,7 +40,7 @@ internal static class MapperInfoExtensions
         ///     Creates a MapperInfo containing only error diagnostics. Used when an exception prevents
         ///     normal analysis.
         /// </summary>
-        internal static MapperInfo CreateWithDiagnostics(IEnumerable<DiagnosticInfo> diagnostics) =>
+        private static MapperInfo CreateWithDiagnostics(IEnumerable<DiagnosticInfo> diagnostics) =>
             new(null, null, diagnostics.ToEquatableArray());
     }
 }

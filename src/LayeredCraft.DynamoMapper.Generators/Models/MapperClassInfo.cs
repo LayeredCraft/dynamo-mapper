@@ -39,20 +39,10 @@ internal static class MapperClassInfoExtensions
              * - the POCO type on both mapper methods must match.
              */
 
-            // TODO: add diagnostic to warn about invalid mapper methods
-            var methodSymbols = classSymbol
-                .GetMembers()
-                .OfType<IMethodSymbol>()
-                .Where(static m => m.IsPartialDefinition && m.PartialImplementationPart is null)
-                .Where(m => HasSupportedSignature(m, context))
-                .ToArray();
+            var methods = classSymbol.GetMembers().OfType<IMethodSymbol>().ToArray();
 
-            var toItemMethod = methodSymbols.FirstOrDefault(static m =>
-                m.Name.StartsWith(ToMethodPrefix, StringComparison.Ordinal)
-            );
-            var fromItemMethod = methodSymbols.FirstOrDefault(static m =>
-                m.Name.StartsWith(FromMethodPrefix, StringComparison.Ordinal)
-            );
+            var toItemMethod = methods.FirstOrDefault(m => IsToMethod(m, context));
+            var fromItemMethod = methods.FirstOrDefault(m => IsFromMethod(m, context));
 
             // If there's an error in POCO type matching, propagate it
             return EnsurePocoTypesMatch(toItemMethod, fromItemMethod, classSymbol)
@@ -123,22 +113,31 @@ internal static class MapperClassInfoExtensions
         return DiagnosticResult<ITypeSymbol>.Success(toItemPocoType ?? fromItemPocoType!);
     }
 
-    private static bool HasSupportedSignature(IMethodSymbol method, GeneratorContext context)
-    {
-        context.ThrowIfCancellationRequested();
+    /// <summary>
+    ///     To method must be:
+    ///     <list type="bullet">
+    ///         <item>partial</item> <item>not implemented</item>
+    ///         <item>one parameter</item> <item>return an Attribute value dictionary</item>
+    ///     </list>
+    /// </summary>
+    private static bool IsToMethod(IMethodSymbol method, GeneratorContext context) =>
+        method.Name.StartsWith(ToMethodPrefix)
+        && method
+            is { IsPartialDefinition: true, PartialImplementationPart: null, Parameters.Length: 1 }
+        && IsAttributeValueDictionary(method.ReturnType, context);
 
-        if (method.Parameters.Length != 1)
-            return false;
-
-        if (method.Name.StartsWith(ToMethodPrefix, StringComparison.Ordinal))
-            return IsAttributeValueDictionary(method.ReturnType, context);
-
-        if (method.Name.StartsWith(FromMethodPrefix, StringComparison.Ordinal))
-            return !method.ReturnsVoid
-                && IsAttributeValueDictionary(method.Parameters[0].Type, context);
-
-        return false;
-    }
+    /// <summary>
+    ///     From method must be:
+    ///     <list type="bullet">
+    ///         <item>partial</item> <item>not implemented</item>
+    ///         <item>one parameter</item> <item>parameter is an Attribute value dictionary</item>
+    ///     </list>
+    /// </summary>
+    private static bool IsFromMethod(IMethodSymbol method, GeneratorContext context) =>
+        method.Name.StartsWith(FromMethodPrefix)
+        && method
+            is { IsPartialDefinition: true, PartialImplementationPart: null, Parameters.Length: 1 }
+        && IsAttributeValueDictionary(method.Parameters[0].Type, context);
 
     private static bool IsAttributeValueDictionary(ITypeSymbol type, GeneratorContext context) =>
         type is INamedTypeSymbol { IsGenericType: true } namedType

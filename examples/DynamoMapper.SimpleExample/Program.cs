@@ -91,7 +91,7 @@ var myEntity = ExampleEntityMapper.FromItem(exampleAttributes);
 )]
 public static partial class ExampleEntityMapper
 {
-    public static partial Dictionary<string, AttributeValue> ToItem(ExampleEntity source);
+    private static partial Dictionary<string, AttributeValue> ToItem(ExampleEntity source);
 
     public static partial ExampleEntity FromItem(Dictionary<string, AttributeValue> item);
 }

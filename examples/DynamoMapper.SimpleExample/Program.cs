@@ -114,7 +114,7 @@ public class ExampleEntity
     public int? NullableInt { get; set; }
     public long Long { get; set; }
     public long? NullableLong { get; set; }
-    public string String { get; set; }
+    public required string String { get; set; }
     public string? NullableString { get; set; }
     public float Float { get; set; }
     public float? NullableFloat { get; set; }

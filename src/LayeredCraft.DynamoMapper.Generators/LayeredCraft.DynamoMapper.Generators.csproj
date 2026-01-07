@@ -18,6 +18,7 @@
     <PackageTags>dynamodb;aws;source-generator;mapping;mapper;single-table;nosql;lambda;dotnet;csharp;roslyn</PackageTags>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
     <PackageScribanIncludeSource>true</PackageScribanIncludeSource>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
   </PropertyGroup>
 
   <ItemGroup>
@@ -49,14 +50,17 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" />
     <PackageReference Include="Scriban" IncludeAssets="Build" />
   </ItemGroup>
+
   <ItemGroup>
     <Compile Remove="Templates\*.scriban" />
     <EmbeddedResource Include="Templates\*.scriban" />
   </ItemGroup>
+
   <ItemGroup>
     <AdditionalFiles Include="AnalyzerReleases.Shipped.md" />
     <AdditionalFiles Include="AnalyzerReleases.Unshipped.md" />
   </ItemGroup>
+
   <PropertyGroup>
     <GetTargetPathDependsOn>
       $(GetTargetPathDependsOn);GetDependencyTargetPaths
@@ -70,4 +74,32 @@
       />
     </ItemGroup>
   </Target>
+
+  <!-- Pack the generator DLL into the analyzers folder -->
+  <ItemGroup>
+    <None
+      Include="$(OutputPath)\$(AssemblyName).dll"
+      Pack="true"
+      PackagePath="analyzers/dotnet/cs"
+      Visible="false"
+    />
+    <None
+      Include="$(OutputPath)\$(AssemblyName).Runtime.dll"
+      Pack="true"
+      PackagePath="analyzers/dotnet/cs"
+      Visible="false"
+    />
+    <None
+      Include="$(OutputPath)\$(AssemblyName).Runtime.dll"
+      Pack="true"
+      PackagePath="lib/netstandard2.0"
+      Visible="true"
+    />
+    <None
+      Include="$(OutputPath)\$(AssemblyName).Runtime.xml"
+      Pack="true"
+      PackagePath="lib/netstandard2.0"
+      Visible="true"
+    />
+  </ItemGroup>
 </Project>

@@ -1,23 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
-    <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
-        <Nullable>enable</Nullable>
-        <LangVersion>latest</LangVersion>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <IsPackable>true</IsPackable>
-        <PackageId>DynamoMapper.Runtime</PackageId>
-        <AssemblyName>$(PackageId)</AssemblyName>
-        <RootNamespace>$(PackageId)</RootNamespace>
-        <Title>$(PackageId)</Title>
-        <Description>DynamoMapper.Runtime provides the runtime API used by DynamoMapper-generated code, including mapping attributes and helper utilities for working with Amazon DynamoDB AttributeValue types.
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <PackageId>DynamoMapper.Runtime</PackageId>
+    <AssemblyName>$(PackageId)</AssemblyName>
+    <RootNamespace>$(PackageId)</RootNamespace>
+    <Title>$(PackageId)</Title>
+    <Description>DynamoMapper.Runtime provides the runtime API used by DynamoMapper-generated code, including mapping attributes and helper utilities for working with Amazon DynamoDB AttributeValue types.
 
             Install this package if you want the shared attributes and AttributeValue extension methods without enabling source generation, or if you are building custom mapping infrastructure on top of DynamoDB’s low-level object model.</Description>
-        <PackageTags>dynamodb;aws;attributevalue;nosql;single-table;lambda;dotnet;csharp;utilities;extensions</PackageTags>
-    </PropertyGroup>
-
-    <ItemGroup>
-      <PackageReference Include="AWSSDK.DynamoDBv2" Version="4.0.10.4" />
-    </ItemGroup>
-
+    <PackageTags>dynamodb;aws;attributevalue;nosql;single-table;lambda;dotnet;csharp;utilities;extensions</PackageTags>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="AWSSDK.DynamoDBv2" />
+  </ItemGroup>
 </Project>

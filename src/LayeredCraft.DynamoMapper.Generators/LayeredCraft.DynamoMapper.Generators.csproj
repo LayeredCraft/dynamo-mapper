@@ -1,26 +1,116 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <IsPackable>true</IsPackable>
+    <ImplicitUsings>true</ImplicitUsings>
+    <PackageId>DynamoMapper</PackageId>
+    <AssemblyName>$(PackageId)</AssemblyName>
+    <RootNamespace>$(PackageId)</RootNamespace>
+    <Title>$(PackageId)</Title>
+    <IsAotCompatible>false</IsAotCompatible>
+    <Description>DynamoMapper is a source generator for .NET that generates fast, strongly-typed mappings between your domain models and Amazon DynamoDB AttributeValue dictionaries.
 
-    <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
-        <Nullable>enable</Nullable>
-        <LangVersion>latest</LangVersion>
-        <IncludeBuildOutput>false</IncludeBuildOutput>
-        <IsPackable>true</IsPackable>
-        <ImplicitUsings>true</ImplicitUsings>
-        <PackageId>DynamoMapper</PackageId>
-        <AssemblyName>$(PackageId)</AssemblyName>
-        <RootNamespace>$(PackageId)</RootNamespace>
-        <Title>$(PackageId)</Title>
-        <Description>DynamoMapper is a source generator for .NET that generates fast, strongly-typed mappings between your domain models and Amazon DynamoDB AttributeValue dictionaries.
+      Designed for DynamoDB single-table patterns, it provides compile-time validation and high-performance, zero-reflection mapping code—without requiring AWS attributes on your entities. Install this package to enable code generation; it references DynamoMapper.Runtime for shared attributes and helpers.
+    </Description>
+    <PackageTags>dynamodb;aws;source-generator;mapping;mapper;single-table;nosql;lambda;dotnet;csharp;roslyn</PackageTags>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+    <PackageScribanIncludeSource>true</PackageScribanIncludeSource>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+  </PropertyGroup>
 
-            Designed for DynamoDB single-table patterns, it provides compile-time validation and high-performance, zero-reflection mapping code—without requiring AWS attributes on your entities. Install this package to enable code generation; it references DynamoMapper.Runtime for shared attributes and helpers.</Description>
-        <PackageTags>dynamodb;aws;source-generator;mapping;mapper;single-table;nosql;lambda;dotnet;csharp;roslyn</PackageTags>
-        <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
-        <PackageScribanIncludeSource>true</PackageScribanIncludeSource>
-    </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference
+      Include="..\LayeredCraft.DynamoMapper.Runtime\LayeredCraft.DynamoMapper.Runtime.csproj"
+      PrivateAssets="all"
+    />
+  </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Humanizer.Core" PrivateAssets="all" GeneratePathProperty="true" />
+    <None
+      Include="$(PkgHumanizer_Core)\lib\netstandard2.0\*.dll"
+      Pack="true"
+      PackagePath="analyzers/dotnet/cs"
+      Visible="false"
+    />
+    <PackageReference
+      Include="LayeredCraft.SourceGeneratorTools"
+      PrivateAssets="all"
+      GeneratePathProperty="true"
+    />
+    <None
+      Include="$(PkgLayeredCraft_SourceGeneratorTools)\lib\netstandard2.0\*.dll"
+      Pack="true"
+      PackagePath="analyzers/dotnet/cs"
+      Visible="false"
+    />
+    <PackageReference Include="Meziantou.Polyfill">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CSharp" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" />
+    <PackageReference Include="Scriban" IncludeAssets="Build" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Templates\*.scriban" />
+    <EmbeddedResource Include="Templates\*.scriban" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="AnalyzerReleases.Shipped.md" />
+    <AdditionalFiles Include="AnalyzerReleases.Unshipped.md" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <GetTargetPathDependsOn>
+      $(GetTargetPathDependsOn);GetDependencyTargetPaths
+    </GetTargetPathDependsOn>
+  </PropertyGroup>
+  <Target Name="GetDependencyTargetPaths">
     <ItemGroup>
-      <ProjectReference Include="..\LayeredCraft.DynamoMapper.Runtime\LayeredCraft.DynamoMapper.Runtime.csproj" />
+      <TargetPathWithTargetPlatformMoniker
+        Include="$(PkgHumanizer_Core)\lib\netstandard2.0\*.dll"
+        IncludeRuntimeDependency="false"
+      />
+      <TargetPathWithTargetPlatformMoniker
+        Include="$(PkgLayeredCraft_SourceGeneratorTools)\lib\netstandard2.0\*.dll"
+        IncludeRuntimeDependency="false"
+      />
     </ItemGroup>
+  </Target>
 
+  <!-- Pack the generator DLL into the analyzers folder -->
+  <ItemGroup>
+    <None
+      Include="$(OutputPath)\$(AssemblyName).dll"
+      Pack="true"
+      PackagePath="analyzers/dotnet/cs"
+      Visible="false"
+    />
+    <None
+      Include="$(OutputPath)\$(AssemblyName).Runtime.dll"
+      Pack="true"
+      PackagePath="analyzers/dotnet/cs"
+      Visible="false"
+    />
+    <None
+      Include="$(OutputPath)\$(AssemblyName).Runtime.dll"
+      Pack="true"
+      PackagePath="lib/netstandard2.0"
+      Visible="true"
+    />
+    <None
+      Include="$(OutputPath)\$(AssemblyName).Runtime.xml"
+      Pack="true"
+      PackagePath="lib/netstandard2.0"
+      Visible="true"
+    />
+  </ItemGroup>
 </Project>

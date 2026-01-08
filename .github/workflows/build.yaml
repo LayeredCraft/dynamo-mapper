@@ -3,19 +3,19 @@ on:
   # Disabled automatic builds until implementation is complete
   # Can still be triggered manually via workflow_dispatch
   workflow_dispatch:
-  # push:
-  #   branches:
-  #     - main
-  #     - beta
-  #     - release/*
-  #   tags:
-  #     - v*
-  #   paths-ignore:
-  #     - 'docs/**'
-  #     - 'README.md'
-  #     - 'ROADMAP.md'
-  #     - 'mkdocs.yml'
-  #     - 'requirements.txt'
+  push:
+    branches:
+      - main
+      - beta
+      - release/*
+    tags:
+      - v*
+    paths-ignore:
+      - 'docs/**'
+      - 'README.md'
+      - 'ROADMAP.md'
+      - 'mkdocs.yml'
+      - 'requirements.txt'
 permissions: write-all
 jobs:
   build:

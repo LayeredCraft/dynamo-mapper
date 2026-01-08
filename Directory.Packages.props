@@ -9,13 +9,13 @@
     <PackageVersion Include="AutoFixture.AutoNSubstitute" Version="4.18.1" />
     <PackageVersion Include="AutoFixture.Xunit3" Version="4.19.0" />
     <PackageVersion Include="AwesomeAssertions" Version="9.3.0" />
-    <PackageVersion Include="AWSSDK.DynamoDBv2" Version="4.0.10.4" />
+    <PackageVersion Include="AWSSDK.DynamoDBv2" Version="4.0.10.7" />
     <PackageVersion Include="Basic.Reference.Assemblies.Net100" Version="1.8.4" />
     <PackageVersion Include="Basic.Reference.Assemblies.Net80" Version="1.8.4" />
     <PackageVersion Include="Basic.Reference.Assemblies.Net90" Version="1.8.4" />
     <PackageVersion Include="Humanizer.Core" Version="3.0.1" />
     <PackageVersion Include="LayeredCraft.SourceGeneratorTools" Version="0.1.0-beta.10" />
-    <PackageVersion Include="Meziantou.Polyfill" Version="1.0.71" />
+    <PackageVersion Include="Meziantou.Polyfill" Version="1.0.83" />
     <PackageVersion Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis" Version="5.0.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="4.14.0" />
@@ -26,7 +26,7 @@
     <PackageVersion Include="NSubstitute" Version="5.3.0" />
     <PackageVersion Include="Scriban" Version="6.5.2" />
     <PackageVersion Include="Verify.SourceGenerators" Version="2.5.0" />
-    <PackageVersion Include="Verify.XunitV3" Version="31.9.0" />
+    <PackageVersion Include="Verify.XunitV3" Version="31.9.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
     <PackageVersion Include="xunit.v3" Version="3.2.1" />
   </ItemGroup>

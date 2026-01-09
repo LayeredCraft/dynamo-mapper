@@ -1,4 +1,3 @@
-using DynamoMapper.Extensions;
 using Microsoft.CodeAnalysis;
 
 namespace DynamoMapper.Generator;
@@ -9,6 +8,7 @@ internal class GeneratorContext
         GeneratorAttributeSyntaxContext context,
         WellKnownTypes.WellKnownTypes wellKnownTypes,
         MapperOptions mapperOptions,
+        Dictionary<string, DynamoFieldOptions> fieldOptions,
         CancellationToken cancellationToken
     )
     {
@@ -18,6 +18,7 @@ internal class GeneratorContext
         WellKnownTypes = wellKnownTypes;
         TargetNode = GeneratorAttributeSyntaxContext.TargetNode;
         MapperOptions = mapperOptions;
+        FieldOptions = fieldOptions;
     }
 
     internal CancellationToken CancellationToken { get; }
@@ -26,6 +27,7 @@ internal class GeneratorContext
     internal SemanticModel SemanticModel { get; }
     internal WellKnownTypes.WellKnownTypes WellKnownTypes { get; }
     internal MapperOptions MapperOptions { get; }
+    internal Dictionary<string, DynamoFieldOptions> FieldOptions { get; }
 }
 
 internal static class GeneratorContextExtensions

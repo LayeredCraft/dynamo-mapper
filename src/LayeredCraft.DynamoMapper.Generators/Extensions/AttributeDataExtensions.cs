@@ -1,4 +1,6 @@
+using System.Collections.Immutable;
 using System.Reflection;
+using Humanizer;
 using Microsoft.CodeAnalysis;
 
 namespace DynamoMapper.Generator;
@@ -14,8 +16,19 @@ internal static class AttributeDataExtensions
 
             var settingsType = typeof(TOptions);
 
+            var ctorArgs = GetConstructorArgs(
+                attributeData.AttributeConstructor,
+                attributeData.ConstructorArguments
+            );
+
+            KeyValuePair<string, TypedConstant>[] combinedArgs =
+            [
+                .. attributeData.NamedArguments,
+                .. ctorArgs,
+            ];
+
             // Map named arguments (properties)
-            foreach (var (propertyName, value) in attributeData.NamedArguments)
+            foreach (var (propertyName, value) in combinedArgs)
             {
                 var property = settingsType.GetProperty(
                     propertyName,
@@ -32,6 +45,20 @@ internal static class AttributeDataExtensions
             return options;
         }
     }
+
+    private static IEnumerable<KeyValuePair<string, TypedConstant>> GetConstructorArgs(
+        IMethodSymbol? constructor,
+        ImmutableArray<TypedConstant> constructorArgs
+    ) =>
+        constructor is not null
+            ? constructorArgs.Select(
+                (_, i) =>
+                    new KeyValuePair<string, TypedConstant>(
+                        constructor.Parameters[i].Name.Dehumanize(),
+                        constructorArgs[i]
+                    )
+            )
+            : [];
 
     private static object? GetTypedConstantValue(TypedConstant constant) =>
         constant.Kind switch

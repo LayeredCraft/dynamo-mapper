@@ -43,6 +43,7 @@ internal static class WellKnownTypeData
         Amazon_DynamoDBv2_Model_AttributeValue,
         System_Collections_Generic_Dictionary_2,
         DynamoMapper_Runtime_DynamoMapperAttribute,
+        DynamoMapper_Runtime_DynamoFieldAttribute,
     }
 
     public static readonly string[] WellKnownTypeNames =
@@ -76,5 +77,6 @@ internal static class WellKnownTypeData
         "Amazon.DynamoDBv2.Model.AttributeValue",
         "System.Collections.Generic.Dictionary`2",
         "DynamoMapper.Runtime.DynamoMapperAttribute",
+        "DynamoMapper.Runtime.DynamoFieldAttribute",
     ];
 }

@@ -4,7 +4,7 @@ namespace DynamoMapper.Runtime;
 ///     Configures mapping behavior for a specific property/field on a mapper method. This
 ///     attribute can be applied multiple times to configure different properties.
 /// </summary>
-[AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = false)]
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
 public sealed class DynamoFieldAttribute : Attribute
 {
     /// <summary>Initializes a new instance of the <see cref="DynamoFieldAttribute" /> class.</summary>
@@ -20,7 +20,7 @@ public sealed class DynamoFieldAttribute : Attribute
 
     /// <summary>Gets or sets the DynamoDB attribute name override.</summary>
     /// <remarks>When <c>null</c>, the attribute name is determined by the mapper's naming convention.</remarks>
-    public string? Name { get; set; }
+    public string? AttributeName { get; set; }
 
     /// <summary>Gets or sets whether this field is required.</summary>
     /// <remarks>
@@ -38,16 +38,6 @@ public sealed class DynamoFieldAttribute : Attribute
 
     /// <summary>Gets or sets whether to omit this field if the value is null or whitespace (for strings).</summary>
     public bool? OmitIfNullOrWhiteSpace { get; set; }
-
-    /// <summary>Gets or sets the converter type for custom type conversion.</summary>
-    /// <remarks>
-    ///     Must implement <see cref="IDynamoConverter{T}" />. Cannot be used together with
-    ///     <see cref="ToMethod" /> or <see cref="FromMethod" />.
-    /// </remarks>
-    public Type? Converter { get; set; }
-
-    /// <summary>Gets or sets the optional converter name for named converter registry (future use).</summary>
-    public string? ConverterName { get; set; }
 
     /// <summary>Gets or sets the name of the static method to use for ToItem conversion.</summary>
     /// <remarks>

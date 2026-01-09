@@ -50,8 +50,7 @@ internal static class MapperSyntaxProvider
 
         var mapperOptions = mapperAttribute.PopulateOptions<MapperOptions>();
 
-        // get field attributes
-        var fieldAttributes = attributes
+        var fieldOptions = attributes
             .Where(attr =>
                 attr.AttributeClass is not null
                 && wellKnownTypes.IsType(
@@ -59,9 +58,6 @@ internal static class MapperSyntaxProvider
                     WellKnownType.DynamoMapper_Runtime_DynamoFieldAttribute
                 )
             )
-            .ToArray();
-
-        var fieldOptions = fieldAttributes
             .Select(attr => attr.PopulateOptions<DynamoFieldOptions>())
             .ToDictionary(fieldOption => fieldOption.MemberName);
 

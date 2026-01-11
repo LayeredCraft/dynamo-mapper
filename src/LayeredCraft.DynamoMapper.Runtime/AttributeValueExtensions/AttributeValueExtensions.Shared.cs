@@ -90,6 +90,22 @@ public static partial class AttributeValueExtensions
             value = attributeValue;
             return true;
         }
+
+        internal AttributeValue GetValue(string key, Requiredness requiredness)
+        {
+            if (!attributes.TryGetValue(key, out var attributeValue))
+                return requiredness switch
+                {
+                    Requiredness.Required or Requiredness.InferFromNullability =>
+                        throw new InvalidOperationException(
+                            $"The DynamoDB item does not contain an attribute named '{key}'."
+                        ),
+                    Requiredness.Optional => new AttributeValue { NULL = true },
+                    _ => throw new ArgumentOutOfRangeException(nameof(requiredness)),
+                };
+
+            return attributeValue;
+        }
     }
 
     internal static bool ShouldSet(string? value, bool omitEmptyStrings, bool omitNullStrings) =>

@@ -45,9 +45,11 @@ public static class StringAttributeValueExtensions
             DynamoKind kind = DynamoKind.S
         ) => attributes.GetValue(key, requiredness).GetString(kind);
 
-        /// <summary>Sets a string value in the attribute dictionary.</summary>
+        /// <summary>Sets a string value in the attribute dictionary, honoring omit rules.</summary>
         /// <param name="key">The attribute key to set.</param>
-        /// <param name="value">The string value to set (can be null).</param>
+        /// <param name="value">
+        ///     The string value to set (can be null). When null and not omitted, a DynamoDB NULL is stored.
+        /// </param>
         /// <param name="omitEmptyStrings">
         ///     Whether to omit empty string values from the DynamoDB item. Default
         ///     is <c>false</c>.
@@ -56,18 +58,18 @@ public static class StringAttributeValueExtensions
         ///     Whether to omit null string values from the DynamoDB item. Default is
         ///     <c>true</c>.
         /// </param>
+        /// <param name="kind">The DynamoDB attribute kind to write. Default is <see cref="DynamoKind.S" />.</param>
         /// <returns>The attribute dictionary for fluent chaining.</returns>
         public Dictionary<string, AttributeValue> SetString(
             string key,
             string? value,
             bool omitEmptyStrings = false,
-            bool omitNullStrings = true
+            bool omitNullStrings = true,
+            DynamoKind kind = DynamoKind.S
         )
         {
             if (value.ShouldSet(omitEmptyStrings, omitNullStrings))
-                attributes[key] = value is null
-                    ? new AttributeValue { NULL = true }
-                    : new AttributeValue { S = value };
+                attributes[key] = value.ToAttributeValue(kind);
 
             return attributes;
         }

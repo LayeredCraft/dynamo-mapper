@@ -80,7 +80,7 @@ internal static class UtilAttributeValueExtensions
                 or DynamoKind.SS
                 or DynamoKind.NS
                 or DynamoKind.BS => throw new NotImplementedException(
-                    $"Not implemented for kind: {kind}"
+                    $"{nameof(GetString)} is not implemented for kind: {kind}"
                 ),
                 _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null),
             } ?? string.Empty;
@@ -99,7 +99,7 @@ internal static class UtilAttributeValueExtensions
                 or DynamoKind.SS
                 or DynamoKind.NS
                 or DynamoKind.BS => throw new NotImplementedException(
-                    $"Not implemented for kind: {kind}"
+                    $"{nameof(GetNullableString)} is not implemented for kind: {kind}"
                 ),
                 _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null),
             };
@@ -117,7 +117,7 @@ internal static class UtilAttributeValueExtensions
                 or DynamoKind.SS
                 or DynamoKind.NS
                 or DynamoKind.BS => throw new NotImplementedException(
-                    $"Not implemented for kind: {kind}"
+                    $"{nameof(GetBool)} is not implemented for kind: {kind}"
                 ),
                 _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null),
             };
@@ -136,7 +136,7 @@ internal static class UtilAttributeValueExtensions
                 or DynamoKind.SS
                 or DynamoKind.NS
                 or DynamoKind.BS => throw new NotImplementedException(
-                    $"Not implemented for kind: {kind}"
+                    $"{nameof(GetNullableBool)} is not implemented for kind: {kind}"
                 ),
                 _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null),
             };
@@ -150,6 +150,25 @@ internal static class UtilAttributeValueExtensions
                 null when omitNullStrings => false,
                 _ => true,
             };
+
+        internal AttributeValue ToAttributeValue(DynamoKind kind) =>
+            kind switch
+            {
+                _ when value is null => new AttributeValue { NULL = true },
+                DynamoKind.S => new AttributeValue { S = value.ToString() },
+                DynamoKind.N => new AttributeValue { N = value.ToString() },
+                DynamoKind.BOOL => new AttributeValue { BOOL = value.Value },
+                DynamoKind.B
+                or DynamoKind.M
+                or DynamoKind.L
+                or DynamoKind.NULL
+                or DynamoKind.SS
+                or DynamoKind.NS
+                or DynamoKind.BS => throw new NotImplementedException(
+                    $"{nameof(ToAttributeValue)} is not implemented for kind: {kind}"
+                ),
+                _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null),
+            };
     }
 
     extension(string? value)
@@ -160,6 +179,25 @@ internal static class UtilAttributeValueExtensions
                 null when omitNullStrings => false,
                 { Length: 0 } when omitEmptyStrings => false,
                 _ => true,
+            };
+
+        internal AttributeValue ToAttributeValue(DynamoKind kind) =>
+            kind switch
+            {
+                _ when value is null => new AttributeValue { NULL = true },
+                DynamoKind.S => new AttributeValue { S = value },
+                DynamoKind.N => new AttributeValue { N = value },
+                DynamoKind.BOOL => new AttributeValue { BOOL = bool.Parse(value) },
+                DynamoKind.B
+                or DynamoKind.M
+                or DynamoKind.L
+                or DynamoKind.NULL
+                or DynamoKind.SS
+                or DynamoKind.NS
+                or DynamoKind.BS => throw new NotImplementedException(
+                    $"{nameof(ToAttributeValue)} is not implemented for kind: {kind}"
+                ),
+                _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null),
             };
     }
 }

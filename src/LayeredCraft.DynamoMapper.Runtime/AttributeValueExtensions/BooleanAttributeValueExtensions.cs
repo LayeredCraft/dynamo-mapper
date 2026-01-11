@@ -55,18 +55,18 @@ public static class BooleanAttributeValueExtensions
         ///     Whether to omit null string values from the DynamoDB item. Default is
         ///     <c>true</c>.
         /// </param>
+        /// <param name="kind">The DynamoDB attribute kind to write. Default is <see cref="DynamoKind.BOOL" />.</param>
         /// <returns>The attribute dictionary for fluent chaining.</returns>
         public Dictionary<string, AttributeValue> SetBool(
             string key,
             bool? value,
             bool omitEmptyStrings = false,
-            bool omitNullStrings = true
+            bool omitNullStrings = true,
+            DynamoKind kind = DynamoKind.S
         )
         {
             if (value.ShouldSet(omitNullStrings))
-                attributes[key] = value is null
-                    ? new AttributeValue { NULL = true }
-                    : new AttributeValue { BOOL = value.Value };
+                attributes[key] = value.ToAttributeValue(kind);
 
             return attributes;
         }

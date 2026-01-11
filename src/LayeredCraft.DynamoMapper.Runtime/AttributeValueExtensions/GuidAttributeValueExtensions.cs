@@ -2,6 +2,10 @@ using Amazon.DynamoDBv2.Model;
 
 namespace DynamoMapper.Runtime;
 
+/// <summary>
+///     Extension methods for <see cref="Dictionary{TKey, TValue}" /> of <see cref="string" /> and
+///     <see cref="AttributeValue" /> for <see cref="Guid" /> values.
+/// </summary>
 public static class GuidAttributeValueExtensions
 {
     extension(Dictionary<string, AttributeValue> attributes)

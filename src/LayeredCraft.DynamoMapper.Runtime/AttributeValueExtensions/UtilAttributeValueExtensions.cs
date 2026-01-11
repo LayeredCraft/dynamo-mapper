@@ -2,6 +2,7 @@ using Amazon.DynamoDBv2.Model;
 
 namespace DynamoMapper.Runtime;
 
+/// <summary>Shared helpers for AttributeValue extension methods.</summary>
 internal static class UtilAttributeValueExtensions
 {
     extension(Dictionary<string, AttributeValue> attributes)

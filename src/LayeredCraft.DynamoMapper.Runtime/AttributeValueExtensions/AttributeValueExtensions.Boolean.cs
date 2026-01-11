@@ -12,17 +12,16 @@ public static partial class AttributeValueExtensions
         ///     Specifies whether the attribute is required. Default is
         ///     <see cref="Requiredness.InferFromNullability" />.
         /// </param>
+        /// <param name="kind">The DynamoDB attribute kind to interpret as a boolean.</param>
         /// <returns>
         ///     The boolean value if the key exists and contains a non-NULL value; otherwise <c>false</c>
         ///     if the key is missing or the attribute has a DynamoDB NULL value.
         /// </returns>
         public bool GetBool(
             string key,
-            Requiredness requiredness = Requiredness.InferFromNullability
-        ) =>
-            attributes.TryGetValue(key, requiredness, out var value)
-            && value.IsNotNull
-            && (value?.BOOL ?? false);
+            Requiredness requiredness = Requiredness.InferFromNullability,
+            DynamoKind kind = DynamoKind.BOOL
+        ) => attributes.GetValue(key, requiredness).GetBool(kind);
 
         /// <summary>Gets a nullable boolean value from the attribute dictionary.</summary>
         /// <param name="key">The attribute key to retrieve.</param>
@@ -30,17 +29,16 @@ public static partial class AttributeValueExtensions
         ///     Specifies whether the attribute is required. Default is
         ///     <see cref="Requiredness.InferFromNullability" />.
         /// </param>
+        /// <param name="kind">The DynamoDB attribute kind to interpret as a boolean.</param>
         /// <returns>
         ///     The boolean value if the key exists and contains a non-NULL value; otherwise <c>null</c>
         ///     if the key is missing or the attribute has a DynamoDB NULL value.
         /// </returns>
         public bool? GetNullableBool(
             string key,
-            Requiredness requiredness = Requiredness.InferFromNullability
-        ) =>
-            attributes
-                .GetNullableValue(key, requiredness)
-                .Map(static value => value.IsNull ? null : value.BOOL);
+            Requiredness requiredness = Requiredness.InferFromNullability,
+            DynamoKind kind = DynamoKind.BOOL
+        ) => attributes.GetNullableValue(key, requiredness).GetNullableBool(kind);
 
         /// <summary>Sets a boolean value in the attribute dictionary.</summary>
         /// <param name="key">The attribute key to set.</param>

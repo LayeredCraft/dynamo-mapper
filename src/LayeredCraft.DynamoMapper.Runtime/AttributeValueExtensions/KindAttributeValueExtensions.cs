@@ -60,5 +60,24 @@ internal static class KindAttributeValueExtensions
                 ),
                 _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null),
             };
+
+        public bool? GetNullableBool(DynamoKind kind) =>
+            kind switch
+            {
+                _ when attributeValue.NULL is true => null,
+                DynamoKind.S => bool.Parse(attributeValue.S),
+                DynamoKind.N => bool.Parse(attributeValue.N),
+                DynamoKind.BOOL => attributeValue.BOOL,
+                DynamoKind.B
+                or DynamoKind.M
+                or DynamoKind.L
+                or DynamoKind.NULL
+                or DynamoKind.SS
+                or DynamoKind.NS
+                or DynamoKind.BS => throw new NotImplementedException(
+                    $"Not implemented for kind: {kind}"
+                ),
+                _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null),
+            };
     }
 }

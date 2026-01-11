@@ -89,42 +89,42 @@ var myEntity = ExampleEntityMapper.FromItem(exampleAttributes);
     DateTimeFormat = "I",
     EnumFormat = "G"
 )]
-public static partial class ExampleEntityMapper
+internal static partial class ExampleEntityMapper
 {
     private static partial Dictionary<string, AttributeValue> ToItem(ExampleEntity source);
 
-    public static partial ExampleEntity FromItem(Dictionary<string, AttributeValue> item);
+    internal static partial ExampleEntity FromItem(Dictionary<string, AttributeValue> item);
 }
 
-public class ExampleEntity
+internal class ExampleEntity
 {
-    public bool Bool { get; set; }
-    public bool? NullableBool { get; set; }
-    public DateTime DateTime { get; set; }
-    public DateTime? NullableDateTime { get; set; }
-    public DateTimeOffset DateTimeOffset { get; set; }
-    public DateTimeOffset? NullableDateTimeOffset { get; set; }
-    public decimal Decimal { get; set; }
-    public decimal? NullableDecimal { get; set; }
-    public double Double { get; set; }
-    public double? NullableDouble { get; set; }
-    public Guid Guid { get; set; }
-    public Guid? NullableGuid { get; set; }
-    public int Int { get; set; }
-    public int? NullableInt { get; set; }
-    public long Long { get; set; }
-    public long? NullableLong { get; set; }
-    public required string String { get; set; }
-    public string? NullableString { get; set; }
-    public float Float { get; set; }
-    public float? NullableFloat { get; set; }
-    public TimeSpan TimeSpan { get; set; }
-    public TimeSpan? NullableTimeSpan { get; set; }
-    public OrderStatus Enum { get; set; }
-    public OrderStatus? NullableEnum { get; set; }
+    internal bool Bool { get; set; }
+    internal bool? NullableBool { get; set; }
+    internal DateTime DateTime { get; set; }
+    internal DateTime? NullableDateTime { get; set; }
+    internal DateTimeOffset DateTimeOffset { get; set; }
+    internal DateTimeOffset? NullableDateTimeOffset { get; set; }
+    internal decimal Decimal { get; set; }
+    internal decimal? NullableDecimal { get; set; }
+    internal double Double { get; set; }
+    internal double? NullableDouble { get; set; }
+    internal Guid Guid { get; set; }
+    internal Guid? NullableGuid { get; set; }
+    internal int Int { get; set; }
+    internal int? NullableInt { get; set; }
+    internal long Long { get; set; }
+    internal long? NullableLong { get; set; }
+    internal required string String { get; set; }
+    internal string? NullableString { get; set; }
+    internal float Float { get; set; }
+    internal float? NullableFloat { get; set; }
+    internal TimeSpan TimeSpan { get; set; }
+    internal TimeSpan? NullableTimeSpan { get; set; }
+    internal OrderStatus Enum { get; set; }
+    internal OrderStatus? NullableEnum { get; set; }
 }
 
-public enum OrderStatus
+internal enum OrderStatus
 {
     Pending,
     Processing,

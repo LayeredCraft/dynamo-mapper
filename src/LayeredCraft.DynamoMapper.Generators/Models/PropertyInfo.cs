@@ -23,7 +23,7 @@ internal static class PropertyInfoExtensions
                     or { IsReferenceType: true, NullableAnnotation: NullableAnnotation.Annotated };
 
             return GetProps(propertySymbol, context, isNullableType)
-                .Bind(p =>
+                .Bind<PropertyInfo>(p =>
                 {
                     var toParamName = context.MapperOptions.ToMethodParameterName;
                     var fromParamName = context.MapperOptions.FromMethodParameterName;
@@ -35,31 +35,25 @@ internal static class PropertyInfoExtensions
 
                     var nullable = isNullableType ? "Nullable" : string.Empty;
 
-                    var fromArgs = (
-                        (string[])
-                            [
-                                key,
-                                .. p.FromArgs,
-                                $"Requiredness.{context.MapperOptions.DefaultRequiredness.ToString()}",
-                            ]
-                    ).MakeArgs();
+                    string[] fromArgs =
+                    [
+                        key,
+                        .. p.FromArgs,
+                        $"Requiredness.{context.MapperOptions.DefaultRequiredness.ToString()}",
+                    ];
 
-                    var toArgs = (
-                        (string[])
-                            [
-                                key,
-                                sourceProperty,
-                                .. p.ToArgs,
-                                $"{context.MapperOptions.OmitEmptyStrings.ToString().ToLowerInvariant()}",
-                                $"{context.MapperOptions.OmitNullStrings.ToString().ToLowerInvariant()}",
-                            ]
-                    ).MakeArgs();
+                    string[] toArgs =
+                    [
+                        key,
+                        sourceProperty,
+                        .. p.ToArgs,
+                        context.MapperOptions.OmitEmptyStrings.ToString().ToLowerInvariant(),
+                        context.MapperOptions.OmitNullStrings.ToString().ToLowerInvariant(),
+                    ];
 
-                    return DiagnosticResult<PropertyInfo>.Success(
-                        new PropertyInfo(
-                            $"{propertyName} = {fromParamName}.Get{nullable}{p.Type}{p.Generic}({fromArgs}),",
-                            $"item.Set{p.Type}{p.Generic}({toArgs});"
-                        )
+                    return new PropertyInfo(
+                        $"{propertyName} = {fromParamName}.Get{nullable}{p.Type}{p.Generic}({fromArgs.MakeArgs()}),",
+                        $".Set{p.Type}{p.Generic}({toArgs.MakeArgs()})"
                     );
                 });
         }

@@ -19,15 +19,12 @@ namespace MyNamespace;
 public static partial class ExampleEntityMapper
 {
     [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
-    public static partial global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> ToItem(global::MyNamespace.MyDto source)
-    {
-        var item = new Dictionary<string, AttributeValue>(0);
-        return item;
-    }
+    public static partial global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> ToItem(global::MyNamespace.MyDto source) =>
+        new Dictionary<string, AttributeValue>(0);
     
     [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
-    public static partial global::MyNamespace.MyDto FromItem(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> x)
-        => new global::MyNamespace.MyDto
+    public static partial global::MyNamespace.MyDto FromItem(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> x) =>
+        new global::MyNamespace.MyDto
         {
         };
 }

@@ -19,37 +19,34 @@ namespace MyNamespace;
 public static partial class ExampleEntityMapper
 {
     [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
-    public static partial global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> ToItem(global::MyNamespace.ExampleEntity source)
-    {
-        var item = new Dictionary<string, AttributeValue>(22);
-        item.SetBool("bool", source.Bool, false, true);
-        item.SetBool("nullableBool", source.NullableBool, false, true);
-        item.SetDateTime("dateTime", source.DateTime, "O", false, true);
-        item.SetDateTime("nullableDateTime", source.NullableDateTime, "O", false, true);
-        item.SetDateTimeOffset("dateTimeOffset", source.DateTimeOffset, "O", false, true);
-        item.SetDateTimeOffset("nullableDateTimeOffset", source.NullableDateTimeOffset, "O", false, true);
-        item.SetDecimal("decimal", source.Decimal, false, true);
-        item.SetDecimal("nullableDecimal", source.NullableDecimal, false, true);
-        item.SetDouble("double", source.Double, false, true);
-        item.SetDouble("nullableDouble", source.NullableDouble, false, true);
-        item.SetGuid("guid", source.Guid, false, true);
-        item.SetGuid("nullableGuid", source.NullableGuid, false, true);
-        item.SetInt("int", source.Int, false, true);
-        item.SetInt("nullableInt", source.NullableInt, false, true);
-        item.SetLong("long", source.Long, false, true);
-        item.SetLong("nullableLong", source.NullableLong, false, true);
-        item.SetString("string", source.String, false, true);
-        item.SetString("nullableString", source.NullableString, false, true);
-        item.SetTimeSpan("timeSpan", source.TimeSpan, false, true);
-        item.SetTimeSpan("nullableTimeSpan", source.NullableTimeSpan, false, true);
-        item.SetEnum<global::MyNamespace.OrderStatus>("enum", source.Enum, "G", false, true);
-        item.SetEnum<global::MyNamespace.OrderStatus>("nullableEnum", source.NullableEnum, "G", false, true);
-        return item;
-    }
+    public static partial global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> ToItem(global::MyNamespace.ExampleEntity source) =>
+        new Dictionary<string, AttributeValue>(22)
+            .SetBool("bool", source.Bool, false, true)
+            .SetBool("nullableBool", source.NullableBool, false, true)
+            .SetDateTime("dateTime", source.DateTime, "O", false, true)
+            .SetDateTime("nullableDateTime", source.NullableDateTime, "O", false, true)
+            .SetDateTimeOffset("dateTimeOffset", source.DateTimeOffset, "O", false, true)
+            .SetDateTimeOffset("nullableDateTimeOffset", source.NullableDateTimeOffset, "O", false, true)
+            .SetDecimal("decimal", source.Decimal, false, true)
+            .SetDecimal("nullableDecimal", source.NullableDecimal, false, true)
+            .SetDouble("double", source.Double, false, true)
+            .SetDouble("nullableDouble", source.NullableDouble, false, true)
+            .SetGuid("guid", source.Guid, false, true)
+            .SetGuid("nullableGuid", source.NullableGuid, false, true)
+            .SetInt("int", source.Int, false, true)
+            .SetInt("nullableInt", source.NullableInt, false, true)
+            .SetLong("long", source.Long, false, true)
+            .SetLong("nullableLong", source.NullableLong, false, true)
+            .SetString("string", source.String, false, true)
+            .SetString("nullableString", source.NullableString, false, true)
+            .SetTimeSpan("timeSpan", source.TimeSpan, false, true)
+            .SetTimeSpan("nullableTimeSpan", source.NullableTimeSpan, false, true)
+            .SetEnum<global::MyNamespace.OrderStatus>("enum", source.Enum, "G", false, true)
+            .SetEnum<global::MyNamespace.OrderStatus>("nullableEnum", source.NullableEnum, "G", false, true);
     
     [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
-    public static partial global::MyNamespace.ExampleEntity FromItem(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> x)
-        => new global::MyNamespace.ExampleEntity
+    public static partial global::MyNamespace.ExampleEntity FromItem(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> x) =>
+        new global::MyNamespace.ExampleEntity
         {
             Bool = x.GetBool("bool", Requiredness.InferFromNullability),
             NullableBool = x.GetNullableBool("nullableBool", Requiredness.InferFromNullability),

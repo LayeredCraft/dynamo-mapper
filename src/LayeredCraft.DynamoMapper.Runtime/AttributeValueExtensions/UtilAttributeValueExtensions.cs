@@ -205,18 +205,24 @@ internal static class UtilAttributeValueExtensions
             };
     }
 
-    internal static bool ShouldSet(string? value, bool omitEmptyStrings, bool omitNullStrings) =>
-        value switch
-        {
-            null when omitNullStrings => false,
-            { Length: 0 } when omitEmptyStrings => false,
-            _ => true,
-        };
+    extension(bool? value)
+    {
+        internal bool ShouldSet(bool omitNullStrings) =>
+            value switch
+            {
+                null when omitNullStrings => false,
+                _ => true,
+            };
+    }
 
-    internal static bool ShouldSet(bool? value, bool omitNullStrings) =>
-        value switch
-        {
-            null when omitNullStrings => false,
-            _ => true,
-        };
+    extension(string? value)
+    {
+        internal bool ShouldSet(bool omitEmptyStrings, bool omitNullStrings) =>
+            value switch
+            {
+                null when omitNullStrings => false,
+                { Length: 0 } when omitEmptyStrings => false,
+                _ => true,
+            };
+    }
 }

@@ -3,7 +3,7 @@ using Amazon.DynamoDBv2.Model;
 
 namespace DynamoMapper.Runtime;
 
-public static partial class AttributeValueExtensions
+public static class DateTimeAttributeValueExtensions
 {
     extension(Dictionary<string, AttributeValue> attributes)
     {
@@ -397,7 +397,13 @@ public static partial class AttributeValueExtensions
         )
         {
             var stringValue = value?.ToString("o", CultureInfo.InvariantCulture);
-            if (ShouldSet(stringValue, omitEmptyStrings, omitNullStrings))
+            if (
+                UtilAttributeValueExtensions.ShouldSet(
+                    stringValue,
+                    omitEmptyStrings,
+                    omitNullStrings
+                )
+            )
                 attributes[key] = value is null
                     ? new AttributeValue { NULL = true }
                     : new AttributeValue { S = stringValue };
@@ -425,7 +431,13 @@ public static partial class AttributeValueExtensions
         )
         {
             var stringValue = value?.ToString("o", CultureInfo.InvariantCulture);
-            if (ShouldSet(stringValue, omitEmptyStrings, omitNullStrings))
+            if (
+                UtilAttributeValueExtensions.ShouldSet(
+                    stringValue,
+                    omitEmptyStrings,
+                    omitNullStrings
+                )
+            )
                 attributes[key] = value is null
                     ? new AttributeValue { NULL = true }
                     : new AttributeValue { S = stringValue };
@@ -453,7 +465,13 @@ public static partial class AttributeValueExtensions
         )
         {
             var stringValue = value?.ToString("c", CultureInfo.InvariantCulture);
-            if (ShouldSet(stringValue, omitEmptyStrings, omitNullStrings))
+            if (
+                UtilAttributeValueExtensions.ShouldSet(
+                    stringValue,
+                    omitEmptyStrings,
+                    omitNullStrings
+                )
+            )
                 attributes[key] = value is null
                     ? new AttributeValue { NULL = true }
                     : new AttributeValue { S = stringValue };
@@ -487,7 +505,13 @@ public static partial class AttributeValueExtensions
         )
         {
             var stringValue = value?.ToString(format, CultureInfo.InvariantCulture);
-            if (ShouldSet(stringValue, omitEmptyStrings, omitNullStrings))
+            if (
+                UtilAttributeValueExtensions.ShouldSet(
+                    stringValue,
+                    omitEmptyStrings,
+                    omitNullStrings
+                )
+            )
                 attributes[key] = value is null
                     ? new AttributeValue { NULL = true }
                     : new AttributeValue { S = stringValue };
@@ -524,7 +548,13 @@ public static partial class AttributeValueExtensions
         )
         {
             var stringValue = value?.ToString(format, CultureInfo.InvariantCulture);
-            if (ShouldSet(stringValue, omitEmptyStrings, omitNullStrings))
+            if (
+                UtilAttributeValueExtensions.ShouldSet(
+                    stringValue,
+                    omitEmptyStrings,
+                    omitNullStrings
+                )
+            )
                 attributes[key] = value is null
                     ? new AttributeValue { NULL = true }
                     : new AttributeValue { S = stringValue };
@@ -558,7 +588,13 @@ public static partial class AttributeValueExtensions
         )
         {
             var stringValue = value?.ToString(format, CultureInfo.InvariantCulture);
-            if (ShouldSet(stringValue, omitEmptyStrings, omitNullStrings))
+            if (
+                UtilAttributeValueExtensions.ShouldSet(
+                    stringValue,
+                    omitEmptyStrings,
+                    omitNullStrings
+                )
+            )
                 attributes[key] = value is null
                     ? new AttributeValue { NULL = true }
                     : new AttributeValue { S = stringValue };

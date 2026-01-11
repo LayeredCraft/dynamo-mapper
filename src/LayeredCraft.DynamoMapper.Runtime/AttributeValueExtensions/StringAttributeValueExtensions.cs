@@ -7,7 +7,7 @@ namespace DynamoMapper.Runtime;
 ///     <see cref="AttributeValue" /> to simplify extraction of typed values from DynamoDB attribute
 ///     dictionaries.
 /// </summary>
-public static partial class AttributeValueExtensions
+public static class StringAttributeValueExtensions
 {
     extension(Dictionary<string, AttributeValue> attributes)
     {
@@ -64,7 +64,7 @@ public static partial class AttributeValueExtensions
             bool omitNullStrings = true
         )
         {
-            if (ShouldSet(value, omitEmptyStrings, omitNullStrings))
+            if (UtilAttributeValueExtensions.ShouldSet(value, omitEmptyStrings, omitNullStrings))
                 attributes[key] = value is null
                     ? new AttributeValue { NULL = true }
                     : new AttributeValue { S = value };

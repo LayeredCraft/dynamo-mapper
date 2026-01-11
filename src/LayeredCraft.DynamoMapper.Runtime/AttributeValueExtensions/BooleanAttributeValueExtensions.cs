@@ -2,7 +2,7 @@ using Amazon.DynamoDBv2.Model;
 
 namespace DynamoMapper.Runtime;
 
-public static partial class AttributeValueExtensions
+public static class BooleanAttributeValueExtensions
 {
     extension(Dictionary<string, AttributeValue> attributes)
     {
@@ -59,7 +59,7 @@ public static partial class AttributeValueExtensions
             bool omitNullStrings = true
         )
         {
-            if (ShouldSet(value, omitNullStrings))
+            if (UtilAttributeValueExtensions.ShouldSet(value, omitNullStrings))
                 attributes[key] = value is null
                     ? new AttributeValue { NULL = true }
                     : new AttributeValue { BOOL = value.Value };

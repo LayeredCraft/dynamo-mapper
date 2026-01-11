@@ -7,27 +7,6 @@ internal static class UtilAttributeValueExtensions
 {
     extension(Dictionary<string, AttributeValue> attributes)
     {
-        /// <summary>
-        ///     Retrieves an attribute value from the dictionary, returning a NULL AttributeValue if the
-        ///     key is missing and the attribute is optional.
-        /// </summary>
-        /// <param name="key">The attribute key to retrieve.</param>
-        /// <param name="requiredness">Specifies whether the attribute is required.</param>
-        /// <returns>
-        ///     The <see cref="AttributeValue" /> if the key exists; otherwise a NULL
-        ///     <see cref="AttributeValue" /> if <paramref name="requiredness" /> is
-        ///     <see cref="Requiredness.Optional" /> or <see cref="Requiredness.InferFromNullability" />.
-        /// </returns>
-        /// <exception cref="InvalidOperationException">
-        ///     Thrown when the key is missing and
-        ///     <paramref name="requiredness" /> is <see cref="Requiredness.Required" />.
-        /// </exception>
-        /// <remarks>
-        ///     This helper is used by <c>GetNullable*</c> methods to handle missing attributes. When the
-        ///     key is missing and the attribute is optional, it returns an AttributeValue with NULL = true,
-        ///     allowing the caller to distinguish between a missing attribute and an explicit DynamoDB NULL
-        ///     value.
-        /// </remarks>
         internal AttributeValue GetNullableValue(string key, Requiredness requiredness)
         {
             if (!attributes.TryGetValue(key, out var attributeValue))
@@ -46,29 +25,6 @@ internal static class UtilAttributeValueExtensions
             return attributeValue;
         }
 
-        /// <summary>Attempts to retrieve an attribute value from the dictionary with requiredness validation.</summary>
-        /// <param name="key">The attribute key to retrieve.</param>
-        /// <param name="requiredness">Specifies whether the attribute is required.</param>
-        /// <param name="value">
-        ///     When this method returns, contains the <see cref="AttributeValue" /> if the key
-        ///     exists; otherwise <c>null</c> if the key is missing and <paramref name="requiredness" /> is
-        ///     <see cref="Requiredness.Optional" />.
-        /// </param>
-        /// <returns>
-        ///     <c>true</c> if the key exists in the dictionary; otherwise <c>false</c> if the key is
-        ///     missing and <paramref name="requiredness" /> is <see cref="Requiredness.Optional" />.
-        /// </returns>
-        /// <exception cref="InvalidOperationException">
-        ///     Thrown when the key is missing and
-        ///     <paramref name="requiredness" /> is <see cref="Requiredness.Required" /> or
-        ///     <see cref="Requiredness.InferFromNullability" />.
-        /// </exception>
-        /// <remarks>
-        ///     This helper is used by non-nullable <c>Get*</c> methods to handle missing attributes.
-        ///     Unlike <see cref="GetNullableValue" />, this method returns <c>false</c> with a <c>null</c> out
-        ///     parameter when the key is missing and the attribute is optional, allowing callers to provide
-        ///     default values for non-nullable types.
-        /// </remarks>
         internal bool TryGetValue(string key, Requiredness requiredness, out AttributeValue? value)
         {
             value = null;
@@ -107,26 +63,6 @@ internal static class UtilAttributeValueExtensions
 
             return attributeValue;
         }
-    }
-
-    extension(AttributeValue? attributeValue)
-    {
-        /// <summary>
-        ///     Gets a value indicating whether this <see cref="AttributeValue" /> represents a DynamoDB
-        ///     NULL value.
-        /// </summary>
-        /// <value>
-        ///     <c>true</c> if the attribute value is <c>null</c> or has its
-        ///     <see cref="AttributeValue.NULL" /> property set to <c>true</c>; otherwise <c>false</c>.
-        /// </value>
-        /// <remarks>
-        ///     This extension property provides a convenient way to check if an AttributeValue represents
-        ///     a DynamoDB NULL. It handles both the case where the AttributeValue itself is null and where it
-        ///     explicitly has NULL = true.
-        /// </remarks>
-        public bool IsNull => attributeValue?.NULL is true;
-
-        public bool IsNotNull => attributeValue?.NULL is null or false;
     }
 
     extension(AttributeValue attributeValue)

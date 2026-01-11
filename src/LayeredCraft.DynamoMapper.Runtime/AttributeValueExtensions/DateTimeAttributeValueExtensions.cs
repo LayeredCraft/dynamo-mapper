@@ -1,7 +1,7 @@
 using System.Globalization;
-using Amazon.DynamoDBv2.Model;
+using DynamoMapper.Runtime;
 
-namespace DynamoMapper.Runtime;
+namespace Amazon.DynamoDBv2.Model;
 
 /// <summary>
 ///     Extension methods for <see cref="Dictionary{TKey, TValue}" /> of <see cref="string" /> and

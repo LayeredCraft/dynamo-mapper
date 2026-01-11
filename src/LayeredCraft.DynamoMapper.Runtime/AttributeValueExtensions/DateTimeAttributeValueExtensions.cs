@@ -397,13 +397,7 @@ public static class DateTimeAttributeValueExtensions
         )
         {
             var stringValue = value?.ToString("o", CultureInfo.InvariantCulture);
-            if (
-                UtilAttributeValueExtensions.ShouldSet(
-                    stringValue,
-                    omitEmptyStrings,
-                    omitNullStrings
-                )
-            )
+            if (stringValue.ShouldSet(omitEmptyStrings, omitNullStrings))
                 attributes[key] = value is null
                     ? new AttributeValue { NULL = true }
                     : new AttributeValue { S = stringValue };
@@ -431,13 +425,7 @@ public static class DateTimeAttributeValueExtensions
         )
         {
             var stringValue = value?.ToString("o", CultureInfo.InvariantCulture);
-            if (
-                UtilAttributeValueExtensions.ShouldSet(
-                    stringValue,
-                    omitEmptyStrings,
-                    omitNullStrings
-                )
-            )
+            if (stringValue.ShouldSet(omitEmptyStrings, omitNullStrings))
                 attributes[key] = value is null
                     ? new AttributeValue { NULL = true }
                     : new AttributeValue { S = stringValue };
@@ -465,13 +453,7 @@ public static class DateTimeAttributeValueExtensions
         )
         {
             var stringValue = value?.ToString("c", CultureInfo.InvariantCulture);
-            if (
-                UtilAttributeValueExtensions.ShouldSet(
-                    stringValue,
-                    omitEmptyStrings,
-                    omitNullStrings
-                )
-            )
+            if (stringValue.ShouldSet(omitEmptyStrings, omitNullStrings))
                 attributes[key] = value is null
                     ? new AttributeValue { NULL = true }
                     : new AttributeValue { S = stringValue };
@@ -505,13 +487,7 @@ public static class DateTimeAttributeValueExtensions
         )
         {
             var stringValue = value?.ToString(format, CultureInfo.InvariantCulture);
-            if (
-                UtilAttributeValueExtensions.ShouldSet(
-                    stringValue,
-                    omitEmptyStrings,
-                    omitNullStrings
-                )
-            )
+            if (stringValue.ShouldSet(omitEmptyStrings, omitNullStrings))
                 attributes[key] = value is null
                     ? new AttributeValue { NULL = true }
                     : new AttributeValue { S = stringValue };
@@ -548,13 +524,7 @@ public static class DateTimeAttributeValueExtensions
         )
         {
             var stringValue = value?.ToString(format, CultureInfo.InvariantCulture);
-            if (
-                UtilAttributeValueExtensions.ShouldSet(
-                    stringValue,
-                    omitEmptyStrings,
-                    omitNullStrings
-                )
-            )
+            if (stringValue.ShouldSet(omitEmptyStrings, omitNullStrings))
                 attributes[key] = value is null
                     ? new AttributeValue { NULL = true }
                     : new AttributeValue { S = stringValue };
@@ -588,13 +558,7 @@ public static class DateTimeAttributeValueExtensions
         )
         {
             var stringValue = value?.ToString(format, CultureInfo.InvariantCulture);
-            if (
-                UtilAttributeValueExtensions.ShouldSet(
-                    stringValue,
-                    omitEmptyStrings,
-                    omitNullStrings
-                )
-            )
+            if (stringValue.ShouldSet(omitEmptyStrings, omitNullStrings))
                 attributes[key] = value is null
                     ? new AttributeValue { NULL = true }
                     : new AttributeValue { S = stringValue };

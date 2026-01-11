@@ -117,13 +117,7 @@ public static class NumericAttributeValueExtensions
         )
         {
             var stringValue = value?.ToString(CultureInfo.InvariantCulture);
-            if (
-                UtilAttributeValueExtensions.ShouldSet(
-                    stringValue,
-                    omitEmptyStrings,
-                    omitNullStrings
-                )
-            )
+            if (stringValue.ShouldSet(omitEmptyStrings, omitNullStrings))
                 attributes[key] = value is null
                     ? new AttributeValue { NULL = true }
                     : new AttributeValue { N = stringValue };
@@ -151,13 +145,7 @@ public static class NumericAttributeValueExtensions
         )
         {
             var stringValue = value?.ToString(CultureInfo.InvariantCulture);
-            if (
-                UtilAttributeValueExtensions.ShouldSet(
-                    stringValue,
-                    omitEmptyStrings,
-                    omitNullStrings
-                )
-            )
+            if (stringValue.ShouldSet(omitEmptyStrings, omitNullStrings))
                 attributes[key] = value is null
                     ? new AttributeValue { NULL = true }
                     : new AttributeValue { N = stringValue };
@@ -322,13 +310,7 @@ public static class NumericAttributeValueExtensions
         )
         {
             var stringValue = value?.ToString(CultureInfo.InvariantCulture);
-            if (
-                UtilAttributeValueExtensions.ShouldSet(
-                    stringValue,
-                    omitEmptyStrings,
-                    omitNullStrings
-                )
-            )
+            if (stringValue.ShouldSet(omitEmptyStrings, omitNullStrings))
                 attributes[key] = value is null
                     ? new AttributeValue { NULL = true }
                     : new AttributeValue { N = stringValue };
@@ -356,13 +338,7 @@ public static class NumericAttributeValueExtensions
         )
         {
             var stringValue = value?.ToString(CultureInfo.InvariantCulture);
-            if (
-                UtilAttributeValueExtensions.ShouldSet(
-                    stringValue,
-                    omitEmptyStrings,
-                    omitNullStrings
-                )
-            )
+            if (stringValue.ShouldSet(omitEmptyStrings, omitNullStrings))
                 attributes[key] = value is null
                     ? new AttributeValue { NULL = true }
                     : new AttributeValue { N = stringValue };
@@ -390,13 +366,7 @@ public static class NumericAttributeValueExtensions
         )
         {
             var stringValue = value?.ToString(CultureInfo.InvariantCulture);
-            if (
-                UtilAttributeValueExtensions.ShouldSet(
-                    stringValue,
-                    omitEmptyStrings,
-                    omitNullStrings
-                )
-            )
+            if (stringValue.ShouldSet(omitEmptyStrings, omitNullStrings))
                 attributes[key] = value is null
                     ? new AttributeValue { NULL = true }
                     : new AttributeValue { N = stringValue };

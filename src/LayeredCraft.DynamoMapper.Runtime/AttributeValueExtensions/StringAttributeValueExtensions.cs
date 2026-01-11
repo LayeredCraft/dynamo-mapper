@@ -64,7 +64,7 @@ public static class StringAttributeValueExtensions
             bool omitNullStrings = true
         )
         {
-            if (UtilAttributeValueExtensions.ShouldSet(value, omitEmptyStrings, omitNullStrings))
+            if (value.ShouldSet(omitEmptyStrings, omitNullStrings))
                 attributes[key] = value is null
                     ? new AttributeValue { NULL = true }
                     : new AttributeValue { S = value };

@@ -130,13 +130,7 @@ public static class EnumAttributeValueExtensions
             where TEnum : struct, Enum
         {
             var stringValue = value?.ToString();
-            if (
-                UtilAttributeValueExtensions.ShouldSet(
-                    stringValue,
-                    omitEmptyStrings,
-                    omitNullStrings
-                )
-            )
+            if (stringValue.ShouldSet(omitEmptyStrings, omitNullStrings))
                 attributes[key] = value is null
                     ? new AttributeValue { NULL = true }
                     : new AttributeValue { S = stringValue };
@@ -171,13 +165,7 @@ public static class EnumAttributeValueExtensions
             where TEnum : struct, Enum
         {
             var stringValue = value?.ToString(format);
-            if (
-                UtilAttributeValueExtensions.ShouldSet(
-                    stringValue,
-                    omitEmptyStrings,
-                    omitNullStrings
-                )
-            )
+            if (stringValue.ShouldSet(omitEmptyStrings, omitNullStrings))
                 attributes[key] = value is null
                     ? new AttributeValue { NULL = true }
                     : new AttributeValue { S = stringValue };

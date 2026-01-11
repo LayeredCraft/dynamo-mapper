@@ -59,7 +59,7 @@ public static class BooleanAttributeValueExtensions
             bool omitNullStrings = true
         )
         {
-            if (UtilAttributeValueExtensions.ShouldSet(value, omitNullStrings))
+            if (value.ShouldSet(omitNullStrings))
                 attributes[key] = value is null
                     ? new AttributeValue { NULL = true }
                     : new AttributeValue { BOOL = value.Value };

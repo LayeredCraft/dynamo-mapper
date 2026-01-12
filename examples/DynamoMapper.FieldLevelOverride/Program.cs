@@ -15,13 +15,29 @@ var exampleAttributes = new Dictionary<string, AttributeValue>
 var myEntity = ExampleEntityMapper.FromItem(exampleAttributes);
 
 [DynamoMapper]
-[DynamoField(nameof(ExampleEntity.String), AttributeName = "customName")]
-[DynamoField(nameof(ExampleEntity.NullableString), AttributeName = "ANOTHER_NAME")]
+[DynamoField(
+    nameof(ExampleEntity.String),
+    ToMethod = nameof(ToMethod),
+    FromMethod = nameof(FromMethod)
+)]
+[DynamoField(
+    nameof(ExampleEntity.NullableString),
+    AttributeName = "ANOTHER_NAME",
+    Required = true,
+    Kind = DynamoKind.N,
+    OmitIfNull = false,
+    OmitIfEmptyString = true
+)]
 internal static partial class ExampleEntityMapper
 {
     internal static partial Dictionary<string, AttributeValue> ToItem(ExampleEntity source);
 
     internal static partial ExampleEntity FromItem(Dictionary<string, AttributeValue> item);
+
+    internal static AttributeValue ToMethod(string value) => new() { S = value };
+
+    internal static string FromMethod(Dictionary<string, AttributeValue> item) =>
+        item["customName"].S;
 }
 
 internal class ExampleEntity

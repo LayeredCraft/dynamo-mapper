@@ -9,8 +9,7 @@ internal class DynamoFieldOptions
     public bool? Required { get; set; }
     public DynamoKind? Kind { get; set; }
     public bool? OmitIfNull { get; set; }
-    public bool? OmitIfNullOrWhiteSpace { get; set; }
-    public string? ConverterName { get; set; }
+    public bool? OmitIfEmptyString { get; set; }
     public string? ToMethod { get; set; }
     public string? FromMethod { get; set; }
 }

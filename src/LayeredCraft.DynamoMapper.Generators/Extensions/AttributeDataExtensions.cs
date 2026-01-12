@@ -38,7 +38,8 @@ internal static class AttributeDataExtensions
                 if (property is not null && property.CanWrite)
                 {
                     var actualValue = GetTypedConstantValue(value);
-                    property.SetValue(options, actualValue);
+                    var convertedValue = ConvertToPropertyType(actualValue, property.PropertyType);
+                    property.SetValue(options, convertedValue);
                 }
             }
 
@@ -128,6 +129,28 @@ internal static class AttributeDataExtensions
             }
         }
 
+        return value;
+    }
+
+    private static object? ConvertToPropertyType(object? value, Type targetType)
+    {
+        if (value == null)
+            return null;
+
+        // If the target type is nullable, get the underlying type
+        var underlyingType = Nullable.GetUnderlyingType(targetType);
+        if (underlyingType != null)
+        {
+            // Convert value to the underlying type (e.g., int to DynamoKind)
+            // then the nullable wrapper will be applied automatically by SetValue
+            if (underlyingType.IsEnum && value is int intValue)
+                return Enum.ToObject(underlyingType, intValue);
+
+            // For other nullable value types, convert to underlying type
+            return Convert.ChangeType(value, underlyingType);
+        }
+
+        // If not nullable, return value as-is
         return value;
     }
 }

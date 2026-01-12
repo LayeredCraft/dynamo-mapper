@@ -30,4 +30,18 @@ public static class AttributeValueExtensions
         /// <remarks>This is the inverse of <see cref="IsNull" /> and treats a null reference as NULL.</remarks>
         public bool IsNotNull => attributeValue?.NULL is null or false;
     }
+
+    extension(Dictionary<string, AttributeValue> attributes)
+    {
+        /// <summary>Sets an <see cref="AttributeValue" /> in the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to set.</param>
+        /// <param name="value">The <see cref="AttributeValue" /> to set.</param>
+        /// <returns>The attribute dictionary for fluent chaining.</returns>
+        public Dictionary<string, AttributeValue> Set(string key, AttributeValue value)
+        {
+            attributes[key] = value;
+
+            return attributes;
+        }
+    }
 }

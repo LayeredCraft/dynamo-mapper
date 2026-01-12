@@ -21,7 +21,7 @@ internal static partial class ExampleEntityMapper
     [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
     internal static partial global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> ToItem(global::MyNamespace.ExampleEntity source) =>
         new Dictionary<string, AttributeValue>(2)
-            .ToMethod(source.String)
+            .Set("customName", ToMethod(source))
             .SetString("ANOTHER_NAME", source.NullableString, true, false, DynamoKind.N);
 
     [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]

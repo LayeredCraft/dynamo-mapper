@@ -1,6 +1,7 @@
 using DynamoMapper.Generator.Diagnostics;
 using DynamoMapper.Generator.Models;
 using DynamoMapper.Generator.PropertyMapping.Models;
+using DynamoMapper.Runtime;
 using Microsoft.CodeAnalysis;
 using WellKnownType = DynamoMapper.Generator.WellKnownTypes.WellKnownTypeData.WellKnownType;
 
@@ -25,6 +26,10 @@ internal static class TypeMappingStrategyResolver
     )
     {
         context.ThrowIfCancellationRequested();
+
+        // Check for Kind override first - it takes precedence over type inference
+        if (analysis.FieldOptions?.Kind is DynamoKind overrideKind)
+            return CreateStrategyForKindOverride(overrideKind, analysis, context);
 
         return analysis.UnderlyingType switch
         {
@@ -138,5 +143,78 @@ internal static class TypeMappingStrategyResolver
         string[] toArgs = [enumFormat];
 
         return new TypeMappingStrategy("Enum", $"<{enumName}>", nullableModifier, fromArgs, toArgs);
+    }
+
+    /// <summary>
+    ///     Creates a type mapping strategy for a Kind override. The Kind only affects serialization
+    ///     format, not the C# type mapping - method names are still based on the property's C# type.
+    /// </summary>
+    private static DiagnosticResult<TypeMappingStrategy> CreateStrategyForKindOverride(
+        DynamoKind kind,
+        PropertyAnalysis analysis,
+        GeneratorContext context
+    )
+    {
+        // Validate that the Kind is supported
+        if (kind is DynamoKind.L or DynamoKind.M or DynamoKind.SS or DynamoKind.NS or DynamoKind.BS)
+            return DiagnosticResult<TypeMappingStrategy>.Failure(
+                DiagnosticDescriptors.CannotConvertFromAttributeValue,
+                analysis.PropertyType.Locations.FirstOrDefault()?.CreateLocationInfo(),
+                analysis.PropertyName,
+                $"DynamoKind.{kind} (not supported in Phase 1)"
+            );
+
+        // Resolve the strategy based on the actual C# type (not the Kind)
+        // Then add the Kind as an override parameter
+        var baseStrategyResult = analysis.UnderlyingType switch
+        {
+            { SpecialType: SpecialType.System_String } => CreateStrategy(
+                "String",
+                analysis.Nullability
+            ),
+            { SpecialType: SpecialType.System_Boolean } => CreateStrategy(
+                "Bool",
+                analysis.Nullability
+            ),
+            { SpecialType: SpecialType.System_Int32 } => CreateStrategy(
+                "Int",
+                analysis.Nullability
+            ),
+            { SpecialType: SpecialType.System_Int64 } => CreateStrategy(
+                "Long",
+                analysis.Nullability
+            ),
+            { SpecialType: SpecialType.System_Single } => CreateStrategy(
+                "Float",
+                analysis.Nullability
+            ),
+            { SpecialType: SpecialType.System_Double } => CreateStrategy(
+                "Double",
+                analysis.Nullability
+            ),
+            { SpecialType: SpecialType.System_Decimal } => CreateStrategy(
+                "Decimal",
+                analysis.Nullability
+            ),
+            _ => null,
+        };
+
+        if (baseStrategyResult is null)
+            return DiagnosticResult<TypeMappingStrategy>.Failure(
+                DiagnosticDescriptors.CannotConvertFromAttributeValue,
+                analysis.PropertyType.Locations.FirstOrDefault()?.CreateLocationInfo(),
+                analysis.PropertyName,
+                analysis.PropertyType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
+            );
+
+        // Add the Kind override to the base strategy
+        return new TypeMappingStrategy(
+            baseStrategyResult.TypeName,
+            baseStrategyResult.GenericArgument,
+            baseStrategyResult.NullableModifier,
+            baseStrategyResult.FromTypeSpecificArgs,
+            baseStrategyResult.ToTypeSpecificArgs,
+            kind
+        );
     }
 }

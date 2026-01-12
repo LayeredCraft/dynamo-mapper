@@ -17,8 +17,9 @@ var myEntity = ExampleEntityMapper.FromItem(exampleAttributes);
 [DynamoMapper]
 [DynamoField(
     nameof(ExampleEntity.String),
-    ToMethod = nameof(ToMethod),
-    FromMethod = nameof(FromMethod)
+    AttributeName = "customName",
+    ToMethod = nameof(CustomValueToAttribute),
+    FromMethod = nameof(CustomValueFromAttribute)
 )]
 [DynamoField(
     nameof(ExampleEntity.NullableString),
@@ -34,10 +35,16 @@ internal static partial class ExampleEntityMapper
 
     internal static partial ExampleEntity FromItem(Dictionary<string, AttributeValue> item);
 
-    internal static AttributeValue ToMethod(string value) => new() { S = value };
+    internal static AttributeValue CustomValueToAttribute(ExampleEntity source) =>
+        // custom logic here before returning an attribute value
+        new() { S = source.String };
 
-    internal static string FromMethod(Dictionary<string, AttributeValue> item) =>
-        item["customName"].S;
+    internal static string CustomValueFromAttribute(Dictionary<string, AttributeValue> item)
+    {
+        var value = item["customName"].S;
+        // custom logic here before returning a string
+        return value;
+    }
 }
 
 internal class ExampleEntity

@@ -24,11 +24,15 @@ internal static class PropertyAnalyzer
         var nullability = AnalyzeNullability(propertySymbol);
         var underlyingType = UnwrapNullableType(propertySymbol.Type);
 
+        // Lookup field-level overrides from DynamoFieldAttribute
+        context.FieldOptions.TryGetValue(propertySymbol.Name, out var fieldOptions);
+
         return new PropertyAnalysis(
             propertySymbol.Name,
             propertySymbol.Type,
             underlyingType,
-            nullability
+            nullability,
+            fieldOptions
         );
     }
 

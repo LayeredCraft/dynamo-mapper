@@ -1,3 +1,5 @@
+using DynamoMapper.Runtime;
+
 namespace DynamoMapper.Generator.PropertyMapping.Models;
 
 /// <summary>Defines the strategy for mapping a C# type to AttributeValue extension methods.</summary>
@@ -21,10 +23,15 @@ namespace DynamoMapper.Generator.PropertyMapping.Models;
 ///     Type-specific arguments for serialization (ToItem), like format
 ///     strings.
 /// </param>
+/// <param name="KindOverride">
+///     Optional DynamoKind override from DynamoFieldOptions. When present,
+///     this value is passed as an additional argument to Get/Set methods.
+/// </param>
 internal sealed record TypeMappingStrategy(
     string TypeName,
     string GenericArgument,
     string NullableModifier,
     string[] FromTypeSpecificArgs,
-    string[] ToTypeSpecificArgs
+    string[] ToTypeSpecificArgs,
+    DynamoKind? KindOverride = null
 );

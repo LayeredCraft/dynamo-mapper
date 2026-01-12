@@ -23,27 +23,32 @@ internal static class PropertyMappingCodeRenderer
 
     /// <summary>
     ///     Renders the FromAssignment string for deserialization. Format: PropertyName =
-    ///     paramName.MethodName&lt;Generic&gt;(args),
+    ///     paramName.MethodName&lt;Generic&gt;(args), OR PropertyName = CustomMethodName(args), for
+    ///     custom methods
     /// </summary>
     private static string RenderFromAssignment(PropertyMappingSpec spec, GeneratorContext context)
     {
-        var paramName = context.MapperOptions.FromMethodParameterName;
         var args = string.Join(", ", spec.FromItemMethod.Arguments.Select(a => a.Value));
-        var methodCall =
-            $"{paramName}.{spec.FromItemMethod.MethodName}{spec.TypeStrategy.GenericArgument}({args})";
+
+        var methodCall = spec.FromItemMethod.IsCustomMethod
+            ? $"{spec.FromItemMethod.MethodName}({args})" // Custom: MethodName(item)
+            : $"{context.MapperOptions.FromMethodParameterName}.{spec.FromItemMethod.MethodName}{spec.TypeStrategy.GenericArgument}({args})"; // Standard: item.GetXxx<T>(args)
 
         return $"{spec.PropertyName} = {methodCall},";
     }
 
     /// <summary>
-    ///     Renders the ToAssignment string for serialization. Format: .MethodName&lt;Generic&gt;
-    ///     (args)
+    ///     Renders the ToAssignment string for serialization. Format: .MethodName&lt;Generic&gt;(args)
+    ///     Custom ToMethods are rendered as .Set("key", CustomMethod(source))
     /// </summary>
     private static string RenderToAssignment(PropertyMappingSpec spec)
     {
         var args = string.Join(", ", spec.ToItemMethod.Arguments.Select(a => a.Value));
-        var methodCall =
-            $".{spec.ToItemMethod.MethodName}{spec.TypeStrategy.GenericArgument}({args})";
+
+        var methodCall = spec.ToItemMethod.IsCustomMethod
+            ? $".{spec.ToItemMethod.MethodName}({args})" // Custom: .Set("key",
+            // CustomMethod(source))
+            : $".{spec.ToItemMethod.MethodName}{spec.TypeStrategy.GenericArgument}({args})"; // Standard: .SetXxx<T>(args)
 
         return methodCall;
     }

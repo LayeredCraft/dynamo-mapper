@@ -27,7 +27,6 @@ public static class AttributeValueExtensions
         ///     value.
         /// </summary>
         /// <value><c>true</c> if the attribute value is not a DynamoDB NULL value; otherwise <c>false</c>.</value>
-        /// <remarks>This is the inverse of <see cref="IsNull" /> and treats a null reference as NULL.</remarks>
         public bool IsNotNull => attributeValue?.NULL is null or false;
     }
 

@@ -41,15 +41,13 @@ public sealed class DynamoFieldAttribute : Attribute
 
     /// <summary>Gets or sets the name of the static method to use for ToItem conversion.</summary>
     /// <remarks>
-    ///     Method must have signature: <c>static AttributeValue MethodName(T value)</c>. Cannot be
-    ///     used together with <see cref="Converter" />.
+    ///     Method must have signature: <c>static AttributeValue MethodName(T value)</c>.
     /// </remarks>
     public string ToMethod { get; set; } = null!;
 
     /// <summary>Gets or sets the name of the static method to use for FromItem conversion.</summary>
     /// <remarks>
-    ///     Method must have signature: <c>static T MethodName(AttributeValue value)</c>. Cannot be
-    ///     used together with <see cref="Converter" />.
+    ///     Method must have signature: <c>static T MethodName(AttributeValue value)</c>.
     /// </remarks>
     public string FromMethod { get; set; } = null!;
 }

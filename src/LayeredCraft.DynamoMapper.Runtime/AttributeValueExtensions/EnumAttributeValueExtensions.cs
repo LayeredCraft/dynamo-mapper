@@ -18,6 +18,7 @@ public static class EnumAttributeValueExtensions
         ///     Specifies whether the attribute is required. Default is
         ///     <see cref="Requiredness.InferFromNullability" />.
         /// </param>
+        /// <param name="kind">The DynamoDB attribute kind to interpret as a string.</param>
         /// <returns>
         ///     The enum value if the key exists and is valid; otherwise <paramref name="defaultValue" />
         ///     if the key is missing (when Optional) or parsing fails.
@@ -25,11 +26,12 @@ public static class EnumAttributeValueExtensions
         public TEnum GetEnum<TEnum>(
             string key,
             TEnum defaultValue,
-            Requiredness requiredness = Requiredness.InferFromNullability
+            Requiredness requiredness = Requiredness.InferFromNullability,
+            DynamoKind kind = DynamoKind.S
         )
             where TEnum : struct =>
-            attributes.TryGetValue(key, requiredness, out var value) && value.IsNotNull
-                ? (TEnum)Enum.Parse(typeof(TEnum), value!.S)
+            attributes.GetValue(key, requiredness).GetString(kind) is { Length: > 0 } stringValue
+                ? (TEnum)Enum.Parse(typeof(TEnum), stringValue)
                 : defaultValue;
 
         /// <summary>Gets an enum value from the attribute dictionary, expecting a specific format.</summary>
@@ -45,6 +47,7 @@ public static class EnumAttributeValueExtensions
         ///     Specifies whether the attribute is required. Default is
         ///     <see cref="Requiredness.InferFromNullability" />.
         /// </param>
+        /// <param name="kind">The DynamoDB attribute kind to interpret as a string.</param>
         /// <returns>
         ///     The enum value if the key exists and is valid; otherwise <paramref name="defaultValue" />
         ///     if the key is missing (when Optional) or parsing fails.
@@ -53,11 +56,12 @@ public static class EnumAttributeValueExtensions
             string key,
             TEnum defaultValue,
             string format,
-            Requiredness requiredness = Requiredness.InferFromNullability
+            Requiredness requiredness = Requiredness.InferFromNullability,
+            DynamoKind kind = DynamoKind.S
         )
             where TEnum : struct =>
-            attributes.TryGetValue(key, requiredness, out var value) && value.IsNotNull
-                ? (TEnum)Enum.Parse(typeof(TEnum), value!.S)
+            attributes.GetValue(key, requiredness).GetString(kind) is { Length: > 0 } stringValue
+                ? (TEnum)Enum.Parse(typeof(TEnum), stringValue)
                 : defaultValue;
 
         /// <summary>Gets a nullable enum value from the attribute dictionary.</summary>
@@ -67,21 +71,23 @@ public static class EnumAttributeValueExtensions
         ///     Specifies whether the attribute is required. Default is
         ///     <see cref="Requiredness.InferFromNullability" />.
         /// </param>
+        /// <param name="kind">The DynamoDB attribute kind to interpret as a string.</param>
         /// <returns>
         ///     The enum value if the key exists and is valid; otherwise <c>null</c> if the key is missing
         ///     or the attribute has a DynamoDB NULL value.
         /// </returns>
         public TEnum? GetNullableEnum<TEnum>(
             string key,
-            Requiredness requiredness = Requiredness.InferFromNullability
+            Requiredness requiredness = Requiredness.InferFromNullability,
+            DynamoKind kind = DynamoKind.S
         )
-            where TEnum : struct =>
-            attributes
+            where TEnum : struct
+        {
+            var stringValue = attributes
                 .GetNullableValue(key, requiredness)
-                .Map(
-                    static TEnum? (value) =>
-                        value.IsNotNull ? (TEnum)Enum.Parse(typeof(TEnum), value!.S) : null
-                );
+                .GetNullableString(kind);
+            return stringValue is null ? null : (TEnum)Enum.Parse(typeof(TEnum), stringValue);
+        }
 
         /// <summary>Gets a nullable enum value from the attribute dictionary, expecting a specific format.</summary>
         /// <typeparam name="TEnum">The enum type to parse.</typeparam>
@@ -95,6 +101,7 @@ public static class EnumAttributeValueExtensions
         ///     Specifies whether the attribute is required. Default is
         ///     <see cref="Requiredness.InferFromNullability" />.
         /// </param>
+        /// <param name="kind">The DynamoDB attribute kind to interpret as a string.</param>
         /// <returns>
         ///     The enum value if the key exists and is valid; otherwise <c>null</c> if the key is missing
         ///     or the attribute has a DynamoDB NULL value.
@@ -102,15 +109,16 @@ public static class EnumAttributeValueExtensions
         public TEnum? GetNullableEnum<TEnum>(
             string key,
             string format,
-            Requiredness requiredness = Requiredness.InferFromNullability
+            Requiredness requiredness = Requiredness.InferFromNullability,
+            DynamoKind kind = DynamoKind.S
         )
-            where TEnum : struct =>
-            attributes
+            where TEnum : struct
+        {
+            var stringValue = attributes
                 .GetNullableValue(key, requiredness)
-                .Map(
-                    TEnum? (value) =>
-                        value.IsNotNull ? (TEnum)Enum.Parse(typeof(TEnum), value!.S) : null
-                );
+                .GetNullableString(kind);
+            return stringValue is null ? null : (TEnum)Enum.Parse(typeof(TEnum), stringValue);
+        }
 
         /// <summary>Sets an enum value in the attribute dictionary.</summary>
         /// <typeparam name="TEnum">The enum type to set.</typeparam>
@@ -124,20 +132,20 @@ public static class EnumAttributeValueExtensions
         ///     Whether to omit null string values from the DynamoDB item. Default is
         ///     <c>true</c>.
         /// </param>
+        /// <param name="kind">The DynamoDB attribute kind to write. Default is <see cref="DynamoKind.S" />.</param>
         /// <returns>The attribute dictionary for fluent chaining.</returns>
         public Dictionary<string, AttributeValue> SetEnum<TEnum>(
             string key,
             TEnum? value,
             bool omitEmptyStrings = false,
-            bool omitNullStrings = true
+            bool omitNullStrings = true,
+            DynamoKind kind = DynamoKind.S
         )
             where TEnum : struct, Enum
         {
             var stringValue = value?.ToString();
             if (stringValue.ShouldSet(omitEmptyStrings, omitNullStrings))
-                attributes[key] = value is null
-                    ? new AttributeValue { NULL = true }
-                    : new AttributeValue { S = stringValue };
+                attributes[key] = stringValue.ToAttributeValue(kind);
 
             return attributes;
         }
@@ -158,21 +166,21 @@ public static class EnumAttributeValueExtensions
         ///     Whether to omit null string values from the DynamoDB item. Default is
         ///     <c>true</c>.
         /// </param>
+        /// <param name="kind">The DynamoDB attribute kind to write. Default is <see cref="DynamoKind.S" />.</param>
         /// <returns>The attribute dictionary for fluent chaining.</returns>
         public Dictionary<string, AttributeValue> SetEnum<TEnum>(
             string key,
             TEnum? value,
             string format,
             bool omitEmptyStrings = false,
-            bool omitNullStrings = true
+            bool omitNullStrings = true,
+            DynamoKind kind = DynamoKind.S
         )
             where TEnum : struct, Enum
         {
             var stringValue = value?.ToString(format);
             if (stringValue.ShouldSet(omitEmptyStrings, omitNullStrings))
-                attributes[key] = value is null
-                    ? new AttributeValue { NULL = true }
-                    : new AttributeValue { S = stringValue };
+                attributes[key] = stringValue.ToAttributeValue(kind);
 
             return attributes;
         }

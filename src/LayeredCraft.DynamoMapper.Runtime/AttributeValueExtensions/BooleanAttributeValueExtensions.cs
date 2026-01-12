@@ -62,7 +62,7 @@ public static class BooleanAttributeValueExtensions
             bool? value,
             bool omitEmptyStrings = false,
             bool omitNullStrings = true,
-            DynamoKind kind = DynamoKind.S
+            DynamoKind kind = DynamoKind.BOOL
         )
         {
             if (value.ShouldSet(omitNullStrings))

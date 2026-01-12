@@ -36,7 +36,7 @@ public class DynamoFieldVerifyTests
 
                     internal static partial ExampleEntity FromItem(Dictionary<string, AttributeValue> item);
 
-                    internal static AttributeValue ToMethod(string value) => new AttributeValue { S = value };
+                    internal static AttributeValue ToMethod(ExampleEntity source) => new() { S = source.String };
 
                     internal static string FromMethod(Dictionary<string, AttributeValue> item) =>
                         item["customName"].S;

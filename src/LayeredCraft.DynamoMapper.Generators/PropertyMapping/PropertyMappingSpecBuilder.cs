@@ -96,7 +96,7 @@ internal static class PropertyMappingSpecBuilder
         if (strategy.KindOverride is not null)
             args.Add(
                 new ArgumentSpec(
-                    $"DynamoMapper.Runtime.DynamoKind.{strategy.KindOverride}",
+                    $"DynamoKind.{strategy.KindOverride}",
                     ArgumentSource.FieldOverride
                 )
             );
@@ -162,7 +162,7 @@ internal static class PropertyMappingSpecBuilder
         if (strategy.KindOverride is not null)
             args.Add(
                 new ArgumentSpec(
-                    $"DynamoMapper.Runtime.DynamoKind.{strategy.KindOverride}",
+                    $"DynamoKind.{strategy.KindOverride}",
                     ArgumentSource.FieldOverride
                 )
             );

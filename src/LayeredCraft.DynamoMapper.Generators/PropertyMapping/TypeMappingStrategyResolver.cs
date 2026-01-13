@@ -20,7 +20,7 @@ internal static class TypeMappingStrategyResolver
     ///     A diagnostic result containing the type mapping strategy, or a failure for unsupported
     ///     types.
     /// </returns>
-    internal static DiagnosticResult<TypeMappingStrategy> Resolve(
+    internal static DiagnosticResult<TypeMappingStrategy?> Resolve(
         PropertyAnalysis analysis,
         GeneratorContext context
     )
@@ -29,7 +29,7 @@ internal static class TypeMappingStrategyResolver
 
         // Skip type resolution if both custom methods are provided
         if (analysis.FieldOptions is { ToMethod: not null, FromMethod: not null })
-            return new TypeMappingStrategy("", "", "", [], [], analysis.FieldOptions?.Kind);
+            return DiagnosticResult<TypeMappingStrategy?>.Success(null);
 
         // Validate Kind override first if present - reject Phase 2 types (collections, maps, etc.)
         if (
@@ -43,7 +43,7 @@ internal static class TypeMappingStrategyResolver
                     or DynamoKind.BS
                 )
         )
-            return DiagnosticResult<TypeMappingStrategy>.Failure(
+            return DiagnosticResult<TypeMappingStrategy?>.Failure(
                 DiagnosticDescriptors.CannotConvertFromAttributeValue,
                 analysis.PropertyType.Locations.FirstOrDefault()?.CreateLocationInfo(),
                 analysis.PropertyName,
@@ -118,7 +118,7 @@ internal static class TypeMappingStrategyResolver
         };
 
         // If type resolution succeeded and Kind override exists, augment the strategy
-        return strategyResult.Bind<TypeMappingStrategy>(strategy =>
+        return strategyResult.Bind<TypeMappingStrategy?>(strategy =>
             analysis.FieldOptions?.Kind is { } kind
                 ? strategy with
                 {

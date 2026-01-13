@@ -23,7 +23,7 @@ internal static class ModelClassInfoExtensions
             var properties = modelTypeSymbol
                 .GetMembers()
                 .OfType<IPropertySymbol>()
-                .Where(p => p.SetMethod is not null && !p.IsStatic)
+                .Where(p => !p.IsStatic)
                 .ToList();
 
             var (propertyInfos, propertyDiagnostics) = properties.CollectDiagnosticResults(

@@ -10,7 +10,7 @@ namespace DynamoMapper.Generator.PropertyMapping.Models;
 /// <param name="FromItemMethod">Method specification for deserialization (FromItem).</param>
 internal sealed record PropertyMappingSpec(
     string PropertyName,
-    TypeMappingStrategy TypeStrategy,
+    TypeMappingStrategy? TypeStrategy,
     MethodCallSpec ToItemMethod,
     MethodCallSpec FromItemMethod
 );

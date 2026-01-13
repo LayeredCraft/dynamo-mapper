@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using DynamoMapper.Generator.Models;
 using DynamoMapper.Generator.PropertyMapping.Models;
 
@@ -28,11 +29,16 @@ internal static class PropertyMappingCodeRenderer
     /// </summary>
     private static string RenderFromAssignment(PropertyMappingSpec spec, GeneratorContext context)
     {
+        Debug.Assert(
+            spec.FromItemMethod.IsCustomMethod || spec.TypeStrategy is not null,
+            "TypeStrategy should not be null for standard methods"
+        );
+
         var args = string.Join(", ", spec.FromItemMethod.Arguments.Select(a => a.Value));
 
         var methodCall = spec.FromItemMethod.IsCustomMethod
             ? $"{spec.FromItemMethod.MethodName}({args})" // Custom: MethodName(item)
-            : $"{context.MapperOptions.FromMethodParameterName}.{spec.FromItemMethod.MethodName}{spec.TypeStrategy.GenericArgument}({args})"; // Standard: item.GetXxx<T>(args)
+            : $"{context.MapperOptions.FromMethodParameterName}.{spec.FromItemMethod.MethodName}{spec.TypeStrategy!.GenericArgument}({args})"; // Standard: item.GetXxx<T>(args)
 
         return $"{spec.PropertyName} = {methodCall},";
     }
@@ -43,12 +49,17 @@ internal static class PropertyMappingCodeRenderer
     /// </summary>
     private static string RenderToAssignment(PropertyMappingSpec spec)
     {
+        Debug.Assert(
+            spec.ToItemMethod.IsCustomMethod || spec.TypeStrategy is not null,
+            "TypeStrategy should not be null for standard methods"
+        );
+
         var args = string.Join(", ", spec.ToItemMethod.Arguments.Select(a => a.Value));
 
         var methodCall = spec.ToItemMethod.IsCustomMethod
             ? $".{spec.ToItemMethod.MethodName}({args})" // Custom: .Set("key",
             // CustomMethod(source))
-            : $".{spec.ToItemMethod.MethodName}{spec.TypeStrategy.GenericArgument}({args})"; // Standard: .SetXxx<T>(args)
+            : $".{spec.ToItemMethod.MethodName}{spec.TypeStrategy!.GenericArgument}({args})"; // Standard: .SetXxx<T>(args)
 
         return methodCall;
     }

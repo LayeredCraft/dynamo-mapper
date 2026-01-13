@@ -66,7 +66,7 @@ internal static class PropertyMappingSpecBuilder
             "TypeMappingStrategy cannot be null for FromItem method"
         );
 
-        var methodName = $"Get{strategy.NullableModifier}{strategy.TypeName}";
+        var methodName = $"Get{strategy!.NullableModifier}{strategy.TypeName}";
 
         var args = new List<ArgumentSpec>
         {

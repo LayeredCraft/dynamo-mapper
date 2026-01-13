@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using DynamoMapper.Generator.PropertyMapping.Models;
 using DynamoMapper.Runtime;
 
@@ -16,7 +18,7 @@ internal static class PropertyMappingSpecBuilder
     /// <returns>A property mapping specification ready for code generation.</returns>
     internal static PropertyMappingSpec Build(
         PropertyAnalysis analysis,
-        TypeMappingStrategy strategy,
+        TypeMappingStrategy? strategy,
         GeneratorContext context
     )
     {
@@ -54,12 +56,17 @@ internal static class PropertyMappingSpecBuilder
     /// </summary>
     private static MethodCallSpec BuildFromItemMethod(
         PropertyAnalysis analysis,
-        TypeMappingStrategy strategy,
+        [NotNull] TypeMappingStrategy? strategy,
         string key,
         GeneratorContext context
     )
     {
-        var methodName = $"Get{strategy.NullableModifier}{strategy.TypeName}";
+        Debug.Assert(
+            strategy is not null,
+            "TypeMappingStrategy cannot be null for FromItem method"
+        );
+
+        var methodName = $"Get{strategy!.NullableModifier}{strategy.TypeName}";
 
         var args = new List<ArgumentSpec>
         {
@@ -111,12 +118,14 @@ internal static class PropertyMappingSpecBuilder
     /// </summary>
     private static MethodCallSpec BuildToItemMethod(
         PropertyAnalysis analysis,
-        TypeMappingStrategy strategy,
+        [NotNull] TypeMappingStrategy? strategy,
         string key,
         GeneratorContext context
     )
     {
-        var methodName = $"Set{strategy.TypeName}";
+        Debug.Assert(strategy is not null, "TypeMappingStrategy cannot be null for ToItem method");
+
+        var methodName = $"Set{strategy!.TypeName}";
         var paramName = context.MapperOptions.ToMethodParameterName;
 
         var args = new List<ArgumentSpec>
@@ -176,7 +185,7 @@ internal static class PropertyMappingSpecBuilder
     /// </summary>
     private static PropertyMappingSpec BuildWithCustomMethods(
         PropertyAnalysis analysis,
-        TypeMappingStrategy strategy,
+        TypeMappingStrategy? strategy,
         DynamoFieldOptions fieldOptions,
         GeneratorContext context
     )

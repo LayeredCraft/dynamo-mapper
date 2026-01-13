@@ -274,4 +274,48 @@ public class DynamoFieldVerifyTests
             },
             TestContext.Current.CancellationToken
         );
+
+    [Fact]
+    public async Task DynamoField_FromAndToMethod_CustomType() =>
+        await GeneratorTestHelpers.Verify(
+            new VerifyTestOptions
+            {
+                SourceCode = """
+                using System.Collections.Generic;
+                using Amazon.DynamoDBv2.Model;
+                using DynamoMapper.Runtime;
+
+                namespace MyNamespace;
+
+                [DynamoMapper]
+                [DynamoField(
+                    nameof(ExampleEntity.String),
+                    FromMethod = nameof(PersonFromAttr),
+                    ToMethod = nameof(PersonToAttr)
+                )]
+                internal static partial class ExampleEntityMapper
+                {
+                    internal static partial Dictionary<string, AttributeValue> ToItem(ExampleEntity source);
+
+                    internal static partial ExampleEntity FromItem(Dictionary<string, AttributeValue> item);
+
+                    internal static Person PersonFromAttr(Dictionary<string, AttributeValue> item) =>
+                        new(item["customName"].S);
+
+                    internal static AttributeValue PersonToAttr(ExampleEntity source) =>
+                        new() { S = source.Person.name };
+                }
+
+                internal class ExampleEntity
+                {
+                    internal required string String { get; set; }
+                    internal string? NullableString { get; set; }
+                    internal Person Person { get; set; }
+                }
+
+                internal record Person(string name);
+                """,
+            },
+            TestContext.Current.CancellationToken
+        );
 }

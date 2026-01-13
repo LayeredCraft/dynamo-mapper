@@ -79,7 +79,7 @@ var exampleAttributes = new Dictionary<string, AttributeValue>
     ["nullable_enum"] = new() { S = "Shipped" },
 };
 
-var myEntity = ExampleEntityMapper.FromItem(exampleAttributes);
+var myEntity = ExampleModelMapper.FromItem(exampleAttributes);
 
 [DynamoMapper(
     Convention = DynamoNamingConvention.SnakeCase,
@@ -89,14 +89,14 @@ var myEntity = ExampleEntityMapper.FromItem(exampleAttributes);
     DateTimeFormat = "I",
     EnumFormat = "G"
 )]
-internal static partial class ExampleEntityMapper
+internal static partial class ExampleModelMapper
 {
-    private static partial Dictionary<string, AttributeValue> ToItem(ExampleEntity source);
+    private static partial Dictionary<string, AttributeValue> ToItem(ExampleModel source);
 
-    internal static partial ExampleEntity FromItem(Dictionary<string, AttributeValue> item);
+    internal static partial ExampleModel FromItem(Dictionary<string, AttributeValue> item);
 }
 
-internal class ExampleEntity
+internal class ExampleModel
 {
     internal bool Bool { get; set; }
     internal bool? NullableBool { get; set; }

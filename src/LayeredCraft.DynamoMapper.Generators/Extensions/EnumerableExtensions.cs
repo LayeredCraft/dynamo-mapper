@@ -9,7 +9,9 @@ internal static class EnumerableExtensions
         public void ForEach(Action<T> action)
         {
             foreach (var item in enumerable)
+            {
                 action(item);
+            }
         }
     }
 

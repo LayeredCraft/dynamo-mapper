@@ -5,11 +5,13 @@ using Microsoft.CodeAnalysis;
 
 namespace DynamoMapper.Generator;
 
+/// <summary>Source code generator for DynamoMapper.</summary>
 [Generator]
 public class DynamoMapperGenerator : IIncrementalGenerator
 {
     private static readonly string DynamoMapperAttribute = typeof(DynamoMapperAttribute).FullName!;
 
+    /// <summary>Initializes the DynamoMapper generator.</summary>
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var mapperInfos = context

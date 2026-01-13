@@ -27,6 +27,10 @@ internal static class TypeMappingStrategyResolver
     {
         context.ThrowIfCancellationRequested();
 
+        // Skip type resolution if both custom methods are provided
+        if (analysis.FieldOptions is { ToMethod: not null, FromMethod: not null })
+            return new TypeMappingStrategy("", "", "", [], [], analysis.FieldOptions?.Kind);
+
         // Validate Kind override first if present - reject Phase 2 types (collections, maps, etc.)
         if (
             analysis.FieldOptions?.Kind

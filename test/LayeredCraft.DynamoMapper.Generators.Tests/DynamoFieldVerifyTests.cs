@@ -289,7 +289,7 @@ public class DynamoFieldVerifyTests
 
                 [DynamoMapper]
                 [DynamoField(
-                    nameof(ExampleEntity.String),
+                    nameof(ExampleEntity.Person),
                     FromMethod = nameof(PersonFromAttr),
                     ToMethod = nameof(PersonToAttr)
                 )]
@@ -300,7 +300,7 @@ public class DynamoFieldVerifyTests
                     internal static partial ExampleEntity FromItem(Dictionary<string, AttributeValue> item);
 
                     internal static Person PersonFromAttr(Dictionary<string, AttributeValue> item) =>
-                        new(item["customName"].S);
+                        new(item["person"].S);
 
                     internal static AttributeValue PersonToAttr(ExampleEntity source) =>
                         new() { S = source.Person.name };
@@ -310,7 +310,7 @@ public class DynamoFieldVerifyTests
                 {
                     internal required string String { get; set; }
                     internal string? NullableString { get; set; }
-                    internal Person Person { get; set; }
+                    internal required Person Person { get; set; }
                 }
 
                 internal record Person(string name);

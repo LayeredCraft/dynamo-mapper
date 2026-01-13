@@ -12,12 +12,20 @@ internal static class PropertyMappingCodeRenderer
 {
     /// <summary>Renders a property mapping specification into PropertyInfo.</summary>
     /// <param name="spec">The property mapping specification.</param>
+    /// <param name="analysis">The property analysis containing accessor information.</param>
     /// <param name="context">The generator context.</param>
     /// <returns>The rendered PropertyInfo.</returns>
-    internal static PropertyInfo Render(PropertyMappingSpec spec, GeneratorContext context)
+    internal static PropertyInfo Render(
+        PropertyMappingSpec spec,
+        PropertyAnalysis analysis,
+        GeneratorContext context
+    )
     {
-        var fromAssignment = RenderFromAssignment(spec, context);
-        var toAssignments = RenderToAssignment(spec);
+        // FromItem requires setter - property must be assignable
+        var fromAssignment = analysis.HasSetter ? RenderFromAssignment(spec, context) : null;
+
+        // ToItem requires getter - property must be readable
+        var toAssignments = analysis.HasGetter ? RenderToAssignment(spec) : null;
 
         return new PropertyInfo(fromAssignment, toAssignments);
     }

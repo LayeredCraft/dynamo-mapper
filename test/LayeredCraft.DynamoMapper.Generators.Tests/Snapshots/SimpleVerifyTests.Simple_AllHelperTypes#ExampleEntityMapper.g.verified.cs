@@ -43,7 +43,7 @@ public static partial class ExampleEntityMapper
             .SetTimeSpan("nullableTimeSpan", source.NullableTimeSpan, false, true)
             .SetEnum<global::MyNamespace.OrderStatus>("enum", source.Enum, "G", false, true)
             .SetEnum<global::MyNamespace.OrderStatus>("nullableEnum", source.NullableEnum, "G", false, true);
-    
+
     [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
     public static partial global::MyNamespace.ExampleEntity FromItem(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> x) =>
         new global::MyNamespace.ExampleEntity

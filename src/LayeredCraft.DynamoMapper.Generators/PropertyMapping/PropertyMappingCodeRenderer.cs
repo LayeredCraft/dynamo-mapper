@@ -21,11 +21,15 @@ internal static class PropertyMappingCodeRenderer
         GeneratorContext context
     )
     {
-        // FromItem requires setter - property must be assignable
-        var fromAssignment = analysis.HasSetter ? RenderFromAssignment(spec, context) : null;
+        // FromItem requires both: setter on property AND FromItem method exists
+        var fromAssignment =
+            context.HasFromItemMethod && analysis.HasSetter
+                ? RenderFromAssignment(spec, context)
+                : null;
 
-        // ToItem requires getter - property must be readable
-        var toAssignments = analysis.HasGetter ? RenderToAssignment(spec) : null;
+        // ToItem requires both: getter on property AND ToItem method exists
+        var toAssignments =
+            context.HasToItemMethod && analysis.HasGetter ? RenderToAssignment(spec) : null;
 
         return new PropertyInfo(fromAssignment, toAssignments);
     }

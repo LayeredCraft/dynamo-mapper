@@ -28,6 +28,18 @@ internal class GeneratorContext
     internal WellKnownTypes.WellKnownTypes WellKnownTypes { get; }
     internal MapperOptions MapperOptions { get; }
     internal Dictionary<string, DynamoFieldOptions> FieldOptions { get; }
+
+    /// <summary>
+    ///     Indicates whether a ToItem method is defined in the mapper class. Used to determine if
+    ///     properties need to be validated for serialization.
+    /// </summary>
+    internal bool HasToItemMethod { get; set; }
+
+    /// <summary>
+    ///     Indicates whether a FromItem method is defined in the mapper class. Used to determine if
+    ///     properties need to be validated for deserialization.
+    /// </summary>
+    internal bool HasFromItemMethod { get; set; }
 }
 
 internal static class GeneratorContextExtensions

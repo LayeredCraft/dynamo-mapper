@@ -32,8 +32,16 @@ internal static class TypeMappingStrategyResolver
             return DiagnosticResult<TypeMappingStrategy?>.Success(null);
 
         // Skip validation if property won't be used in any generated methods
-        var willBeUsedInToItem = context.HasToItemMethod && analysis.HasGetter;
-        var willBeUsedInFromItem = context.HasFromItemMethod && analysis.HasSetter;
+        // Also skip if a custom method is provided for that direction (no auto-mapping needed)
+        var willBeUsedInToItem =
+            context.HasToItemMethod
+            && analysis.HasGetter
+            && analysis.FieldOptions?.ToMethod == null;
+
+        var willBeUsedInFromItem =
+            context.HasFromItemMethod
+            && analysis.HasSetter
+            && analysis.FieldOptions?.FromMethod == null;
 
         if (!willBeUsedInToItem && !willBeUsedInFromItem)
             return DiagnosticResult<TypeMappingStrategy?>.Success(null);

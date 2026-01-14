@@ -6,11 +6,11 @@ namespace DynamoMapper.Generator.PropertyMapping.Models;
 /// </summary>
 /// <param name="PropertyName">The property name.</param>
 /// <param name="TypeStrategy">The type mapping strategy.</param>
-/// <param name="ToItemMethod">Method specification for serialization (ToItem).</param>
-/// <param name="FromItemMethod">Method specification for deserialization (FromItem).</param>
+/// <param name="ToItemMethod">Method specification for serialization (ToItem), or null if mapper doesn't have ToItem.</param>
+/// <param name="FromItemMethod">Method specification for deserialization (FromItem), or null if mapper doesn't have FromItem.</param>
 internal sealed record PropertyMappingSpec(
     string PropertyName,
     TypeMappingStrategy? TypeStrategy,
-    MethodCallSpec ToItemMethod,
-    MethodCallSpec FromItemMethod
+    MethodCallSpec? ToItemMethod,
+    MethodCallSpec? FromItemMethod
 );

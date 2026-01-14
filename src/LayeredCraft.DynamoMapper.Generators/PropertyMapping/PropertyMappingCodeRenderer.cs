@@ -23,13 +23,15 @@ internal static class PropertyMappingCodeRenderer
     {
         // FromItem requires both: setter on property AND FromItem method exists
         var fromAssignment =
-            context.HasFromItemMethod && analysis.HasSetter
+            context.HasFromItemMethod && analysis.HasSetter && spec.FromItemMethod is not null
                 ? RenderFromAssignment(spec, context)
                 : null;
 
         // ToItem requires both: getter on property AND ToItem method exists
         var toAssignments =
-            context.HasToItemMethod && analysis.HasGetter ? RenderToAssignment(spec) : null;
+            context.HasToItemMethod && analysis.HasGetter && spec.ToItemMethod is not null
+                ? RenderToAssignment(spec)
+                : null;
 
         return new PropertyInfo(fromAssignment, toAssignments);
     }
@@ -41,8 +43,9 @@ internal static class PropertyMappingCodeRenderer
     /// </summary>
     private static string RenderFromAssignment(PropertyMappingSpec spec, GeneratorContext context)
     {
+        Debug.Assert(spec.FromItemMethod is not null, "FromItemMethod should not be null");
         Debug.Assert(
-            spec.FromItemMethod.IsCustomMethod || spec.TypeStrategy is not null,
+            spec.FromItemMethod!.IsCustomMethod || spec.TypeStrategy is not null,
             "TypeStrategy should not be null for standard methods"
         );
 
@@ -61,8 +64,9 @@ internal static class PropertyMappingCodeRenderer
     /// </summary>
     private static string RenderToAssignment(PropertyMappingSpec spec)
     {
+        Debug.Assert(spec.ToItemMethod is not null, "ToItemMethod should not be null");
         Debug.Assert(
-            spec.ToItemMethod.IsCustomMethod || spec.TypeStrategy is not null,
+            spec.ToItemMethod!.IsCustomMethod || spec.TypeStrategy is not null,
             "TypeStrategy should not be null for standard methods"
         );
 

@@ -361,4 +361,39 @@ public class SimpleVerifyTests
             },
             TestContext.Current.CancellationToken
         );
+
+    [Fact]
+    public async Task Simple_OverrideOnlyOnFromMethod_NoToMethod() =>
+        await GeneratorTestHelpers.Verify(
+            new VerifyTestOptions
+            {
+                SourceCode = """
+                using System;
+                using System.Collections.Generic;
+                using Amazon.DynamoDBv2.Model;
+                using DynamoMapper.Runtime;
+
+                namespace MyNamespace;
+
+                [DynamoMapper]
+                [DynamoField(nameof(MyDto.ShouldNotBeMapped), FromMethod = nameof(FromItem))]
+                public static partial class ExampleMyDtoMapper
+                {
+                    public static partial MyDto FromItem(Dictionary<string, AttributeValue> item);
+
+                    public static Type GetType(Dictionary<string, AttributeValue> item)
+                    {
+                        return typeof(MyDto);
+                    }
+                }
+
+                public class MyDto
+                {
+                    public required string Name { get; set; }
+                    public Type ShouldNotBeMapped { get; set; }
+                }
+                """,
+            },
+            TestContext.Current.CancellationToken
+        );
 }

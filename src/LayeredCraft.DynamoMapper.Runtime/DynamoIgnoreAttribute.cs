@@ -21,6 +21,6 @@ public sealed class DynamoIgnoreAttribute : Attribute
     /// <summary>
     ///     Gets or sets which mapping direction(s) should skip this property.
     /// </summary>
-    /// <remarks>Default is <see cref="Ignore.All" /> (skip in both directions).</remarks>
+    /// <remarks>Default is <see cref="IgnoreMapping.All" /> (skip in both directions).</remarks>
     public IgnoreMapping Ignore { get; set; } = IgnoreMapping.All;
 }

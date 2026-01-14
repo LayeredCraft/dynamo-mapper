@@ -9,6 +9,7 @@ internal class GeneratorContext
         WellKnownTypes.WellKnownTypes wellKnownTypes,
         MapperOptions mapperOptions,
         Dictionary<string, DynamoFieldOptions> fieldOptions,
+        Dictionary<string, DynamoIgnoreOptions> ignoreOptions,
         CancellationToken cancellationToken
     )
     {
@@ -19,6 +20,7 @@ internal class GeneratorContext
         TargetNode = GeneratorAttributeSyntaxContext.TargetNode;
         MapperOptions = mapperOptions;
         FieldOptions = fieldOptions;
+        IgnoreOptions = ignoreOptions;
     }
 
     internal CancellationToken CancellationToken { get; }
@@ -28,6 +30,7 @@ internal class GeneratorContext
     internal WellKnownTypes.WellKnownTypes WellKnownTypes { get; }
     internal MapperOptions MapperOptions { get; }
     internal Dictionary<string, DynamoFieldOptions> FieldOptions { get; }
+    internal Dictionary<string, DynamoIgnoreOptions> IgnoreOptions { get; }
 
     /// <summary>
     ///     Indicates whether a ToItem method is defined in the mapper class. Used to determine if

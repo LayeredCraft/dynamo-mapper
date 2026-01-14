@@ -61,11 +61,23 @@ internal static class MapperSyntaxProvider
             .Select(attr => attr.PopulateOptions<DynamoFieldOptions>())
             .ToDictionary(fieldOption => fieldOption.MemberName);
 
+        var ignoreOptions = attributes
+            .Where(attr =>
+                attr.AttributeClass is not null
+                && wellKnownTypes.IsType(
+                    attr.AttributeClass,
+                    WellKnownType.DynamoMapper_Runtime_DynamoIgnoreAttribute
+                )
+            )
+            .Select(attr => attr.PopulateOptions<DynamoIgnoreOptions>())
+            .ToDictionary(ignoreOption => ignoreOption.MemberName);
+
         var context = new GeneratorContext(
             syntaxContext,
             wellKnownTypes,
             mapperOptions,
             fieldOptions,
+            ignoreOptions,
             cancellationToken
         );
 

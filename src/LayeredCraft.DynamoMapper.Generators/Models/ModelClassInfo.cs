@@ -23,7 +23,9 @@ internal static class ModelClassInfoExtensions
             var properties = modelTypeSymbol
                 .GetMembers()
                 .OfType<IPropertySymbol>()
-                .Where(p => !p.IsStatic)
+                .Where(p =>
+                    !p.IsStatic && (!modelTypeSymbol.IsRecord || p.Name != "EqualityContract")
+                )
                 .ToList();
 
             var (propertyInfos, propertyDiagnostics) = properties.CollectDiagnosticResults(

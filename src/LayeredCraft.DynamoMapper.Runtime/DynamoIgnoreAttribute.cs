@@ -18,7 +18,9 @@ public sealed class DynamoIgnoreAttribute : Attribute
     /// <summary>Gets the .NET property/member name being configured.</summary>
     public string MemberName { get; }
 
-    /// <summary>Gets or sets which mapping direction(s) should skip this property.</summary>
+    /// <summary>
+    ///     Gets or sets which mapping direction(s) should skip this property.
+    /// </summary>
     /// <remarks>Default is <see cref="Runtime.SkipMapping.All" /> (skip in both directions).</remarks>
     public SkipMapping SkipMapping { get; set; } = SkipMapping.All;
 }

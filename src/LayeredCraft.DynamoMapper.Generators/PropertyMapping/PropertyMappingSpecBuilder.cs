@@ -30,8 +30,13 @@ internal static class PropertyMappingSpecBuilder
 
         var key = GetAttributeKey(analysis, context);
 
-        var fromItemMethod = BuildFromItemMethod(analysis, strategy, key, context);
-        var toItemMethod = BuildToItemMethod(analysis, strategy, key, context);
+        // Only build methods if the mapper has them defined
+        var fromItemMethod = context.HasFromItemMethod
+            ? BuildFromItemMethod(analysis, strategy, key, context)
+            : null;
+        var toItemMethod = context.HasToItemMethod
+            ? BuildToItemMethod(analysis, strategy, key, context)
+            : null;
 
         return new PropertyMappingSpec(
             analysis.PropertyName,
@@ -192,13 +197,19 @@ internal static class PropertyMappingSpecBuilder
     {
         var key = GetAttributeKey(analysis, context);
 
-        var fromItemMethod = fieldOptions.FromMethod is not null
-            ? BuildCustomFromItemMethod(fieldOptions.FromMethod, context)
-            : BuildFromItemMethod(analysis, strategy, key, context);
+        // Only build FromItem method if mapper has FromItem defined
+        var fromItemMethod = context.HasFromItemMethod
+            ? fieldOptions.FromMethod is not null
+                ? BuildCustomFromItemMethod(fieldOptions.FromMethod, context)
+                : BuildFromItemMethod(analysis, strategy, key, context)
+            : null;
 
-        var toItemMethod = fieldOptions.ToMethod is not null
-            ? BuildCustomToItemMethod(fieldOptions.ToMethod, analysis, context)
-            : BuildToItemMethod(analysis, strategy, key, context);
+        // Only build ToItem method if mapper has ToItem defined
+        var toItemMethod = context.HasToItemMethod
+            ? fieldOptions.ToMethod is not null
+                ? BuildCustomToItemMethod(fieldOptions.ToMethod, analysis, context)
+                : BuildToItemMethod(analysis, strategy, key, context)
+            : null;
 
         return new PropertyMappingSpec(
             analysis.PropertyName,

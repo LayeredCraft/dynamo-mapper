@@ -45,7 +45,7 @@ internal static class PropertyMappingCodeRenderer
     {
         Debug.Assert(spec.FromItemMethod is not null, "FromItemMethod should not be null");
         Debug.Assert(
-            spec.FromItemMethod.IsCustomMethod || spec.TypeStrategy is not null,
+            spec.FromItemMethod!.IsCustomMethod || spec.TypeStrategy is not null,
             "TypeStrategy should not be null for standard methods"
         );
 
@@ -66,7 +66,7 @@ internal static class PropertyMappingCodeRenderer
     {
         Debug.Assert(spec.ToItemMethod is not null, "ToItemMethod should not be null");
         Debug.Assert(
-            spec.ToItemMethod.IsCustomMethod || spec.TypeStrategy is not null,
+            spec.ToItemMethod!.IsCustomMethod || spec.TypeStrategy is not null,
             "TypeStrategy should not be null for standard methods"
         );
 

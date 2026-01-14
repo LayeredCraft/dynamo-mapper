@@ -4,7 +4,7 @@ namespace DynamoMapper.Runtime;
 ///     Specifies which mapping direction(s) should skip a property marked with
 ///     <see cref="DynamoIgnoreAttribute" />.
 /// </summary>
-public enum SkipMapping
+public enum IgnoreMapping
 {
     /// <summary>
     ///     Skip this property in both <c>ToItem</c> (model to DynamoDB) and <c>FromItem</c>

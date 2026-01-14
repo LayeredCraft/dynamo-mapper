@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis;
 
 namespace DynamoMapper.Generator.Models;
 
-internal sealed record PropertyInfo(string FromAssignment, string ToAssignments);
+internal sealed record PropertyInfo(string? FromAssignment, string? ToAssignments);
 
 internal static class PropertyInfoExtensions
 {
@@ -26,8 +26,13 @@ internal static class PropertyInfoExtensions
                         .Map(strategy => (analysis, strategy))
                 )
                 .Map(tuple =>
-                    PropertyMappingSpecBuilder.Build(tuple.analysis, tuple.strategy, context)
+                    (
+                        tuple.analysis,
+                        PropertyMappingSpecBuilder.Build(tuple.analysis, tuple.strategy, context)
+                    )
                 )
-                .Map(spec => PropertyMappingCodeRenderer.Render(spec, context));
+                .Map(result =>
+                    PropertyMappingCodeRenderer.Render(result.Item2, result.analysis, context)
+                );
     }
 }

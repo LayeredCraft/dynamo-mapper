@@ -27,12 +27,18 @@ internal static class PropertyAnalyzer
         // Lookup field-level overrides from DynamoFieldAttribute
         context.FieldOptions.TryGetValue(propertySymbol.Name, out var fieldOptions);
 
+        // Detect property accessors
+        var hasGetter = propertySymbol.GetMethod is not null;
+        var hasSetter = propertySymbol.SetMethod is not null; // includes init-only setters
+
         return new PropertyAnalysis(
             propertySymbol.Name,
             propertySymbol.Type,
             underlyingType,
             nullability,
-            fieldOptions
+            fieldOptions,
+            hasGetter,
+            hasSetter
         );
     }
 

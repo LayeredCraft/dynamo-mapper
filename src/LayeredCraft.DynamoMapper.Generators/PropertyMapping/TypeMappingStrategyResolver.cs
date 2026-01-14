@@ -46,6 +46,22 @@ internal static class TypeMappingStrategyResolver
         if (!willBeUsedInToItem && !willBeUsedInFromItem)
             return DiagnosticResult<TypeMappingStrategy?>.Success(null);
 
+        // Check if property should be ignored based on DynamoIgnoreOptions
+        if (context.IgnoreOptions.TryGetValue(analysis.PropertyName, out var ignoreOptions))
+        {
+            var shouldIgnoreToItem =
+                ignoreOptions.Ignore is IgnoreMapping.All or IgnoreMapping.FromModel;
+            var shouldIgnoreFromItem =
+                ignoreOptions.Ignore is IgnoreMapping.All or IgnoreMapping.ToModel;
+
+            // If property should be ignored in all relevant directions, skip mapping
+            if (
+                (!willBeUsedInToItem || shouldIgnoreToItem)
+                && (!willBeUsedInFromItem || shouldIgnoreFromItem)
+            )
+                return DiagnosticResult<TypeMappingStrategy?>.Success(null);
+        }
+
         // Validate Kind override first if present - reject Phase 2 types (collections, maps, etc.)
         if (
             analysis.FieldOptions?.Kind

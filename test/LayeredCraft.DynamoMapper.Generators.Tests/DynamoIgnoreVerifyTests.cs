@@ -8,6 +8,7 @@ public class DynamoIgnoreVerifyTests
             new VerifyTestOptions
             {
                 SourceCode = """
+                using System;
                 using System.Collections.Generic;
                 using Amazon.DynamoDBv2.Model;
                 using DynamoMapper.Runtime;
@@ -29,7 +30,7 @@ public class DynamoIgnoreVerifyTests
                 internal class ExampleEntity
                 {
                     internal required string String { get; set; }
-                    internal required string Ignore { get; set; }
+                    internal Type Ignore { get; set; } = typeof(ExampleEntity);
                     internal required string IgnoreAll { get; set; }
                     internal required string IgnoreFrom { get; set; }
                     internal required string IgnoreTo { get; set; }

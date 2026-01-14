@@ -27,6 +27,10 @@ internal static class MapperInfoExtensions
 
             var (mapperClassInfo, modelTypeSymbol) = mapperResult.Value;
 
+            // Set method context flags so property validation knows which methods exist
+            context.HasToItemMethod = mapperClassInfo.ToItemSignature != null;
+            context.HasFromItemMethod = mapperClassInfo.FromItemSignature != null;
+
             var (modelClassInfo, diagnosticInfos) = ModelClassInfo.Create(modelTypeSymbol, context);
 
             return new MapperInfo(

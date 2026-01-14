@@ -31,6 +31,13 @@ internal static class TypeMappingStrategyResolver
         if (analysis.FieldOptions is { ToMethod: not null, FromMethod: not null })
             return DiagnosticResult<TypeMappingStrategy?>.Success(null);
 
+        // Skip validation if property won't be used in any generated methods
+        var willBeUsedInToItem = context.HasToItemMethod && analysis.HasGetter;
+        var willBeUsedInFromItem = context.HasFromItemMethod && analysis.HasSetter;
+
+        if (!willBeUsedInToItem && !willBeUsedInFromItem)
+            return DiagnosticResult<TypeMappingStrategy?>.Success(null);
+
         // Validate Kind override first if present - reject Phase 2 types (collections, maps, etc.)
         if (
             analysis.FieldOptions?.Kind

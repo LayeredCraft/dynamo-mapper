@@ -12,30 +12,30 @@ var exampleAttributes = new Dictionary<string, AttributeValue>
     ["ANOTHER_NAME"] = new() { S = "Optional text" },
 };
 
-var myEntity = ExampleEntityMapper.FromItem(exampleAttributes);
+var myEntity = ExampleDtoMapper.FromItem(exampleAttributes);
 
 [DynamoMapper]
 [DynamoField(
-    nameof(ExampleEntity.String),
+    nameof(ExampleDto.String),
     AttributeName = "customName",
     ToMethod = nameof(CustomValueToAttribute),
     FromMethod = nameof(CustomValueFromAttribute)
 )]
 [DynamoField(
-    nameof(ExampleEntity.NullableString),
+    nameof(ExampleDto.NullableString),
     AttributeName = "ANOTHER_NAME",
     Required = true,
     Kind = DynamoKind.N,
     OmitIfNull = false,
     OmitIfEmptyString = true
 )]
-internal static partial class ExampleEntityMapper
+internal static partial class ExampleDtoMapper
 {
-    internal static partial Dictionary<string, AttributeValue> ToItem(ExampleEntity source);
+    internal static partial Dictionary<string, AttributeValue> ToItem(ExampleDto source);
 
-    internal static partial ExampleEntity FromItem(Dictionary<string, AttributeValue> item);
+    internal static partial ExampleDto FromItem(Dictionary<string, AttributeValue> item);
 
-    internal static AttributeValue CustomValueToAttribute(ExampleEntity source) =>
+    internal static AttributeValue CustomValueToAttribute(ExampleDto source) =>
         // custom logic here before returning an attribute value
         new() { S = source.String };
 
@@ -47,7 +47,7 @@ internal static partial class ExampleEntityMapper
     }
 }
 
-internal class ExampleEntity
+internal class ExampleDto
 {
     internal required string String { get; set; }
     internal string? NullableString { get; set; }

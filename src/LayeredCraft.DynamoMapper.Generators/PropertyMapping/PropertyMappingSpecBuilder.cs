@@ -30,12 +30,25 @@ internal static class PropertyMappingSpecBuilder
 
         var key = GetAttributeKey(analysis, context);
 
+        // Check if property should be ignored in specific directions
+        var ignoreOptions = context.IgnoreOptions.TryGetValue(analysis.PropertyName, out var opts)
+            ? opts
+            : null;
+        var shouldIgnoreToItem =
+            ignoreOptions?.Ignore is IgnoreMapping.All or IgnoreMapping.FromModel;
+        var shouldIgnoreFromItem =
+            ignoreOptions?.Ignore is IgnoreMapping.All or IgnoreMapping.ToModel;
+
         // Only build methods if the mapper has them defined
         var fromItemMethod = context.HasFromItemMethod
-            ? BuildFromItemMethod(analysis, strategy, key, context)
+            ? shouldIgnoreFromItem
+                ? null
+                : BuildFromItemMethod(analysis, strategy, key, context)
             : null;
         var toItemMethod = context.HasToItemMethod
-            ? BuildToItemMethod(analysis, strategy, key, context)
+            ? shouldIgnoreToItem
+                ? null
+                : BuildToItemMethod(analysis, strategy, key, context)
             : null;
 
         return new PropertyMappingSpec(

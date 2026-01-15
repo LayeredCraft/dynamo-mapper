@@ -1,5 +1,7 @@
 using DynamoMapper.Runtime;
 
+// ReSharper disable MemberCanBePrivate.Global
+
 namespace Amazon.DynamoDBv2.Model;
 
 /// <summary>
@@ -11,6 +13,30 @@ public static class StringAttributeValueExtensions
 {
     extension(Dictionary<string, AttributeValue> attributes)
     {
+        /// <summary>Tries to get a nullable string value from the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="value">The nullable string value when found.</param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <param name="kind">The DynamoDB attribute kind to interpret as a string.</param>
+        /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
+        public bool TryGetNullableString(
+            string key,
+            out string? value,
+            Requiredness requiredness = Requiredness.InferFromNullability,
+            DynamoKind kind = DynamoKind.S
+        )
+        {
+            value = null;
+            if (!attributes.TryGetNullableValue(key, requiredness, out var attribute))
+                return false;
+
+            value = attribute!.GetString(kind);
+            return true;
+        }
+
         /// <summary>Gets a nullable string value from the attribute dictionary.</summary>
         /// <param name="key">The attribute key to retrieve.</param>
         /// <param name="requiredness">
@@ -26,7 +52,31 @@ public static class StringAttributeValueExtensions
             string key,
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.S
-        ) => attributes.GetNullableValue(key, requiredness).GetNullableString(kind);
+        ) => attributes.TryGetNullableString(key, out var value, requiredness, kind) ? value : null;
+
+        /// <summary>Tries to get a string value from the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="value">The string value when found.</param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <param name="kind">The DynamoDB attribute kind to interpret as a string.</param>
+        /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
+        public bool TryGetString(
+            string key,
+            out string? value,
+            Requiredness requiredness = Requiredness.InferFromNullability,
+            DynamoKind kind = DynamoKind.S
+        )
+        {
+            value = null;
+            if (!attributes.TryGetValue(key, requiredness, out var attribute))
+                return false;
+
+            value = attribute!.GetString(kind);
+            return true;
+        }
 
         /// <summary>Gets a string value from the attribute dictionary.</summary>
         /// <param name="key">The attribute key to retrieve.</param>
@@ -43,7 +93,8 @@ public static class StringAttributeValueExtensions
             string key,
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.S
-        ) => attributes.GetValue(key, requiredness).GetString(kind);
+        ) =>
+            attributes.TryGetString(key, out var value, requiredness, kind) ? value! : string.Empty;
 
         /// <summary>Sets a string value in the attribute dictionary, honoring omit rules.</summary>
         /// <param name="key">The attribute key to set.</param>

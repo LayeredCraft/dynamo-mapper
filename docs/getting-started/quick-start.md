@@ -36,9 +36,9 @@ namespace MyApp.Data;
 public static partial class OrderMapper
 {
     [DynamoField(nameof(Order.Notes), OmitIfNullOrWhiteSpace = true)]
-    public static partial Dictionary<string, AttributeValue> ToItem(Order source);
+    public static partial Dictionary<string, AttributeValue> FromModel(Order source);
 
-    public static partial Order FromItem(Dictionary<string, AttributeValue> item);
+    public static partial Order ToModel(Dictionary<string, AttributeValue> item);
 }
 ```
 
@@ -55,7 +55,7 @@ var order = new Order
 };
 
 // Convert to DynamoDB item
-var item = OrderMapper.ToItem(order);
+var item = OrderMapper.FromModel(order);
 
 // Save to DynamoDB
 await dynamoDbClient.PutItemAsync(new PutItemRequest
@@ -76,14 +76,14 @@ var response = await dynamoDbClient.GetItemAsync(new GetItemRequest
 });
 
 // Convert back to domain model
-var retrievedOrder = OrderMapper.FromItem(response.Item);
+var retrievedOrder = OrderMapper.ToModel(response.Item);
 ```
 
 ## What Just Happened?
 
 1. **`[DynamoMapper]`** - Marks the mapper and sets CamelCase naming (OrderId → orderId)
 2. **`[DynamoField]`** - Configured Notes field to omit if null/whitespace
-3. **Generated Code** - DynamoMapper generated ToItem and FromItem implementations at compile time
+3. **Generated Code** - DynamoMapper generated FromModel and ToModel implementations at compile time
 
 ## Next Steps
 

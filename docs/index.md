@@ -9,14 +9,15 @@
 DynamoMapper is a .NET incremental source generator that generates high-performance mapping code between **domain models** and **Amazon DynamoDB `AttributeValue` dictionaries**. Using compile-time code generation, it eliminates runtime reflection, reduces allocations, and provides type-safe mapping for single-table DynamoDB patterns.
 
 **Important:** DynamoMapper is a **DynamoDB-specific mapping library**, not a general-purpose object mapper. It supports only two mapping directions:
-- `T → Dictionary<string, AttributeValue>` (ToItem)
-- `Dictionary<string, AttributeValue> → T` (FromItem)
+
+- `T → Dictionary<string, AttributeValue>` (FromModel)
+- `Dictionary<string, AttributeValue> → T` (ToModel)
 
 Unlike general-purpose mappers like Mapperly or AutoMapper, DynamoMapper focuses exclusively on DynamoDB attribute mapping and single-table design patterns.
 
 ### Why DynamoMapper?
 
-Writing manual `ToItem()` and `FromItem()` methods for DynamoDB is repetitive and error-prone:
+Writing manual `FromModel()` and `ToModel()` methods for DynamoDB is repetitive and error-prone:
 
 - Field naming inconsistencies (`UserId` vs `userId`)
 - Attribute type mistakes (`S` vs `N`)
@@ -44,13 +45,13 @@ public class Product
 public static partial class ProductMapper
 {
     [DynamoField(nameof(Product.Description), OmitIfNullOrWhiteSpace = true)]
-    public static partial Dictionary<string, AttributeValue> ToItem(Product source);
-    public static partial Product FromItem(Dictionary<string, AttributeValue> item);
+    public static partial Dictionary<string, AttributeValue> FromModel(Product source);
+    public static partial Product ToModel(Dictionary<string, AttributeValue> item);
 }
 
 // Usage - simple and type-safe
-var item = ProductMapper.ToItem(product);
-var product = ProductMapper.FromItem(item);
+var item = ProductMapper.FromModel(product);
+var product = ProductMapper.ToModel(item);
 ```
 
 See the [Quick Start Guide](getting-started/quick-start.md) for a complete tutorial.

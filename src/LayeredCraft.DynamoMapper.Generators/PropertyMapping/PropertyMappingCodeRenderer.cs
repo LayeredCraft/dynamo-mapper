@@ -21,61 +21,65 @@ internal static class PropertyMappingCodeRenderer
         GeneratorContext context
     )
     {
-        // FromItem requires both: setter on property AND FromItem method exists
-        var fromAssignment =
-            context.HasFromItemMethod && analysis.HasSetter && spec.FromItemMethod is not null
-                ? RenderFromAssignment(spec, context)
+        // ToModel (DynamoDB → Model) requires both: setter on property AND ToModel method exists
+        var toModelAssignment =
+            context.HasToModelMethod && analysis.HasSetter && spec.ToModelMethod is not null
+                ? RenderToModelAssignment(spec, context)
                 : null;
 
-        // ToItem requires both: getter on property AND ToItem method exists
-        var toAssignments =
-            context.HasToItemMethod && analysis.HasGetter && spec.ToItemMethod is not null
-                ? RenderToAssignment(spec)
+        // FromModel (Model → DynamoDB) requires both: getter on property AND FromModel method
+        // exists
+        var fromModelAssignments =
+            context.HasFromModelMethod && analysis.HasGetter && spec.FromModelMethod is not null
+                ? RenderFromModelAssignment(spec)
                 : null;
 
-        return new PropertyInfo(fromAssignment, toAssignments);
+        return new PropertyInfo(toModelAssignment, fromModelAssignments);
     }
 
     /// <summary>
-    ///     Renders the FromAssignment string for deserialization. Format: PropertyName =
+    ///     Renders the ToModel assignment string for deserialization (DynamoDB → Model). Format: PropertyName =
     ///     paramName.MethodName&lt;Generic&gt;(args), OR PropertyName = CustomMethodName(args), for
     ///     custom methods
     /// </summary>
-    private static string RenderFromAssignment(PropertyMappingSpec spec, GeneratorContext context)
+    private static string RenderToModelAssignment(
+        PropertyMappingSpec spec,
+        GeneratorContext context
+    )
     {
-        Debug.Assert(spec.FromItemMethod is not null, "FromItemMethod should not be null");
+        Debug.Assert(spec.ToModelMethod is not null, "ToModelMethod should not be null");
         Debug.Assert(
-            spec.FromItemMethod!.IsCustomMethod || spec.TypeStrategy is not null,
+            spec.ToModelMethod!.IsCustomMethod || spec.TypeStrategy is not null,
             "TypeStrategy should not be null for standard methods"
         );
 
-        var args = string.Join(", ", spec.FromItemMethod.Arguments.Select(a => a.Value));
+        var args = string.Join(", ", spec.ToModelMethod.Arguments.Select(a => a.Value));
 
-        var methodCall = spec.FromItemMethod.IsCustomMethod
-            ? $"{spec.FromItemMethod.MethodName}({args})" // Custom: MethodName(item)
-            : $"{context.MapperOptions.FromMethodParameterName}.{spec.FromItemMethod.MethodName}{spec.TypeStrategy!.GenericArgument}({args})"; // Standard: item.GetXxx<T>(args)
+        var methodCall = spec.ToModelMethod.IsCustomMethod
+            ? $"{spec.ToModelMethod.MethodName}({args})" // Custom: MethodName(item)
+            : $"{context.MapperOptions.ToModelParameterName}.{spec.ToModelMethod.MethodName}{spec.TypeStrategy!.GenericArgument}({args})"; // Standard: item.GetXxx<T>(args)
 
         return $"{spec.PropertyName} = {methodCall},";
     }
 
     /// <summary>
-    ///     Renders the ToAssignment string for serialization. Format: .MethodName&lt;Generic&gt;(args)
-    ///     Custom ToMethods are rendered as .Set("key", CustomMethod(source))
+    ///     Renders the FromModel assignment string for serialization (Model → DynamoDB). Format: .MethodName&lt;Generic&gt;(args)
+    ///     Custom FromModel methods are rendered as .Set("key", CustomMethod(source))
     /// </summary>
-    private static string RenderToAssignment(PropertyMappingSpec spec)
+    private static string RenderFromModelAssignment(PropertyMappingSpec spec)
     {
-        Debug.Assert(spec.ToItemMethod is not null, "ToItemMethod should not be null");
+        Debug.Assert(spec.FromModelMethod is not null, "FromModelMethod should not be null");
         Debug.Assert(
-            spec.ToItemMethod!.IsCustomMethod || spec.TypeStrategy is not null,
+            spec.FromModelMethod!.IsCustomMethod || spec.TypeStrategy is not null,
             "TypeStrategy should not be null for standard methods"
         );
 
-        var args = string.Join(", ", spec.ToItemMethod.Arguments.Select(a => a.Value));
+        var args = string.Join(", ", spec.FromModelMethod.Arguments.Select(a => a.Value));
 
-        var methodCall = spec.ToItemMethod.IsCustomMethod
-            ? $".{spec.ToItemMethod.MethodName}({args})" // Custom: .Set("key",
+        var methodCall = spec.FromModelMethod.IsCustomMethod
+            ? $".{spec.FromModelMethod.MethodName}({args})" // Custom: .Set("key",
             // CustomMethod(source))
-            : $".{spec.ToItemMethod.MethodName}{spec.TypeStrategy!.GenericArgument}({args})"; // Standard: .SetXxx<T>(args)
+            : $".{spec.FromModelMethod.MethodName}{spec.TypeStrategy!.GenericArgument}({args})"; // Standard: .SetXxx<T>(args)
 
         return methodCall;
     }

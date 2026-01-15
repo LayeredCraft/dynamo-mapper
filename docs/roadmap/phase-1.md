@@ -16,7 +16,8 @@ description: Attribute-based mapping for DynamoMapper - comprehensive Phase 1 sp
 ## 1. Background and Goals
 
 ### 1.1 Problem Statement
-Manually writing `ToItem()` and `FromItem()` methods for DynamoDB is repetitive and error-prone:
+
+Manually writing `FromModel()` and `ToModel()` methods for DynamoDB is repetitive and error-prone:
 - Field naming drift (`OwnerId` vs `ownerId`)
 - `S` vs `N` (string vs number) mistakes
 - Inconsistent null handling (omit vs store empty)
@@ -90,9 +91,9 @@ namespace MyApp.Persistence;
 [DynamoMapper(Convention = DynamoNamingConvention.CamelCase)]
 public static partial class JediCharacterMapper
 {
-    public static partial Dictionary<string, AttributeValue> ToItem(JediCharacter source);
+    public static partial Dictionary<string, AttributeValue> FromModel(JediCharacter source);
 
-    public static partial JediCharacter FromItem(Dictionary<string, AttributeValue> item);
+    public static partial JediCharacter ToModel(Dictionary<string, AttributeValue> item);
 }
 ```
 
@@ -116,9 +117,9 @@ public static partial class JediCharacterMapper
     [DynamoIgnore(nameof(JediCharacter.CriticalHitChance))]
     [DynamoIgnore(nameof(JediCharacter.HitRoll))]
     [DynamoIgnore(nameof(JediCharacter.DamRoll))]
-    public static partial Dictionary<string, AttributeValue> ToItem(JediCharacter source);
+    public static partial Dictionary<string, AttributeValue> FromModel(JediCharacter source);
 
-    public static partial JediCharacter FromItem(Dictionary<string, AttributeValue> item);
+    public static partial JediCharacter ToModel(Dictionary<string, AttributeValue> item);
 }
 ```
 
@@ -237,8 +238,9 @@ Phase 1 must support omission policies:
   - `OmitIfDefault` *(optional; good for ints if desired)*
 
 If a property is omitted and is **Required**, generated code must:
-- **not omit** on ToItem
-- and **throw** on FromItem if missing
+
+- **not omit** on FromModel
+- and **throw** on ToModel if missing
 
 ---
 
@@ -329,7 +331,7 @@ public class OrderStatusConverter : IDynamoConverter<OrderStatus>
 Per field via attribute:
 ```csharp
 [DynamoField(nameof(Order.Status), Converter = typeof(OrderStatusConverter))]
-public static partial Dictionary<string, AttributeValue> ToItem(Order source);
+public static partial Dictionary<string, AttributeValue> FromModel(Order source);
 ```
 
 Constraints:
@@ -367,9 +369,9 @@ static TProperty FromMethodName(AttributeValue value);
 public static partial class OrderMapper
 {
     [DynamoField(nameof(Order.Status), ToMethod = nameof(ToOrderStatus), FromMethod = nameof(FromOrderStatus))]
-    public static partial Dictionary<string, AttributeValue> ToItem(Order source);
+    public static partial Dictionary<string, AttributeValue> FromModel(Order source);
 
-    public static partial Order FromItem(Dictionary<string, AttributeValue> item);
+    public static partial Order ToModel(Dictionary<string, AttributeValue> item);
 
     // Static conversion methods
     static AttributeValue ToOrderStatus(OrderStatus status)
@@ -459,16 +461,18 @@ Generated code must:
 - Avoid reflection
 - Avoid `ToString()` without culture for numbers
 
-### 10.2 `ToItem` Generation Requirements
-Generated `ToItem` must:
+### 10.2 `FromModel` Generation Requirements
+
+Generated `FromModel` must:
 - Instantiate a `Dictionary<string, AttributeValue>` with a sensible initial capacity if determinable
 - Set mapped fields using configured naming
 - Omit fields based on omission policy (unless required)
 - Call user hooks (if defined) **at deterministic points** (see §11)
 - Return the dictionary
 
-### 10.3 `FromItem` Generation Requirements
-Generated `FromItem` must:
+### 10.3 `ToModel` Generation Requirements
+
+Generated `ToModel` must:
 - Validate required fields (throw `DynamoMappingException` with detailed message)
 - Read each field using `AttributeValue` kinds or converter as configured
 - Create target object via object initializer:
@@ -496,11 +500,12 @@ Customization hooks are **first-class extension points** that allow developers t
 
 Phase 1 supports four lifecycle hooks that provide access to mapping operations at key points:
 
-#### 11.1.1 BeforeToItem Hook
-Invoked **before** property mapping during `ToItem`.
+#### 11.1.1 BeforeFromModel Hook
+
+Invoked **before** property mapping during `FromModel`.
 
 ```csharp
-static partial void BeforeToItem(T source, Dictionary<string, AttributeValue> item);
+static partial void BeforeFromModel(T source, Dictionary<string, AttributeValue> item);
 ```
 
 **Parameters:**
@@ -512,11 +517,12 @@ static partial void BeforeToItem(T source, Dictionary<string, AttributeValue> it
 - Add metadata before property mapping
 - Pre-compute derived values
 
-#### 11.1.2 AfterToItem Hook
-Invoked **after** property mapping during `ToItem`.
+#### 11.1.2 AfterFromModel Hook
+
+Invoked **after** property mapping during `FromModel`.
 
 ```csharp
-static partial void AfterToItem(T source, Dictionary<string, AttributeValue> item);
+static partial void AfterFromModel(T source, Dictionary<string, AttributeValue> item);
 ```
 
 **Parameters:**
@@ -530,11 +536,12 @@ static partial void AfterToItem(T source, Dictionary<string, AttributeValue> ite
 - Merge additional attribute dictionaries
 - Override or remove generated attributes
 
-#### 11.1.3 BeforeFromItem Hook
-Invoked **before** property mapping during `FromItem`.
+#### 11.1.3 BeforeToModel Hook
+
+Invoked **before** property mapping during `ToModel`.
 
 ```csharp
-static partial void BeforeFromItem(Dictionary<string, AttributeValue> item);
+static partial void BeforeToModel(Dictionary<string, AttributeValue> item);
 ```
 
 **Parameters:**
@@ -546,11 +553,12 @@ static partial void BeforeFromItem(Dictionary<string, AttributeValue> item);
 - Extract and store unmapped attributes
 - Log or audit incoming data
 
-#### 11.1.4 AfterFromItem Hook
-Invoked **after** property mapping and object construction during `FromItem`.
+#### 11.1.4 AfterToModel Hook
+
+Invoked **after** property mapping and object construction during `ToModel`.
 
 ```csharp
-static partial void AfterFromItem(Dictionary<string, AttributeValue> item, ref T entity);
+static partial void AfterToModel(Dictionary<string, AttributeValue> item, ref T entity);
 ```
 
 **Parameters:**
@@ -573,11 +581,11 @@ Hooks must be declared in the **same partial mapper class** as the mapping metho
 [DynamoMapper(Convention = DynamoNamingConvention.CamelCase)]
 public static partial class ProductMapper
 {
-    public static partial Dictionary<string, AttributeValue> ToItem(Product source);
-    public static partial Product FromItem(Dictionary<string, AttributeValue> item);
+    public static partial Dictionary<string, AttributeValue> FromModel(Product source);
+    public static partial Product ToModel(Dictionary<string, AttributeValue> item);
 
     // Hooks defined in the same partial class
-    static partial void AfterToItem(Product source, Dictionary<string, AttributeValue> item)
+    static partial void AfterFromModel(Product source, Dictionary<string, AttributeValue> item)
     {
         item["pk"] = new AttributeValue { S = $"PRODUCT#{source.ProductId}" };
         item["sk"] = new AttributeValue { S = $"METADATA" };
@@ -594,21 +602,21 @@ Hooks may be placed in **separate partial class files** for better organization:
 [DynamoMapper(Convention = DynamoNamingConvention.CamelCase)]
 public static partial class ProductMapper
 {
-    public static partial Dictionary<string, AttributeValue> ToItem(Product source);
-    public static partial Product FromItem(Dictionary<string, AttributeValue> item);
+    public static partial Dictionary<string, AttributeValue> FromModel(Product source);
+    public static partial Product ToModel(Dictionary<string, AttributeValue> item);
 }
 
 // ProductMapper.Hooks.cs
 public static partial class ProductMapper
 {
-    static partial void AfterToItem(Product source, Dictionary<string, AttributeValue> item)
+    static partial void AfterFromModel(Product source, Dictionary<string, AttributeValue> item)
     {
         item["pk"] = new AttributeValue { S = $"PRODUCT#{source.ProductId}" };
         item["sk"] = new AttributeValue { S = $"METADATA" };
         item["recordType"] = new AttributeValue { S = "Product" };
     }
 
-    static partial void AfterFromItem(Dictionary<string, AttributeValue> item, ref Product entity)
+    static partial void AfterToModel(Dictionary<string, AttributeValue> item, ref Product entity)
     {
         // Populate additional state
     }
@@ -621,18 +629,18 @@ public static partial class ProductMapper
 The generated code **always invokes hooks unconditionally**, regardless of whether they are implemented:
 
 ```csharp
-// Generated ToItem implementation
-public static partial Dictionary<string, AttributeValue> ToItem(Product source)
+// Generated FromModel implementation
+public static partial Dictionary<string, AttributeValue> FromModel(Product source)
 {
     var item = new Dictionary<string, AttributeValue>(capacity: 5);
 
-    BeforeToItem(source, item); // Always invoked
+    BeforeFromModel(source, item); // Always invoked
 
     // Property mapping...
     item["productId"] = new AttributeValue { S = source.ProductId.ToString() };
     item["name"] = new AttributeValue { S = source.Name };
 
-    AfterToItem(source, item); // Always invoked
+    AfterFromModel(source, item); // Always invoked
 
     return item;
 }
@@ -650,7 +658,7 @@ Unimplemented hooks **compile away** due to `partial void` semantics:
 #### 11.4.1 Single-Table PK/SK Composition
 
 ```csharp
-static partial void AfterToItem(Order order, Dictionary<string, AttributeValue> item)
+static partial void AfterFromModel(Order order, Dictionary<string, AttributeValue> item)
 {
     item["pk"] = new AttributeValue { S = $"CUSTOMER#{order.CustomerId}" };
     item["sk"] = new AttributeValue { S = $"ORDER#{order.OrderId}" };
@@ -661,12 +669,12 @@ static partial void AfterToItem(Order order, Dictionary<string, AttributeValue> 
 #### 11.4.2 Record Type Discrimination
 
 ```csharp
-static partial void AfterToItem(Customer customer, Dictionary<string, AttributeValue> item)
+static partial void AfterFromModel(Customer customer, Dictionary<string, AttributeValue> item)
 {
     item["entityType"] = new AttributeValue { S = nameof(Customer) };
 }
 
-static partial void AfterFromItem(Dictionary<string, AttributeValue> item, ref Customer entity)
+static partial void AfterToModel(Dictionary<string, AttributeValue> item, ref Customer entity)
 {
     // Validate entity type on read
     if (item.TryGetValue("entityType", out var typeAttr) && typeAttr.S != nameof(Customer))
@@ -679,7 +687,7 @@ static partial void AfterFromItem(Dictionary<string, AttributeValue> item, ref C
 #### 11.4.3 TTL Attributes
 
 ```csharp
-static partial void AfterToItem(Session session, Dictionary<string, AttributeValue> item)
+static partial void AfterFromModel(Session session, Dictionary<string, AttributeValue> item)
 {
     // Set TTL to 24 hours from now
     var ttl = DateTimeOffset.UtcNow.AddHours(24).ToUnixTimeSeconds();
@@ -697,7 +705,7 @@ public class Product
     public Dictionary<string, AttributeValue>? AdditionalAttributes { get; set; }
 }
 
-static partial void AfterToItem(Product source, Dictionary<string, AttributeValue> item)
+static partial void AfterFromModel(Product source, Dictionary<string, AttributeValue> item)
 {
     // Merge additional attributes
     if (source.AdditionalAttributes != null)
@@ -709,7 +717,7 @@ static partial void AfterToItem(Product source, Dictionary<string, AttributeValu
     }
 }
 
-static partial void AfterFromItem(Dictionary<string, AttributeValue> item, ref Product entity)
+static partial void AfterToModel(Dictionary<string, AttributeValue> item, ref Product entity)
 {
     // Capture unmapped attributes
     var mappedKeys = new HashSet<string> { "pk", "sk", "productId", "name" };
@@ -722,7 +730,7 @@ static partial void AfterFromItem(Dictionary<string, AttributeValue> item, ref P
 #### 11.4.5 Post-Hydration Normalization
 
 ```csharp
-static partial void AfterFromItem(Dictionary<string, AttributeValue> item, ref User entity)
+static partial void AfterToModel(Dictionary<string, AttributeValue> item, ref User entity)
 {
     // Normalize email to lowercase
     entity.Email = entity.Email?.ToLowerInvariant();
@@ -736,15 +744,17 @@ static partial void AfterFromItem(Dictionary<string, AttributeValue> item, ref U
 
 Hooks execute in a deterministic order:
 
-**During ToItem:**
-1. `BeforeToItem(source, item)` - item is empty
-2. Generated property mapping
-3. `AfterToItem(source, item)` - item is fully populated
+**During FromModel:**
 
-**During FromItem:**
-1. `BeforeFromItem(item)` - item is unmodified
+1. `BeforeFromModel(source, item)` - item is empty
+2. Generated property mapping
+3. `AfterFromModel(source, item)` - item is fully populated
+
+**During ToModel:**
+
+1. `BeforeToModel(item)` - item is unmodified
 2. Generated property mapping and object construction
-3. `AfterFromItem(item, ref entity)` - entity is constructed and populated
+3. `AfterToModel(item, ref entity)` - entity is constructed and populated
 
 ### 11.6 Constraints and Best Practices
 
@@ -814,10 +824,11 @@ Avoid whole-compilation scans beyond necessary discovery.
 
 ### 13.3 Supported Signatures (Phase 1)
 Must recognize:
-- `public static partial Dictionary<string, AttributeValue> ToItem(T source);`
-- `public static partial T FromItem(Dictionary<string, AttributeValue> item);`
 
-> Optional: allow `IReadOnlyDictionary<string, AttributeValue>` as input for FromItem.
+- `public static partial Dictionary<string, AttributeValue> FromModel(T source);`
+- `public static partial T ToModel(Dictionary<string, AttributeValue> item);`
+
+> Optional: allow `IReadOnlyDictionary<string, AttributeValue>` as input for ToModel.
 
 ### 13.4 Thread Safety / Determinism
 - Generator must be deterministic: same input → same output
@@ -912,7 +923,7 @@ GitHub Pages is the primary long-form documentation site for DynamoMapper and mu
 - Naming conventions and defaults
 - Required vs optional behavior
 - Converter authoring guide
-- Customization hooks (`BeforeToItem`, `AfterFromItem`, etc.)
+- Customization hooks (`BeforeFromModel`, `AfterToModel`, etc.)
 - Diagnostics reference (error codes and meanings)
 - Single-table DynamoDB patterns and best practices
 - Migration guide from manual mapping or DynamoDBContext
@@ -922,7 +933,8 @@ GitHub Pages should be versioned logically (by major/minor release) but does not
 ### 16.3 Examples
 
 Include at least one “single-table style” example:
-- Add pk/sk via `BeforeToItem`
+
+- Add pk/sk via `BeforeFromModel`
 - Add `recordType`
 - Omit optional fields
 
@@ -970,7 +982,7 @@ Phase 2 will introduce an optional fluent DSL for configuration while retaining 
 ```csharp
 public static partial class JediCharacterMapper
 {
-    static partial void BeforeToItem(JediCharacter source, Dictionary<string, AttributeValue> item)
+    static partial void BeforeFromModel(JediCharacter source, Dictionary<string, AttributeValue> item)
     {
         // Single-table keys + type discriminator 🧠
         item["pk"] = new AttributeValue { S = source.Pk };

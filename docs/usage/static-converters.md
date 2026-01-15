@@ -85,9 +85,9 @@ public class Order
 public static partial class OrderMapper
 {
     [DynamoField(nameof(Order.Status), ToMethod = nameof(ToOrderStatus), FromMethod = nameof(FromOrderStatus))]
-    public static partial Dictionary<string, AttributeValue> ToItem(Order source);
+    public static partial Dictionary<string, AttributeValue> FromModel(Order source);
 
-    public static partial Order FromItem(Dictionary<string, AttributeValue> item);
+    public static partial Order ToModel(Dictionary<string, AttributeValue> item);
 
     // Static conversion methods
     static AttributeValue ToOrderStatus(OrderStatus status)
@@ -112,7 +112,7 @@ Configure static methods using the `[DynamoField]` attribute:
 [DynamoField(nameof(Order.Status),
     ToMethod = nameof(ToOrderStatus),
     FromMethod = nameof(FromOrderStatus))]
-public static partial Dictionary<string, AttributeValue> ToItem(Order source);
+public static partial Dictionary<string, AttributeValue> FromModel(Order source);
 ```
 
 **Properties:**
@@ -132,8 +132,8 @@ In Phase 2, static methods can be configured using the fluent DSL:
 [DynamoMapper]
 public static partial class OrderMapper
 {
-    public static partial Dictionary<string, AttributeValue> ToItem(Order source);
-    public static partial Order FromItem(Dictionary<string, AttributeValue> item);
+    public static partial Dictionary<string, AttributeValue> FromModel(Order source);
+    public static partial Order ToModel(Dictionary<string, AttributeValue> item);
 
     static partial void Configure(DynamoMapBuilder<Order> map)
     {
@@ -163,9 +163,9 @@ public static partial class ProductMapper
 {
     [DynamoField(nameof(Product.Category), ToMethod = nameof(ToCategory), FromMethod = nameof(FromCategory))]
     [DynamoField(nameof(Product.Status), ToMethod = nameof(ToProductStatus), FromMethod = nameof(FromProductStatus))]
-    public static partial Dictionary<string, AttributeValue> ToItem(Product source);
+    public static partial Dictionary<string, AttributeValue> FromModel(Product source);
 
-    public static partial Product FromItem(Dictionary<string, AttributeValue> item);
+    public static partial Product ToModel(Dictionary<string, AttributeValue> item);
 
     // Category conversion
     static AttributeValue ToCategory(ProductCategory category)
@@ -206,9 +206,9 @@ public class User
 public static partial class UserMapper
 {
     [DynamoField(nameof(User.Role), ToMethod = nameof(ToUserRole), FromMethod = nameof(FromUserRole))]
-    public static partial Dictionary<string, AttributeValue> ToItem(User source);
+    public static partial Dictionary<string, AttributeValue> FromModel(User source);
 
-    public static partial User FromItem(Dictionary<string, AttributeValue> item);
+    public static partial User ToModel(Dictionary<string, AttributeValue> item);
 
     // Methods work with non-nullable UserRole
     static AttributeValue ToUserRole(UserRole role)
@@ -254,9 +254,9 @@ public class Money
 public static partial class ProductMapper
 {
     [DynamoField(nameof(Product.Price), ToMethod = nameof(ToMoney), FromMethod = nameof(FromMoney))]
-    public static partial Dictionary<string, AttributeValue> ToItem(Product source);
+    public static partial Dictionary<string, AttributeValue> FromModel(Product source);
 
-    public static partial Product FromItem(Dictionary<string, AttributeValue> item);
+    public static partial Product ToModel(Dictionary<string, AttributeValue> item);
 
     static AttributeValue ToMoney(Money money)
     {

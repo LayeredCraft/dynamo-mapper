@@ -8,8 +8,8 @@ internal sealed record MapperClassInfo(
     string Name,
     string Namespace,
     string ClassSignature,
-    string? ToItemSignature,
-    string? FromItemSignature,
+    string? FromModelSignature,
+    string? ToModelSignature,
     LocationInfo? Location
 );
 
@@ -29,10 +29,11 @@ internal static class MapperClassInfoExtensions
 
             /*
              * to determine what mappers to generate, we need to look for methods using these rules:
-             * - Methods starting with `To` (e.g., ToItem, ToModel) -> map from POCO to
-             * AttributeValue
-             * - Methods starting with `From` (e.g., FromItem, FromModel) -> map from AttributeValue
-             * to POCO
+             * - Methods starting with `From` (e.g., FromModel, FromProduct) -> map from POCO/Model
+             * to
+             * AttributeValue (Model → DynamoDB)
+             * - Methods starting with `To` (e.g., ToModel, ToProduct) -> map from AttributeValue
+             * to POCO/Model (DynamoDB → Model)
              *
              * Rules:
              * - at least one is needed, but both are not required
@@ -41,27 +42,27 @@ internal static class MapperClassInfoExtensions
 
             var methods = classSymbol.GetMembers().OfType<IMethodSymbol>().ToArray();
 
-            var toItemMethod = methods.FirstOrDefault(m => IsToMethod(m, context));
-            var fromItemMethod = methods.FirstOrDefault(m => IsFromMethod(m, context));
+            var fromModelMethod = methods.FirstOrDefault(m => IsFromMethod(m, context));
+            var toModelMethod = methods.FirstOrDefault(m => IsToMethod(m, context));
 
             // If there's an error in POCO type matching, propagate it
-            return EnsurePocoTypesMatch(toItemMethod, fromItemMethod, classSymbol)
+            return EnsurePocoTypesMatch(fromModelMethod, toModelMethod, classSymbol)
                 .Bind(modelType =>
                 {
                     var classSignature = GetClassSignature(classSymbol);
-                    var toItemSignature = toItemMethod?.Map(GetMethodSignature);
-                    var fromItemSignature = fromItemMethod?.Map(GetMethodSignature);
+                    var fromModelSignature = fromModelMethod?.Map(GetMethodSignature);
+                    var toModelSignature = toModelMethod?.Map(GetMethodSignature);
                     var namespaceStatement = classSymbol.ContainingNamespace
                         is { IsGlobalNamespace: false } ns
                         ? $"namespace {ns.ToDisplayString()};"
                         : string.Empty;
 
-                    toItemMethod
+                    fromModelMethod
                         ?.Parameters.FirstOrDefault()
-                        ?.Name.Tap(name => context.MapperOptions.ToMethodParameterName = name);
-                    fromItemMethod
+                        ?.Name.Tap(name => context.MapperOptions.FromModelParameterName = name);
+                    toModelMethod
                         ?.Parameters.FirstOrDefault()
-                        ?.Name.Tap(name => context.MapperOptions.FromMethodParameterName = name);
+                        ?.Name.Tap(name => context.MapperOptions.ToModelParameterName = name);
 
                     return DiagnosticResult<(MapperClassInfo, ITypeSymbol)>.Success(
                         (
@@ -69,8 +70,8 @@ internal static class MapperClassInfoExtensions
                                 classSymbol.Name,
                                 namespaceStatement,
                                 classSignature,
-                                toItemSignature,
-                                fromItemSignature,
+                                fromModelSignature,
+                                toModelSignature,
                                 context.TargetNode.CreateLocationInfo()
                             ),
                             modelType
@@ -81,63 +82,65 @@ internal static class MapperClassInfoExtensions
     }
 
     private static DiagnosticResult<ITypeSymbol> EnsurePocoTypesMatch(
-        IMethodSymbol? toItemMethod,
-        IMethodSymbol? fromItemMethod,
+        IMethodSymbol? fromModelMethod,
+        IMethodSymbol? toModelMethod,
         INamedTypeSymbol mapperClassSymbol
     )
     {
-        if (toItemMethod is null && fromItemMethod is null)
+        if (fromModelMethod is null && toModelMethod is null)
             return DiagnosticResult<ITypeSymbol>.Failure(
                 DiagnosticDescriptors.NoMapperMethodsFound,
                 mapperClassSymbol.CreateLocationInfo(),
                 mapperClassSymbol.Name
             );
 
-        var toItemPocoType = toItemMethod?.Parameters[0].Type;
-        var fromItemPocoType = fromItemMethod?.ReturnType;
+        var fromModelPocoType = fromModelMethod?.Parameters[0].Type;
+        var toModelPocoType = toModelMethod?.ReturnType;
 
         if (
-            toItemPocoType is not null
-            && fromItemPocoType is not null
-            && !SymbolEqualityComparer.Default.Equals(toItemPocoType, fromItemPocoType)
+            fromModelPocoType is not null
+            && toModelPocoType is not null
+            && !SymbolEqualityComparer.Default.Equals(fromModelPocoType, toModelPocoType)
         )
             return DiagnosticResult<ITypeSymbol>.Failure(
                 DiagnosticDescriptors.MismatchedPocoTypes,
-                toItemMethod?.CreateLocationInfo(),
-                toItemMethod?.Name,
-                fromItemMethod?.Name,
-                toItemPocoType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-                fromItemPocoType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
+                fromModelMethod?.CreateLocationInfo(),
+                fromModelMethod?.Name,
+                toModelMethod?.Name,
+                fromModelPocoType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                toModelPocoType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
             );
 
-        return DiagnosticResult<ITypeSymbol>.Success(toItemPocoType ?? fromItemPocoType!);
+        return DiagnosticResult<ITypeSymbol>.Success(fromModelPocoType ?? toModelPocoType!);
     }
 
     /// <summary>
-    ///     To method must be:
+    ///     To method (ToModel, ToProduct, etc.) maps DynamoDB to Model (DynamoDB → Model).
+    ///     Must be:
     ///     <list type="bullet">
     ///         <item>partial</item> <item>not implemented</item>
-    ///         <item>one parameter</item> <item>return an Attribute value dictionary</item>
+    ///         <item>one parameter</item> <item>parameter is an Attribute value dictionary</item>
     ///     </list>
     /// </summary>
     private static bool IsToMethod(IMethodSymbol method, GeneratorContext context) =>
         method.Name.StartsWith(ToMethodPrefix)
         && method
             is { IsPartialDefinition: true, PartialImplementationPart: null, Parameters.Length: 1 }
-        && IsAttributeValueDictionary(method.ReturnType, context);
+        && IsAttributeValueDictionary(method.Parameters[0].Type, context);
 
     /// <summary>
-    ///     From method must be:
+    ///     From method (FromModel, FromProduct, etc.) maps Model to DynamoDB (Model → DynamoDB).
+    ///     Must be:
     ///     <list type="bullet">
     ///         <item>partial</item> <item>not implemented</item>
-    ///         <item>one parameter</item> <item>parameter is an Attribute value dictionary</item>
+    ///         <item>one parameter</item> <item>return an Attribute value dictionary</item>
     ///     </list>
     /// </summary>
     private static bool IsFromMethod(IMethodSymbol method, GeneratorContext context) =>
         method.Name.StartsWith(FromMethodPrefix)
         && method
             is { IsPartialDefinition: true, PartialImplementationPart: null, Parameters.Length: 1 }
-        && IsAttributeValueDictionary(method.Parameters[0].Type, context);
+        && IsAttributeValueDictionary(method.ReturnType, context);
 
     private static bool IsAttributeValueDictionary(ITypeSymbol type, GeneratorContext context) =>
         type is INamedTypeSymbol { IsGenericType: true } namedType

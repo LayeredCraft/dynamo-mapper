@@ -12,7 +12,7 @@ var exampleAttributes = new Dictionary<string, AttributeValue>
     ["ANOTHER_NAME"] = new() { S = "Optional text" },
 };
 
-var myEntity = ExampleDtoMapper.FromItem(exampleAttributes);
+var myEntity = ExampleDtoMapper.ToModel(exampleAttributes);
 
 [DynamoMapper]
 [DynamoField(
@@ -31,9 +31,9 @@ var myEntity = ExampleDtoMapper.FromItem(exampleAttributes);
 )]
 internal static partial class ExampleDtoMapper
 {
-    internal static partial Dictionary<string, AttributeValue> ToItem(ExampleDto source);
+    internal static partial Dictionary<string, AttributeValue> FromModel(ExampleDto source);
 
-    internal static partial ExampleDto FromItem(Dictionary<string, AttributeValue> item);
+    internal static partial ExampleDto ToModel(Dictionary<string, AttributeValue> item);
 
     internal static AttributeValue CustomValueToAttribute(ExampleDto source) =>
         // custom logic here before returning an attribute value

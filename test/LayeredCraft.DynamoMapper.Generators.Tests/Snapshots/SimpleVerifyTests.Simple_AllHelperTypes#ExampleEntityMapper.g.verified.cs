@@ -19,7 +19,7 @@ namespace MyNamespace;
 public static partial class ExampleEntityMapper
 {
     [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
-    public static partial global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> ToItem(global::MyNamespace.ExampleEntity source) =>
+    public static partial global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> FromModel(global::MyNamespace.ExampleEntity source) =>
         new Dictionary<string, AttributeValue>(22)
             .SetBool("bool", source.Bool, false, true)
             .SetBool("nullableBool", source.NullableBool, false, true)
@@ -45,7 +45,7 @@ public static partial class ExampleEntityMapper
             .SetEnum<global::MyNamespace.OrderStatus>("nullableEnum", source.NullableEnum, "G", false, true);
 
     [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
-    public static partial global::MyNamespace.ExampleEntity FromItem(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> x) =>
+    public static partial global::MyNamespace.ExampleEntity ToModel(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> x) =>
         new global::MyNamespace.ExampleEntity
         {
             Bool = x.GetBool("bool", Requiredness.InferFromNullability),

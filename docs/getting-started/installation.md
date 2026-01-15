@@ -41,8 +41,8 @@ using Amazon.DynamoDBv2.Model;
 [DynamoMapper]
 public static partial class TestMapper
 {
-    public static partial Dictionary<string, AttributeValue> ToItem(TestEntity source);
-    public static partial TestEntity FromItem(Dictionary<string, AttributeValue> item);
+    public static partial Dictionary<string, AttributeValue> FromModel(TestEntity source);
+    public static partial TestEntity ToModel(Dictionary<string, AttributeValue> item);
 }
 
 public class TestEntity

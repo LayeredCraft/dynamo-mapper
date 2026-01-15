@@ -34,28 +34,28 @@ internal static class PropertyMappingSpecBuilder
         var ignoreOptions = context.IgnoreOptions.TryGetValue(analysis.PropertyName, out var opts)
             ? opts
             : null;
-        var shouldIgnoreToItem =
+        var shouldIgnoreFromModel =
             ignoreOptions?.Ignore is IgnoreMapping.All or IgnoreMapping.FromModel;
-        var shouldIgnoreFromItem =
+        var shouldIgnoreToModel =
             ignoreOptions?.Ignore is IgnoreMapping.All or IgnoreMapping.ToModel;
 
         // Only build methods if the mapper has them defined
-        var fromItemMethod = context.HasFromItemMethod
-            ? shouldIgnoreFromItem
+        var toModelMethod = context.HasToModelMethod
+            ? shouldIgnoreToModel
                 ? null
-                : BuildFromItemMethod(analysis, strategy, key, context)
+                : BuildToModelMethod(analysis, strategy, key, context)
             : null;
-        var toItemMethod = context.HasToItemMethod
-            ? shouldIgnoreToItem
+        var fromModelMethod = context.HasFromModelMethod
+            ? shouldIgnoreFromModel
                 ? null
-                : BuildToItemMethod(analysis, strategy, key, context)
+                : BuildFromModelMethod(analysis, strategy, key, context)
             : null;
 
         return new PropertyMappingSpec(
             analysis.PropertyName,
             strategy,
-            toItemMethod,
-            fromItemMethod
+            fromModelMethod,
+            toModelMethod
         );
     }
 
@@ -68,21 +68,18 @@ internal static class PropertyMappingSpecBuilder
         ?? context.MapperOptions.KeyNamingConventionConverter(analysis.PropertyName);
 
     /// <summary>
-    ///     Builds the method specification for deserialization (FromItem). Method name format:
+    ///     Builds the method specification for deserialization (ToModel - DynamoDB → Model). Method name format:
     ///     Get{Nullable}{TypeName}{Generic} Arguments: [key, ...type-specific args, requiredness,
     ///     (optional) kind]
     /// </summary>
-    private static MethodCallSpec BuildFromItemMethod(
+    private static MethodCallSpec BuildToModelMethod(
         PropertyAnalysis analysis,
         [NotNull] TypeMappingStrategy? strategy,
         string key,
         GeneratorContext context
     )
     {
-        Debug.Assert(
-            strategy is not null,
-            "TypeMappingStrategy cannot be null for FromItem method"
-        );
+        Debug.Assert(strategy is not null, "TypeMappingStrategy cannot be null for ToModel method");
 
         var methodName = $"Get{strategy!.NullableModifier}{strategy.TypeName}";
 
@@ -130,21 +127,24 @@ internal static class PropertyMappingSpecBuilder
     }
 
     /// <summary>
-    ///     Builds the method specification for serialization (ToItem). Method name format:
+    ///     Builds the method specification for serialization (FromModel - Model → DynamoDB). Method name format:
     ///     Set{TypeName}{Generic} (no Nullable modifier) Arguments: [key, sourceProperty, ...type-specific
     ///     args, omitEmptyStrings, omitNullStrings, (optional) kind]
     /// </summary>
-    private static MethodCallSpec BuildToItemMethod(
+    private static MethodCallSpec BuildFromModelMethod(
         PropertyAnalysis analysis,
         [NotNull] TypeMappingStrategy? strategy,
         string key,
         GeneratorContext context
     )
     {
-        Debug.Assert(strategy is not null, "TypeMappingStrategy cannot be null for ToItem method");
+        Debug.Assert(
+            strategy is not null,
+            "TypeMappingStrategy cannot be null for FromModel method"
+        );
 
         var methodName = $"Set{strategy!.TypeName}";
-        var paramName = context.MapperOptions.ToMethodParameterName;
+        var paramName = context.MapperOptions.FromModelParameterName;
 
         var args = new List<ArgumentSpec>
         {
@@ -210,33 +210,33 @@ internal static class PropertyMappingSpecBuilder
     {
         var key = GetAttributeKey(analysis, context);
 
-        // Only build FromItem method if mapper has FromItem defined
-        var fromItemMethod = context.HasFromItemMethod
+        // Only build ToModel method if mapper has ToModel defined (DynamoDB → Model)
+        var toModelMethod = context.HasToModelMethod
             ? fieldOptions.FromMethod is not null
-                ? BuildCustomFromItemMethod(fieldOptions.FromMethod, context)
-                : BuildFromItemMethod(analysis, strategy, key, context)
+                ? BuildCustomToModelMethod(fieldOptions.FromMethod, context)
+                : BuildToModelMethod(analysis, strategy, key, context)
             : null;
 
-        // Only build ToItem method if mapper has ToItem defined
-        var toItemMethod = context.HasToItemMethod
+        // Only build FromModel method if mapper has FromModel defined (Model → DynamoDB)
+        var fromModelMethod = context.HasFromModelMethod
             ? fieldOptions.ToMethod is not null
-                ? BuildCustomToItemMethod(fieldOptions.ToMethod, analysis, context)
-                : BuildToItemMethod(analysis, strategy, key, context)
+                ? BuildCustomFromModelMethod(fieldOptions.ToMethod, analysis, context)
+                : BuildFromModelMethod(analysis, strategy, key, context)
             : null;
 
         return new PropertyMappingSpec(
             analysis.PropertyName,
             strategy,
-            toItemMethod,
-            fromItemMethod
+            fromModelMethod,
+            toModelMethod
         );
     }
 
     /// <summary>
-    ///     Builds a custom FromItem method call. Custom FromItem methods receive the entire item
+    ///     Builds a custom ToModel method call (DynamoDB → Model). Custom ToModel methods receive the entire item
     ///     dictionary as their only argument.
     /// </summary>
-    private static MethodCallSpec BuildCustomFromItemMethod(
+    private static MethodCallSpec BuildCustomToModelMethod(
         string methodName,
         GeneratorContext context
     )
@@ -244,7 +244,7 @@ internal static class PropertyMappingSpecBuilder
         var args = new[]
         {
             new ArgumentSpec(
-                context.MapperOptions.FromMethodParameterName,
+                context.MapperOptions.ToModelParameterName,
                 ArgumentSource.FieldOverride
             ),
         };
@@ -252,17 +252,17 @@ internal static class PropertyMappingSpecBuilder
     }
 
     /// <summary>
-    ///     Builds a custom ToItem method call. Custom ToItem methods receive the entire source object
+    ///     Builds a custom FromModel method call (Model → DynamoDB). Custom FromModel methods receive the entire source object
     ///     and return an AttributeValue to be used within a .Set() call.
     /// </summary>
-    private static MethodCallSpec BuildCustomToItemMethod(
+    private static MethodCallSpec BuildCustomFromModelMethod(
         string methodName,
         PropertyAnalysis analysis,
         GeneratorContext context
     )
     {
         var key = GetAttributeKey(analysis, context);
-        var paramName = context.MapperOptions.ToMethodParameterName;
+        var paramName = context.MapperOptions.FromModelParameterName;
 
         var args = new[]
         {

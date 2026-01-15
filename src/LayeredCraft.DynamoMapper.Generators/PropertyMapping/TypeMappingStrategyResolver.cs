@@ -33,31 +33,31 @@ internal static class TypeMappingStrategyResolver
 
         // Skip validation if property won't be used in any generated methods
         // Also skip if a custom method is provided for that direction (no auto-mapping needed)
-        var willBeUsedInToItem =
-            context.HasToItemMethod
+        var willBeUsedInFromModel =
+            context.HasFromModelMethod
             && analysis.HasGetter
             && analysis.FieldOptions?.ToMethod == null;
 
-        var willBeUsedInFromItem =
-            context.HasFromItemMethod
+        var willBeUsedInToModel =
+            context.HasToModelMethod
             && analysis.HasSetter
             && analysis.FieldOptions?.FromMethod == null;
 
-        if (!willBeUsedInToItem && !willBeUsedInFromItem)
+        if (!willBeUsedInFromModel && !willBeUsedInToModel)
             return DiagnosticResult<TypeMappingStrategy?>.Success(null);
 
         // Check if property should be ignored based on DynamoIgnoreOptions
         if (context.IgnoreOptions.TryGetValue(analysis.PropertyName, out var ignoreOptions))
         {
-            var shouldIgnoreToItem =
+            var shouldIgnoreFromModel =
                 ignoreOptions.Ignore is IgnoreMapping.All or IgnoreMapping.FromModel;
-            var shouldIgnoreFromItem =
+            var shouldIgnoreToModel =
                 ignoreOptions.Ignore is IgnoreMapping.All or IgnoreMapping.ToModel;
 
             // If property should be ignored in all relevant directions, skip mapping
             if (
-                (!willBeUsedInToItem || shouldIgnoreToItem)
-                && (!willBeUsedInFromItem || shouldIgnoreFromItem)
+                (!willBeUsedInFromModel || shouldIgnoreFromModel)
+                && (!willBeUsedInToModel || shouldIgnoreToModel)
             )
                 return DiagnosticResult<TypeMappingStrategy?>.Success(null);
         }
@@ -199,7 +199,7 @@ internal static class TypeMappingStrategyResolver
         // Nullable enums don't need a default value (they can be null)
         string[] fromArgs = analysis.Nullability.IsNullableType
             ? [enumFormat]
-            : [$"{enumName}.{enumType.MemberNames.First()}", enumFormat];
+mType.MemberNames.First()}", enumFormat];
 
         string[] toArgs = [enumFormat];
 

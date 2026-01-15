@@ -128,9 +128,9 @@ public class Order
 public static partial class OrderMapper
 {
     [DynamoField(nameof(Order.Status), Converter = typeof(OrderStatusConverter))]
-    public static partial Dictionary<string, AttributeValue> ToItem(Order source);
+    public static partial Dictionary<string, AttributeValue> FromModel(Order source);
 
-    public static partial Order FromItem(Dictionary<string, AttributeValue> item);
+    public static partial Order ToModel(Dictionary<string, AttributeValue> item);
 }
 ```
 
@@ -142,8 +142,8 @@ In Phase 2, converters can be configured using the fluent DSL:
 [DynamoMapper]
 public static partial class OrderMapper
 {
-    public static partial Dictionary<string, AttributeValue> ToItem(Order source);
-    public static partial Order FromItem(Dictionary<string, AttributeValue> item);
+    public static partial Dictionary<string, AttributeValue> FromModel(Order source);
+    public static partial Order ToModel(Dictionary<string, AttributeValue> item);
 
     static partial void Configure(DynamoMapBuilder<Order> map)
     {
@@ -183,23 +183,23 @@ public class UserRoleConverter : IDynamoConverter<UserRole>
 public static partial class UserMapper
 {
     [DynamoField(nameof(User.Role), Converter = typeof(UserRoleConverter))]
-    public static partial Dictionary<string, AttributeValue> ToItem(User source);
+    public static partial Dictionary<string, AttributeValue> FromModel(User source);
 
-    public static partial Order FromItem(Dictionary<string, AttributeValue> item);
+    public static partial Order ToModel(Dictionary<string, AttributeValue> item);
 }
 ```
 
 The generator produces code similar to:
 
 ```csharp
-// Generated ToItem code
+// Generated FromModel code
 if (source.Role != null)
 {
     var converter = new UserRoleConverter();
     item["role"] = converter.ToAttributeValue(source.Role);
 }
 
-// Generated FromItem code
+// Generated ToModel code
 UserRole? role = null;
 if (item.TryGetValue("role", out var roleAttr))
 {
@@ -403,8 +403,8 @@ public class OrderStatusConverter : IDynamoConverter<OrderStatus>
 public static partial class OrderMapper
 {
     [DynamoField(nameof(Order.Status), Converter = typeof(OrderStatusConverter))]
-    public static partial Dictionary<string, AttributeValue> ToItem(Order source);
-    public static partial Order FromItem(Dictionary<string, AttributeValue> item);
+    public static partial Dictionary<string, AttributeValue> FromModel(Order source);
+    public static partial Order ToModel(Dictionary<string, AttributeValue> item);
 }
 
 [DynamoMapper(Convention = DynamoNamingConvention.CamelCase)]
@@ -412,8 +412,8 @@ public static partial class OrderHistoryMapper
 {
     [DynamoField(nameof(OrderHistory.PreviousStatus), Converter = typeof(OrderStatusConverter))]
     [DynamoField(nameof(OrderHistory.CurrentStatus), Converter = typeof(OrderStatusConverter))]
-    public static partial Dictionary<string, AttributeValue> ToItem(OrderHistory source);
-    public static partial OrderHistory FromItem(Dictionary<string, AttributeValue> item);
+    public static partial Dictionary<string, AttributeValue> FromModel(OrderHistory source);
+    public static partial OrderHistory ToModel(Dictionary<string, AttributeValue> item);
 }
 ```
 

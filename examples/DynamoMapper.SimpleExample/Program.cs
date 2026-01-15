@@ -79,7 +79,7 @@ var exampleAttributes = new Dictionary<string, AttributeValue>
     ["nullable_enum"] = new() { S = "Shipped" },
 };
 
-var myEntity = ExampleModelMapper.FromItem(exampleAttributes);
+var myEntity = ExampleModelMapper.ToModel(exampleAttributes);
 
 [DynamoMapper(
     Convention = DynamoNamingConvention.SnakeCase,
@@ -91,9 +91,9 @@ var myEntity = ExampleModelMapper.FromItem(exampleAttributes);
 )]
 internal static partial class ExampleModelMapper
 {
-    private static partial Dictionary<string, AttributeValue> ToItem(ExampleModel source);
+    private static partial Dictionary<string, AttributeValue> FromModel(ExampleModel source);
 
-    internal static partial ExampleModel FromItem(Dictionary<string, AttributeValue> item);
+    internal static partial ExampleModel ToModel(Dictionary<string, AttributeValue> item);
 }
 
 internal class ExampleModel

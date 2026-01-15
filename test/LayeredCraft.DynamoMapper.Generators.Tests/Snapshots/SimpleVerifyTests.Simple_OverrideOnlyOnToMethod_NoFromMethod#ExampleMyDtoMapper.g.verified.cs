@@ -19,7 +19,7 @@ namespace MyNamespace;
 public static partial class ExampleMyDtoMapper
 {
     [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
-    public static partial global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> ToItem(global::MyNamespace.MyDto source) =>
+    public static partial global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> FromModel(global::MyNamespace.MyDto source) =>
         new Dictionary<string, AttributeValue>(2)
             .SetString("name", source.Name, false, true)
             .Set("shouldNotBeMapped", SetType(source));

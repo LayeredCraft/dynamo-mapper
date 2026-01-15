@@ -19,14 +19,14 @@ namespace MyNamespace;
 public static partial class ExampleEntityMapper
 {
     [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
-    public static partial global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> ToItem(global::MyNamespace.MyDto source) =>
+    public static partial global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> FromModel(global::MyNamespace.MyDto source) =>
         new Dictionary<string, AttributeValue>(3)
             .SetString("name", source.Name, false, true)
             .SetString("readOnlyString", source.ReadOnlyString, false, true)
             .SetString("expressionProperty", source.ExpressionProperty, false, true);
 
     [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
-    public static partial global::MyNamespace.MyDto FromItem(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> item) =>
+    public static partial global::MyNamespace.MyDto ToModel(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> item) =>
         new global::MyNamespace.MyDto
         {
             Name = item.GetString("name", Requiredness.InferFromNullability),

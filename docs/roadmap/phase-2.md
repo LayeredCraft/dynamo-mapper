@@ -199,8 +199,8 @@ map.Property(x => x.Status)
 [DynamoMapper]
 public static partial class OrderMapper
 {
-    public static partial Dictionary<string, AttributeValue> ToItem(Order source);
-    public static partial Order FromItem(Dictionary<string, AttributeValue> item);
+    public static partial Dictionary<string, AttributeValue> FromModel(Order source);
+    public static partial Order ToModel(Dictionary<string, AttributeValue> item);
 
     static partial void Configure(DynamoMapBuilder<Order> map)
     {
@@ -240,8 +240,8 @@ map.Property(x => x.Status)
 [DynamoMapper]
 public static partial class OrderMapper
 {
-    public static partial Dictionary<string, AttributeValue> ToItem(Order source);
-    public static partial Order FromItem(Dictionary<string, AttributeValue> item);
+    public static partial Dictionary<string, AttributeValue> FromModel(Order source);
+    public static partial Order ToModel(Dictionary<string, AttributeValue> item);
 
     static partial void Configure(DynamoMapBuilder<Order> map)
     {
@@ -308,9 +308,9 @@ public static partial class ProductMapper
 {
     // Attribute specifies one converter
     [DynamoField(nameof(Product.Category), Converter = typeof(OldCategoryConverter))]
-    public static partial Dictionary<string, AttributeValue> ToItem(Product source);
+    public static partial Dictionary<string, AttributeValue> FromModel(Product source);
 
-    public static partial Product FromItem(Dictionary<string, AttributeValue> item);
+    public static partial Product ToModel(Dictionary<string, AttributeValue> item);
 
     static partial void Configure(DynamoMapBuilder<Product> map)
     {
@@ -337,7 +337,7 @@ See also:
 Hooks defined via DSL are equivalent to Phase 1 partial methods.
 
 ```csharp
-map.BeforeToItem((source, item) =>
+map.BeforeFromModel((source, item) =>
 {
     item["pk"] = new AttributeValue { S = source.Pk };
     item["sk"] = new AttributeValue { S = source.Sk };
@@ -465,7 +465,7 @@ public static partial class JediCharacterMapper
         map.Ignore(x => x.HitRoll);
         map.Ignore(x => x.DamRoll);
 
-        map.BeforeToItem((src, item) =>
+        map.BeforeFromModel((src, item) =>
         {
             item["pk"] = new AttributeValue { S = src.Pk };
             item["sk"] = new AttributeValue { S = src.Sk };

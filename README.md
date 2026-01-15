@@ -66,9 +66,9 @@ namespace MyApp.Data;
 public static partial class ProductMapper
 {
     [DynamoField(nameof(Product.Description), OmitIfNullOrWhiteSpace = true)]
-    public static partial Dictionary<string, AttributeValue> ToItem(Product source);
+    public static partial Dictionary<string, AttributeValue> FromModel(Product source);
 
-    public static partial Product FromItem(Dictionary<string, AttributeValue> item);
+    public static partial Product ToModel(Dictionary<string, AttributeValue> item);
 }
 ```
 
@@ -87,7 +87,7 @@ var product = new Product
 };
 
 // Convert to DynamoDB item
-var item = ProductMapper.ToItem(product);
+var item = ProductMapper.FromModel(product);
 await dynamoDbClient.PutItemAsync(new PutItemRequest
 {
     TableName = "MyTable",
@@ -104,7 +104,7 @@ var getResponse = await dynamoDbClient.GetItemAsync(new GetItemRequest
         ["sk"] = new AttributeValue { S = $"PRODUCT#{product.ProductId}" }
     }
 });
-var retrievedProduct = ProductMapper.FromItem(getResponse.Item);
+var retrievedProduct = ProductMapper.ToModel(getResponse.Item);
 ```
 
 For more examples including single-table patterns and custom converters, see the [Quick Start Guide](https://layeredcraft.github.io/dynamo-mapper/getting-started/quick-start/).

@@ -7,22 +7,22 @@ namespace DynamoMapper.Runtime;
 public enum IgnoreMapping
 {
     /// <summary>
-    ///     Skip this property in both <c>ToItem</c> (model to DynamoDB) and <c>FromItem</c>
+    ///     Skip this property in both <c>FromModel</c> (model to DynamoDB) and <c>ToModel</c>
     ///     (DynamoDB to model) mappings.
     /// </summary>
     All,
 
     /// <summary>
-    ///     Skip this property when mapping from DynamoDB to the .NET model (<c>FromItem</c>
+    ///     Skip this property when mapping from DynamoDB to the .NET model (<c>ToModel</c>
     ///     method). The property will still be mapped when serializing to DynamoDB
-    ///     (<c>ToItem</c> method).
+    ///     (<c>FromModel</c> method).
     /// </summary>
     ToModel,
 
     /// <summary>
-    ///     Skip this property when mapping from the .NET model to DynamoDB (<c>ToItem</c>
+    ///     Skip this property when mapping from the .NET model to DynamoDB (<c>FromModel</c>
     ///     method). The property will still be mapped when deserializing from DynamoDB
-    ///     (<c>FromItem</c> method).
+    ///     (<c>ToModel</c> method).
     /// </summary>
     FromModel,
 }

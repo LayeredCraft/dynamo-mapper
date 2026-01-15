@@ -24,11 +24,11 @@ DynamoMapper is built on three fundamental principles:
 DynamoMapper supports **exactly two mapping directions**:
 
 ```csharp
-// ToItem: Domain model → DynamoDB item
-Dictionary<string, AttributeValue> ToItem(T source);
+// FromModel: Domain model → DynamoDB item
+Dictionary<string, AttributeValue> FromModel(T source);
 
-// FromItem: DynamoDB item → Domain model
-T FromItem(Dictionary<string, AttributeValue> item);
+// ToModel: DynamoDB item → Domain model
+T ToModel(Dictionary<string, AttributeValue> item);
 ```
 
 ### What DynamoMapper Does NOT Do
@@ -51,7 +51,7 @@ DynamoMapper uses .NET's `IIncrementalGenerator` API to analyze your code at com
 
 1. **Discovery Phase**
    - Locate classes marked with `[DynamoMapper]`
-   - Find partial mapping methods (`ToItem`, `FromItem`)
+   - Find partial mapping methods (`FromModel`, `ToModel`)
    - Collect configuration attributes
 
 2. **Analysis Phase**
@@ -61,8 +61,8 @@ DynamoMapper uses .NET's `IIncrementalGenerator` API to analyze your code at com
    - Validate converters and hooks
 
 3. **Code Generation Phase**
-   - Generate `ToItem` implementation
-   - Generate `FromItem` implementation
+  - Generate `FromModel` implementation
+  - Generate `ToModel` implementation
    - Emit diagnostics for configuration errors
 
 4. **Compilation Phase**
@@ -80,12 +80,12 @@ using Amazon.DynamoDBv2.Model;
 public static partial class ProductMapper
 {
     // Partial method declarations (you provide)
-    public static partial Dictionary<string, AttributeValue> ToItem(Product source);
-    public static partial Product FromItem(Dictionary<string, AttributeValue> item);
+    public static partial Dictionary<string, AttributeValue> FromModel(Product source);
+    public static partial Product ToModel(Dictionary<string, AttributeValue> item);
 
     // Generated implementations (DynamoMapper provides)
-    // - ToItem implementation
-    // - FromItem implementation
+    // - FromModel implementation
+    // - ToModel implementation
 }
 ```
 
@@ -110,8 +110,8 @@ public class Product
 [DynamoMapper(Convention = DynamoNamingConvention.CamelCase)]
 public static partial class ProductMapper
 {
-    public static partial Dictionary<string, AttributeValue> ToItem(Product source);
-    public static partial Product FromItem(Dictionary<string, AttributeValue> item);
+    public static partial Dictionary<string, AttributeValue> FromModel(Product source);
+    public static partial Product ToModel(Dictionary<string, AttributeValue> item);
 }
 ```
 
@@ -120,7 +120,7 @@ DynamoMapper generates:
 ```csharp
 public static partial class ProductMapper
 {
-    public static partial Dictionary<string, AttributeValue> ToItem(Product source)
+    public static partial Dictionary<string, AttributeValue> FromModel(Product source)
     {
         var item = new Dictionary<string, AttributeValue>(capacity: 3);
 
@@ -131,7 +131,7 @@ public static partial class ProductMapper
         return item;
     }
 
-    public static partial Product FromItem(Dictionary<string, AttributeValue> item)
+    public static partial Product ToModel(Dictionary<string, AttributeValue> item)
     {
         var entity = new Product
         {
@@ -170,7 +170,7 @@ DynamoMapper uses a layered configuration model:
 ```csharp
 [DynamoField(nameof(Product.Name), Required = true)]
 [DynamoField(nameof(Product.Description), OmitIfNullOrWhiteSpace = true)]
-public static partial Dictionary<string, AttributeValue> ToItem(Product source);
+public static partial Dictionary<string, AttributeValue> FromModel(Product source);
 ```
 
 ### 3. Converters
@@ -190,7 +190,7 @@ Two approaches, both first-class:
 ### 4. Customization Hooks
 
 ```csharp
-static partial void AfterToItem(Product source, Dictionary<string, AttributeValue> item)
+static partial void AfterFromModel(Product source, Dictionary<string, AttributeValue> item)
 {
     item["pk"] = new AttributeValue { S = $"PRODUCT#{source.ProductId}" };
     item["sk"] = new AttributeValue { S = "METADATA" };
@@ -267,16 +267,16 @@ Hooks enable DynamoDB-specific patterns without compromising the focused mapping
 
 ```csharp
 // Before property mapping
-static partial void BeforeToItem(Product source, Dictionary<string, AttributeValue> item);
+static partial void BeforeFromModel(Product source, Dictionary<string, AttributeValue> item);
 
 // After property mapping - most common
-static partial void AfterToItem(Product source, Dictionary<string, AttributeValue> item);
+static partial void AfterFromModel(Product source, Dictionary<string, AttributeValue> item);
 
 // Before deserialization
-static partial void BeforeFromItem(Dictionary<string, AttributeValue> item);
+static partial void BeforeToModel(Dictionary<string, AttributeValue> item);
 
 // After object construction
-static partial void AfterFromItem(Dictionary<string, AttributeValue> item, ref Product entity);
+static partial void AfterToModel(Dictionary<string, AttributeValue> item, ref Product entity);
 ```
 
 **Common use cases:**
@@ -331,11 +331,11 @@ error DM0201: Static conversion method 'ToStatus' not found on mapper 'OrderMapp
 
 ### Benchmarks (Typical)
 
-| Operation | Time | Allocations |
-|-----------|------|-------------|
-| ToItem (5 properties) | ~50ns | 1 (dictionary) |
-| FromItem (5 properties) | ~100ns | 1 (entity) |
-| With hooks | +5-10ns | 0 additional |
+| Operation                | Time    | Allocations    |
+|--------------------------|---------|----------------|
+| FromModel (5 properties) | ~50ns   | 1 (dictionary) |
+| ToModel (5 properties)   | ~100ns  | 1 (entity)     |
+| With hooks               | +5-10ns | 0 additional   |
 
 ## Design Constraints
 
@@ -382,8 +382,8 @@ Phase 2 adds an optional fluent DSL while maintaining all Phase 1 capabilities:
 [DynamoMapper]
 public static partial class ProductMapper
 {
-    public static partial Dictionary<string, AttributeValue> ToItem(Product source);
-    public static partial Product FromItem(Dictionary<string, AttributeValue> item);
+    public static partial Dictionary<string, AttributeValue> FromModel(Product source);
+    public static partial Product ToModel(Dictionary<string, AttributeValue> item);
 
     static partial void Configure(DynamoMapBuilder<Product> map)
     {

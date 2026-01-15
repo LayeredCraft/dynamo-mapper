@@ -51,10 +51,10 @@ using Amazon.DynamoDBv2.Model;
 [DynamoMapper(Convention = DynamoNamingConvention.CamelCase)]
 public static partial class CustomerMapper
 {
-    public static partial Dictionary<string, AttributeValue> ToItem(Customer source);
-    public static partial Customer FromItem(Dictionary<string, AttributeValue> item);
+    public static partial Dictionary<string, AttributeValue> FromModel(Customer source);
+    public static partial Customer ToModel(Dictionary<string, AttributeValue> item);
 
-    static partial void AfterToItem(Customer source, Dictionary<string, AttributeValue> item)
+    static partial void AfterFromModel(Customer source, Dictionary<string, AttributeValue> item)
     {
         // PK/SK for customer entity
         item["pk"] = new AttributeValue { S = $"CUSTOMER#{source.CustomerId}" };
@@ -69,7 +69,7 @@ public static partial class CustomerMapper
         item["gsi1sk"] = new AttributeValue { S = $"CUSTOMER#{source.CustomerId}" };
     }
 
-    static partial void BeforeFromItem(Dictionary<string, AttributeValue> item)
+    static partial void BeforeToModel(Dictionary<string, AttributeValue> item)
     {
         // Validate entity type before mapping
         if (item.TryGetValue("entityType", out var typeAttr) && typeAttr.S != "Customer")
@@ -89,11 +89,11 @@ public static partial class CustomerMapper
 public static partial class OrderMapper
 {
     [DynamoField(nameof(Order.Status), Converter = typeof(OrderStatusConverter))]
-    public static partial Dictionary<string, AttributeValue> ToItem(Order source);
+    public static partial Dictionary<string, AttributeValue> FromModel(Order source);
 
-    public static partial Order FromItem(Dictionary<string, AttributeValue> item);
+    public static partial Order ToModel(Dictionary<string, AttributeValue> item);
 
-    static partial void AfterToItem(Order source, Dictionary<string, AttributeValue> item)
+    static partial void AfterFromModel(Order source, Dictionary<string, AttributeValue> item)
     {
         // PK/SK for order under customer
         item["pk"] = new AttributeValue { S = $"CUSTOMER#{source.CustomerId}" };
@@ -112,7 +112,7 @@ public static partial class OrderMapper
         item["gsi2sk"] = new AttributeValue { S = source.CreatedAt.ToString("O") };
     }
 
-    static partial void BeforeFromItem(Dictionary<string, AttributeValue> item)
+    static partial void BeforeToModel(Dictionary<string, AttributeValue> item)
     {
         if (item.TryGetValue("entityType", out var typeAttr) && typeAttr.S != "Order")
         {
@@ -165,7 +165,7 @@ var request = new GetItemRequest
 };
 
 var response = await dynamoDb.GetItemAsync(request);
-var customer = CustomerMapper.FromItem(response.Item);
+var customer = CustomerMapper.ToModel(response.Item);
 ```
 
 ### 2. Get All Orders for Customer
@@ -183,7 +183,7 @@ var request = new QueryRequest
 };
 
 var response = await dynamoDb.QueryAsync(request);
-var orders = response.Items.Select(OrderMapper.FromItem).ToList();
+var orders = response.Items.Select(OrderMapper.ToModel).ToList();
 ```
 
 ### 3. Get Customer by Email (GSI1)
@@ -201,7 +201,7 @@ var request = new QueryRequest
 };
 
 var response = await dynamoDb.QueryAsync(request);
-var customer = CustomerMapper.FromItem(response.Items.First());
+var customer = CustomerMapper.ToModel(response.Items.First());
 ```
 
 ### 4. Get Orders by Status (GSI1)
@@ -219,7 +219,7 @@ var request = new QueryRequest
 };
 
 var response = await dynamoDb.QueryAsync(request);
-var orders = response.Items.Select(OrderMapper.FromItem).ToList();
+var orders = response.Items.Select(OrderMapper.ToModel).ToList();
 ```
 
 ## Advanced Patterns
@@ -238,10 +238,10 @@ public class Session
 [DynamoMapper(Convention = DynamoNamingConvention.CamelCase)]
 public static partial class SessionMapper
 {
-    public static partial Dictionary<string, AttributeValue> ToItem(Session source);
-    public static partial Session FromItem(Dictionary<string, AttributeValue> item);
+    public static partial Dictionary<string, AttributeValue> FromModel(Session source);
+    public static partial Session ToModel(Dictionary<string, AttributeValue> item);
 
-    static partial void AfterToItem(Session source, Dictionary<string, AttributeValue> item)
+    static partial void AfterFromModel(Session source, Dictionary<string, AttributeValue> item)
     {
         // Session keys
         item["pk"] = new AttributeValue { S = $"USER#{source.UserId}" };
@@ -286,10 +286,10 @@ public class ProductReview
 [DynamoMapper(Convention = DynamoNamingConvention.CamelCase)]
 public static partial class ProductMapper
 {
-    public static partial Dictionary<string, AttributeValue> ToItem(Product source);
-    public static partial Product FromItem(Dictionary<string, AttributeValue> item);
+    public static partial Dictionary<string, AttributeValue> FromModel(Product source);
+    public static partial Product ToModel(Dictionary<string, AttributeValue> item);
 
-    static partial void AfterToItem(Product source, Dictionary<string, AttributeValue> item)
+    static partial void AfterFromModel(Product source, Dictionary<string, AttributeValue> item)
     {
         // Product hierarchy under category
         item["pk"] = new AttributeValue { S = $"CATEGORY#{source.CategoryId}" };
@@ -305,10 +305,10 @@ public static partial class ProductMapper
 [DynamoMapper(Convention = DynamoNamingConvention.CamelCase)]
 public static partial class ProductReviewMapper
 {
-    public static partial Dictionary<string, AttributeValue> ToItem(ProductReview source);
-    public static partial ProductReview FromItem(Dictionary<string, AttributeValue> item);
+    public static partial Dictionary<string, AttributeValue> FromModel(ProductReview source);
+    public static partial ProductReview ToModel(Dictionary<string, AttributeValue> item);
 
-    static partial void AfterToItem(ProductReview source, Dictionary<string, AttributeValue> item)
+    static partial void AfterFromModel(ProductReview source, Dictionary<string, AttributeValue> item)
     {
         // Reviews under product
         item["pk"] = new AttributeValue { S = $"PRODUCT#{source.ProductId}" };
@@ -345,12 +345,12 @@ public class Product
 public static partial class ProductMapper
 {
     [DynamoIgnore(nameof(Product.Metadata))]
-    public static partial Dictionary<string, AttributeValue> ToItem(Product source);
+    public static partial Dictionary<string, AttributeValue> FromModel(Product source);
 
     [DynamoIgnore(nameof(Product.Metadata))]
-    public static partial Product FromItem(Dictionary<string, AttributeValue> item);
+    public static partial Product ToModel(Dictionary<string, AttributeValue> item);
 
-    static partial void AfterToItem(Product source, Dictionary<string, AttributeValue> item)
+    static partial void AfterFromModel(Product source, Dictionary<string, AttributeValue> item)
     {
         // Single-table keys
         item["pk"] = new AttributeValue { S = $"PRODUCT#{source.ProductId}" };
@@ -367,7 +367,7 @@ public static partial class ProductMapper
         }
     }
 
-    static partial void AfterFromItem(Dictionary<string, AttributeValue> item, ref Product entity)
+    static partial void AfterToModel(Dictionary<string, AttributeValue> item, ref Product entity)
     {
         // Capture unmapped attributes
         var coreAttributes = new HashSet<string>
@@ -399,10 +399,10 @@ public class Product
 [DynamoMapper(Convention = DynamoNamingConvention.CamelCase)]
 public static partial class ProductMapper
 {
-    public static partial Dictionary<string, AttributeValue> ToItem(Product source);
-    public static partial Product FromItem(Dictionary<string, AttributeValue> item);
+    public static partial Dictionary<string, AttributeValue> FromModel(Product source);
+    public static partial Product ToModel(Dictionary<string, AttributeValue> item);
 
-    static partial void AfterToItem(Product source, Dictionary<string, AttributeValue> item)
+    static partial void AfterFromModel(Product source, Dictionary<string, AttributeValue> item)
     {
         // Base keys
         item["pk"] = new AttributeValue { S = $"PRODUCT#{source.ProductId}" };
@@ -453,8 +453,8 @@ var results = response.Items.Select(item =>
     var entityType = item["entityType"].S;
     return entityType switch
     {
-        "Customer" => (object)CustomerMapper.FromItem(item),
-        "Order" => (object)OrderMapper.FromItem(item),
+        "Customer" => (object)CustomerMapper.ToModel(item),
+        "Order" => (object)OrderMapper.ToModel(item),
         _ => throw new InvalidOperationException($"Unknown entity type: {entityType}")
     };
 }).ToList();
@@ -478,11 +478,11 @@ public class Order
 public static partial class OrderMapper
 {
     [DynamoField(nameof(Order.Status), Converter = typeof(OrderStatusConverter))]
-    public static partial Dictionary<string, AttributeValue> ToItem(Order source);
+    public static partial Dictionary<string, AttributeValue> FromModel(Order source);
 
-    public static partial Order FromItem(Dictionary<string, AttributeValue> item);
+    public static partial Order ToModel(Dictionary<string, AttributeValue> item);
 
-    static partial void AfterToItem(Order source, Dictionary<string, AttributeValue> item)
+    static partial void AfterFromModel(Order source, Dictionary<string, AttributeValue> item)
     {
         item["pk"] = new AttributeValue { S = $"CUSTOMER#{source.CustomerId}" };
         item["sk"] = new AttributeValue { S = $"ORDER#{source.OrderId}" };

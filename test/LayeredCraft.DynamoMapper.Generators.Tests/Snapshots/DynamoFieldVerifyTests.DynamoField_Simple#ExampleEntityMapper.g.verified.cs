@@ -19,13 +19,13 @@ namespace MyNamespace;
 internal static partial class ExampleEntityMapper
 {
     [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
-    internal static partial global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> ToItem(global::MyNamespace.ExampleEntity source) =>
+    internal static partial global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> FromModel(global::MyNamespace.ExampleEntity source) =>
         new Dictionary<string, AttributeValue>(2)
             .Set("customName", ToMethod(source))
             .SetString("ANOTHER_NAME", source.NullableString, true, false, DynamoKind.N);
 
     [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
-    internal static partial global::MyNamespace.ExampleEntity FromItem(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> item) =>
+    internal static partial global::MyNamespace.ExampleEntity ToModel(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> item) =>
         new global::MyNamespace.ExampleEntity
         {
             String = FromMethod(item),

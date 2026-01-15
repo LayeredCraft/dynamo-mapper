@@ -33,16 +33,16 @@ internal class GeneratorContext
     internal Dictionary<string, DynamoIgnoreOptions> IgnoreOptions { get; }
 
     /// <summary>
-    ///     Indicates whether a ToItem method is defined in the mapper class. Used to determine if
-    ///     properties need to be validated for serialization.
+    ///     Indicates whether a FromModel method is defined in the mapper class (Model → DynamoDB).
+    ///     Used to determine if properties need to be validated for serialization.
     /// </summary>
-    internal bool HasToItemMethod { get; set; }
+    internal bool HasFromModelMethod { get; set; }
 
     /// <summary>
-    ///     Indicates whether a FromItem method is defined in the mapper class. Used to determine if
-    ///     properties need to be validated for deserialization.
+    ///     Indicates whether a ToModel method is defined in the mapper class (DynamoDB → Model).
+    ///     Used to determine if properties need to be validated for deserialization.
     /// </summary>
-    internal bool HasFromItemMethod { get; set; }
+    internal bool HasToModelMethod { get; set; }
 }
 
 internal static class GeneratorContextExtensions

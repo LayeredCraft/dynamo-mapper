@@ -26,14 +26,14 @@ internal static class MapperEmitter
 
     internal static void Generate(SourceProductionContext context, MapperInfo mapperInfo)
     {
-        var toAssignments = mapperInfo
-            .ModelClass!.Properties.Where(p => !string.IsNullOrEmpty(p.ToAssignments))
-            .Select(p => p.ToAssignments)
+        var fromModelAssignments = mapperInfo
+            .ModelClass!.Properties.Where(p => !string.IsNullOrEmpty(p.FromModelAssignments))
+            .Select(p => p.FromModelAssignments)
             .ToArray();
 
-        var fromAssignments = mapperInfo
-            .ModelClass!.Properties.Where(p => !string.IsNullOrEmpty(p.FromAssignment))
-            .Select(p => p.FromAssignment)
+        var toModelAssignments = mapperInfo
+            .ModelClass!.Properties.Where(p => !string.IsNullOrEmpty(p.ToModelAssignment))
+            .Select(p => p.ToModelAssignment)
             .ToArray();
 
         var model = new
@@ -41,11 +41,11 @@ internal static class MapperEmitter
             GeneratedCodeAttribute,
             mapperInfo.MapperClass,
             ModelClass = mapperInfo.ModelClass!,
-            ToAssignments = toAssignments,
-            FromAssignments = fromAssignments,
+            FromModelAssignments = fromModelAssignments,
+            ToModelAssignments = toModelAssignments,
             MapperClassNamespace = mapperInfo.MapperClass?.Namespace,
             MapperClassSignature = mapperInfo.MapperClass?.ClassSignature,
-            DictionaryCapacity = toAssignments.Length,
+            DictionaryCapacity = fromModelAssignments.Length,
         };
 
         var outputCode = TemplateHelper.Render("Templates.Mapper.scriban", model);

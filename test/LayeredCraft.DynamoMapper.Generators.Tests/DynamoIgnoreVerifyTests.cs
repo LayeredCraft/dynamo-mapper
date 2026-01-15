@@ -18,13 +18,13 @@ public class DynamoIgnoreVerifyTests
                 [DynamoMapper]
                 [DynamoIgnore(nameof(ExampleEntity.Ignore))]
                 [DynamoIgnore(nameof(ExampleEntity.IgnoreAll), Ignore = IgnoreMapping.All)]
-                [DynamoIgnore(nameof(ExampleEntity.IgnoreInToItem), Ignore = IgnoreMapping.FromModel)]
-                [DynamoIgnore(nameof(ExampleEntity.IgnoreInFromItem), Ignore = IgnoreMapping.ToModel)]
+                [DynamoIgnore(nameof(ExampleEntity.IgnoreInFromModel), Ignore = IgnoreMapping.FromModel)]
+                [DynamoIgnore(nameof(ExampleEntity.IgnoreInToModel), Ignore = IgnoreMapping.ToModel)]
                 internal static partial class ExampleEntityMapper
                 {
-                    internal static partial Dictionary<string, AttributeValue> ToItem(ExampleEntity source);
+                    internal static partial Dictionary<string, AttributeValue> FromModel(ExampleEntity source);
 
-                    internal static partial ExampleEntity FromItem(Dictionary<string, AttributeValue> item);
+                    internal static partial ExampleEntity ToModel(Dictionary<string, AttributeValue> item);
                 }
 
                 internal class ExampleEntity
@@ -32,8 +32,8 @@ public class DynamoIgnoreVerifyTests
                     internal required string String { get; set; }
                     internal Type Ignore { get; set; } = typeof(ExampleEntity);
                     internal string IgnoreAll { get; set; } = string.Empty;
-                    internal string IgnoreInToItem { get; set; } = string.Empty;
-                    internal string IgnoreInFromItem { get; set; } = string.Empty;
+                    internal string IgnoreInFromModel { get; set; } = string.Empty;
+                    internal string IgnoreInToModel { get; set; } = string.Empty;
                 }
                 """,
             },

@@ -32,9 +32,9 @@ public class DynamoFieldVerifyTests
                 )]
                 internal static partial class ExampleEntityMapper
                 {
-                    internal static partial Dictionary<string, AttributeValue> ToItem(ExampleEntity source);
+                    internal static partial Dictionary<string, AttributeValue> FromModel(ExampleEntity source);
 
-                    internal static partial ExampleEntity FromItem(Dictionary<string, AttributeValue> item);
+                    internal static partial ExampleEntity ToModel(Dictionary<string, AttributeValue> item);
 
                     internal static AttributeValue ToMethod(ExampleEntity source) => new() { S = source.String };
 
@@ -68,9 +68,9 @@ public class DynamoFieldVerifyTests
                 [DynamoField(nameof(ExampleEntity.NullableString), Required = true)]
                 internal static partial class ExampleEntityMapper
                 {
-                    internal static partial Dictionary<string, AttributeValue> ToItem(ExampleEntity source);
+                    internal static partial Dictionary<string, AttributeValue> FromModel(ExampleEntity source);
 
-                    internal static partial ExampleEntity FromItem(Dictionary<string, AttributeValue> item);
+                    internal static partial ExampleEntity ToModel(Dictionary<string, AttributeValue> item);
                 }
 
                 internal class ExampleEntity
@@ -99,9 +99,9 @@ public class DynamoFieldVerifyTests
                 [DynamoField(nameof(ExampleEntity.String), Required = false)]
                 internal static partial class ExampleEntityMapper
                 {
-                    internal static partial Dictionary<string, AttributeValue> ToItem(ExampleEntity source);
+                    internal static partial Dictionary<string, AttributeValue> FromModel(ExampleEntity source);
 
-                    internal static partial ExampleEntity FromItem(Dictionary<string, AttributeValue> item);
+                    internal static partial ExampleEntity ToModel(Dictionary<string, AttributeValue> item);
                 }
 
                 internal class ExampleEntity
@@ -130,9 +130,9 @@ public class DynamoFieldVerifyTests
                 [DynamoField(nameof(ExampleEntity.String), Kind = DynamoKind.B)]
                 internal static partial class ExampleEntityMapper
                 {
-                    internal static partial Dictionary<string, AttributeValue> ToItem(ExampleEntity source);
+                    internal static partial Dictionary<string, AttributeValue> FromModel(ExampleEntity source);
 
-                    internal static partial ExampleEntity FromItem(Dictionary<string, AttributeValue> item);
+                    internal static partial ExampleEntity ToModel(Dictionary<string, AttributeValue> item);
                 }
 
                 internal class ExampleEntity
@@ -161,9 +161,9 @@ public class DynamoFieldVerifyTests
                 [DynamoField(nameof(ExampleEntity.String), OmitIfNull = false)]
                 internal static partial class ExampleEntityMapper
                 {
-                    internal static partial Dictionary<string, AttributeValue> ToItem(ExampleEntity source);
+                    internal static partial Dictionary<string, AttributeValue> FromModel(ExampleEntity source);
 
-                    internal static partial ExampleEntity FromItem(Dictionary<string, AttributeValue> item);
+                    internal static partial ExampleEntity ToModel(Dictionary<string, AttributeValue> item);
                 }
 
                 internal class ExampleEntity
@@ -192,9 +192,9 @@ public class DynamoFieldVerifyTests
                 [DynamoField(nameof(ExampleEntity.String), OmitIfEmptyString = true)]
                 internal static partial class ExampleEntityMapper
                 {
-                    internal static partial Dictionary<string, AttributeValue> ToItem(ExampleEntity source);
+                    internal static partial Dictionary<string, AttributeValue> FromModel(ExampleEntity source);
 
-                    internal static partial ExampleEntity FromItem(Dictionary<string, AttributeValue> item);
+                    internal static partial ExampleEntity ToModel(Dictionary<string, AttributeValue> item);
                 }
 
                 internal class ExampleEntity
@@ -223,9 +223,9 @@ public class DynamoFieldVerifyTests
                 [DynamoField(nameof(ExampleEntity.String), ToMethod = nameof(ToMethod))]
                 internal static partial class ExampleEntityMapper
                 {
-                    internal static partial Dictionary<string, AttributeValue> ToItem(ExampleEntity source);
+                    internal static partial Dictionary<string, AttributeValue> FromModel(ExampleEntity source);
 
-                    internal static partial ExampleEntity FromItem(Dictionary<string, AttributeValue> item);
+                    internal static partial ExampleEntity ToModel(Dictionary<string, AttributeValue> item);
 
                     internal static AttributeValue ToMethod(ExampleEntity source) => new() { S = source.String };
                 }
@@ -257,9 +257,9 @@ public class DynamoFieldVerifyTests
                 [DynamoField(nameof(ExampleEntity.String), FromMethod = nameof(FromMethod))]
                 internal static partial class ExampleEntityMapper
                 {
-                    internal static partial Dictionary<string, AttributeValue> ToItem(ExampleEntity source);
+                    internal static partial Dictionary<string, AttributeValue> FromModel(ExampleEntity source);
 
-                    internal static partial ExampleEntity FromItem(Dictionary<string, AttributeValue> item);
+                    internal static partial ExampleEntity ToModel(Dictionary<string, AttributeValue> item);
 
                     internal static string FromMethod(Dictionary<string, AttributeValue> item) =>
                         item["customName"].S;
@@ -295,9 +295,9 @@ public class DynamoFieldVerifyTests
                 )]
                 internal static partial class ExampleEntityMapper
                 {
-                    internal static partial Dictionary<string, AttributeValue> ToItem(ExampleEntity source);
+                    internal static partial Dictionary<string, AttributeValue> FromModel(ExampleEntity source);
 
-                    internal static partial ExampleEntity FromItem(Dictionary<string, AttributeValue> item);
+                    internal static partial ExampleEntity ToModel(Dictionary<string, AttributeValue> item);
 
                     internal static Person PersonFromAttr(Dictionary<string, AttributeValue> item) =>
                         new(item["person"].S);

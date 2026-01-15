@@ -17,9 +17,9 @@ public class SimpleVerifyTests
                 [DynamoMapper]
                 public static partial class ExampleEntityMapper
                 {
-                    public static partial Dictionary<string, AttributeValue> ToItem(MyDto source);
+                    public static partial Dictionary<string, AttributeValue> FromModel(MyDto source);
 
-                    public static partial MyDto FromItem(Dictionary<string, AttributeValue> item);
+                    public static partial MyDto ToModel(Dictionary<string, AttributeValue> item);
                 }
 
                 public class MyDto
@@ -46,9 +46,9 @@ public class SimpleVerifyTests
                 [DynamoMapper]
                 public static partial class ExampleEntityMapper
                 {
-                    public static partial Dictionary<string, AttributeValue> ToItem(MyDto source);
+                    public static partial Dictionary<string, AttributeValue> FromModel(MyDto source);
 
-                    public static partial MyDto FromItem(Dictionary<string, AttributeValue> item);
+                    public static partial MyDto ToModel(Dictionary<string, AttributeValue> item);
                 }
 
                 public record MyDto
@@ -75,9 +75,9 @@ public class SimpleVerifyTests
                 [DynamoMapper]
                 public static partial class ExampleEntityMapper
                 {
-                    public static partial Dictionary<string, AttributeValue> ToItem(MyDto source);
+                    public static partial Dictionary<string, AttributeValue> FromModel(MyDto source);
 
-                    public static partial MyDto FromItem(Dictionary<string, AttributeValue> item);
+                    public static partial MyDto ToModel(Dictionary<string, AttributeValue> item);
                 }
 
                 public class MyDto
@@ -104,9 +104,9 @@ public class SimpleVerifyTests
                 [DynamoMapper]
                 public static partial class ExampleEntityMapper
                 {
-                    public static partial Dictionary<string, AttributeValue> ToItem(ExampleEntity source);
+                    public static partial Dictionary<string, AttributeValue> FromModel(ExampleEntity source);
 
-                    public static partial ExampleEntity FromItem(Dictionary<string, AttributeValue> x);
+                    public static partial ExampleEntity ToModel(Dictionary<string, AttributeValue> x);
                 }
 
                 public class ExampleEntity
@@ -163,9 +163,9 @@ public class SimpleVerifyTests
                 [DynamoMapper]
                 public static partial class ExampleEntityMapper
                 {
-                    public static partial Dictionary<string, AttributeValue> ToItem(MyDto source);
+                    public static partial Dictionary<string, AttributeValue> FromModel(MyDto source);
 
-                    public static partial MyDto FromItem(Dictionary<string, AttributeValue> x);
+                    public static partial MyDto ToModel(Dictionary<string, AttributeValue> x);
                 }
 
                 public class MyDto
@@ -192,9 +192,9 @@ public class SimpleVerifyTests
                 [DynamoMapper]
                 public static partial class ExampleEntityMapper
                 {
-                    public static partial Dictionary<string, AttributeValue> ToItem(MyDto source);
+                    public static partial Dictionary<string, AttributeValue> FromModel(MyDto source);
 
-                    public static partial MyDto FromItem(Dictionary<string, AttributeValue> x);
+                    public static partial MyDto ToModel(Dictionary<string, AttributeValue> x);
                 }
 
                 public class MyDto
@@ -221,9 +221,9 @@ public class SimpleVerifyTests
                 [DynamoMapper]
                 public static partial class ExampleEntityMapper
                 {
-                    public static partial Dictionary<string, AttributeValue> ToAttributeValues(MyDto source);
+                    public static partial Dictionary<string, AttributeValue> FromMyDto(MyDto source);
 
-                    public static partial MyDto FromAttributeValues(Dictionary<string, AttributeValue> x);
+                    public static partial MyDto ToMyDto(Dictionary<string, AttributeValue> x);
                 }
 
                 public class MyDto
@@ -258,9 +258,9 @@ public class SimpleVerifyTests
                 )]
                 public static partial class ExampleEntityMapper
                 {
-                    public static partial Dictionary<string, AttributeValue> ToItem(ExampleEntity source);
+                    public static partial Dictionary<string, AttributeValue> FromModel(ExampleEntity source);
 
-                    public static partial ExampleEntity FromItem(Dictionary<string, AttributeValue> x);
+                    public static partial ExampleEntity ToModel(Dictionary<string, AttributeValue> x);
                 }
 
                 public class ExampleEntity
@@ -317,9 +317,9 @@ public class SimpleVerifyTests
                 [DynamoMapper]
                 public static partial class ExampleEntityMapper
                 {
-                    public static partial Dictionary<string, AttributeValue> ToItem(MyDto source);
+                    public static partial Dictionary<string, AttributeValue> FromModel(MyDto source);
 
-                    public static partial MyDto FromItem(Dictionary<string, AttributeValue> item);
+                    public static partial MyDto ToModel(Dictionary<string, AttributeValue> item);
                 }
 
                 public class MyDto
@@ -349,7 +349,7 @@ public class SimpleVerifyTests
                 [DynamoMapper]
                 public static partial class ExampleEntityMapper
                 {
-                    public static partial MyDto FromItem(Dictionary<string, AttributeValue> item);
+                    public static partial MyDto ToModel(Dictionary<string, AttributeValue> item);
                 }
 
                 public class MyDto
@@ -379,7 +379,7 @@ public class SimpleVerifyTests
                 [DynamoField(nameof(MyDto.ShouldNotBeMapped), FromMethod = nameof(GetType))]
                 public static partial class ExampleMyDtoMapper
                 {
-                    public static partial MyDto FromItem(Dictionary<string, AttributeValue> item);
+                    public static partial MyDto ToModel(Dictionary<string, AttributeValue> item);
 
                     public static Type GetType(Dictionary<string, AttributeValue> item)
                     {
@@ -414,7 +414,7 @@ public class SimpleVerifyTests
                 [DynamoField(nameof(MyDto.ShouldNotBeMapped), ToMethod = nameof(SetType))]
                 public static partial class ExampleMyDtoMapper
                 {
-                    public static partial Dictionary<string, AttributeValue> ToItem(MyDto source);
+                    public static partial Dictionary<string, AttributeValue> FromModel(MyDto source);
 
                     public static AttributeValue SetType(MyDto source)
                     {

@@ -12,8 +12,8 @@ internal class MapperOptions
     internal bool OmitEmptyStrings { get; set; } = false;
     internal bool OmitNullStrings { get; set; } = true;
 
-    internal string ToMethodParameterName { get; set; } = "source";
-    internal string FromMethodParameterName { get; set; } = "item";
+    internal string FromModelParameterName { get; set; } = "source";
+    internal string ToModelParameterName { get; set; } = "item";
 
     internal Func<string, string> KeyNamingConventionConverter
     {

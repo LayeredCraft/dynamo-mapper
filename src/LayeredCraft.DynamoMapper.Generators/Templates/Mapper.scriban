@@ -19,23 +19,23 @@ using Amazon.DynamoDBv2.Model;
 {{~ end ~}}
 {{ mapper_class_signature }}
 {
-    {{~ if mapper_class.to_item_signature != null ~}}
+    {{~ if mapper_class.from_model_signature != null ~}}
     {{ generated_code_attribute }}
-    {{ mapper_class.to_item_signature }} =>
+    {{ mapper_class.from_model_signature }} =>
         new Dictionary<string, AttributeValue>({{ dictionary_capacity }}){{ if dictionary_capacity == 0 }};{{ end }}
-            {{~ for assignment in to_assignments ~}}
+            {{~ for assignment in from_model_assignments ~}}
             {{ assignment }}{{ if for.last }};{{ end }}
             {{~ end ~}}
     {{~ end ~}}
-    {{~ if mapper_class.to_item_signature != null && mapper_class.from_item_signature != null ~}}
+    {{~ if mapper_class.from_model_signature != null && mapper_class.to_model_signature != null ~}}
 
     {{~ end ~}}
-    {{~ if mapper_class.from_item_signature != null ~}}
+    {{~ if mapper_class.to_model_signature != null ~}}
     {{ generated_code_attribute }}
-    {{ mapper_class.from_item_signature }} =>
+    {{ mapper_class.to_model_signature }} =>
         new {{ model_class.fully_qualified_type }}
         {
-            {{~ for assignment in from_assignments ~}}
+            {{~ for assignment in to_model_assignments ~}}
             {{ assignment }}
             {{~ end ~}}
         };

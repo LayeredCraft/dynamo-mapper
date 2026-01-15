@@ -76,7 +76,7 @@ dotnet run --project examples/DynamoMapper.SimpleExample/DynamoMapper.SimpleExam
 2. **Analysis**: `MapperSyntaxProvider.Transformer()` extracts mapper and model metadata
 3. **Type Resolution**: Analyzes properties to determine AttributeValue mappings
 4. **Code Generation**: `MapperEmitter.Generate()` renders Scriban template
-5. **Output**: Generates `{MapperClassName}.g.cs` with `ToItem` and `FromItem` methods
+5. **Output**: Generates `{MapperClassName}.g.cs` with `FromModel` and `ToModel` methods
 
 ### Key Components
 
@@ -94,7 +94,7 @@ dotnet run --project examples/DynamoMapper.SimpleExample/DynamoMapper.SimpleExam
 
 **WellKnownTypes**: Caches and resolves commonly-used types from Roslyn compilation
 
-**Mapper.scriban**: Scriban template that generates both `ToItem` and `FromItem` method implementations
+**Mapper.scriban**: Scriban template that generates both `FromModel` and `ToModel` method implementations
 
 ## Supported Types (Phase 1)
 
@@ -128,8 +128,8 @@ Nullable: All nullable versions of the above
 ## Naming Conventions
 
 **Method Prefixes**:
-- "To" prefix: Domain model → DynamoDB (e.g., `ToItem`, `ToProduct`)
-- "From" prefix: DynamoDB → Domain model (e.g., `FromItem`, `FromProduct`)
+- "To" prefix: Domain model → DynamoDB (e.g., `FromModel`, `ToProduct`)
+- "From" prefix: DynamoDB → Domain model (e.g., `ToModel`, `FromProduct`)
 
 **Generator Tracking Names** (in `TrackingName.cs`): Used for Roslyn incremental generation debugging
 
@@ -137,13 +137,13 @@ Nullable: All nullable versions of the above
 
 Mappers support four lifecycle hooks as `static partial void` methods:
 
-- `BeforeToItem(T source, Dictionary<string, AttributeValue> item)`: Before property mapping
-- `AfterToItem(T source, Dictionary<string, AttributeValue> item)`: After property mapping (add pk/sk here)
-- `BeforeFromItem(Dictionary<string, AttributeValue> item)`: Before deserialization
-- `AfterFromItem(Dictionary<string, AttributeValue> item, ref T entity)`: After object construction
+- `BeforeFromModel(T source, Dictionary<string, AttributeValue> item)`: Before property mapping
+- `AfterFromModel(T source, Dictionary<string, AttributeValue> item)`: After property mapping (add pk/sk here)
+- `BeforeToModel(Dictionary<string, AttributeValue> item)`: Before deserialization
+- `AfterToModel(Dictionary<string, AttributeValue> item, ref T entity)`: After object construction
 
 **Common Use Cases**:
-- Adding single-table keys (pk/sk) in `AfterToItem`
+- Adding single-table keys (pk/sk) in `AfterFromModel`
 - Adding discriminator fields (`recordType`, `entityType`)
 - Adding TTL attributes
 - Capturing unmapped attributes in an attribute bag

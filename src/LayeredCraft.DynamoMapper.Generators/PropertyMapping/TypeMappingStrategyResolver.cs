@@ -199,7 +199,7 @@ internal static class TypeMappingStrategyResolver
         // Nullable enums don't need a default value (they can be null)
         string[] fromArgs = analysis.Nullability.IsNullableType
             ? [enumFormat]
-mType.MemberNames.First()}", enumFormat];
+            : [$"{enumName}.{enumType.MemberNames.First()}", enumFormat];
 
         string[] toArgs = [enumFormat];
 

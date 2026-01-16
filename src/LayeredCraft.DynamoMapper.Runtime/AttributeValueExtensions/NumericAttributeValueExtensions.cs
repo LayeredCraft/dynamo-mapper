@@ -11,6 +11,35 @@ public static class NumericAttributeValueExtensions
 {
     extension(Dictionary<string, AttributeValue> attributes)
     {
+        /// <summary>Tries to get an integer value from the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="value">The integer value when found.</param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <param name="kind">The DynamoDB attribute kind to interpret as a number.</param>
+        /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
+        /// <remarks>Parsing uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
+        public bool TryGetInt(
+            string key,
+            out int value,
+            Requiredness requiredness = Requiredness.InferFromNullability,
+            DynamoKind kind = DynamoKind.N
+        )
+        {
+            value = 0;
+            if (!attributes.TryGetValue(key, requiredness, out var attribute))
+                return false;
+
+            var stringValue = attribute!.GetString(kind);
+            value =
+                stringValue.Length == 0
+                    ? 0
+                    : int.Parse(stringValue, NumberStyles.Integer, CultureInfo.InvariantCulture);
+            return true;
+        }
+
         /// <summary>Gets an integer value from the attribute dictionary.</summary>
         /// <param name="key">The attribute key to retrieve.</param>
         /// <param name="requiredness">
@@ -27,12 +56,37 @@ public static class NumericAttributeValueExtensions
             string key,
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.N
+        ) => attributes.TryGetInt(key, out var value, requiredness, kind) ? value : 0;
+
+        /// <summary>Tries to get a nullable integer value from the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="value">The nullable integer value when found.</param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <param name="kind">The DynamoDB attribute kind to interpret as a number.</param>
+        /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
+        /// <remarks>Parsing uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
+        public bool TryGetNullableInt(
+            string key,
+            out int? value,
+            Requiredness requiredness = Requiredness.InferFromNullability,
+            DynamoKind kind = DynamoKind.N
         )
         {
-            var stringValue = attributes.GetValue(key, requiredness).GetString(kind);
-            return stringValue.Length == 0
-                ? 0
+            value = null;
+            if (!attributes.TryGetNullableValue(key, requiredness, out var attribute))
+                return false;
+
+            if (attribute.IsNull)
+                return true;
+
+            var stringValue = attribute!.GetNullableString(kind);
+            value = stringValue is null
+                ? null
                 : int.Parse(stringValue, NumberStyles.Integer, CultureInfo.InvariantCulture);
+            return true;
         }
 
         /// <summary>Gets a nullable integer value from the attribute dictionary.</summary>
@@ -51,14 +105,35 @@ public static class NumericAttributeValueExtensions
             string key,
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.N
+        ) => attributes.TryGetNullableInt(key, out var value, requiredness, kind) ? value : null;
+
+        /// <summary>Tries to get a long integer value from the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="value">The long value when found.</param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <param name="kind">The DynamoDB attribute kind to interpret as a number.</param>
+        /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
+        /// <remarks>Parsing uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
+        public bool TryGetLong(
+            string key,
+            out long value,
+            Requiredness requiredness = Requiredness.InferFromNullability,
+            DynamoKind kind = DynamoKind.N
         )
         {
-            var stringValue = attributes
-                .GetNullableValue(key, requiredness)
-                .GetNullableString(kind);
-            return stringValue is null
-                ? null
-                : int.Parse(stringValue, NumberStyles.Integer, CultureInfo.InvariantCulture);
+            value = 0;
+            if (!attributes.TryGetValue(key, requiredness, out var attribute))
+                return false;
+
+            var stringValue = attribute!.GetString(kind);
+            value =
+                stringValue.Length == 0
+                    ? 0
+                    : long.Parse(stringValue, NumberStyles.Integer, CultureInfo.InvariantCulture);
+            return true;
         }
 
         /// <summary>Gets a long integer value from the attribute dictionary.</summary>
@@ -77,12 +152,37 @@ public static class NumericAttributeValueExtensions
             string key,
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.N
+        ) => attributes.TryGetLong(key, out var value, requiredness, kind) ? value : 0;
+
+        /// <summary>Tries to get a nullable long integer value from the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="value">The nullable long value when found.</param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <param name="kind">The DynamoDB attribute kind to interpret as a number.</param>
+        /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
+        /// <remarks>Parsing uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
+        public bool TryGetNullableLong(
+            string key,
+            out long? value,
+            Requiredness requiredness = Requiredness.InferFromNullability,
+            DynamoKind kind = DynamoKind.N
         )
         {
-            var stringValue = attributes.GetValue(key, requiredness).GetString(kind);
-            return stringValue.Length == 0
-                ? 0
+            value = null;
+            if (!attributes.TryGetNullableValue(key, requiredness, out var attribute))
+                return false;
+
+            if (attribute.IsNull)
+                return true;
+
+            var stringValue = attribute!.GetNullableString(kind);
+            value = stringValue is null
+                ? null
                 : long.Parse(stringValue, NumberStyles.Integer, CultureInfo.InvariantCulture);
+            return true;
         }
 
         /// <summary>Gets a nullable long integer value from the attribute dictionary.</summary>
@@ -101,15 +201,7 @@ public static class NumericAttributeValueExtensions
             string key,
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.N
-        )
-        {
-            var stringValue = attributes
-                .GetNullableValue(key, requiredness)
-                .GetNullableString(kind);
-            return stringValue is null
-                ? null
-                : long.Parse(stringValue, NumberStyles.Integer, CultureInfo.InvariantCulture);
-        }
+        ) => attributes.TryGetNullableLong(key, out var value, requiredness, kind) ? value : null;
 
         /// <summary>Sets an integer value in the attribute dictionary.</summary>
         /// <param name="key">The attribute key to set.</param>
@@ -167,6 +259,35 @@ public static class NumericAttributeValueExtensions
             return attributes;
         }
 
+        /// <summary>Tries to get a single-precision floating-point value from the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="value">The float value when found.</param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <param name="kind">The DynamoDB attribute kind to interpret as a number.</param>
+        /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
+        /// <remarks>Parsing uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
+        public bool TryGetFloat(
+            string key,
+            out float value,
+            Requiredness requiredness = Requiredness.InferFromNullability,
+            DynamoKind kind = DynamoKind.N
+        )
+        {
+            value = 0f;
+            if (!attributes.TryGetValue(key, requiredness, out var attribute))
+                return false;
+
+            var stringValue = attribute!.GetString(kind);
+            value =
+                stringValue.Length == 0
+                    ? 0f
+                    : float.Parse(stringValue, NumberStyles.Float, CultureInfo.InvariantCulture);
+            return true;
+        }
+
         /// <summary>Gets a single-precision floating-point value from the attribute dictionary.</summary>
         /// <param name="key">The attribute key to retrieve.</param>
         /// <param name="requiredness">
@@ -183,12 +304,40 @@ public static class NumericAttributeValueExtensions
             string key,
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.N
+        ) => attributes.TryGetFloat(key, out var value, requiredness, kind) ? value : 0f;
+
+        /// <summary>
+        ///     Tries to get a nullable single-precision floating-point value from the attribute
+        ///     dictionary.
+        /// </summary>
+        /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="value">The nullable float value when found.</param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <param name="kind">The DynamoDB attribute kind to interpret as a number.</param>
+        /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
+        /// <remarks>Parsing uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
+        public bool TryGetNullableFloat(
+            string key,
+            out float? value,
+            Requiredness requiredness = Requiredness.InferFromNullability,
+            DynamoKind kind = DynamoKind.N
         )
         {
-            var stringValue = attributes.GetValue(key, requiredness).GetString(kind);
-            return stringValue.Length == 0
-                ? 0f
+            value = null;
+            if (!attributes.TryGetNullableValue(key, requiredness, out var attribute))
+                return false;
+
+            if (attribute.IsNull)
+                return true;
+
+            var stringValue = attribute!.GetNullableString(kind);
+            value = stringValue is null
+                ? null
                 : float.Parse(stringValue, NumberStyles.Float, CultureInfo.InvariantCulture);
+            return true;
         }
 
         /// <summary>Gets a nullable single-precision floating-point value from the attribute dictionary.</summary>
@@ -207,14 +356,35 @@ public static class NumericAttributeValueExtensions
             string key,
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.N
+        ) => attributes.TryGetNullableFloat(key, out var value, requiredness, kind) ? value : null;
+
+        /// <summary>Tries to get a double-precision floating-point value from the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="value">The double value when found.</param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <param name="kind">The DynamoDB attribute kind to interpret as a number.</param>
+        /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
+        /// <remarks>Parsing uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
+        public bool TryGetDouble(
+            string key,
+            out double value,
+            Requiredness requiredness = Requiredness.InferFromNullability,
+            DynamoKind kind = DynamoKind.N
         )
         {
-            var stringValue = attributes
-                .GetNullableValue(key, requiredness)
-                .GetNullableString(kind);
-            return stringValue is null
-                ? null
-                : float.Parse(stringValue, NumberStyles.Float, CultureInfo.InvariantCulture);
+            value = 0.0;
+            if (!attributes.TryGetValue(key, requiredness, out var attribute))
+                return false;
+
+            var stringValue = attribute!.GetString(kind);
+            value =
+                stringValue.Length == 0
+                    ? 0.0
+                    : double.Parse(stringValue, NumberStyles.Float, CultureInfo.InvariantCulture);
+            return true;
         }
 
         /// <summary>Gets a double-precision floating-point value from the attribute dictionary.</summary>
@@ -233,12 +403,40 @@ public static class NumericAttributeValueExtensions
             string key,
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.N
+        ) => attributes.TryGetDouble(key, out var value, requiredness, kind) ? value : 0.0;
+
+        /// <summary>
+        ///     Tries to get a nullable double-precision floating-point value from the attribute
+        ///     dictionary.
+        /// </summary>
+        /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="value">The nullable double value when found.</param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <param name="kind">The DynamoDB attribute kind to interpret as a number.</param>
+        /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
+        /// <remarks>Parsing uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
+        public bool TryGetNullableDouble(
+            string key,
+            out double? value,
+            Requiredness requiredness = Requiredness.InferFromNullability,
+            DynamoKind kind = DynamoKind.N
         )
         {
-            var stringValue = attributes.GetValue(key, requiredness).GetString(kind);
-            return stringValue.Length == 0
-                ? 0.0
+            value = null;
+            if (!attributes.TryGetNullableValue(key, requiredness, out var attribute))
+                return false;
+
+            if (attribute.IsNull)
+                return true;
+
+            var stringValue = attribute!.GetNullableString(kind);
+            value = stringValue is null
+                ? null
                 : double.Parse(stringValue, NumberStyles.Float, CultureInfo.InvariantCulture);
+            return true;
         }
 
         /// <summary>Gets a nullable double-precision floating-point value from the attribute dictionary.</summary>
@@ -257,14 +455,35 @@ public static class NumericAttributeValueExtensions
             string key,
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.N
+        ) => attributes.TryGetNullableDouble(key, out var value, requiredness, kind) ? value : null;
+
+        /// <summary>Tries to get a decimal value from the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="value">The decimal value when found.</param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <param name="kind">The DynamoDB attribute kind to interpret as a number.</param>
+        /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
+        /// <remarks>Parsing uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
+        public bool TryGetDecimal(
+            string key,
+            out decimal value,
+            Requiredness requiredness = Requiredness.InferFromNullability,
+            DynamoKind kind = DynamoKind.N
         )
         {
-            var stringValue = attributes
-                .GetNullableValue(key, requiredness)
-                .GetNullableString(kind);
-            return stringValue is null
-                ? null
-                : double.Parse(stringValue, NumberStyles.Float, CultureInfo.InvariantCulture);
+            value = 0m;
+            if (!attributes.TryGetValue(key, requiredness, out var attribute))
+                return false;
+
+            var stringValue = attribute!.GetString(kind);
+            value =
+                stringValue.Length == 0
+                    ? 0m
+                    : decimal.Parse(stringValue, NumberStyles.Float, CultureInfo.InvariantCulture);
+            return true;
         }
 
         /// <summary>Gets a decimal value from the attribute dictionary.</summary>
@@ -283,12 +502,37 @@ public static class NumericAttributeValueExtensions
             string key,
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.N
+        ) => attributes.TryGetDecimal(key, out var value, requiredness, kind) ? value : 0m;
+
+        /// <summary>Tries to get a nullable decimal value from the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="value">The nullable decimal value when found.</param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <param name="kind">The DynamoDB attribute kind to interpret as a number.</param>
+        /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
+        /// <remarks>Parsing uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
+        public bool TryGetNullableDecimal(
+            string key,
+            out decimal? value,
+            Requiredness requiredness = Requiredness.InferFromNullability,
+            DynamoKind kind = DynamoKind.N
         )
         {
-            var stringValue = attributes.GetValue(key, requiredness).GetString(kind);
-            return stringValue.Length == 0
-                ? 0m
+            value = null;
+            if (!attributes.TryGetNullableValue(key, requiredness, out var attribute))
+                return false;
+
+            if (attribute.IsNull)
+                return true;
+
+            var stringValue = attribute!.GetNullableString(kind);
+            value = stringValue is null
+                ? null
                 : decimal.Parse(stringValue, NumberStyles.Float, CultureInfo.InvariantCulture);
+            return true;
         }
 
         /// <summary>Gets a nullable decimal value from the attribute dictionary.</summary>
@@ -307,15 +551,8 @@ public static class NumericAttributeValueExtensions
             string key,
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.N
-        )
-        {
-            var stringValue = attributes
-                .GetNullableValue(key, requiredness)
-                .GetNullableString(kind);
-            return stringValue is null
-                ? null
-                : decimal.Parse(stringValue, NumberStyles.Float, CultureInfo.InvariantCulture);
-        }
+        ) =>
+            attributes.TryGetNullableDecimal(key, out var value, requiredness, kind) ? value : null;
 
         /// <summary>Sets a single-precision floating-point value in the attribute dictionary.</summary>
         /// <param name="key">The attribute key to set.</param>

@@ -1,6 +1,7 @@
 using DynamoMapper.Generator.Diagnostics;
 using DynamoMapper.Generator.PropertyMapping.Models;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace DynamoMapper.Generator.PropertyMapping;
 
@@ -31,6 +32,11 @@ internal static class PropertyAnalyzer
         var hasGetter = propertySymbol.GetMethod is not null;
         var hasSetter = propertySymbol.SetMethod is not null; // includes init-only setters
 
+        var isRequired = propertySymbol.IsRequired;
+        var isInitOnly = propertySymbol.SetMethod?.IsInitOnly ?? false;
+
+        var hasDefaultValue = HasDefaultValue(propertySymbol);
+
         return new PropertyAnalysis(
             propertySymbol.Name,
             propertySymbol.Type,
@@ -38,7 +44,10 @@ internal static class PropertyAnalyzer
             nullability,
             fieldOptions,
             hasGetter,
-            hasSetter
+            hasSetter,
+            isRequired,
+            isInitOnly,
+            hasDefaultValue
         );
     }
 
@@ -62,6 +71,10 @@ internal static class PropertyAnalyzer
 
         return new PropertyNullabilityInfo(isNullableType, isReferenceType, annotation);
     }
+
+    private static bool HasDefaultValue(IPropertySymbol property) =>
+        property.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax()
+            is PropertyDeclarationSyntax { Initializer: not null };
 
     /// <summary>
     ///     Unwraps Nullable&lt;T&gt; to get the underlying type T. If the type is not nullable,

@@ -6,6 +6,7 @@ namespace DynamoMapper.Generator.Models;
 
 internal sealed record ModelClassInfo(
     string FullyQualifiedType,
+    string VarName,
     EquatableArray<PropertyInfo> Properties
 );
 
@@ -15,6 +16,7 @@ internal static class ModelClassInfoExtensions
     {
         internal static (ModelClassInfo?, DiagnosticInfo[]) Create(
             ITypeSymbol modelTypeSymbol,
+            string? fromItemParameterName,
             GeneratorContext context
         )
         {
@@ -28,12 +30,17 @@ internal static class ModelClassInfoExtensions
                 )
                 .ToList();
 
+            var varName = context
+                .MapperOptions.KeyNamingConventionConverter(modelTypeSymbol.Name)
+                .Map(name => name == fromItemParameterName ? name + "1" : name);
+
             var (propertyInfos, propertyDiagnostics) = properties.CollectDiagnosticResults(
-                propertySymbol => PropertyInfo.Create(propertySymbol, context)
+                propertySymbol => PropertyInfo.Create(propertySymbol, varName, context)
             );
 
             var modelClassInfo = new ModelClassInfo(
                 modelTypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                varName,
                 propertyInfos.ToEquatableArray()
             );
 

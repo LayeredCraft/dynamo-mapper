@@ -10,6 +10,38 @@ public static class EnumAttributeValueExtensions
 {
     extension(Dictionary<string, AttributeValue> attributes)
     {
+        /// <summary>Tries to get an enum value from the attribute dictionary.</summary>
+        /// <typeparam name="TEnum">The enum type to parse.</typeparam>
+        /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="value">The enum value when found.</param>
+        /// <param name="defaultValue">The default value to return if parsing fails.</param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <param name="kind">The DynamoDB attribute kind to interpret as a string.</param>
+        /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
+        public bool TryGetEnum<TEnum>(
+            string key,
+            out TEnum value,
+            TEnum defaultValue,
+            Requiredness requiredness = Requiredness.InferFromNullability,
+            DynamoKind kind = DynamoKind.S
+        )
+            where TEnum : struct
+        {
+            value = defaultValue;
+            if (!attributes.TryGetValue(key, requiredness, out var attribute))
+                return false;
+
+            var stringValue = attribute!.GetString(kind);
+            if (stringValue.Length == 0)
+                return true;
+
+            value = Enum.TryParse(stringValue, out TEnum parsed) ? parsed : defaultValue;
+            return true;
+        }
+
         /// <summary>Gets an enum value from the attribute dictionary.</summary>
         /// <typeparam name="TEnum">The enum type to parse.</typeparam>
         /// <param name="key">The attribute key to retrieve.</param>
@@ -30,9 +62,47 @@ public static class EnumAttributeValueExtensions
             DynamoKind kind = DynamoKind.S
         )
             where TEnum : struct =>
-            attributes.GetValue(key, requiredness).GetString(kind) is { Length: > 0 } stringValue
-                ? (TEnum)Enum.Parse(typeof(TEnum), stringValue)
+            attributes.TryGetEnum(key, out var value, defaultValue, requiredness, kind)
+                ? value
                 : defaultValue;
+
+        /// <summary>Tries to get an enum value from the attribute dictionary, expecting a specific format.</summary>
+        /// <typeparam name="TEnum">The enum type to parse.</typeparam>
+        /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="value">The enum value when found.</param>
+        /// <param name="defaultValue">The default value to return if parsing fails.</param>
+        /// <param name="format">
+        ///     The format that was used to serialize the enum. Valid formats: "G" or "g"
+        ///     (general/name), "D" or "d" (decimal), "X" or "x" (hexadecimal), "F" or "f" (flags). This
+        ///     parameter is for documentation purposes; parsing handles all formats.
+        /// </param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <param name="kind">The DynamoDB attribute kind to interpret as a string.</param>
+        /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
+        public bool TryGetEnum<TEnum>(
+            string key,
+            out TEnum value,
+            TEnum defaultValue,
+            string format,
+            Requiredness requiredness = Requiredness.InferFromNullability,
+            DynamoKind kind = DynamoKind.S
+        )
+            where TEnum : struct
+        {
+            value = defaultValue;
+            if (!attributes.TryGetValue(key, requiredness, out var attribute))
+                return false;
+
+            var stringValue = attribute!.GetString(kind);
+            if (stringValue.Length == 0)
+                return true;
+
+            value = Enum.TryParse(stringValue, out TEnum parsed) ? parsed : defaultValue;
+            return true;
+        }
 
         /// <summary>Gets an enum value from the attribute dictionary, expecting a specific format.</summary>
         /// <typeparam name="TEnum">The enum type to parse.</typeparam>
@@ -60,9 +130,42 @@ public static class EnumAttributeValueExtensions
             DynamoKind kind = DynamoKind.S
         )
             where TEnum : struct =>
-            attributes.GetValue(key, requiredness).GetString(kind) is { Length: > 0 } stringValue
-                ? (TEnum)Enum.Parse(typeof(TEnum), stringValue)
+            attributes.TryGetEnum(key, out var value, defaultValue, format, requiredness, kind)
+                ? value
                 : defaultValue;
+
+        /// <summary>Tries to get a nullable enum value from the attribute dictionary.</summary>
+        /// <typeparam name="TEnum">The enum type to parse.</typeparam>
+        /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="value">The nullable enum value when found.</param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <param name="kind">The DynamoDB attribute kind to interpret as a string.</param>
+        /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
+        public bool TryGetNullableEnum<TEnum>(
+            string key,
+            out TEnum? value,
+            Requiredness requiredness = Requiredness.InferFromNullability,
+            DynamoKind kind = DynamoKind.S
+        )
+            where TEnum : struct
+        {
+            value = null;
+            if (!attributes.TryGetNullableValue(key, requiredness, out var attribute))
+                return false;
+
+            if (attribute.IsNull)
+                return true;
+
+            var stringValue = attribute!.GetNullableString(kind);
+            if (stringValue is null)
+                return true;
+
+            value = Enum.TryParse(stringValue, out TEnum parsed) ? parsed : null;
+            return true;
+        }
 
         /// <summary>Gets a nullable enum value from the attribute dictionary.</summary>
         /// <typeparam name="TEnum">The enum type to parse.</typeparam>
@@ -81,12 +184,51 @@ public static class EnumAttributeValueExtensions
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.S
         )
+            where TEnum : struct =>
+            attributes.TryGetNullableEnum<TEnum>(key, out var value, requiredness, kind)
+                ? value
+                : null;
+
+        /// <summary>
+        ///     Tries to get a nullable enum value from the attribute dictionary, expecting a specific
+        ///     format.
+        /// </summary>
+        /// <typeparam name="TEnum">The enum type to parse.</typeparam>
+        /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="format">
+        ///     The format that was used to serialize the enum. Valid formats: "G" or "g"
+        ///     (general/name), "D" or "d" (decimal), "X" or "x" (hexadecimal), "F" or "f" (flags). This
+        ///     parameter is for documentation purposes; parsing handles all formats.
+        /// </param>
+        /// <param name="value">The nullable enum value when found.</param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <param name="kind">The DynamoDB attribute kind to interpret as a string.</param>
+        /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
+        public bool TryGetNullableEnum<TEnum>(
+            string key,
+            string format,
+            out TEnum? value,
+            Requiredness requiredness = Requiredness.InferFromNullability,
+            DynamoKind kind = DynamoKind.S
+        )
             where TEnum : struct
         {
-            var stringValue = attributes
-                .GetNullableValue(key, requiredness)
-                .GetNullableString(kind);
-            return stringValue is null ? null : (TEnum)Enum.Parse(typeof(TEnum), stringValue);
+            value = null;
+            if (!attributes.TryGetNullableValue(key, requiredness, out var attribute))
+                return false;
+
+            if (attribute.IsNull)
+                return true;
+
+            var stringValue = attribute!.GetNullableString(kind);
+            if (stringValue is null)
+                return true;
+
+            value = Enum.TryParse(stringValue, out TEnum parsed) ? parsed : null;
+            return true;
         }
 
         /// <summary>Gets a nullable enum value from the attribute dictionary, expecting a specific format.</summary>
@@ -112,13 +254,10 @@ public static class EnumAttributeValueExtensions
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.S
         )
-            where TEnum : struct
-        {
-            var stringValue = attributes
-                .GetNullableValue(key, requiredness)
-                .GetNullableString(kind);
-            return stringValue is null ? null : (TEnum)Enum.Parse(typeof(TEnum), stringValue);
-        }
+            where TEnum : struct =>
+            attributes.TryGetNullableEnum<TEnum>(key, format, out var value, requiredness, kind)
+                ? value
+                : null;
 
         /// <summary>Sets an enum value in the attribute dictionary.</summary>
         /// <typeparam name="TEnum">The enum type to set.</typeparam>

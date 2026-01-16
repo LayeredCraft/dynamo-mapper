@@ -45,8 +45,9 @@ public static partial class ExampleEntityMapper
             .SetEnum<global::MyNamespace.OrderStatus>("nullableEnum", source.NullableEnum, "G", false, true);
 
     [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
-    public static partial global::MyNamespace.ExampleEntity FromItem(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> x) =>
-        new global::MyNamespace.ExampleEntity
+    public static partial global::MyNamespace.ExampleEntity FromItem(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> x)
+    {
+        var exampleEntity = new global::MyNamespace.ExampleEntity
         {
             Bool = x.GetBool("bool", Requiredness.InferFromNullability),
             NullableBool = x.GetNullableBool("nullableBool", Requiredness.InferFromNullability),
@@ -71,4 +72,6 @@ public static partial class ExampleEntityMapper
             Enum = x.GetEnum<global::MyNamespace.OrderStatus>("enum", global::MyNamespace.OrderStatus.Pending, "G", Requiredness.InferFromNullability),
             NullableEnum = x.GetNullableEnum<global::MyNamespace.OrderStatus>("nullableEnum", "G", Requiredness.InferFromNullability),
         };
+        return exampleEntity;
+    }
 }

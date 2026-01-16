@@ -19,10 +19,13 @@ namespace MyNamespace;
 public static partial class ExampleMyDtoMapper
 {
     [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
-    public static partial global::MyNamespace.MyDto FromItem(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> item) =>
-        new global::MyNamespace.MyDto
+    public static partial global::MyNamespace.MyDto FromItem(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> item)
+    {
+        var myDto = new global::MyNamespace.MyDto
         {
             Name = item.GetString("name", Requiredness.InferFromNullability),
             ShouldNotBeMapped = GetType(item),
         };
+        return myDto;
+    }
 }

@@ -31,7 +31,11 @@ internal static class MapperInfoExtensions
             context.HasToItemMethod = mapperClassInfo.ToItemSignature != null;
             context.HasFromItemMethod = mapperClassInfo.FromItemSignature != null;
 
-            var (modelClassInfo, diagnosticInfos) = ModelClassInfo.Create(modelTypeSymbol, context);
+            var (modelClassInfo, diagnosticInfos) = ModelClassInfo.Create(
+                modelTypeSymbol,
+                mapperClassInfo.FromItemParameterName,
+                context
+            );
 
             return new MapperInfo(
                 mapperClassInfo,

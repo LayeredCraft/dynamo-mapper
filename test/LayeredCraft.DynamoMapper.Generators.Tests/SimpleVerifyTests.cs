@@ -431,4 +431,35 @@ public class SimpleVerifyTests
             },
             TestContext.Current.CancellationToken
         );
+
+    [Fact]
+    public async Task Simple_DefaultValues() =>
+        await GeneratorTestHelpers.Verify(
+            new VerifyTestOptions
+            {
+                SourceCode = """
+                using System.Collections.Generic;
+                using Amazon.DynamoDBv2.Model;
+                using DynamoMapper.Runtime;
+
+                [DynamoMapper]
+                internal static partial class UserMapper
+                {
+                    internal static partial User FromItem(Dictionary<string, AttributeValue> item);
+
+                    internal static partial Dictionary<string, AttributeValue> ToItem(User user);
+                }
+
+                public class User
+                {
+                    public required string FirstName { get; init; } = string.Empty;
+                    public string MiddleName { get; set; } = string.Empty;
+                    public required string LastName { get; set; }
+                    public int Age { get; set; }
+                    public string FullName => $"{FirstName} {LastName}";
+                }
+                """,
+            },
+            TestContext.Current.CancellationToken
+        );
 }

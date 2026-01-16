@@ -25,6 +25,35 @@ internal static class UtilAttributeValueExtensions
             return attributeValue;
         }
 
+        internal bool TryGetNullableValue(
+            string key,
+            Requiredness requiredness,
+            out AttributeValue? value
+        )
+        {
+            value = null;
+
+            if (!attributes.TryGetValue(key, out var attributeValue))
+            {
+                value = requiredness switch
+                {
+                    Requiredness.Required => throw new InvalidOperationException(
+                        $"The DynamoDB item does not contain an attribute named '{key}'."
+                    ),
+                    Requiredness.Optional or Requiredness.InferFromNullability => new AttributeValue
+                    {
+                        NULL = true,
+                    },
+                    _ => throw new ArgumentOutOfRangeException(nameof(requiredness)),
+                };
+
+                return false;
+            }
+
+            value = attributeValue;
+            return true;
+        }
+
         internal bool TryGetValue(string key, Requiredness requiredness, out AttributeValue? value)
         {
             value = null;

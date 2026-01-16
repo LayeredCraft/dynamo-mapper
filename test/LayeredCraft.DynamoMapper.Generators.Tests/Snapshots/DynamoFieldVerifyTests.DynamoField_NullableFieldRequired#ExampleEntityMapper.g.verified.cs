@@ -25,10 +25,13 @@ internal static partial class ExampleEntityMapper
             .SetString("nullableString", source.NullableString, false, true);
 
     [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
-    internal static partial global::MyNamespace.ExampleEntity FromItem(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> item) =>
-        new global::MyNamespace.ExampleEntity
+    internal static partial global::MyNamespace.ExampleEntity FromItem(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> item)
+    {
+        var exampleEntity = new global::MyNamespace.ExampleEntity
         {
             String = item.GetString("string", Requiredness.InferFromNullability),
             NullableString = item.GetNullableString("nullableString", Requiredness.Required),
         };
+        return exampleEntity;
+    }
 }

@@ -24,9 +24,12 @@ public static partial class ExampleEntityMapper
             .SetString("name", source.Name, false, true);
 
     [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
-    public static partial global::MyNamespace.MyDto FromAttributeValues(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> x) =>
-        new global::MyNamespace.MyDto
+    public static partial global::MyNamespace.MyDto FromAttributeValues(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> x)
+    {
+        var myDto = new global::MyNamespace.MyDto
         {
             Name = x.GetString("name", Requiredness.InferFromNullability),
         };
+        return myDto;
+    }
 }

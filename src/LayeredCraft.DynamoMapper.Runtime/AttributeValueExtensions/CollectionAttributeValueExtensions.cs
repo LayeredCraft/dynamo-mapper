@@ -1,6 +1,12 @@
 using System.Globalization;
-using System.IO;
 using DynamoMapper.Runtime;
+
+// ReSharper disable UnusedMember.Global
+// ReSharper disable UnusedMethodReturnValue.Global
+
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable OutParameterValueIsAlwaysDiscarded.Global
+// ReSharper disable UnusedParameter.Global
 
 namespace Amazon.DynamoDBv2.Model;
 
@@ -13,38 +19,112 @@ public static class CollectionAttributeValueExtensions
     {
         // ==================== LIST OPERATIONS ====================
 
-        /// <summary>Gets a list of elements from the attribute dictionary.</summary>
-        public List<T> GetList<T>(
-            string key, Requiredness requiredness = Requiredness.InferFromNullability,
+        /// <summary>Tries to get a list of elements from the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="value">The list value when found.</param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <param name="kind">
+        ///     The DynamoDB attribute kind to interpret. Default is <see cref="DynamoKind.L" />
+        ///     .
+        /// </param>
+        /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
+        public bool TryGetList<T>(
+            string key,
+            out List<T> value,
+            Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.L
         )
         {
-            var attributeValue = attributes.GetValue(key, requiredness);
-            if (attributeValue.NULL is true)
-                return [];
+            value = [];
+            if (!attributes.TryGetValue(key, requiredness, out var attributeValue))
+                return false;
 
-            var list = attributeValue.L ?? [];
-            return list.Select(Dictionary<string, AttributeValue>.ConvertFromAttributeValue<T>).ToList();
+            if (attributeValue!.IsNull)
+                return true;
+
+            var list = attributeValue!.L ?? [];
+            value = list.Select(Dictionary<string, AttributeValue>.ConvertFromAttributeValue<T>)
+                .ToList();
+            return true;
+        }
+
+        /// <summary>Gets a list of elements from the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <param name="kind">The DynamoDB attribute kind to interpret. Default is <see cref="DynamoKind.L" />.</param>
+        /// <returns>
+        ///     The list value if the key exists; otherwise an empty list if the key is missing or the attribute has a
+        ///     DynamoDB NULL value.
+        /// </returns>
+        public List<T> GetList<T>(
+            string key,
+            Requiredness requiredness = Requiredness.InferFromNullability,
+            DynamoKind kind = DynamoKind.L
+        ) => attributes.TryGetList<T>(key, out var value, requiredness, kind) ? value : [];
+
+        /// <summary>Tries to get a nullable list of elements from the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="value">The nullable list value when found.</param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <param name="kind">
+        ///     The DynamoDB attribute kind to interpret. Default is <see cref="DynamoKind.L" />
+        ///     .
+        /// </param>
+        /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
+        public bool TryGetNullableList<T>(
+            string key,
+            out List<T>? value,
+            Requiredness requiredness = Requiredness.InferFromNullability,
+            DynamoKind kind = DynamoKind.L
+        )
+        {
+            value = null;
+            if (!attributes.TryGetNullableValue(key, requiredness, out var attributeValue))
+                return false;
+
+            if (attributeValue.IsNull)
+                return true;
+
+            var list = attributeValue!.L ?? [];
+            value = list.Select(Dictionary<string, AttributeValue>.ConvertFromAttributeValue<T>)
+                .ToList();
+            return true;
         }
 
         /// <summary>Gets a nullable list from the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <param name="kind">The DynamoDB attribute kind to interpret. Default is <see cref="DynamoKind.L" />.</param>
+        /// <returns>
+        ///     The list value if the key exists and contains a non-NULL value; otherwise <c>null</c> if
+        ///     the key is missing or the attribute has a DynamoDB NULL value.
+        /// </returns>
         public List<T>? GetNullableList<T>(
-            string key, Requiredness requiredness = Requiredness.InferFromNullability,
+            string key,
+            Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.L
-        )
-        {
-            var attributeValue = attributes.GetNullableValue(key, requiredness);
-            if (attributeValue.NULL is true)
-                return null;
-
-            var list = attributeValue.L ?? [];
-            return list.Select(Dictionary<string, AttributeValue>.ConvertFromAttributeValue<T>).ToList();
-        }
+        ) =>
+            attributes.TryGetNullableList<T>(key, out var value, requiredness, kind) ? value : null;
 
         /// <summary>Sets a list in the attribute dictionary.</summary>
         public Dictionary<string, AttributeValue> SetList<T>(
-            string key, IEnumerable<T>? value, bool omitEmptyStrings = false,
-            bool omitNullStrings = true, DynamoKind kind = DynamoKind.L
+            string key,
+            IEnumerable<T>? value,
+            bool omitEmptyStrings = false,
+            bool omitNullStrings = true,
+            DynamoKind kind = DynamoKind.L
         )
         {
             if (value is null && omitNullStrings)
@@ -56,8 +136,9 @@ public static class CollectionAttributeValueExtensions
                 return attributes;
             }
 
-            var list =
-                value.Select(Dictionary<string, AttributeValue>.ConvertToAttributeValue).ToList();
+            var list = value
+                .Select(Dictionary<string, AttributeValue>.ConvertToAttributeValue)
+                .ToList();
 
             // Empty lists ARE allowed in DynamoDB - respect omitEmptyStrings flag
             if (list.Count == 0 && omitEmptyStrings)
@@ -69,38 +150,118 @@ public static class CollectionAttributeValueExtensions
 
         // ==================== MAP OPERATIONS ====================
 
-        /// <summary>Gets a map from the attribute dictionary.</summary>
-        public Dictionary<string, T> GetMap<T>(
-            string key, Requiredness requiredness = Requiredness.InferFromNullability,
+        /// <summary>Tries to get a map from the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="value">The map value when found.</param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <param name="kind">
+        ///     The DynamoDB attribute kind to interpret. Default is <see cref="DynamoKind.M" />
+        ///     .
+        /// </param>
+        /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
+        public bool TryGetMap<T>(
+            string key,
+            out Dictionary<string, T> value,
+            Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.M
         )
         {
-            var attributeValue = attributes.GetValue(key, requiredness);
-            if (attributeValue.NULL is true)
-                return new Dictionary<string, T>();
+            value = new Dictionary<string, T>();
+            if (!attributes.TryGetValue(key, requiredness, out var attributeValue))
+                return false;
 
-            var map = attributeValue.M ?? new Dictionary<string, AttributeValue>();
-            return map.ToDictionary(kvp => kvp.Key, kvp => Dictionary<string, AttributeValue>.ConvertFromAttributeValue<T>(kvp.Value));
+            if (attributeValue!.IsNull)
+                return true;
+
+            var map = attributeValue!.M ?? new Dictionary<string, AttributeValue>();
+            value = map.ToDictionary(
+                kvp => kvp.Key,
+                kvp => Dictionary<string, AttributeValue>.ConvertFromAttributeValue<T>(kvp.Value)
+            );
+            return true;
+        }
+
+        /// <summary>Gets a map from the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <param name="kind">The DynamoDB attribute kind to interpret. Default is <see cref="DynamoKind.M" />.</param>
+        /// <returns>
+        ///     The map value if the key exists; otherwise an empty map if the key is missing or the attribute has a
+        ///     DynamoDB NULL value.
+        /// </returns>
+        public Dictionary<string, T> GetMap<T>(
+            string key,
+            Requiredness requiredness = Requiredness.InferFromNullability,
+            DynamoKind kind = DynamoKind.M
+        ) =>
+            attributes.TryGetMap<T>(key, out var value, requiredness, kind)
+                ? value
+                : new Dictionary<string, T>();
+
+        /// <summary>Tries to get a nullable map from the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="value">The nullable map value when found.</param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <param name="kind">
+        ///     The DynamoDB attribute kind to interpret. Default is <see cref="DynamoKind.M" />
+        ///     .
+        /// </param>
+        /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
+        public bool TryGetNullableMap<T>(
+            string key,
+            out Dictionary<string, T>? value,
+            Requiredness requiredness = Requiredness.InferFromNullability,
+            DynamoKind kind = DynamoKind.M
+        )
+        {
+            value = null;
+            if (!attributes.TryGetNullableValue(key, requiredness, out var attributeValue))
+                return false;
+
+            if (attributeValue.IsNull)
+                return true;
+
+            var map = attributeValue!.M ?? new Dictionary<string, AttributeValue>();
+            value = map.ToDictionary(
+                kvp => kvp.Key,
+                kvp => Dictionary<string, AttributeValue>.ConvertFromAttributeValue<T>(kvp.Value)
+            );
+            return true;
         }
 
         /// <summary>Gets a nullable map from the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <param name="kind">The DynamoDB attribute kind to interpret. Default is <see cref="DynamoKind.M" />.</param>
+        /// <returns>
+        ///     The map value if the key exists and contains a non-NULL value; otherwise <c>null</c> if
+        ///     the key is missing or the attribute has a DynamoDB NULL value.
+        /// </returns>
         public Dictionary<string, T>? GetNullableMap<T>(
-            string key, Requiredness requiredness = Requiredness.InferFromNullability,
+            string key,
+            Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.M
-        )
-        {
-            var attributeValue = attributes.GetNullableValue(key, requiredness);
-            if (attributeValue.NULL is true)
-                return null;
-
-            var map = attributeValue.M ?? new Dictionary<string, AttributeValue>();
-            return map.ToDictionary(kvp => kvp.Key, kvp => Dictionary<string, AttributeValue>.ConvertFromAttributeValue<T>(kvp.Value));
-        }
+        ) => attributes.TryGetNullableMap<T>(key, out var value, requiredness, kind) ? value : null;
 
         /// <summary>Sets a map in the attribute dictionary.</summary>
         public Dictionary<string, AttributeValue> SetMap<T>(
-            string key, IDictionary<string, T>? value, bool omitEmptyStrings = false,
-            bool omitNullStrings = true, DynamoKind kind = DynamoKind.M
+            string key,
+            IDictionary<string, T>? value,
+            bool omitEmptyStrings = false,
+            bool omitNullStrings = true,
+            DynamoKind kind = DynamoKind.M
         )
         {
             if (value is null && omitNullStrings)
@@ -112,11 +273,10 @@ public static class CollectionAttributeValueExtensions
                 return attributes;
             }
 
-            var map =
-                value.ToDictionary(
-                    kvp => kvp.Key,
-                    kvp => Dictionary<string, AttributeValue>.ConvertToAttributeValue(kvp.Value)
-                );
+            var map = value.ToDictionary(
+                kvp => kvp.Key,
+                kvp => Dictionary<string, AttributeValue>.ConvertToAttributeValue(kvp.Value)
+            );
 
             // Empty maps ARE allowed in DynamoDB - respect omitEmptyStrings flag
             if (map.Count == 0 && omitEmptyStrings)
@@ -128,38 +288,112 @@ public static class CollectionAttributeValueExtensions
 
         // ==================== STRING SET OPERATIONS ====================
 
-        /// <summary>Gets a string set from the attribute dictionary.</summary>
-        public HashSet<string> GetStringSet(
-            string key, Requiredness requiredness = Requiredness.InferFromNullability,
+        /// <summary>Tries to get a string set from the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="value">The string set value when found.</param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <param name="kind">
+        ///     The DynamoDB attribute kind to interpret. Default is
+        ///     <see cref="DynamoKind.SS" />.
+        /// </param>
+        /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
+        public bool TryGetStringSet(
+            string key,
+            out HashSet<string> value,
+            Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.SS
         )
         {
-            var attributeValue = attributes.GetValue(key, requiredness);
-            if (attributeValue.NULL is true)
-                return [];
+            value = [];
+            if (!attributes.TryGetValue(key, requiredness, out var attributeValue))
+                return false;
 
-            var ss = attributeValue.SS ?? [];
-            return [..ss];
+            if (attributeValue!.IsNull)
+                return true;
+
+            var ss = attributeValue!.SS ?? [];
+            value = [.. ss];
+            return true;
+        }
+
+        /// <summary>Gets a string set from the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <param name="kind">The DynamoDB attribute kind to interpret. Default is <see cref="DynamoKind.SS" />.</param>
+        /// <returns>
+        ///     The string set value if the key exists; otherwise an empty set if the key is missing or the attribute
+        ///     has a DynamoDB NULL value.
+        /// </returns>
+        public HashSet<string> GetStringSet(
+            string key,
+            Requiredness requiredness = Requiredness.InferFromNullability,
+            DynamoKind kind = DynamoKind.SS
+        ) => attributes.TryGetStringSet(key, out var value, requiredness, kind) ? value : [];
+
+        /// <summary>Tries to get a nullable string set from the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="value">The nullable string set value when found.</param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <param name="kind">
+        ///     The DynamoDB attribute kind to interpret. Default is
+        ///     <see cref="DynamoKind.SS" />.
+        /// </param>
+        /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
+        public bool TryGetNullableStringSet(
+            string key,
+            out HashSet<string>? value,
+            Requiredness requiredness = Requiredness.InferFromNullability,
+            DynamoKind kind = DynamoKind.SS
+        )
+        {
+            value = null;
+            if (!attributes.TryGetNullableValue(key, requiredness, out var attributeValue))
+                return false;
+
+            if (attributeValue.IsNull)
+                return true;
+
+            var ss = attributeValue!.SS ?? [];
+            value = [.. ss];
+            return true;
         }
 
         /// <summary>Gets a nullable string set.</summary>
+        /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <param name="kind">The DynamoDB attribute kind to interpret. Default is <see cref="DynamoKind.SS" />.</param>
+        /// <returns>
+        ///     The string set value if the key exists and contains a non-NULL value; otherwise <c>null</c> if
+        ///     the key is missing or the attribute has a DynamoDB NULL value.
+        /// </returns>
         public HashSet<string>? GetNullableStringSet(
-            string key, Requiredness requiredness = Requiredness.InferFromNullability,
+            string key,
+            Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.SS
-        )
-        {
-            var attributeValue = attributes.GetNullableValue(key, requiredness);
-            if (attributeValue.NULL is true)
-                return null;
-
-            var ss = attributeValue.SS ?? [];
-            return [..ss];
-        }
+        ) =>
+            attributes.TryGetNullableStringSet(key, out var value, requiredness, kind)
+                ? value
+                : null;
 
         /// <summary>Sets a string set in the attribute dictionary.</summary>
         public Dictionary<string, AttributeValue> SetStringSet(
-            string key, IEnumerable<string>? value, bool omitEmptyStrings = false,
-            bool omitNullStrings = true, DynamoKind kind = DynamoKind.SS
+            string key,
+            IEnumerable<string>? value,
+            bool omitEmptyStrings = false,
+            bool omitNullStrings = true,
+            DynamoKind kind = DynamoKind.SS
         )
         {
             if (value is null && omitNullStrings)
@@ -178,47 +412,126 @@ public static class CollectionAttributeValueExtensions
 
         // ==================== NUMBER SET OPERATIONS ====================
 
-        /// <summary>Gets a number set from the attribute dictionary.</summary>
-        public HashSet<T> GetNumberSet<T>(
-            string key, Requiredness requiredness = Requiredness.InferFromNullability,
+        /// <summary>Tries to get a number set from the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="value">The number set value when found.</param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <param name="kind">
+        ///     The DynamoDB attribute kind to interpret. Default is
+        ///     <see cref="DynamoKind.NS" />.
+        /// </param>
+        /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
+        public bool TryGetNumberSet<T>(
+            string key,
+            out HashSet<T> value,
+            Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.NS
-        ) where T : struct
+        )
+            where T : struct
         {
-            var attributeValue = attributes.GetValue(key, requiredness);
-            if (attributeValue.NULL is true)
-                return [];
+            value = [];
+            if (!attributes.TryGetValue(key, requiredness, out var attributeValue))
+                return false;
 
-            var ns = attributeValue.NS ?? [];
-            return [..ns.Select(Dictionary<string, AttributeValue>.ParseNumber<T>)];
+            if (attributeValue!.IsNull)
+                return true;
+
+            var ns = attributeValue!.NS ?? [];
+            value = [.. ns.Select(Dictionary<string, AttributeValue>.ParseNumber<T>)];
+            return true;
+        }
+
+        /// <summary>Gets a number set from the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <param name="kind">The DynamoDB attribute kind to interpret. Default is <see cref="DynamoKind.NS" />.</param>
+        /// <returns>
+        ///     The number set value if the key exists; otherwise an empty set if the key is missing or the attribute
+        ///     has a DynamoDB NULL value.
+        /// </returns>
+        public HashSet<T> GetNumberSet<T>(
+            string key,
+            Requiredness requiredness = Requiredness.InferFromNullability,
+            DynamoKind kind = DynamoKind.NS
+        )
+            where T : struct =>
+            attributes.TryGetNumberSet<T>(key, out var value, requiredness, kind) ? value : [];
+
+        /// <summary>Tries to get a nullable number set from the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="value">The nullable number set value when found.</param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <param name="kind">
+        ///     The DynamoDB attribute kind to interpret. Default is
+        ///     <see cref="DynamoKind.NS" />.
+        /// </param>
+        /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
+        public bool TryGetNullableNumberSet<T>(
+            string key,
+            out HashSet<T>? value,
+            Requiredness requiredness = Requiredness.InferFromNullability,
+            DynamoKind kind = DynamoKind.NS
+        )
+            where T : struct
+        {
+            value = null;
+            if (!attributes.TryGetNullableValue(key, requiredness, out var attributeValue))
+                return false;
+
+            if (attributeValue.IsNull)
+                return true;
+
+            var ns = attributeValue!.NS ?? [];
+            value = [.. ns.Select(Dictionary<string, AttributeValue>.ParseNumber<T>)];
+            return true;
         }
 
         /// <summary>Gets a nullable number set.</summary>
+        /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <param name="kind">The DynamoDB attribute kind to interpret. Default is <see cref="DynamoKind.NS" />.</param>
+        /// <returns>
+        ///     The number set value if the key exists and contains a non-NULL value; otherwise <c>null</c> if
+        ///     the key is missing or the attribute has a DynamoDB NULL value.
+        /// </returns>
         public HashSet<T>? GetNullableNumberSet<T>(
-            string key, Requiredness requiredness = Requiredness.InferFromNullability,
+            string key,
+            Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.NS
-        ) where T : struct
-        {
-            var attributeValue = attributes.GetNullableValue(key, requiredness);
-            if (attributeValue.NULL is true)
-                return null;
-
-            var ns = attributeValue.NS ?? [];
-            return [..ns.Select(Dictionary<string, AttributeValue>.ParseNumber<T>)];
-        }
+        )
+            where T : struct =>
+            attributes.TryGetNullableNumberSet<T>(key, out var value, requiredness, kind)
+                ? value
+                : null;
 
         /// <summary>Sets a number set in the attribute dictionary.</summary>
         public Dictionary<string, AttributeValue> SetNumberSet<T>(
-            string key, IEnumerable<T>? value, bool omitEmptyStrings = false,
-            bool omitNullStrings = true, DynamoKind kind = DynamoKind.NS
-        ) where T : struct
+            string key,
+            IEnumerable<T>? value,
+            bool omitEmptyStrings = false,
+            bool omitNullStrings = true,
+            DynamoKind kind = DynamoKind.NS
+        )
+            where T : struct
         {
             if (value is null && omitNullStrings)
                 return attributes;
 
             var set =
-                value?.Distinct()
-                    .Select(Dictionary<string, AttributeValue>.FormatNumber)
-                    .ToList() ?? [];
+                value?.Distinct().Select(Dictionary<string, AttributeValue>.FormatNumber).ToList()
+                ?? [];
 
             // DynamoDB does NOT allow empty sets - always omit
             if (set.Count == 0)
@@ -230,54 +543,133 @@ public static class CollectionAttributeValueExtensions
 
         // ==================== BINARY SET OPERATIONS ====================
 
-        /// <summary>Gets a binary set from the attribute dictionary.</summary>
-        public HashSet<byte[]> GetBinarySet(
-            string key, Requiredness requiredness = Requiredness.InferFromNullability,
+        /// <summary>Tries to get a binary set from the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="value">The binary set value when found.</param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <param name="kind">
+        ///     The DynamoDB attribute kind to interpret. Default is
+        ///     <see cref="DynamoKind.BS" />.
+        /// </param>
+        /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
+        public bool TryGetBinarySet(
+            string key,
+            out HashSet<byte[]> value,
+            Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.BS
         )
         {
-            var attributeValue = attributes.GetValue(key, requiredness);
-            if (attributeValue.NULL is true)
-                return new HashSet<byte[]>(ByteArrayComparer.Instance);
+            value = new HashSet<byte[]>(ByteArrayComparer.Instance);
+            if (!attributes.TryGetValue(key, requiredness, out var attributeValue))
+                return false;
 
-            var bs = attributeValue.BS ?? [];
-            return new HashSet<byte[]>(
+            if (attributeValue!.IsNull)
+                return true;
+
+            var bs = attributeValue!.BS ?? [];
+            value = new HashSet<byte[]>(
                 bs.Select(stream => stream.ToArray()),
                 ByteArrayComparer.Instance
             );
+            return true;
+        }
+
+        /// <summary>Gets a binary set from the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <param name="kind">The DynamoDB attribute kind to interpret. Default is <see cref="DynamoKind.BS" />.</param>
+        /// <returns>
+        ///     The binary set value if the key exists; otherwise an empty set if the key is missing or the attribute
+        ///     has a DynamoDB NULL value.
+        /// </returns>
+        public HashSet<byte[]> GetBinarySet(
+            string key,
+            Requiredness requiredness = Requiredness.InferFromNullability,
+            DynamoKind kind = DynamoKind.BS
+        ) =>
+            attributes.TryGetBinarySet(key, out var value, requiredness, kind)
+                ? value
+                : new HashSet<byte[]>(ByteArrayComparer.Instance);
+
+        /// <summary>Tries to get a nullable binary set from the attribute dictionary.</summary>
+        /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="value">The nullable binary set value when found.</param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <param name="kind">
+        ///     The DynamoDB attribute kind to interpret. Default is
+        ///     <see cref="DynamoKind.BS" />.
+        /// </param>
+        /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
+        public bool TryGetNullableBinarySet(
+            string key,
+            out HashSet<byte[]>? value,
+            Requiredness requiredness = Requiredness.InferFromNullability,
+            DynamoKind kind = DynamoKind.BS
+        )
+        {
+            value = null;
+            if (!attributes.TryGetNullableValue(key, requiredness, out var attributeValue))
+                return false;
+
+            if (attributeValue.IsNull)
+                return true;
+
+            var bs = attributeValue!.BS ?? [];
+            value = new HashSet<byte[]>(
+                bs.Select(stream => stream.ToArray()),
+                ByteArrayComparer.Instance
+            );
+            return true;
         }
 
         /// <summary>Gets a nullable binary set.</summary>
+        /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="requiredness">
+        ///     Specifies whether the attribute is required. Default is
+        ///     <see cref="Requiredness.InferFromNullability" />.
+        /// </param>
+        /// <param name="kind">The DynamoDB attribute kind to interpret. Default is <see cref="DynamoKind.BS" />.</param>
+        /// <returns>
+        ///     The binary set value if the key exists and contains a non-NULL value; otherwise <c>null</c> if
+        ///     the key is missing or the attribute has a DynamoDB NULL value.
+        /// </returns>
         public HashSet<byte[]>? GetNullableBinarySet(
-            string key, Requiredness requiredness = Requiredness.InferFromNullability,
+            string key,
+            Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.BS
-        )
-        {
-            var attributeValue = attributes.GetNullableValue(key, requiredness);
-            if (attributeValue.NULL is true)
-                return null;
-
-            var bs = attributeValue.BS ?? [];
-            return new HashSet<byte[]>(
-                bs.Select(stream => stream.ToArray()),
-                ByteArrayComparer.Instance
-            );
-        }
+        ) =>
+            attributes.TryGetNullableBinarySet(key, out var value, requiredness, kind)
+                ? value
+                : null;
 
         /// <summary>Sets a binary set in the attribute dictionary.</summary>
         public Dictionary<string, AttributeValue> SetBinarySet(
-            string key, IEnumerable<byte[]>? value, bool omitEmptyStrings = false,
-            bool omitNullStrings = true, DynamoKind kind = DynamoKind.BS
+            string key,
+            IEnumerable<byte[]>? value,
+            bool omitEmptyStrings = false,
+            bool omitNullStrings = true,
+            DynamoKind kind = DynamoKind.BS
         )
         {
             if (value is null && omitNullStrings)
                 return attributes;
 
-            var set = value?
-                .Where(bytes => bytes is not null)
-                .Distinct(ByteArrayComparer.Instance)
-                .Select(bytes => new MemoryStream(bytes!))
-                .ToList() ?? new List<MemoryStream>();
+            var set =
+                value
+                    ?.Where(bytes => bytes is not null)
+                    .Distinct(ByteArrayComparer.Instance)
+                    .Select(bytes => new MemoryStream(bytes!))
+                    .ToList()
+                ?? new List<MemoryStream>();
 
             // DynamoDB does NOT allow empty sets - always omit
             if (set.Count == 0)
@@ -314,40 +706,47 @@ public static class CollectionAttributeValueExtensions
 
             // Numeric types
             if (underlyingType == typeof(int))
-                return (T)(object)int.Parse(av.GetString(DynamoKind.N), CultureInfo.InvariantCulture);
+                return (T)
+                    (object)int.Parse(av.GetString(DynamoKind.N), CultureInfo.InvariantCulture);
             if (underlyingType == typeof(long))
-                return (T)(object)long.Parse(av.GetString(DynamoKind.N), CultureInfo.InvariantCulture);
+                return (T)
+                    (object)long.Parse(av.GetString(DynamoKind.N), CultureInfo.InvariantCulture);
             if (underlyingType == typeof(float))
-                return (T)(object)float.Parse(av.GetString(DynamoKind.N), CultureInfo.InvariantCulture);
+                return (T)
+                    (object)float.Parse(av.GetString(DynamoKind.N), CultureInfo.InvariantCulture);
             if (underlyingType == typeof(double))
-                return (T)(object)double.Parse(av.GetString(DynamoKind.N), CultureInfo.InvariantCulture);
+                return (T)
+                    (object)double.Parse(av.GetString(DynamoKind.N), CultureInfo.InvariantCulture);
             if (underlyingType == typeof(decimal))
-                return (T)(object)decimal.Parse(av.GetString(DynamoKind.N), CultureInfo.InvariantCulture);
+                return (T)
+                    (object)decimal.Parse(av.GetString(DynamoKind.N), CultureInfo.InvariantCulture);
             if (underlyingType == typeof(byte))
-                return (T)(object)byte.Parse(av.GetString(DynamoKind.N), CultureInfo.InvariantCulture);
+                return (T)
+                    (object)byte.Parse(av.GetString(DynamoKind.N), CultureInfo.InvariantCulture);
             if (underlyingType == typeof(short))
-                return (T)(object)short.Parse(av.GetString(DynamoKind.N), CultureInfo.InvariantCulture);
+                return (T)
+                    (object)short.Parse(av.GetString(DynamoKind.N), CultureInfo.InvariantCulture);
 
             // DateTime
             if (underlyingType == typeof(DateTime))
-                return (T)(object)DateTime.Parse(
-                    av.GetString(DynamoKind.S),
-                    CultureInfo.InvariantCulture
-                );
+                return (T)
+                    (object)
+                        DateTime.Parse(av.GetString(DynamoKind.S), CultureInfo.InvariantCulture);
 
             // DateTimeOffset
             if (underlyingType == typeof(DateTimeOffset))
-                return (T)(object)DateTimeOffset.Parse(
-                    av.GetString(DynamoKind.S),
-                    CultureInfo.InvariantCulture
-                );
+                return (T)
+                    (object)
+                        DateTimeOffset.Parse(
+                            av.GetString(DynamoKind.S),
+                            CultureInfo.InvariantCulture
+                        );
 
             // TimeSpan
             if (underlyingType == typeof(TimeSpan))
-                return (T)(object)TimeSpan.Parse(
-                    av.GetString(DynamoKind.S),
-                    CultureInfo.InvariantCulture
-                );
+                return (T)
+                    (object)
+                        TimeSpan.Parse(av.GetString(DynamoKind.S), CultureInfo.InvariantCulture);
 
             // Guid
             if (underlyingType == typeof(Guid))
@@ -437,9 +836,7 @@ public static class CollectionAttributeValueExtensions
 
             // Guid
             if (underlyingType == typeof(Guid))
-                return ((Guid)(object)value)
-                    .ToString()
-                    .ToAttributeValue(DynamoKind.S);
+                return ((Guid)(object)value).ToString().ToAttributeValue(DynamoKind.S);
 
             // byte[]
             if (underlyingType == typeof(byte[]))
@@ -457,7 +854,8 @@ public static class CollectionAttributeValueExtensions
         /// Parses a number from DynamoDB's string representation.
         /// Uses InvariantCulture for culture-safe parsing.
         /// </summary>
-        private static T ParseNumber<T>(string s) where T : struct
+        private static T ParseNumber<T>(string s)
+            where T : struct
         {
             if (typeof(T) == typeof(int))
                 return (T)(object)int.Parse(s, CultureInfo.InvariantCulture);
@@ -481,7 +879,8 @@ public static class CollectionAttributeValueExtensions
         /// Formats a number for DynamoDB's string representation.
         /// Uses InvariantCulture for culture-safe formatting.
         /// </summary>
-        private static string FormatNumber<T>(T value) where T : struct
+        private static string FormatNumber<T>(T value)
+            where T : struct
         {
             return value switch
             {

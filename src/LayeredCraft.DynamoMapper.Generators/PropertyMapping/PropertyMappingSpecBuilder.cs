@@ -53,6 +53,7 @@ internal static class PropertyMappingSpecBuilder
 
         return new PropertyMappingSpec(
             analysis.PropertyName,
+            key,
             strategy,
             toItemMethod,
             fromItemMethod
@@ -226,6 +227,7 @@ internal static class PropertyMappingSpecBuilder
 
         return new PropertyMappingSpec(
             analysis.PropertyName,
+            key,
             strategy,
             toItemMethod,
             fromItemMethod

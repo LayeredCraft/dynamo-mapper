@@ -36,13 +36,20 @@ internal static class MapperEmitter
             .Select(p => p.FromAssignment)
             .ToArray();
 
+        var fromInitAssignments = mapperInfo
+            .ModelClass!.Properties.Where(p => !string.IsNullOrEmpty(p.FromInitAssignment))
+            .Select(p => p.FromInitAssignment)
+            .ToArray();
+
         var model = new
         {
             GeneratedCodeAttribute,
             mapperInfo.MapperClass,
             ModelClass = mapperInfo.ModelClass!,
+            ModelVarName = mapperInfo.ModelClass.VarName,
             ToAssignments = toAssignments,
             FromAssignments = fromAssignments,
+            FromInitAssignments = fromInitAssignments,
             MapperClassNamespace = mapperInfo.MapperClass?.Namespace,
             MapperClassSignature = mapperInfo.MapperClass?.ClassSignature,
             DictionaryCapacity = toAssignments.Length,

@@ -12,4 +12,5 @@ internal class DynamoFieldOptions
     public bool? OmitIfEmptyString { get; set; }
     public string? ToMethod { get; set; }
     public string? FromMethod { get; set; }
+    public string? Format { get; set; }
 }

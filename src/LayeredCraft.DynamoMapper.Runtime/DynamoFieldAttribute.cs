@@ -50,4 +50,42 @@ public sealed class DynamoFieldAttribute : Attribute
     ///     Method must have signature: <c>static T MethodName(AttributeValue value)</c>.
     /// </remarks>
     public string FromMethod { get; set; } = null!;
+
+    /// <summary>Gets or sets the format string for types that support formatting.</summary>
+    /// <remarks>
+    ///     <para>Supported types and their format strings:</para>
+    ///     <list type="bullet">
+    ///         <item>
+    ///             <term>DateTime / DateTimeOffset</term>
+    ///             <description>Standard or custom format strings (e.g., "O", "yyyy-MM-dd", "MM/dd/yyyy")</description>
+    ///         </item>
+    ///         <item>
+    ///             <term>TimeSpan</term>
+    ///             <description>
+    ///                 "c" (constant), "g" (general short), "G" (general long), or custom
+    ///                 patterns
+    ///             </description>
+    ///         </item>
+    ///         <item>
+    ///             <term>Guid</term>
+    ///             <description>
+    ///                 "N" (32 digits), "D" (hyphens), "B" (braces), "P" (parentheses), "X"
+    ///                 (hexadecimal)
+    ///             </description>
+    ///         </item>
+    ///         <item>
+    ///             <term>Enum</term>
+    ///             <description>"G" (general), "F" (flags), "D" (decimal), "X" (hexadecimal)</description>
+    ///         </item>
+    ///     </list>
+    ///     <para>
+    ///         When set, this format overrides the mapper-level format (DateTimeFormat, TimeSpanFormat,
+    ///         GuidFormat, EnumFormat).
+    ///     </para>
+    ///     <para>
+    ///         For types that don't support formatting (string, bool, numeric types), this property is
+    ///         ignored.
+    ///     </para>
+    /// </remarks>
+    public string Format { get; set; } = null!;
 }

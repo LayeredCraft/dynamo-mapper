@@ -30,7 +30,10 @@ public sealed class DynamoMapperAttribute : Attribute
     /// <remarks>Default is <c>false</c>.</remarks>
     public bool OmitEmptyStrings { get; set; } = false;
 
-    /// <summary>Gets or sets the default DateTime format string.</summary>
+    /// <summary>
+    ///     Gets or sets the default format string for DateTime, DateTimeOffset, and TimeSpan
+    ///     properties.
+    /// </summary>
     /// <remarks>Default is "O" (round-trip format, ISO-8601).</remarks>
     public string DateTimeFormat { get; set; } = "O";
 

@@ -438,6 +438,7 @@ public class SimpleVerifyTests
             new VerifyTestOptions
             {
                 SourceCode = """
+                using System;
                 using System.Collections.Generic;
                 using Amazon.DynamoDBv2.Model;
                 using DynamoMapper.Runtime;
@@ -456,6 +457,7 @@ public class SimpleVerifyTests
                     public string MiddleName { get; set; } = string.Empty;
                     public required string LastName { get; set; }
                     public int Age { get; set; }
+                    public DateTimeOffset DateCreated { get; set; } = DateTimeOffset.UtcNow;
                     public string FullName => $"{FirstName} {LastName}";
                 }
                 """,

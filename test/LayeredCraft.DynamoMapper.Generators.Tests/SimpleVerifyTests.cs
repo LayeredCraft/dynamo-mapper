@@ -32,6 +32,35 @@ public class SimpleVerifyTests
         );
 
     [Fact]
+    public async Task Simple_HelloWorld_ExtensionMethod() =>
+        await GeneratorTestHelpers.Verify(
+            new VerifyTestOptions
+            {
+                SourceCode = """
+                using System.Collections.Generic;
+                using Amazon.DynamoDBv2.Model;
+                using DynamoMapper.Runtime;
+
+                namespace MyNamespace;
+
+                [DynamoMapper]
+                public static partial class ExampleEntityMapper
+                {
+                    public static partial Dictionary<string, AttributeValue> ToItem(this MyDto source);
+
+                    public static partial MyDto FromItem(this Dictionary<string, AttributeValue> item);
+                }
+
+                public class MyDto
+                {
+                    public string Name { get; set; }
+                }
+                """,
+            },
+            TestContext.Current.CancellationToken
+        );
+
+    [Fact]
     public async Task Simple_Record() =>
         await GeneratorTestHelpers.Verify(
             new VerifyTestOptions

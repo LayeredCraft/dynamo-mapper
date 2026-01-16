@@ -31,8 +31,8 @@ public static partial class ExampleEntityMapper
             .SetDecimal("nullableDecimal", source.NullableDecimal, false, true)
             .SetDouble("double", source.Double, false, true)
             .SetDouble("nullableDouble", source.NullableDouble, false, true)
-            .SetGuid("guid", source.Guid, false, true)
-            .SetGuid("nullableGuid", source.NullableGuid, false, true)
+            .SetGuid("guid", source.Guid, "D", false, true)
+            .SetGuid("nullableGuid", source.NullableGuid, "D", false, true)
             .SetInt("int", source.Int, false, true)
             .SetInt("nullableInt", source.NullableInt, false, true)
             .SetLong("long", source.Long, false, true)
@@ -59,8 +59,8 @@ public static partial class ExampleEntityMapper
             NullableDecimal = x.GetNullableDecimal("nullableDecimal", Requiredness.InferFromNullability),
             Double = x.GetDouble("double", Requiredness.InferFromNullability),
             NullableDouble = x.GetNullableDouble("nullableDouble", Requiredness.InferFromNullability),
-            Guid = x.GetGuid("guid", Requiredness.InferFromNullability),
-            NullableGuid = x.GetNullableGuid("nullableGuid", Requiredness.InferFromNullability),
+            Guid = x.GetGuid("guid", "D", Requiredness.InferFromNullability),
+            NullableGuid = x.GetNullableGuid("nullableGuid", "D", Requiredness.InferFromNullability),
             Int = x.GetInt("int", Requiredness.InferFromNullability),
             NullableInt = x.GetNullableInt("nullableInt", Requiredness.InferFromNullability),
             Long = x.GetLong("long", Requiredness.InferFromNullability),

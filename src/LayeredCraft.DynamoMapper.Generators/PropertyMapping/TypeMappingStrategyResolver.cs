@@ -120,7 +120,9 @@ internal static class TypeMappingStrategyResolver
                     )
                 ),
             INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_Guid, context) =>
-                CreateStrategy("Guid", analysis.Nullability),
+                $"\"{context.MapperOptions.GuidFormat}\"".Map(guidFmt =>
+                    CreateStrategy("Guid", analysis.Nullability, fromArg: guidFmt, toArg: guidFmt)
+                ),
             INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_TimeSpan, context) =>
                 $"\"{context.MapperOptions.TimeSpanFormat}\"".Map(timeFmt =>
                     CreateStrategy(
@@ -282,7 +284,7 @@ internal static class TypeMappingStrategyResolver
         };
 
         // Build strategy - collections are nullable at collection level, not element level
-        var strategy = CreateStrategy(typeName, analysis.Nullability, genericArg: genericArg);
+        var strategy = CreateStrategy(typeName, analysis.Nullability, genericArg);
 
         // Apply Kind override if present (or use inferred kind)
         return strategy with

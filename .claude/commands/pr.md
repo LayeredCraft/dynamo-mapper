@@ -1,6 +1,7 @@
 # Open PR for current branch
 - $ARGUMENTS
 - PR title must follow the format: `<type>(<scope>): <description>`
+- If this PR is resolving an issue, mention the issue in the PR. If it closes an issue, use `closes #<issue number>` in the PR body.
 - Use this template for the PR:
 
 ---
@@ -26,6 +27,8 @@
 ## 🧪 Related Issues or PRs
 
 Closes #...
+
+> Related issues or PRs. If this PR closes an issue, mention it here.
 
 ---
 

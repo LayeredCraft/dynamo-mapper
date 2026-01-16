@@ -19,6 +19,11 @@ internal class VerifyTestOptions : CodeGenerationOptions
     ///     generator.
     /// </summary>
     internal int? ExpectedTrees { get; init; } = null;
+
+    /// <summary>
+    ///     Gets or initializes the expected diagnostic ID for failure tests.
+    /// </summary>
+    internal string? ExpectedDiagnosticId { get; init; } = null;
 }
 
 /// <summary>Configuration options for code generation testing.</summary>
@@ -97,6 +102,49 @@ internal static class GeneratorTestHelpers
 
         if (options.ExpectedTrees is not null)
             result.GeneratedTrees.Length.Should().Be(options.ExpectedTrees);
+
+        return Verifier
+            .Verify(driver)
+            .UseDirectory("Snapshots")
+            .DisableDiff()
+            .ScrubLinesWithReplace(line =>
+            {
+                if (line.Contains("global::System.CodeDom.Compiler.GeneratedCode"))
+                    return RegexHelper.GeneratedCodeAttributeRegex().Replace(line, "REPLACED");
+
+                return line;
+            });
+    }
+
+    internal static Task VerifyFailure(
+        VerifyTestOptions options,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var (driver, _) = GenerateFromSource(options, cancellationToken);
+
+        driver.Should().NotBeNull();
+
+        var result = driver.GetRunResult();
+
+        result
+            .Diagnostics.Should()
+            .NotBeEmpty("expected diagnostic errors to be generated");
+
+        if (options.ExpectedDiagnosticId is not null)
+        {
+            result
+                .Diagnostics.Should()
+                .Contain(d => d.Id == options.ExpectedDiagnosticId,
+                    $"expected diagnostic {options.ExpectedDiagnosticId} to be present, but found:\n"
+                        + string.Join(
+                            "\n---\n",
+                            result.Diagnostics.Select(e =>
+                                $"  - {e.Id}: {e.GetMessage()} at {e.Location}"
+                            )
+                        )
+                );
+        }
 
         return Verifier
             .Verify(driver)

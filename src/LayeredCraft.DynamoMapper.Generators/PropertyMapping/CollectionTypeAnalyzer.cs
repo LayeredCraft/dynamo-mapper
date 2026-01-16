@@ -165,11 +165,6 @@ internal static class CollectionTypeAnalyzer
             if (SymbolEqualityComparer.Default.Equals(namedType, timeSpanType))
                 return true;
 
-            // DateOnly (if available)
-            var dateOnlyType = context.WellKnownTypes.Get(WellKnownType.System_DateOnly);
-            if (dateOnlyType is not null && SymbolEqualityComparer.Default.Equals(namedType, dateOnlyType))
-                return true;
-
             // Enums
             if (namedType.TypeKind == TypeKind.Enum)
                 return true;

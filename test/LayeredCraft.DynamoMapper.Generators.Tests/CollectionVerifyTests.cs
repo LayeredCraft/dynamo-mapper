@@ -209,6 +209,35 @@ public class CollectionVerifyTests
             TestContext.Current.CancellationToken
         );
 
+    [Fact]
+    public async Task Collection_HashSetOfByteArray() =>
+        await GeneratorTestHelpers.Verify(
+            new VerifyTestOptions
+            {
+                SourceCode = """
+                using System;
+                using System.Collections.Generic;
+                using Amazon.DynamoDBv2.Model;
+                using DynamoMapper.Runtime;
+
+                namespace MyNamespace;
+
+                [DynamoMapper]
+                public static partial class ExampleEntityMapper
+                {
+                    public static partial Dictionary<string, AttributeValue> ToItem(Entity source);
+                    public static partial Entity FromItem(Dictionary<string, AttributeValue> item);
+                }
+
+                public class Entity
+                {
+                    public HashSet<byte[]> Payloads { get; set; } = new();
+                }
+                """,
+            },
+            TestContext.Current.CancellationToken
+        );
+
     // ==================== INTERFACE TESTS ====================
 
     [Fact]

@@ -1,3 +1,4 @@
+using System.IO;
 using Amazon.DynamoDBv2.Model;
 using DynamoMapper.Runtime;
 using LayeredCraft.DynamoMapper.TestKit.Attributes;
@@ -108,6 +109,31 @@ public class AttributeValueExtensionsCollectionTests
         Assert.Equal(100, result[0]);
         Assert.Equal(200, result[1]);
         Assert.Equal(300, result[2]);
+    }
+
+    [Fact]
+    public void GetList_ReturnsListOfBinary_WhenListContainsBinaryValues()
+    {
+        // Arrange
+        var attributes = new Dictionary<string, AttributeValue>
+        {
+            ["payloads"] = new()
+            {
+                L = new List<AttributeValue>
+                {
+                    new() { B = new MemoryStream(new byte[] { 1, 2, 3 }) },
+                    new() { B = new MemoryStream(new byte[] { 4, 5, 6 }) }
+                }
+            }
+        };
+
+        // Act
+        var result = attributes.GetList<byte[]>("payloads");
+
+        // Assert
+        Assert.Equal(2, result.Count);
+        Assert.Equal(new byte[] { 1, 2, 3 }, result[0]);
+        Assert.Equal(new byte[] { 4, 5, 6 }, result[1]);
     }
 
     [Fact]
@@ -290,6 +316,27 @@ public class AttributeValueExtensionsCollectionTests
         Assert.Equal(original, result);
     }
 
+    [Fact]
+    public void List_RoundTrip_WithBinary()
+    {
+        // Arrange
+        var attributes = new Dictionary<string, AttributeValue>();
+        var original = new List<byte[]>
+        {
+            new byte[] { 0, 1, 2 },
+            new byte[] { 3, 4, 5 }
+        };
+
+        // Act
+        attributes.SetList("payloads", original);
+        var result = attributes.GetList<byte[]>("payloads");
+
+        // Assert
+        Assert.Equal(original.Count, result.Count);
+        Assert.Equal(original[0], result[0]);
+        Assert.Equal(original[1], result[1]);
+    }
+
     // ==================== MAP TESTS ====================
 
     [Fact]
@@ -443,6 +490,7 @@ public class AttributeValueExtensionsCollectionTests
         // Assert
         Assert.Equal(original, result);
     }
+
 
     // ==================== STRING SET TESTS ====================
 
@@ -726,6 +774,158 @@ public class AttributeValueExtensionsCollectionTests
         Assert.Equal(original, result);
     }
 
+    // ==================== BINARY SET TESTS ====================
+
+    [Fact]
+    public void GetBinarySet_ReturnsEmptySet_WhenKeyDoesNotExist()
+    {
+        // Arrange
+        var attributes = new Dictionary<string, AttributeValue>();
+
+        // Act
+        var result = attributes.GetBinarySet("payloads", Requiredness.Optional);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Empty(result);
+    }
+
+    [Fact]
+    public void GetBinarySet_ReturnsEmptySet_WhenValueIsNull()
+    {
+        // Arrange
+        var attributes = new Dictionary<string, AttributeValue>
+        {
+            ["payloads"] = new() { NULL = true }
+        };
+
+        // Act
+        var result = attributes.GetBinarySet("payloads");
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Empty(result);
+    }
+
+    [Fact]
+    public void GetBinarySet_ReturnsHashSet_WhenSetContainsValues()
+    {
+        // Arrange
+        var attributes = new Dictionary<string, AttributeValue>
+        {
+            ["payloads"] = new()
+            {
+                BS = new List<MemoryStream>
+                {
+                    new(new byte[] { 1, 2, 3 }),
+                    new(new byte[] { 4, 5, 6 })
+                }
+            }
+        };
+
+        // Act
+        var result = attributes.GetBinarySet("payloads");
+
+        // Assert
+        Assert.Equal(2, result.Count);
+        Assert.Contains(result, bytes => bytes.SequenceEqual(new byte[] { 1, 2, 3 }));
+        Assert.Contains(result, bytes => bytes.SequenceEqual(new byte[] { 4, 5, 6 }));
+    }
+
+    [Fact]
+    public void GetNullableBinarySet_ReturnsNull_WhenValueIsNull()
+    {
+        // Arrange
+        var attributes = new Dictionary<string, AttributeValue>
+        {
+            ["payloads"] = new() { NULL = true }
+        };
+
+        // Act
+        var result = attributes.GetNullableBinarySet("payloads");
+
+        // Assert
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public void SetBinarySet_SetsBinarySet_WhenNonNullSet()
+    {
+        // Arrange
+        var attributes = new Dictionary<string, AttributeValue>();
+        var payloads = new List<byte[]>
+        {
+            new byte[] { 1, 2, 3 },
+            new byte[] { 4, 5, 6 }
+        };
+
+        // Act
+        attributes.SetBinarySet("payloads", payloads);
+
+        // Assert
+        Assert.True(attributes.ContainsKey("payloads"));
+        Assert.NotNull(attributes["payloads"].BS);
+        Assert.Equal(2, attributes["payloads"].BS.Count);
+    }
+
+    [Fact]
+    public void SetBinarySet_DeduplicatesValues()
+    {
+        // Arrange
+        var attributes = new Dictionary<string, AttributeValue>();
+        var payloads = new List<byte[]>
+        {
+            new byte[] { 1, 2, 3 },
+            new byte[] { 1, 2, 3 }
+        };
+
+        // Act
+        attributes.SetBinarySet("payloads", payloads);
+
+        // Assert
+        Assert.True(attributes.ContainsKey("payloads"));
+        Assert.Equal(1, attributes["payloads"].BS.Count);
+    }
+
+    [Fact]
+    public void SetBinarySet_OmitsAttribute_WhenEmptySet()
+    {
+        // Arrange
+        var attributes = new Dictionary<string, AttributeValue>();
+        var payloads = new List<byte[]>();
+
+        // Act
+        attributes.SetBinarySet("payloads", payloads);
+
+        // Assert - DynamoDB does NOT allow empty sets
+        Assert.False(attributes.ContainsKey("payloads"));
+    }
+
+    [Fact]
+    public void BinarySet_RoundTrip()
+    {
+        // Arrange
+        var attributes = new Dictionary<string, AttributeValue>();
+        var original = new List<byte[]>
+        {
+            new byte[] { 7, 8, 9 },
+            new byte[] { 10, 11, 12 }
+        };
+        var expected = original
+            .Select(bytes => string.Join(",", bytes))
+            .ToHashSet(StringComparer.Ordinal);
+
+        // Act
+        attributes.SetBinarySet("payloads", original);
+        var result = attributes.GetBinarySet("payloads");
+        var actual = result
+            .Select(bytes => string.Join(",", bytes))
+            .ToHashSet(StringComparer.Ordinal);
+
+        // Assert
+        Assert.Equal(expected, actual);
+    }
+
     // ==================== FLUENT CHAINING TESTS ====================
 
     [Fact]
@@ -739,13 +939,15 @@ public class AttributeValueExtensionsCollectionTests
             .SetList("tags", new List<string> { "tag1", "tag2" })
             .SetMap("metadata", new Dictionary<string, int> { ["count"] = 42 })
             .SetStringSet("categories", new List<string> { "cat1", "cat2" })
-            .SetNumberSet("numbers", new List<int> { 1, 2, 3 });
+            .SetNumberSet("numbers", new List<int> { 1, 2, 3 })
+            .SetBinarySet("payloads", new List<byte[]> { new byte[] { 1, 2, 3 } });
 
         // Assert
-        Assert.Equal(4, attributes.Count);
+        Assert.Equal(5, attributes.Count);
         Assert.True(attributes.ContainsKey("tags"));
         Assert.True(attributes.ContainsKey("metadata"));
         Assert.True(attributes.ContainsKey("categories"));
         Assert.True(attributes.ContainsKey("numbers"));
+        Assert.True(attributes.ContainsKey("payloads"));
     }
 }

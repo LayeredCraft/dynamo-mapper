@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.IO;
 using DynamoMapper.Runtime;
 
 namespace Amazon.DynamoDBv2.Model;
@@ -227,6 +228,65 @@ public static class CollectionAttributeValueExtensions
             return attributes;
         }
 
+        // ==================== BINARY SET OPERATIONS ====================
+
+        /// <summary>Gets a binary set from the attribute dictionary.</summary>
+        public HashSet<byte[]> GetBinarySet(
+            string key, Requiredness requiredness = Requiredness.InferFromNullability,
+            DynamoKind kind = DynamoKind.BS
+        )
+        {
+            var attributeValue = attributes.GetValue(key, requiredness);
+            if (attributeValue.NULL is true)
+                return new HashSet<byte[]>(ByteArrayComparer.Instance);
+
+            var bs = attributeValue.BS ?? [];
+            return new HashSet<byte[]>(
+                bs.Select(stream => stream.ToArray()),
+                ByteArrayComparer.Instance
+            );
+        }
+
+        /// <summary>Gets a nullable binary set.</summary>
+        public HashSet<byte[]>? GetNullableBinarySet(
+            string key, Requiredness requiredness = Requiredness.InferFromNullability,
+            DynamoKind kind = DynamoKind.BS
+        )
+        {
+            var attributeValue = attributes.GetNullableValue(key, requiredness);
+            if (attributeValue.NULL is true)
+                return null;
+
+            var bs = attributeValue.BS ?? [];
+            return new HashSet<byte[]>(
+                bs.Select(stream => stream.ToArray()),
+                ByteArrayComparer.Instance
+            );
+        }
+
+        /// <summary>Sets a binary set in the attribute dictionary.</summary>
+        public Dictionary<string, AttributeValue> SetBinarySet(
+            string key, IEnumerable<byte[]>? value, bool omitEmptyStrings = false,
+            bool omitNullStrings = true, DynamoKind kind = DynamoKind.BS
+        )
+        {
+            if (value is null && omitNullStrings)
+                return attributes;
+
+            var set = value?
+                .Where(bytes => bytes is not null)
+                .Distinct(ByteArrayComparer.Instance)
+                .Select(bytes => new MemoryStream(bytes!))
+                .ToList() ?? new List<MemoryStream>();
+
+            // DynamoDB does NOT allow empty sets - always omit
+            if (set.Count == 0)
+                return attributes;
+
+            attributes[key] = new AttributeValue { BS = set };
+            return attributes;
+        }
+
         // ==================== HELPER METHODS ====================
 
         /// <summary>
@@ -296,6 +356,10 @@ public static class CollectionAttributeValueExtensions
             // Enum
             if (underlyingType.IsEnum)
                 return (T)Enum.Parse(underlyingType, av.GetString(DynamoKind.S));
+
+            // byte[]
+            if (underlyingType == typeof(byte[]))
+                return (T)(object)(av.B?.ToArray() ?? []);
 
             throw new NotSupportedException(
                 $"Type {typeof(T)} is not supported as a collection element"
@@ -377,6 +441,10 @@ public static class CollectionAttributeValueExtensions
                     .ToString()
                     .ToAttributeValue(DynamoKind.S);
 
+            // byte[]
+            if (underlyingType == typeof(byte[]))
+                return new AttributeValue { B = new MemoryStream((byte[])(object)value) };
+
             // Enum
             return underlyingType.IsEnum
                 ? (value.ToString() ?? string.Empty).ToAttributeValue(DynamoKind.S)
@@ -428,6 +496,33 @@ public static class CollectionAttributeValueExtensions
                     $"Number type {typeof(T)} not supported for sets"
                 ),
             };
+        }
+    }
+
+    private sealed class ByteArrayComparer : IEqualityComparer<byte[]>
+    {
+        internal static readonly ByteArrayComparer Instance = new();
+
+        public bool Equals(byte[]? x, byte[]? y)
+        {
+            if (ReferenceEquals(x, y))
+                return true;
+            if (x is null || y is null)
+                return false;
+
+            return x.SequenceEqual(y);
+        }
+
+        public int GetHashCode(byte[] obj)
+        {
+            if (obj.Length == 0)
+                return 0;
+
+            var hash = 17;
+            foreach (var b in obj)
+                hash = (hash * 31) + b;
+
+            return hash;
         }
     }
 }

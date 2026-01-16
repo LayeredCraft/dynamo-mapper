@@ -26,7 +26,7 @@ internal static class PropertyMappingCodeRenderer
         // Determine if we should use regular assignment vs init assignment
         var useRegularAssignment =
             spec.FromItemMethod is { IsCustomMethod: false }
-            || analysis is { IsRequired: false, IsInitOnly: false, HasDefaultValue: true };
+            && analysis is { IsRequired: false, IsInitOnly: false, HasDefaultValue: true };
 
         // FromItem requires both: setter on property AND FromItem method exists
         var fromAssignment =

@@ -16,6 +16,7 @@ internal static class ModelClassInfoExtensions
     {
         internal static (ModelClassInfo?, DiagnosticInfo[]) Create(
             ITypeSymbol modelTypeSymbol,
+            string? fromItemParameterName,
             GeneratorContext context
         )
         {
@@ -29,7 +30,9 @@ internal static class ModelClassInfoExtensions
                 )
                 .ToList();
 
-            var varName = context.MapperOptions.KeyNamingConventionConverter(modelTypeSymbol.Name);
+            var varName = context
+                .MapperOptions.KeyNamingConventionConverter(modelTypeSymbol.Name)
+                .Map(name => name == fromItemParameterName ? name + "1" : name);
 
             var (propertyInfos, propertyDiagnostics) = properties.CollectDiagnosticResults(
                 propertySymbol => PropertyInfo.Create(propertySymbol, varName, context)

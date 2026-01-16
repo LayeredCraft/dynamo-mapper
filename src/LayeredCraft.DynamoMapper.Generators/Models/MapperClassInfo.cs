@@ -10,6 +10,7 @@ internal sealed record MapperClassInfo(
     string ClassSignature,
     string? ToItemSignature,
     string? FromItemSignature,
+    string? FromItemParameterName,
     LocationInfo? Location
 );
 
@@ -63,6 +64,8 @@ internal static class MapperClassInfoExtensions
                         ?.Parameters.FirstOrDefault()
                         ?.Name.Tap(name => context.MapperOptions.FromMethodParameterName = name);
 
+                    var fromItemParameterName = fromItemMethod?.Parameters.FirstOrDefault()?.Name;
+
                     return DiagnosticResult<(MapperClassInfo, ITypeSymbol)>.Success(
                         (
                             new MapperClassInfo(
@@ -71,6 +74,7 @@ internal static class MapperClassInfoExtensions
                                 classSignature,
                                 toItemSignature,
                                 fromItemSignature,
+                                fromItemParameterName,
                                 context.TargetNode.CreateLocationInfo()
                             ),
                             modelType

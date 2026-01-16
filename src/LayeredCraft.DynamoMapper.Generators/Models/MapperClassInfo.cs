@@ -172,7 +172,8 @@ internal static class MapperClassInfoExtensions
         var parameterType = parameter?.Type.QualifiedNullableName;
         var accessibility = method.DeclaredAccessibility.ToString().ToLowerInvariant();
         var modifiers = method.IsStatic ? "static " : string.Empty;
+        var extensionMethod = method.IsExtensionMethod ? "this " : string.Empty;
 
-        return $"{accessibility} {modifiers}partial {returnType} {method.Name}({parameterType} {parameterName})";
+        return $"{accessibility} {modifiers}partial {returnType} {method.Name}({extensionMethod}{parameterType} {parameterName})";
     }
 }

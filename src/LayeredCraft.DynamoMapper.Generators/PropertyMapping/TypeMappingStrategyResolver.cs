@@ -62,24 +62,12 @@ internal static class TypeMappingStrategyResolver
                 return DiagnosticResult<TypeMappingStrategy?>.Success(null);
         }
 
-        // Validate Kind override first if present - reject Phase 2 types (collections, maps, etc.)
-        if (
-            analysis.FieldOptions?.Kind
-            is { } overrideKind
-                and (
-                    DynamoKind.L
-                    or DynamoKind.M
-                    or DynamoKind.SS
-                    or DynamoKind.NS
-                    or DynamoKind.BS
-                )
-        )
-            return DiagnosticResult<TypeMappingStrategy?>.Failure(
-                DiagnosticDescriptors.CannotConvertFromAttributeValue,
-                analysis.PropertyType.Locations.FirstOrDefault()?.CreateLocationInfo(),
-                analysis.PropertyName,
-                $"DynamoKind.{overrideKind} (not supported in Phase 1)"
-            );
+        // Try collection analysis first before scalar type resolution
+        var collectionInfo = CollectionTypeAnalyzer.Analyze(analysis.UnderlyingType, context);
+        if (collectionInfo is not null)
+        {
+            return CreateCollectionStrategy(collectionInfo, analysis, context);
+        }
 
         // Resolve the base type mapping strategy (existing logic unchanged)
         var strategyResult = analysis.UnderlyingType switch
@@ -204,5 +192,90 @@ internal static class TypeMappingStrategyResolver
         string[] toArgs = [enumFormat];
 
         return new TypeMappingStrategy("Enum", $"<{enumName}>", nullableModifier, fromArgs, toArgs);
+    }
+
+    /// <summary>
+    ///     Creates a type mapping strategy for collection types (lists, maps, sets).
+    /// </summary>
+    private static DiagnosticResult<TypeMappingStrategy?> CreateCollectionStrategy(
+        CollectionInfo collectionInfo,
+        PropertyAnalysis analysis,
+        GeneratorContext context
+    )
+    {
+        // Validate element type is supported primitive
+        if (!CollectionTypeAnalyzer.IsValidElementType(collectionInfo.ElementType, context))
+        {
+            return DiagnosticResult<TypeMappingStrategy?>.Failure(
+                DiagnosticDescriptors.UnsupportedCollectionElementType,
+                analysis.PropertyType.Locations.FirstOrDefault()?.CreateLocationInfo(),
+                analysis.PropertyName,
+                collectionInfo.ElementType.ToDisplayString()
+            );
+        }
+
+        // For maps, validate key type is string
+        if (collectionInfo.Category == CollectionCategory.Map
+            && collectionInfo.KeyType?.SpecialType != SpecialType.System_String)
+        {
+            return DiagnosticResult<TypeMappingStrategy?>.Failure(
+                DiagnosticDescriptors.DictionaryKeyMustBeString,
+                analysis.PropertyType.Locations.FirstOrDefault()?.CreateLocationInfo(),
+                analysis.PropertyName,
+                collectionInfo.KeyType?.ToDisplayString() ?? "unknown"
+            );
+        }
+
+        // Validate Kind override compatibility if present
+        if (analysis.FieldOptions?.Kind is { } kindOverride)
+        {
+            var isCompatible = (collectionInfo.Category, kindOverride) switch
+            {
+                (CollectionCategory.List, DynamoKind.L) => true,
+                (CollectionCategory.Map, DynamoKind.M) => true,
+                (CollectionCategory.Set, DynamoKind.SS or DynamoKind.NS or DynamoKind.BS) =>
+                    kindOverride == collectionInfo.TargetKind,
+                _ => false,
+            };
+
+            if (!isCompatible)
+            {
+                return DiagnosticResult<TypeMappingStrategy?>.Failure(
+                    DiagnosticDescriptors.IncompatibleKindOverride,
+                    analysis.PropertyType.Locations.FirstOrDefault()?.CreateLocationInfo(),
+                    analysis.PropertyName,
+                    kindOverride.ToString(),
+                    collectionInfo.TargetKind.ToString()
+                );
+            }
+        }
+
+        // Determine TypeName and GenericArgument for method name resolution
+        var (typeName, genericArg) = collectionInfo.Category switch
+        {
+            CollectionCategory.List => ("List", $"<{collectionInfo.ElementType.ToDisplayString()}>"),
+            CollectionCategory.Map => ("Map", $"<{collectionInfo.ElementType.ToDisplayString()}>"),
+            CollectionCategory.Set => collectionInfo.TargetKind switch
+            {
+                DynamoKind.SS => ("StringSet", ""),
+                DynamoKind.NS => ("NumberSet", $"<{collectionInfo.ElementType.ToDisplayString()}>"),
+                DynamoKind.BS => ("BinarySet", ""),
+                _ => throw new InvalidOperationException($"Unexpected set kind: {collectionInfo.TargetKind}")
+            },
+            _ => throw new InvalidOperationException($"Unexpected category: {collectionInfo.Category}")
+        };
+
+        // Build strategy - collections are nullable at collection level, not element level
+        var strategy = CreateStrategy(
+            typeName,
+            analysis.Nullability,
+            genericArg: genericArg
+        );
+
+        // Apply Kind override if present (or use inferred kind)
+        return strategy with
+        {
+            KindOverride = analysis.FieldOptions?.Kind ?? collectionInfo.TargetKind
+        };
     }
 }

@@ -1,0 +1,16 @@
+{
+  Diagnostics: [
+    {
+      Message: The property 'InvalidDict' has key type 'int' but dictionary keys must be of type 'string',
+      Severity: Error,
+      Descriptor: {
+        Id: DM0004,
+        Title: Dictionary key must be string,
+        MessageFormat: The property '{0}' has key type '{1}' but dictionary keys must be of type 'string',
+        Category: DynamoMapper.Usage,
+        DefaultSeverity: Error,
+        IsEnabledByDefault: true
+      }
+    }
+  ]
+}

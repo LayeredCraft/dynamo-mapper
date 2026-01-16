@@ -15,6 +15,33 @@ internal static class DiagnosticDescriptors
         true
     );
 
+    internal static readonly DiagnosticDescriptor UnsupportedCollectionElementType = new(
+        "DM0003",
+        "Collection element type not supported",
+        "The property '{0}' has element type '{1}' which is not supported. Only primitive types are supported as collection elements",
+        UsageCategory,
+        DiagnosticSeverity.Error,
+        true
+    );
+
+    internal static readonly DiagnosticDescriptor DictionaryKeyMustBeString = new(
+        "DM0004",
+        "Dictionary key must be string",
+        "The property '{0}' has key type '{1}' but dictionary keys must be of type 'string'",
+        UsageCategory,
+        DiagnosticSeverity.Error,
+        true
+    );
+
+    internal static readonly DiagnosticDescriptor IncompatibleKindOverride = new(
+        "DM0005",
+        "Incompatible DynamoKind override for collection",
+        "The property '{0}' has Kind override '{1}' which is incompatible with the inferred collection kind '{2}'",
+        UsageCategory,
+        DiagnosticSeverity.Error,
+        true
+    );
+
     internal static readonly DiagnosticDescriptor NoMapperMethodsFound = new(
         "DM0101",
         "No mapper methods found",

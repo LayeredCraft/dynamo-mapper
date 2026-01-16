@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using DynamoMapper.Generator.Models;
 using DynamoMapper.Generator.PropertyMapping.Models;
+using Microsoft.CodeAnalysis;
 
 namespace DynamoMapper.Generator.PropertyMapping;
 
@@ -24,7 +25,7 @@ internal static class PropertyMappingCodeRenderer
         // FromItem requires both: setter on property AND FromItem method exists
         var fromAssignment =
             context.HasFromItemMethod && analysis.HasSetter && spec.FromItemMethod is not null
-                ? RenderFromAssignment(spec, context)
+                ? RenderFromAssignment(spec, analysis, context)
                 : null;
 
         // ToItem requires both: getter on property AND ToItem method exists
@@ -39,9 +40,9 @@ internal static class PropertyMappingCodeRenderer
     /// <summary>
     ///     Renders the FromAssignment string for deserialization. Format: PropertyName =
     ///     paramName.MethodName&lt;Generic&gt;(args), OR PropertyName = CustomMethodName(args), for
-    ///     custom methods
+    ///     custom methods. For array properties, appends .ToArray() to convert List to array.
     /// </summary>
-    private static string RenderFromAssignment(PropertyMappingSpec spec, GeneratorContext context)
+    private static string RenderFromAssignment(PropertyMappingSpec spec, PropertyAnalysis analysis, GeneratorContext context)
     {
         Debug.Assert(spec.FromItemMethod is not null, "FromItemMethod should not be null");
         Debug.Assert(
@@ -54,6 +55,14 @@ internal static class PropertyMappingCodeRenderer
         var methodCall = spec.FromItemMethod.IsCustomMethod
             ? $"{spec.FromItemMethod.MethodName}({args})" // Custom: MethodName(item)
             : $"{context.MapperOptions.FromMethodParameterName}.{spec.FromItemMethod.MethodName}{spec.TypeStrategy!.GenericArgument}({args})"; // Standard: item.GetXxx<T>(args)
+
+        // For array properties, append .ToArray() to convert the List to an array
+        // GetList returns List<T>, but if the property is T[], we need to convert it
+        var isArrayProperty = analysis.PropertyType.TypeKind == TypeKind.Array;
+        if (isArrayProperty && !spec.FromItemMethod.IsCustomMethod)
+        {
+            methodCall += ".ToArray()";
+        }
 
         return $"{spec.PropertyName} = {methodCall},";
     }

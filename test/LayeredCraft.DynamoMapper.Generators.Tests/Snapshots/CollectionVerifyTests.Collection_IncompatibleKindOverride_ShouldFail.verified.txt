@@ -1,0 +1,16 @@
+{
+  Diagnostics: [
+    {
+      Message: The property 'Numbers' has Kind override 'S' which is incompatible with the inferred collection kind 'L',
+      Severity: Error,
+      Descriptor: {
+        Id: DM0005,
+        Title: Incompatible DynamoKind override for collection,
+        MessageFormat: The property '{0}' has Kind override '{1}' which is incompatible with the inferred collection kind '{2}',
+        Category: DynamoMapper.Usage,
+        DefaultSeverity: Error,
+        IsEnabledByDefault: true
+      }
+    }
+  ]
+}

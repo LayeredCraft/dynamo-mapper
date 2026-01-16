@@ -25,6 +25,7 @@ internal static class PropertyInfoExtensions
         internal static DiagnosticResult<PropertyInfo> Create(
             IPropertySymbol propertySymbol,
             string modelVarName,
+            int index,
             GeneratorContext context
         ) =>
             PropertyAnalyzer
@@ -48,6 +49,7 @@ internal static class PropertyInfoExtensions
                                     spec,
                                     tuple.analysis,
                                     modelVarName,
+                                    index,
                                     context
                                 )
                             )

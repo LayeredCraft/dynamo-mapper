@@ -27,7 +27,7 @@ internal static class EnumerableExtensions
     extension<TIn>(IEnumerable<TIn> enumerable)
     {
         internal (List<TOut> Data, List<DiagnosticInfo> Diagnostics) CollectDiagnosticResults<TOut>(
-            Func<TIn, DiagnosticResult<TOut>> extractor
+            Func<TIn, int, DiagnosticResult<TOut>> extractor
         )
         {
             var count = 0;

@@ -16,6 +16,7 @@ internal static class PropertyMappingCodeRenderer
         PropertyMappingSpec spec,
         PropertyAnalysis analysis,
         string modelVarName,
+        int index,
         GeneratorContext context
     )
     {
@@ -30,7 +31,7 @@ internal static class PropertyMappingCodeRenderer
             && analysis.HasSetter
             && spec.FromItemMethod is not null
             && useRegularAssignment
-                ? RenderFromAssignment(spec, modelVarName, analysis, context)
+                ? RenderFromAssignment(spec, modelVarName, analysis, index, context)
                 : null;
 
         var fromInitAssignment =
@@ -88,6 +89,7 @@ internal static class PropertyMappingCodeRenderer
         PropertyMappingSpec spec,
         string modelVarName,
         PropertyAnalysis analysis,
+        int index,
         GeneratorContext context
     )
     {
@@ -98,7 +100,7 @@ internal static class PropertyMappingCodeRenderer
         );
 
         var argsList = spec.FromItemMethod.Arguments.Select(a => a.Value).ToList();
-        argsList.Insert(1, $"out var {spec.Key}");
+        argsList.Insert(1, $"out var var{index}");
         var args = string.Join(", ", argsList);
 
         var methodCall =
@@ -110,7 +112,7 @@ internal static class PropertyMappingCodeRenderer
         var toArray =
             isArrayProperty && !spec.FromItemMethod.IsCustomMethod ? ".ToArray()" : string.Empty;
 
-        return $"if ({context.MapperOptions.FromMethodParameterName}.{methodCall}) {modelVarName}.{spec.PropertyName} = {spec.Key}!{toArray};";
+        return $"if ({context.MapperOptions.FromMethodParameterName}.{methodCall}) {modelVarName}.{spec.PropertyName} = var{index}!{toArray};";
     }
 
     /// <summary>

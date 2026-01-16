@@ -35,7 +35,7 @@ internal static class ModelClassInfoExtensions
                 .Map(name => name == fromItemParameterName ? name + "1" : name);
 
             var (propertyInfos, propertyDiagnostics) = properties.CollectDiagnosticResults(
-                propertySymbol => PropertyInfo.Create(propertySymbol, varName, context)
+                (propertySymbol, i) => PropertyInfo.Create(propertySymbol, varName, i, context)
             );
 
             var modelClassInfo = new ModelClassInfo(

@@ -5,16 +5,11 @@ description: Using named static methods for inline DynamoDB attribute conversion
 
 # Static Conversion Methods
 
-Static conversion methods provide an inline, lightweight approach to custom type conversion in DynamoMapper. Unlike converter types, static methods are defined directly on the mapper class, making them ideal for simple, mapper-specific conversions.
+Static conversion methods provide an inline, lightweight approach to custom type conversion in DynamoMapper. Static methods are defined directly on the mapper class, making them ideal for simple, mapper-specific conversions.
 
 ## Overview
 
-DynamoMapper supports two approaches for custom conversions:
-
-1. **Converter types** implementing `IDynamoConverter<T>` (recommended for reusable conversions)
-2. **Named static methods** on the mapper class (convenient for one-off conversions)
-
-This guide focuses on **static conversion methods**, which are inspired by Mapperly's conversion method pattern.
+The current release supports **named static methods** on the mapper class for custom conversions.
 
 ## When to Use Static Methods
 
@@ -25,7 +20,8 @@ Use static conversion methods when:
 - You prefer co-location of mapping configuration and conversion logic
 - No reuse across multiple mappers is needed
 
-For reusable, testable conversions, consider using [converter types](converters.md) instead.
+For reusable conversions across multiple mappers, create shared static helpers and call them from
+the mapper’s static conversion methods.
 
 ## Required Method Signatures
 
@@ -82,9 +78,9 @@ public class Order
 }
 
 [DynamoMapper(Convention = DynamoNamingConvention.CamelCase)]
+[DynamoField(nameof(Order.Status), ToMethod = nameof(ToOrderStatus), FromMethod = nameof(FromOrderStatus))]
 public static partial class OrderMapper
 {
-    [DynamoField(nameof(Order.Status), ToMethod = nameof(ToOrderStatus), FromMethod = nameof(FromOrderStatus))]
     public static partial Dictionary<string, AttributeValue> ToItem(Order source);
 
     public static partial Order FromItem(Dictionary<string, AttributeValue> item);
@@ -106,13 +102,18 @@ public static partial class OrderMapper
 
 ### DynamoField Attribute
 
-Configure static methods using the `[DynamoField]` attribute:
+Configure static methods using the `[DynamoField]` attribute on the mapper class:
 
 ```csharp
+[DynamoMapper]
 [DynamoField(nameof(Order.Status),
     ToMethod = nameof(ToOrderStatus),
     FromMethod = nameof(FromOrderStatus))]
-public static partial Dictionary<string, AttributeValue> ToItem(Order source);
+public static partial class OrderMapper
+{
+    public static partial Dictionary<string, AttributeValue> ToItem(Order source);
+    public static partial Order FromItem(Dictionary<string, AttributeValue> item);
+}
 ```
 
 **Properties:**
@@ -121,12 +122,11 @@ public static partial Dictionary<string, AttributeValue> ToItem(Order source);
 
 **Constraints:**
 - Both `ToMethod` and `FromMethod` must be specified together
-- Cannot specify `Converter` and `ToMethod`/`FromMethod` simultaneously
 - Method names must reference existing, accessible static methods
 
 ## DSL Usage (Phase 2)
 
-In Phase 2, static methods can be configured using the fluent DSL:
+In Phase 2, static methods will be configurable using the fluent DSL (planned):
 
 ```csharp
 [DynamoMapper]
@@ -159,10 +159,10 @@ You can define multiple static conversion method pairs in a single mapper:
 
 ```csharp
 [DynamoMapper(Convention = DynamoNamingConvention.CamelCase)]
+[DynamoField(nameof(Product.Category), ToMethod = nameof(ToCategory), FromMethod = nameof(FromCategory))]
+[DynamoField(nameof(Product.Status), ToMethod = nameof(ToProductStatus), FromMethod = nameof(FromProductStatus))]
 public static partial class ProductMapper
 {
-    [DynamoField(nameof(Product.Category), ToMethod = nameof(ToCategory), FromMethod = nameof(FromCategory))]
-    [DynamoField(nameof(Product.Status), ToMethod = nameof(ToProductStatus), FromMethod = nameof(FromProductStatus))]
     public static partial Dictionary<string, AttributeValue> ToItem(Product source);
 
     public static partial Product FromItem(Dictionary<string, AttributeValue> item);
@@ -203,9 +203,9 @@ public class User
 }
 
 [DynamoMapper(Convention = DynamoNamingConvention.CamelCase)]
+[DynamoField(nameof(User.Role), ToMethod = nameof(ToUserRole), FromMethod = nameof(FromUserRole))]
 public static partial class UserMapper
 {
-    [DynamoField(nameof(User.Role), ToMethod = nameof(ToUserRole), FromMethod = nameof(FromUserRole))]
     public static partial Dictionary<string, AttributeValue> ToItem(User source);
 
     public static partial User FromItem(Dictionary<string, AttributeValue> item);
@@ -251,9 +251,9 @@ public class Money
 }
 
 [DynamoMapper(Convention = DynamoNamingConvention.CamelCase)]
+[DynamoField(nameof(Product.Price), ToMethod = nameof(ToMoney), FromMethod = nameof(FromMoney))]
 public static partial class ProductMapper
 {
-    [DynamoField(nameof(Product.Price), ToMethod = nameof(ToMoney), FromMethod = nameof(FromMoney))]
     public static partial Dictionary<string, AttributeValue> ToItem(Product source);
 
     public static partial Product FromItem(Dictionary<string, AttributeValue> item);
@@ -273,83 +273,9 @@ public static partial class ProductMapper
 
 ## Diagnostics for Invalid Signatures
 
-DynamoMapper validates static method signatures and emits compile-time diagnostics:
-
-### DM0201: Static Conversion Method Not Found
-
-Emitted when a referenced method doesn't exist:
-
-```csharp
-[DynamoField(nameof(Order.Status),
-    ToMethod = nameof(ToStatus),  // Method doesn't exist
-    FromMethod = nameof(FromStatus))]
-```
-
-**Fix:** Ensure the method exists and is accessible.
-
-### DM0202: Static Conversion Method Has Invalid Signature
-
-Emitted when method signature doesn't match requirements:
-
-```csharp
-// Wrong: returns void instead of AttributeValue
-static void ToOrderStatus(OrderStatus status) { }
-
-// Wrong: parameter is string instead of OrderStatus
-static AttributeValue ToOrderStatus(string status) { }
-
-// Correct:
-static AttributeValue ToOrderStatus(OrderStatus status) { }
-```
-
-**Fix:** Ensure methods match exact signatures: `AttributeValue ToX(T)` and `T FromX(AttributeValue)`.
-
-### DM0203: Static Conversion Method Type Mismatch
-
-Emitted when method parameter/return types don't align with property type:
-
-```csharp
-// Property is OrderStatus, but method uses ProductStatus
-static AttributeValue ToOrderStatus(ProductStatus status) { }
-```
-
-**Fix:** Ensure parameter and return types match the property type.
-
-### DM0204: Both ToMethod and FromMethod Required
-
-Emitted when only one method is specified:
-
-```csharp
-// Wrong: only ToMethod specified
-[DynamoField(nameof(Order.Status), ToMethod = nameof(ToOrderStatus))]
-```
-
-**Fix:** Provide both `ToMethod` and `FromMethod`.
-
-### DM0205: Cannot Specify Both Converter and Static Methods
-
-Emitted when both approaches are used simultaneously:
-
-```csharp
-// Wrong: cannot use both
-[DynamoField(nameof(Order.Status),
-    Converter = typeof(OrderStatusConverter),
-    ToMethod = nameof(ToOrderStatus),
-    FromMethod = nameof(FromOrderStatus))]
-```
-
-**Fix:** Choose one approach (converter type or static methods).
-
-## Comparison with Converter Types
-
-| Feature | Static Methods | Converter Types |
-|---------|---------------|-----------------|
-| Reusability | Single mapper only | Across multiple mappers |
-| Testability | Must test via mapper | Test in isolation |
-| Organization | Co-located with config | Separate files/projects |
-| Verbosity | Less boilerplate | More explicit |
-| DI Support | No | Future phases |
-| Best For | Simple, mapper-specific | Complex, reusable |
+DynamoMapper validates static method signatures and emits compile-time diagnostics
+when a method is missing or has the wrong signature. Check the diagnostic message
+for the exact fix needed.
 
 ## Best Practices
 
@@ -391,6 +317,6 @@ Emitted when both approaches are used simultaneously:
 
 ## See Also
 
-- [Converter Types](converters.md) - Reusable converter types implementing `IDynamoConverter<T>`
+- [Converter Types](converters.md) - Not supported in the current release
 - [Phase 1 Requirements](../roadmap/phase-1.md#9-converters-phase-1) - Detailed converter specifications
 - [Phase 2 DSL](../roadmap/phase-2.md#8-converters-dsl) - DSL converter configuration

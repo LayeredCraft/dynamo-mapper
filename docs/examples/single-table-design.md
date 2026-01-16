@@ -86,9 +86,9 @@ public static partial class CustomerMapper
 
 ```csharp
 [DynamoMapper(Convention = DynamoNamingConvention.CamelCase)]
+[DynamoField(nameof(Order.Status), ToMethod = nameof(ToOrderStatus), FromMethod = nameof(FromOrderStatus))]
 public static partial class OrderMapper
 {
-    [DynamoField(nameof(Order.Status), Converter = typeof(OrderStatusConverter))]
     public static partial Dictionary<string, AttributeValue> ToItem(Order source);
 
     public static partial Order FromItem(Dictionary<string, AttributeValue> item);
@@ -121,6 +121,12 @@ public static partial class OrderMapper
                 details: $"Cannot deserialize {typeAttr.S} as Order");
         }
     }
+
+    static AttributeValue ToOrderStatus(OrderStatus status) =>
+        new() { S = status.Name };
+
+    static OrderStatus FromOrderStatus(AttributeValue value) =>
+        OrderStatus.FromName(value.S);
 }
 ```
 
@@ -342,12 +348,11 @@ public class Product
 }
 
 [DynamoMapper(Convention = DynamoNamingConvention.CamelCase)]
+[DynamoIgnore(nameof(Product.Metadata))]
 public static partial class ProductMapper
 {
-    [DynamoIgnore(nameof(Product.Metadata))]
     public static partial Dictionary<string, AttributeValue> ToItem(Product source);
 
-    [DynamoIgnore(nameof(Product.Metadata))]
     public static partial Product FromItem(Dictionary<string, AttributeValue> item);
 
     static partial void AfterToItem(Product source, Dictionary<string, AttributeValue> item)
@@ -475,9 +480,9 @@ public class Order
 }
 
 [DynamoMapper(Convention = DynamoNamingConvention.CamelCase)]
+[DynamoField(nameof(Order.Status), ToMethod = nameof(ToOrderStatus), FromMethod = nameof(FromOrderStatus))]
 public static partial class OrderMapper
 {
-    [DynamoField(nameof(Order.Status), Converter = typeof(OrderStatusConverter))]
     public static partial Dictionary<string, AttributeValue> ToItem(Order source);
 
     public static partial Order FromItem(Dictionary<string, AttributeValue> item);
@@ -495,6 +500,12 @@ public static partial class OrderMapper
             item["gsi1sk"] = new AttributeValue { S = source.ShippedAt.Value.ToString("O") };
         }
     }
+
+    static AttributeValue ToOrderStatus(OrderStatus status) =>
+        new() { S = status.Name };
+
+    static OrderStatus FromOrderStatus(AttributeValue value) =>
+        OrderStatus.FromName(value.S);
 }
 ```
 

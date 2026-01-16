@@ -33,7 +33,7 @@ public class AttributeValueExtensionsDateTimeTests
         var attributes = new Dictionary<string, AttributeValue>();
 
         // Act
-        var result = attributes.GetDateTime("createdAt", Requiredness.Optional);
+        var result = attributes.GetDateTime("createdAt", requiredness: Requiredness.Optional);
 
         // Assert
         Assert.Equal(DateTime.MinValue, result);
@@ -97,7 +97,7 @@ public class AttributeValueExtensionsDateTimeTests
         var attributes = new Dictionary<string, AttributeValue>();
 
         // Act
-        var result = attributes.GetDateTimeOffset("timestamp", Requiredness.Optional);
+        var result = attributes.GetDateTimeOffset("timestamp", requiredness: Requiredness.Optional);
 
         // Assert
         Assert.Equal(DateTimeOffset.MinValue, result);
@@ -161,7 +161,7 @@ public class AttributeValueExtensionsDateTimeTests
         var attributes = new Dictionary<string, AttributeValue>();
 
         // Act
-        var result = attributes.GetTimeSpan("duration", Requiredness.Optional);
+        var result = attributes.GetTimeSpan("duration", requiredness: Requiredness.Optional);
 
         // Assert
         Assert.Equal(TimeSpan.Zero, result);
@@ -174,7 +174,7 @@ public class AttributeValueExtensionsDateTimeTests
         var value = TimeSpan.FromMinutes(30);
         var attributes = new Dictionary<string, AttributeValue>
         {
-            ["duration"] = new() { S = value.ToString() },
+            ["duration"] = new() { S = value.ToString("") },
         };
 
         // Act
@@ -465,7 +465,10 @@ public class AttributeValueExtensionsDateTimeTests
     public void GetDateTime_ReturnsMinValue_WhenAttributeHasDynamoDBNull()
     {
         var attrs = new Dictionary<string, AttributeValue> { ["dt"] = new() { NULL = true } };
-        Assert.Equal(DateTime.MinValue, attrs.GetDateTime("dt", Requiredness.Optional));
+        Assert.Equal(
+            DateTime.MinValue,
+            attrs.GetDateTime("dt", requiredness: Requiredness.Optional)
+        );
     }
 
     [Fact]
@@ -480,7 +483,7 @@ public class AttributeValueExtensionsDateTimeTests
     {
         var attrs = new Dictionary<string, AttributeValue>();
         var ex = Assert.Throws<InvalidOperationException>(() =>
-            attrs.GetDateTime("missing", Requiredness.Required)
+            attrs.GetDateTime("missing", requiredness: Requiredness.Required)
         );
         Assert.Contains("does not contain an attribute named 'missing'", ex.Message);
     }

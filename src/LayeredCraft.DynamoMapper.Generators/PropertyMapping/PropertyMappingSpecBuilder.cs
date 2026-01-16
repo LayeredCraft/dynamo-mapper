@@ -94,11 +94,18 @@ internal static class PropertyMappingSpecBuilder
         };
 
         // Arguments 2+: Type-specific arguments (format strings, default values)
+        // Format parameters need named parameters to avoid ambiguity with out parameters
         args.AddRange(
-            strategy.FromTypeSpecificArgs.Select(typeArg => new ArgumentSpec(
-                typeArg,
-                ArgumentSource.TypeSpecific
-            ))
+            strategy.FromTypeSpecificArgs.Select(
+                (typeArg, index) =>
+                    new ArgumentSpec(
+                        // Format strings (quoted strings) need named parameters
+                        typeArg.StartsWith("\"")
+                            ? $"format: {typeArg}"
+                            : typeArg,
+                        ArgumentSource.TypeSpecific
+                    )
+            )
         );
 
         // Requiredness: field override > global default
@@ -156,11 +163,20 @@ internal static class PropertyMappingSpecBuilder
         };
 
         // Arguments 3+: Type-specific arguments (format strings)
+        // Format strings should use named parameters to avoid ambiguity
         args.AddRange(
-            strategy.ToTypeSpecificArgs.Select(typeArg => new ArgumentSpec(
-                typeArg,
-                ArgumentSource.TypeSpecific
-            ))
+            strategy.ToTypeSpecificArgs.Select(
+                (typeArg, index) =>
+                    new ArgumentSpec(
+                        // First arg that's a quoted string is typically a format parameter - use
+                        // named parameter
+                        index == 0
+                        && typeArg.StartsWith("\"")
+                            ? $"format: {typeArg}"
+                            : typeArg,
+                        ArgumentSource.TypeSpecific
+                    )
+            )
         );
 
         // Omit flags: field override > global default

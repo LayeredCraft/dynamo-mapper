@@ -100,7 +100,17 @@ internal static class PropertyMappingCodeRenderer
         );
 
         var argsList = spec.FromItemMethod.Arguments.Select(a => a.Value).ToList();
-        argsList.Insert(1, $"out var var{index}");
+
+        // For NULLABLE Enum methods with format, format comes before out parameter (position 1)
+        // For non-nullable enums, out comes first (after key), then defaultValue, then format
+        // For DateTime/DateTimeOffset/TimeSpan, out comes before format
+        var isNullableEnumWithFormat =
+            spec.TypeStrategy?.TypeName == "Enum"
+            && spec.TypeStrategy?.NullableModifier == "Nullable"
+            && argsList.Any(a => a.Contains("format:"));
+        var outPosition = isNullableEnumWithFormat ? 2 : 1;
+
+        argsList.Insert(outPosition, $"out var var{index}");
         var args = string.Join(", ", argsList);
 
         var methodCall =

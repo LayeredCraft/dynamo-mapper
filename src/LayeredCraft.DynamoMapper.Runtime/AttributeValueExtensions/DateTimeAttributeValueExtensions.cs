@@ -333,7 +333,7 @@ public static class DateTimeAttributeValueExtensions
         /// <param name="value">The <see cref="TimeSpan" /> value when found.</param>
         /// <param name="format">
         ///     The exact format string to use for parsing (e.g., "c", "g", "G", or custom
-        ///     patterns like "hh\\:mm\\:ss"). Default is "O" (round-trip format, ISO-8601).
+        ///     patterns like "hh\\:mm\\:ss"). Default is "c" (constant/invariant format).
         /// </param>
         /// <param name="requiredness">
         ///     Specifies whether the attribute is required. Default is
@@ -345,7 +345,7 @@ public static class DateTimeAttributeValueExtensions
         public bool TryGetTimeSpan(
             string key,
             out TimeSpan value,
-            string format = "O",
+            string format = "c",
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.S
         )
@@ -369,7 +369,7 @@ public static class DateTimeAttributeValueExtensions
         /// <param name="key">The attribute key to retrieve.</param>
         /// <param name="format">
         ///     The exact format string to use for parsing (e.g., "c", "g", "G", or custom
-        ///     patterns like "hh\\:mm\\:ss"). Default is "O" (round-trip format, ISO-8601).
+        ///     patterns like "hh\\:mm\\:ss"). Default is "c" (constant/invariant format).
         /// </param>
         /// <param name="requiredness">
         ///     Specifies whether the attribute is required. Default is
@@ -383,7 +383,7 @@ public static class DateTimeAttributeValueExtensions
         /// <remarks>Parsing uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
         public TimeSpan GetTimeSpan(
             string key,
-            string format = "O",
+            string format = "c",
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.S
         ) =>
@@ -399,7 +399,7 @@ public static class DateTimeAttributeValueExtensions
         /// <param name="value">The nullable <see cref="TimeSpan" /> value when found.</param>
         /// <param name="format">
         ///     The exact format string to use for parsing (e.g., "c", "g", "G", or custom
-        ///     patterns like "hh\\:mm\\:ss"). Default is "O" (round-trip format, ISO-8601).
+        ///     patterns like "hh\\:mm\\:ss"). Default is "c" (constant/invariant format).
         /// </param>
         /// <param name="requiredness">
         ///     Specifies whether the attribute is required. Default is
@@ -411,7 +411,7 @@ public static class DateTimeAttributeValueExtensions
         public bool TryGetNullableTimeSpan(
             string key,
             out TimeSpan? value,
-            string format = "O",
+            string format = "c",
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.S
         )
@@ -437,7 +437,7 @@ public static class DateTimeAttributeValueExtensions
         /// <param name="key">The attribute key to retrieve.</param>
         /// <param name="format">
         ///     The exact format string to use for parsing (e.g., "c", "g", "G", or custom
-        ///     patterns like "hh\\:mm\\:ss"). Default is "O" (round-trip format, ISO-8601).
+        ///     patterns like "hh\\:mm\\:ss"). Default is "c" (constant/invariant format).
         /// </param>
         /// <param name="requiredness">
         ///     Specifies whether the attribute is required. Default is
@@ -451,7 +451,7 @@ public static class DateTimeAttributeValueExtensions
         /// <remarks>Parsing uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
         public TimeSpan? GetNullableTimeSpan(
             string key,
-            string format = "O",
+            string format = "c",
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.S
         ) =>

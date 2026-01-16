@@ -122,12 +122,12 @@ internal static class TypeMappingStrategyResolver
             INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_Guid, context) =>
                 CreateStrategy("Guid", analysis.Nullability),
             INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_TimeSpan, context) =>
-                $"\"{context.MapperOptions.DateTimeFormat}\"".Map(dateFmt =>
+                $"\"{context.MapperOptions.TimeSpanFormat}\"".Map(timeFmt =>
                     CreateStrategy(
                         "TimeSpan",
                         analysis.Nullability,
-                        fromArg: dateFmt,
-                        toArg: dateFmt
+                        fromArg: timeFmt,
+                        toArg: timeFmt
                     )
                 ),
             INamedTypeSymbol { TypeKind: TypeKind.Enum } enumType => CreateEnumStrategy(

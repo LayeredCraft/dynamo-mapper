@@ -174,7 +174,7 @@ public class AttributeValueExtensionsDateTimeTests
         var value = TimeSpan.FromMinutes(30);
         var attributes = new Dictionary<string, AttributeValue>
         {
-            ["duration"] = new() { S = value.ToString("") },
+            ["duration"] = new() { S = value.ToString("c") },
         };
 
         // Act

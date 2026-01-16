@@ -12,10 +12,6 @@ namespace DynamoMapper.Generator.PropertyMapping;
 internal static class PropertyMappingCodeRenderer
 {
     /// <summary>Renders a property mapping specification into PropertyInfo.</summary>
-    /// <param name="spec">The property mapping specification.</param>
-    /// <param name="analysis">The property analysis containing accessor information.</param>
-    /// <param name="context">The generator context.</param>
-    /// <returns>The rendered PropertyInfo.</returns>
     internal static PropertyInfo Render(
         PropertyMappingSpec spec,
         PropertyAnalysis analysis,

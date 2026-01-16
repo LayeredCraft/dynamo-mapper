@@ -20,5 +20,8 @@ internal sealed record PropertyAnalysis(
     PropertyNullabilityInfo Nullability,
     DynamoFieldOptions? FieldOptions,
     bool HasGetter,
-    bool HasSetter
+    bool HasSetter,
+    bool IsRequired,
+    bool IsInitOnly,
+    bool HasDefaultValue
 );

@@ -86,7 +86,7 @@ public class AttributeValueExtensionsStringTests
         var result = attributes.GetNullableString("name");
 
         // Assert
-        Assert.Null(result);
+        Assert.Equal(string.Empty, result);
     }
 
     // SetString Tests

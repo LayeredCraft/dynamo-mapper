@@ -79,6 +79,9 @@ public static class NumericAttributeValueExtensions
             if (!attributes.TryGetNullableValue(key, requiredness, out var attribute))
                 return false;
 
+            if (attribute.IsNull)
+                return true;
+
             var stringValue = attribute!.GetNullableString(kind);
             value = stringValue is null
                 ? null
@@ -171,6 +174,9 @@ public static class NumericAttributeValueExtensions
             value = null;
             if (!attributes.TryGetNullableValue(key, requiredness, out var attribute))
                 return false;
+
+            if (attribute.IsNull)
+                return true;
 
             var stringValue = attribute!.GetNullableString(kind);
             value = stringValue is null
@@ -324,6 +330,9 @@ public static class NumericAttributeValueExtensions
             if (!attributes.TryGetNullableValue(key, requiredness, out var attribute))
                 return false;
 
+            if (attribute.IsNull)
+                return true;
+
             var stringValue = attribute!.GetNullableString(kind);
             value = stringValue is null
                 ? null
@@ -420,6 +429,9 @@ public static class NumericAttributeValueExtensions
             if (!attributes.TryGetNullableValue(key, requiredness, out var attribute))
                 return false;
 
+            if (attribute.IsNull)
+                return true;
+
             var stringValue = attribute!.GetNullableString(kind);
             value = stringValue is null
                 ? null
@@ -512,6 +524,9 @@ public static class NumericAttributeValueExtensions
             value = null;
             if (!attributes.TryGetNullableValue(key, requiredness, out var attribute))
                 return false;
+
+            if (attribute.IsNull)
+                return true;
 
             var stringValue = attribute!.GetNullableString(kind);
             value = stringValue is null

@@ -30,6 +30,9 @@ public static class BooleanAttributeValueExtensions
             if (!attributes.TryGetNullableValue(key, requiredness, out var attribute))
                 return false;
 
+            if (attribute.IsNull)
+                return true;
+
             value = attribute!.GetNullableBool(kind);
             return true;
         }

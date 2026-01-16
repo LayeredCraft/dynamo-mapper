@@ -33,6 +33,9 @@ public static class StringAttributeValueExtensions
             if (!attributes.TryGetNullableValue(key, requiredness, out var attribute))
                 return false;
 
+            if (attribute.IsNull)
+                return true;
+
             value = attribute!.GetString(kind);
             return true;
         }

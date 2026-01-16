@@ -156,6 +156,9 @@ public static class EnumAttributeValueExtensions
             if (!attributes.TryGetNullableValue(key, requiredness, out var attribute))
                 return false;
 
+            if (attribute.IsNull)
+                return true;
+
             var stringValue = attribute!.GetNullableString(kind);
             if (stringValue is null)
                 return true;
@@ -216,6 +219,9 @@ public static class EnumAttributeValueExtensions
             value = null;
             if (!attributes.TryGetNullableValue(key, requiredness, out var attribute))
                 return false;
+
+            if (attribute.IsNull)
+                return true;
 
             var stringValue = attribute!.GetNullableString(kind);
             if (stringValue is null)

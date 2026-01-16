@@ -174,6 +174,9 @@ public static class DateTimeAttributeValueExtensions
             if (!attributes.TryGetNullableValue(key, requiredness, out var attribute))
                 return false;
 
+            if (attribute.IsNull)
+                return true;
+
             var stringValue = attribute!.GetNullableString(kind);
             value = stringValue is null
                 ? null
@@ -240,6 +243,9 @@ public static class DateTimeAttributeValueExtensions
             value = null;
             if (!attributes.TryGetNullableValue(key, requiredness, out var attribute))
                 return false;
+
+            if (attribute.IsNull)
+                return true;
 
             var stringValue = attribute!.GetNullableString(kind);
             value = stringValue is null
@@ -369,6 +375,9 @@ public static class DateTimeAttributeValueExtensions
             value = null;
             if (!attributes.TryGetNullableValue(key, requiredness, out var attribute))
                 return false;
+
+            if (attribute.IsNull)
+                return true;
 
             var stringValue = attribute!.GetNullableString(kind);
             value = stringValue is null
@@ -515,6 +524,9 @@ public static class DateTimeAttributeValueExtensions
             if (!attributes.TryGetNullableValue(key, requiredness, out var attribute))
                 return false;
 
+            if (attribute.IsNull)
+                return true;
+
             var stringValue = attribute!.GetNullableString(kind);
             value = stringValue is null
                 ? null
@@ -629,6 +641,9 @@ public static class DateTimeAttributeValueExtensions
             value = null;
             if (!attributes.TryGetNullableValue(key, requiredness, out var attribute))
                 return false;
+
+            if (attribute.IsNull)
+                return true;
 
             var stringValue = attribute!.GetNullableString(kind);
             value = stringValue is null
@@ -752,6 +767,9 @@ public static class DateTimeAttributeValueExtensions
             value = null;
             if (!attributes.TryGetNullableValue(key, requiredness, out var attribute))
                 return false;
+
+            if (attribute.IsNull)
+                return true;
 
             var stringValue = attribute!.GetNullableString(kind);
             value = stringValue is null

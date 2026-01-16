@@ -23,26 +23,26 @@ public static partial class ExampleEntityMapper
         new Dictionary<string, AttributeValue>(22)
             .SetBool("bool", source.Bool, false, true)
             .SetBool("nullableBool", source.NullableBool, false, true)
-            .SetDateTime("dateTime", source.DateTime, format: "O", false, true)
-            .SetDateTime("nullableDateTime", source.NullableDateTime, format: "O", false, true)
-            .SetDateTimeOffset("dateTimeOffset", source.DateTimeOffset, format: "O", false, true)
-            .SetDateTimeOffset("nullableDateTimeOffset", source.NullableDateTimeOffset, format: "O", false, true)
+            .SetDateTime("dateTime", source.DateTime, "O", false, true)
+            .SetDateTime("nullableDateTime", source.NullableDateTime, "O", false, true)
+            .SetDateTimeOffset("dateTimeOffset", source.DateTimeOffset, "O", false, true)
+            .SetDateTimeOffset("nullableDateTimeOffset", source.NullableDateTimeOffset, "O", false, true)
             .SetDecimal("decimal", source.Decimal, false, true)
             .SetDecimal("nullableDecimal", source.NullableDecimal, false, true)
             .SetDouble("double", source.Double, false, true)
             .SetDouble("nullableDouble", source.NullableDouble, false, true)
-            .SetGuid("guid", source.Guid, false, true)
-            .SetGuid("nullableGuid", source.NullableGuid, false, true)
+            .SetGuid("guid", source.Guid, "D", false, true)
+            .SetGuid("nullableGuid", source.NullableGuid, "D", false, true)
             .SetInt("int", source.Int, false, true)
             .SetInt("nullableInt", source.NullableInt, false, true)
             .SetLong("long", source.Long, false, true)
             .SetLong("nullableLong", source.NullableLong, false, true)
             .SetString("string", source.String, false, true)
             .SetString("nullableString", source.NullableString, false, true)
-            .SetTimeSpan("timeSpan", source.TimeSpan, format: "c", false, true)
-            .SetTimeSpan("nullableTimeSpan", source.NullableTimeSpan, format: "c", false, true)
-            .SetEnum<global::MyNamespace.OrderStatus>("enum", source.Enum, format: "G", false, true)
-            .SetEnum<global::MyNamespace.OrderStatus>("nullableEnum", source.NullableEnum, format: "G", false, true);
+            .SetTimeSpan("timeSpan", source.TimeSpan, "c", false, true)
+            .SetTimeSpan("nullableTimeSpan", source.NullableTimeSpan, "c", false, true)
+            .SetEnum<global::MyNamespace.OrderStatus>("enum", source.Enum, "G", false, true)
+            .SetEnum<global::MyNamespace.OrderStatus>("nullableEnum", source.NullableEnum, "G", false, true);
 
     [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
     public static partial global::MyNamespace.ExampleEntity FromItem(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> x)
@@ -58,8 +58,8 @@ public static partial class ExampleEntityMapper
         if (x.TryGetNullableDecimal("nullableDecimal", out var var7, Requiredness.InferFromNullability)) exampleEntity.NullableDecimal = var7!;
         if (x.TryGetDouble("double", out var var8, Requiredness.InferFromNullability)) exampleEntity.Double = var8!;
         if (x.TryGetNullableDouble("nullableDouble", out var var9, Requiredness.InferFromNullability)) exampleEntity.NullableDouble = var9!;
-        if (x.TryGetGuid("guid", out var var10, Requiredness.InferFromNullability)) exampleEntity.Guid = var10!;
-        if (x.TryGetNullableGuid("nullableGuid", out var var11, Requiredness.InferFromNullability)) exampleEntity.NullableGuid = var11!;
+        if (x.TryGetGuid("guid", out var var10, format: "D", Requiredness.InferFromNullability)) exampleEntity.Guid = var10!;
+        if (x.TryGetNullableGuid("nullableGuid", out var var11, format: "D", Requiredness.InferFromNullability)) exampleEntity.NullableGuid = var11!;
         if (x.TryGetInt("int", out var var12, Requiredness.InferFromNullability)) exampleEntity.Int = var12!;
         if (x.TryGetNullableInt("nullableInt", out var var13, Requiredness.InferFromNullability)) exampleEntity.NullableInt = var13!;
         if (x.TryGetLong("long", out var var14, Requiredness.InferFromNullability)) exampleEntity.Long = var14!;

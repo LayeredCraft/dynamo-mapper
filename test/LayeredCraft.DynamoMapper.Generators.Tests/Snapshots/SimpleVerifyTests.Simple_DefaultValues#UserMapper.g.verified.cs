@@ -25,7 +25,7 @@ internal static partial class UserMapper
             .SetString("middleName", user.MiddleName, false, true)
             .SetString("lastName", user.LastName, false, true)
             .SetInt("age", user.Age, false, true)
-            .SetDateTimeOffset("dateCreated", user.DateCreated, format: "O", false, true)
+            .SetDateTimeOffset("dateCreated", user.DateCreated, "O", false, true)
             .SetString("fullName", user.FullName, false, true);
 
     [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]

@@ -39,8 +39,8 @@ public static partial class ExampleEntityMapper
             .SetLong("nullableLong", source.NullableLong, false, true)
             .SetString("string", source.String, false, true)
             .SetString("nullableString", source.NullableString, false, true)
-            .SetTimeSpan("timeSpan", source.TimeSpan, format: "O", false, true)
-            .SetTimeSpan("nullableTimeSpan", source.NullableTimeSpan, format: "O", false, true)
+            .SetTimeSpan("timeSpan", source.TimeSpan, format: "c", false, true)
+            .SetTimeSpan("nullableTimeSpan", source.NullableTimeSpan, format: "c", false, true)
             .SetEnum<global::MyNamespace.OrderStatus>("enum", source.Enum, format: "G", false, true)
             .SetEnum<global::MyNamespace.OrderStatus>("nullableEnum", source.NullableEnum, format: "G", false, true);
 
@@ -66,8 +66,8 @@ public static partial class ExampleEntityMapper
         if (x.TryGetNullableLong("nullableLong", out var var15, Requiredness.InferFromNullability)) exampleEntity.NullableLong = var15!;
         if (x.TryGetString("string", out var var16, Requiredness.InferFromNullability)) exampleEntity.String = var16!;
         if (x.TryGetNullableString("nullableString", out var var17, Requiredness.InferFromNullability)) exampleEntity.NullableString = var17!;
-        if (x.TryGetTimeSpan("timeSpan", out var var18, format: "O", Requiredness.InferFromNullability)) exampleEntity.TimeSpan = var18!;
-        if (x.TryGetNullableTimeSpan("nullableTimeSpan", out var var19, format: "O", Requiredness.InferFromNullability)) exampleEntity.NullableTimeSpan = var19!;
+        if (x.TryGetTimeSpan("timeSpan", out var var18, format: "c", Requiredness.InferFromNullability)) exampleEntity.TimeSpan = var18!;
+        if (x.TryGetNullableTimeSpan("nullableTimeSpan", out var var19, format: "c", Requiredness.InferFromNullability)) exampleEntity.NullableTimeSpan = var19!;
         if (x.TryGetEnum<global::MyNamespace.OrderStatus>("enum", out var var20, global::MyNamespace.OrderStatus.Pending, format: "G", Requiredness.InferFromNullability)) exampleEntity.Enum = var20!;
         if (x.TryGetNullableEnum<global::MyNamespace.OrderStatus>("nullableEnum", format: "G", out var var21, Requiredness.InferFromNullability)) exampleEntity.NullableEnum = var21!;
         return exampleEntity;

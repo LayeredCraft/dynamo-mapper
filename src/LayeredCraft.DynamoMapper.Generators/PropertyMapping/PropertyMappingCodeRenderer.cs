@@ -19,13 +19,30 @@ internal static class PropertyMappingCodeRenderer
     internal static PropertyInfo Render(
         PropertyMappingSpec spec,
         PropertyAnalysis analysis,
+        string modelVarName,
         GeneratorContext context
     )
     {
+        // Determine if we should use regular assignment vs init assignment
+        var useRegularAssignment =
+            spec.FromItemMethod is { IsCustomMethod: false }
+            || analysis is { IsRequired: false, IsInitOnly: false, HasDefaultValue: true };
+
         // FromItem requires both: setter on property AND FromItem method exists
         var fromAssignment =
-            context.HasFromItemMethod && analysis.HasSetter && spec.FromItemMethod is not null
-                ? RenderFromAssignment(spec, analysis, context)
+            context.HasFromItemMethod
+            && analysis.HasSetter
+            && spec.FromItemMethod is not null
+            && useRegularAssignment
+                ? RenderFromAssignment(spec, modelVarName, analysis, context)
+                : null;
+
+        var fromInitAssignment =
+            context.HasFromItemMethod
+            && analysis.HasSetter
+            && spec.FromItemMethod is not null
+            && !useRegularAssignment
+                ? RenderFromInitAssignment(spec, analysis, context)
                 : null;
 
         // ToItem requires both: getter on property AND ToItem method exists
@@ -34,15 +51,19 @@ internal static class PropertyMappingCodeRenderer
                 ? RenderToAssignment(spec)
                 : null;
 
-        return new PropertyInfo(fromAssignment, toAssignments);
+        return new PropertyInfo(fromAssignment, fromInitAssignment, toAssignments);
     }
 
     /// <summary>
     ///     Renders the FromAssignment string for deserialization. Format: PropertyName =
     ///     paramName.MethodName&lt;Generic&gt;(args), OR PropertyName = CustomMethodName(args), for
-    ///     custom methods. For array properties, appends .ToArray() to convert List to array.
+    ///     custom methods
     /// </summary>
-    private static string RenderFromAssignment(PropertyMappingSpec spec, PropertyAnalysis analysis, GeneratorContext context)
+    private static string RenderFromInitAssignment(
+        PropertyMappingSpec spec,
+        PropertyAnalysis analysis,
+        GeneratorContext context
+    )
     {
         Debug.Assert(spec.FromItemMethod is not null, "FromItemMethod should not be null");
         Debug.Assert(
@@ -65,6 +86,35 @@ internal static class PropertyMappingCodeRenderer
         }
 
         return $"{spec.PropertyName} = {methodCall},";
+    }
+
+    private static string RenderFromAssignment(
+        PropertyMappingSpec spec,
+        string modelVarName,
+        PropertyAnalysis analysis,
+        GeneratorContext context
+    )
+    {
+        Debug.Assert(spec.FromItemMethod is not null, "FromItemMethod should not be null");
+        Debug.Assert(
+            spec.FromItemMethod!.IsCustomMethod || spec.TypeStrategy is not null,
+            "TypeStrategy should not be null for standard methods"
+        );
+
+        var argsList = spec.FromItemMethod.Arguments.Select(a => a.Value).ToList();
+        argsList.Insert(1, $"out var {spec.Key}");
+        var args = string.Join(", ", argsList);
+
+        var methodCall =
+            $"Try{spec.FromItemMethod.MethodName}{spec.TypeStrategy!.GenericArgument}({args})";
+
+        // For array properties, append .ToArray() to convert the List to an array
+        // GetList returns List<T>, but if the property is T[], we need to convert it
+        var isArrayProperty = analysis.PropertyType.TypeKind == TypeKind.Array;
+        var toArray =
+            isArrayProperty && !spec.FromItemMethod.IsCustomMethod ? ".ToArray()" : string.Empty;
+
+        return $"if ({context.MapperOptions.FromMethodParameterName}.{methodCall}) {modelVarName}.{spec.PropertyName} = {spec.Key}!{toArray};";
     }
 
     /// <summary>

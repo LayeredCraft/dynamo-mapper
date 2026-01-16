@@ -25,10 +25,13 @@ internal static partial class ExampleEntityMapper
             .SetString("ignoreInFromItem", source.IgnoreInFromItem, false, true);
 
     [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
-    internal static partial global::MyNamespace.ExampleEntity FromItem(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> item) =>
-        new global::MyNamespace.ExampleEntity
+    internal static partial global::MyNamespace.ExampleEntity FromItem(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> item)
+    {
+        var exampleEntity = new global::MyNamespace.ExampleEntity
         {
             String = item.GetString("string", Requiredness.InferFromNullability),
-            IgnoreInToItem = item.GetString("ignoreInToItem", Requiredness.InferFromNullability),
         };
+        if (item.TryGetString("ignoreInToItem", out var ignoreInToItem, Requiredness.InferFromNullability)) exampleEntity.IgnoreInToItem = ignoreInToItem!;
+        return exampleEntity;
+    }
 }

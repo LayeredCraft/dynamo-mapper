@@ -30,7 +30,7 @@ internal static partial class UserMapper
     [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
     internal static partial global::User FromItem(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> item)
     {
-        var user = new global::User()
+        var user = new global::User
         {
             FirstName = item.GetString("firstName", Requiredness.InferFromNullability),
             LastName = item.GetString("lastName", Requiredness.InferFromNullability),

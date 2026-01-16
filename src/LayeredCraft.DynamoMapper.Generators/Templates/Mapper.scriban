@@ -34,8 +34,10 @@ using Amazon.DynamoDBv2.Model;
     {{ generated_code_attribute }}
     {{ mapper_class.from_item_signature }}
     {
-        var {{ model_var_name }} = new {{ model_class.fully_qualified_type }}(){{ if from_init_assignments.size == 0 }};{{ end }}
-        {{~ if from_init_assignments.size > 0 ~}}
+        {{~ if from_init_assignments.size == 0 ~}}
+        var {{ model_var_name }} = new {{ model_class.fully_qualified_type }}();
+        {{~ else ~}}
+        var {{ model_var_name }} = new {{ model_class.fully_qualified_type }}
         {
             {{~ for assignment in from_init_assignments ~}}
             {{ assignment }}

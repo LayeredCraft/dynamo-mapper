@@ -23,7 +23,7 @@ public static class CollectionAttributeValueExtensions
                 return [];
 
             var list = attributeValue.L ?? [];
-            return list.Select(av => ConvertFromAttributeValue<T>(av)).ToList();
+            return list.Select(Dictionary<string, AttributeValue>.ConvertFromAttributeValue<T>).ToList();
         }
 
         /// <summary>Gets a nullable list from the attribute dictionary.</summary>
@@ -37,7 +37,7 @@ public static class CollectionAttributeValueExtensions
                 return null;
 
             var list = attributeValue.L ?? [];
-            return list.Select(av => ConvertFromAttributeValue<T>(av)).ToList();
+            return list.Select(Dictionary<string, AttributeValue>.ConvertFromAttributeValue<T>).ToList();
         }
 
         /// <summary>Sets a list in the attribute dictionary.</summary>
@@ -79,7 +79,7 @@ public static class CollectionAttributeValueExtensions
                 return new Dictionary<string, T>();
 
             var map = attributeValue.M ?? new Dictionary<string, AttributeValue>();
-            return map.ToDictionary(kvp => kvp.Key, kvp => ConvertFromAttributeValue<T>(kvp.Value));
+            return map.ToDictionary(kvp => kvp.Key, kvp => Dictionary<string, AttributeValue>.ConvertFromAttributeValue<T>(kvp.Value));
         }
 
         /// <summary>Gets a nullable map from the attribute dictionary.</summary>
@@ -93,7 +93,7 @@ public static class CollectionAttributeValueExtensions
                 return null;
 
             var map = attributeValue.M ?? new Dictionary<string, AttributeValue>();
-            return map.ToDictionary(kvp => kvp.Key, kvp => ConvertFromAttributeValue<T>(kvp.Value));
+            return map.ToDictionary(kvp => kvp.Key, kvp => Dictionary<string, AttributeValue>.ConvertFromAttributeValue<T>(kvp.Value));
         }
 
         /// <summary>Sets a map in the attribute dictionary.</summary>
@@ -233,11 +233,11 @@ public static class CollectionAttributeValueExtensions
         /// Converts an AttributeValue to a strongly-typed value.
         /// Handles NULL AttributeValues for nullable elements.
         /// </summary>
-        private static T? ConvertFromAttributeValue<T>(AttributeValue av)
+        private static T ConvertFromAttributeValue<T>(AttributeValue av)
         {
             // Handle NULL AttributeValues (for nullable elements in collections)
             if (av.NULL is true)
-                return default;
+                return default!;
 
             var type = typeof(T);
 
@@ -246,47 +246,56 @@ public static class CollectionAttributeValueExtensions
 
             // String
             if (underlyingType == typeof(string))
-                return (T?)(object?)av.S;
+                return (T)(object?)av.GetNullableString(DynamoKind.S)!;
 
             // Boolean
             if (underlyingType == typeof(bool))
-                return (T)(object)av.BOOL!;
+                return (T)(object)av.GetBool(DynamoKind.BOOL);
 
             // Numeric types
             if (underlyingType == typeof(int))
-                return (T)(object)int.Parse(av.N, CultureInfo.InvariantCulture);
+                return (T)(object)int.Parse(av.GetString(DynamoKind.N), CultureInfo.InvariantCulture);
             if (underlyingType == typeof(long))
-                return (T)(object)long.Parse(av.N, CultureInfo.InvariantCulture);
+                return (T)(object)long.Parse(av.GetString(DynamoKind.N), CultureInfo.InvariantCulture);
             if (underlyingType == typeof(float))
-                return (T)(object)float.Parse(av.N, CultureInfo.InvariantCulture);
+                return (T)(object)float.Parse(av.GetString(DynamoKind.N), CultureInfo.InvariantCulture);
             if (underlyingType == typeof(double))
-                return (T)(object)double.Parse(av.N, CultureInfo.InvariantCulture);
+                return (T)(object)double.Parse(av.GetString(DynamoKind.N), CultureInfo.InvariantCulture);
             if (underlyingType == typeof(decimal))
-                return (T)(object)decimal.Parse(av.N, CultureInfo.InvariantCulture);
+                return (T)(object)decimal.Parse(av.GetString(DynamoKind.N), CultureInfo.InvariantCulture);
             if (underlyingType == typeof(byte))
-                return (T)(object)byte.Parse(av.N, CultureInfo.InvariantCulture);
+                return (T)(object)byte.Parse(av.GetString(DynamoKind.N), CultureInfo.InvariantCulture);
             if (underlyingType == typeof(short))
-                return (T)(object)short.Parse(av.N, CultureInfo.InvariantCulture);
+                return (T)(object)short.Parse(av.GetString(DynamoKind.N), CultureInfo.InvariantCulture);
 
             // DateTime
             if (underlyingType == typeof(DateTime))
-                return (T)(object)DateTime.Parse(av.S, CultureInfo.InvariantCulture);
+                return (T)(object)DateTime.Parse(
+                    av.GetString(DynamoKind.S),
+                    CultureInfo.InvariantCulture
+                );
 
             // DateTimeOffset
             if (underlyingType == typeof(DateTimeOffset))
-                return (T)(object)DateTimeOffset.Parse(av.S, CultureInfo.InvariantCulture);
+                return (T)(object)DateTimeOffset.Parse(
+                    av.GetString(DynamoKind.S),
+                    CultureInfo.InvariantCulture
+                );
 
             // TimeSpan
             if (underlyingType == typeof(TimeSpan))
-                return (T)(object)TimeSpan.Parse(av.S, CultureInfo.InvariantCulture);
+                return (T)(object)TimeSpan.Parse(
+                    av.GetString(DynamoKind.S),
+                    CultureInfo.InvariantCulture
+                );
 
             // Guid
             if (underlyingType == typeof(Guid))
-                return (T)(object)Guid.Parse(av.S);
+                return (T)(object)Guid.Parse(av.GetString(DynamoKind.S));
 
             // Enum
             if (underlyingType.IsEnum)
-                return (T)Enum.Parse(underlyingType, av.S);
+                return (T)Enum.Parse(underlyingType, av.GetString(DynamoKind.S));
 
             throw new NotSupportedException(
                 $"Type {typeof(T)} is not supported as a collection element"
@@ -308,81 +317,69 @@ public static class CollectionAttributeValueExtensions
 
             // String
             if (underlyingType == typeof(string))
-                return new AttributeValue { S = (string)(object)value };
+                return ((string?)(object)value).ToAttributeValue(DynamoKind.S);
 
             // Boolean
             if (underlyingType == typeof(bool))
-                return new AttributeValue { BOOL = (bool)(object)value };
+                return ((bool?)(object)value).ToAttributeValue(DynamoKind.BOOL);
 
             // Numeric types
             if (underlyingType == typeof(int))
-                return new AttributeValue
-                {
-                    N = ((int)(object)value).ToString(CultureInfo.InvariantCulture)
-                };
+                return ((int)(object)value)
+                    .ToString(CultureInfo.InvariantCulture)
+                    .ToAttributeValue(DynamoKind.N);
             if (underlyingType == typeof(long))
-                return new AttributeValue
-                {
-                    N = ((long)(object)value).ToString(CultureInfo.InvariantCulture)
-                };
+                return ((long)(object)value)
+                    .ToString(CultureInfo.InvariantCulture)
+                    .ToAttributeValue(DynamoKind.N);
             if (underlyingType == typeof(float))
-                return new AttributeValue
-                {
-                    N = ((float)(object)value).ToString(CultureInfo.InvariantCulture)
-                };
+                return ((float)(object)value)
+                    .ToString(CultureInfo.InvariantCulture)
+                    .ToAttributeValue(DynamoKind.N);
             if (underlyingType == typeof(double))
-                return new AttributeValue
-                {
-                    N = ((double)(object)value).ToString(CultureInfo.InvariantCulture)
-                };
+                return ((double)(object)value)
+                    .ToString(CultureInfo.InvariantCulture)
+                    .ToAttributeValue(DynamoKind.N);
             if (underlyingType == typeof(decimal))
-                return new AttributeValue
-                {
-                    N = ((decimal)(object)value).ToString(CultureInfo.InvariantCulture)
-                };
+                return ((decimal)(object)value)
+                    .ToString(CultureInfo.InvariantCulture)
+                    .ToAttributeValue(DynamoKind.N);
             if (underlyingType == typeof(byte))
-                return new AttributeValue
-                {
-                    N = ((byte)(object)value).ToString(CultureInfo.InvariantCulture)
-                };
+                return ((byte)(object)value)
+                    .ToString(CultureInfo.InvariantCulture)
+                    .ToAttributeValue(DynamoKind.N);
             if (underlyingType == typeof(short))
-                return new AttributeValue
-                {
-                    N = ((short)(object)value).ToString(CultureInfo.InvariantCulture)
-                };
+                return ((short)(object)value)
+                    .ToString(CultureInfo.InvariantCulture)
+                    .ToAttributeValue(DynamoKind.N);
 
             // DateTime
             if (underlyingType == typeof(DateTime))
-                return new AttributeValue
-                {
-                    S = ((DateTime)(object)value).ToString("O", CultureInfo.InvariantCulture)
-                };
+                return ((DateTime)(object)value)
+                    .ToString("O", CultureInfo.InvariantCulture)
+                    .ToAttributeValue(DynamoKind.S);
 
             // DateTimeOffset
             if (underlyingType == typeof(DateTimeOffset))
-                return new AttributeValue
-                {
-                    S =
-                        ((DateTimeOffset)(object)value).ToString(
-                            "O",
-                            CultureInfo.InvariantCulture
-                        )
-                };
+                return ((DateTimeOffset)(object)value)
+                    .ToString("O", CultureInfo.InvariantCulture)
+                    .ToAttributeValue(DynamoKind.S);
 
             // TimeSpan
             if (underlyingType == typeof(TimeSpan))
-                return new AttributeValue
-                {
-                    S = ((TimeSpan)(object)value).ToString("c", CultureInfo.InvariantCulture)
-                };
+                return ((TimeSpan)(object)value)
+                    .ToString("c", CultureInfo.InvariantCulture)
+                    .ToAttributeValue(DynamoKind.S);
 
             // Guid
             if (underlyingType == typeof(Guid))
-                return new AttributeValue { S = ((Guid)(object)value).ToString() };
+                return ((Guid)(object)value)
+                    .ToString()
+                    .ToAttributeValue(DynamoKind.S);
 
             // Enum
             return underlyingType.IsEnum
-                ? new AttributeValue { S = value.ToString() ?? string.Empty }
+                ? (value.ToString() ?? string.Empty).ToAttributeValue(DynamoKind.S)
                 : throw new NotSupportedException(
                     $"Type {typeof(T)} is not supported as a collection element"
                 );

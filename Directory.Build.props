@@ -6,7 +6,7 @@
     <!-- Other useful metadata -->
     <RepositoryUrl>https://github.com/layeredcraft/dynamo-mapper</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <Authors>Nick Cipollina</Authors>
+    <Authors>Jonas Ha &amp; Nick Cipollina</Authors>
     <PackageProjectUrl>https://github.com/layeredcraft/dynamo-mapper</PackageProjectUrl>
     <PackageIcon>icon.png</PackageIcon>
     <!-- NuGet.org specific -->

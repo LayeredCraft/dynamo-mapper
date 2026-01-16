@@ -31,7 +31,7 @@ internal static partial class ExampleEntityMapper
         {
             String = item.GetString("string", Requiredness.InferFromNullability),
         };
-        if (item.TryGetString("ignoreInToItem", out var ignoreInToItem, Requiredness.InferFromNullability)) exampleEntity.IgnoreInToItem = ignoreInToItem!;
+        if (item.TryGetString("ignoreInToItem", out var var3, Requiredness.InferFromNullability)) exampleEntity.IgnoreInToItem = var3!;
         return exampleEntity;
     }
 }

@@ -23,10 +23,10 @@ public static partial class ExampleEntityMapper
         new Dictionary<string, AttributeValue>(22)
             .SetBool("bool", source.Bool, false, true)
             .SetBool("nullableBool", source.NullableBool, false, true)
-            .SetDateTime("dateTime", source.DateTime, "O", false, true)
-            .SetDateTime("nullableDateTime", source.NullableDateTime, "O", false, true)
-            .SetDateTimeOffset("dateTimeOffset", source.DateTimeOffset, "O", false, true)
-            .SetDateTimeOffset("nullableDateTimeOffset", source.NullableDateTimeOffset, "O", false, true)
+            .SetDateTime("dateTime", source.DateTime, format: "O", false, true)
+            .SetDateTime("nullableDateTime", source.NullableDateTime, format: "O", false, true)
+            .SetDateTimeOffset("dateTimeOffset", source.DateTimeOffset, format: "O", false, true)
+            .SetDateTimeOffset("nullableDateTimeOffset", source.NullableDateTimeOffset, format: "O", false, true)
             .SetDecimal("decimal", source.Decimal, false, true)
             .SetDecimal("nullableDecimal", source.NullableDecimal, false, true)
             .SetDouble("double", source.Double, false, true)
@@ -39,10 +39,10 @@ public static partial class ExampleEntityMapper
             .SetLong("nullableLong", source.NullableLong, false, true)
             .SetString("string", source.String, false, true)
             .SetString("nullableString", source.NullableString, false, true)
-            .SetTimeSpan("timeSpan", source.TimeSpan, false, true)
-            .SetTimeSpan("nullableTimeSpan", source.NullableTimeSpan, false, true)
-            .SetEnum<global::MyNamespace.OrderStatus>("enum", source.Enum, "G", false, true)
-            .SetEnum<global::MyNamespace.OrderStatus>("nullableEnum", source.NullableEnum, "G", false, true);
+            .SetTimeSpan("timeSpan", source.TimeSpan, format: "c", false, true)
+            .SetTimeSpan("nullableTimeSpan", source.NullableTimeSpan, format: "c", false, true)
+            .SetEnum<global::MyNamespace.OrderStatus>("enum", source.Enum, format: "G", false, true)
+            .SetEnum<global::MyNamespace.OrderStatus>("nullableEnum", source.NullableEnum, format: "G", false, true);
 
     [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
     public static partial global::MyNamespace.ExampleEntity FromItem(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> x)
@@ -51,10 +51,10 @@ public static partial class ExampleEntityMapper
         {
             Bool = x.GetBool("bool", Requiredness.InferFromNullability),
             NullableBool = x.GetNullableBool("nullableBool", Requiredness.InferFromNullability),
-            DateTime = x.GetDateTime("dateTime", "O", Requiredness.InferFromNullability),
-            NullableDateTime = x.GetNullableDateTime("nullableDateTime", "O", Requiredness.InferFromNullability),
-            DateTimeOffset = x.GetDateTimeOffset("dateTimeOffset", "O", Requiredness.InferFromNullability),
-            NullableDateTimeOffset = x.GetNullableDateTimeOffset("nullableDateTimeOffset", "O", Requiredness.InferFromNullability),
+            DateTime = x.GetDateTime("dateTime", format: "O", Requiredness.InferFromNullability),
+            NullableDateTime = x.GetNullableDateTime("nullableDateTime", format: "O", Requiredness.InferFromNullability),
+            DateTimeOffset = x.GetDateTimeOffset("dateTimeOffset", format: "O", Requiredness.InferFromNullability),
+            NullableDateTimeOffset = x.GetNullableDateTimeOffset("nullableDateTimeOffset", format: "O", Requiredness.InferFromNullability),
             Decimal = x.GetDecimal("decimal", Requiredness.InferFromNullability),
             NullableDecimal = x.GetNullableDecimal("nullableDecimal", Requiredness.InferFromNullability),
             Double = x.GetDouble("double", Requiredness.InferFromNullability),
@@ -67,10 +67,10 @@ public static partial class ExampleEntityMapper
             NullableLong = x.GetNullableLong("nullableLong", Requiredness.InferFromNullability),
             String = x.GetString("string", Requiredness.InferFromNullability),
             NullableString = x.GetNullableString("nullableString", Requiredness.InferFromNullability),
-            TimeSpan = x.GetTimeSpan("timeSpan", Requiredness.InferFromNullability),
-            NullableTimeSpan = x.GetNullableTimeSpan("nullableTimeSpan", Requiredness.InferFromNullability),
-            Enum = x.GetEnum<global::MyNamespace.OrderStatus>("enum", global::MyNamespace.OrderStatus.Pending, "G", Requiredness.InferFromNullability),
-            NullableEnum = x.GetNullableEnum<global::MyNamespace.OrderStatus>("nullableEnum", "G", Requiredness.InferFromNullability),
+            TimeSpan = x.GetTimeSpan("timeSpan", format: "c", Requiredness.InferFromNullability),
+            NullableTimeSpan = x.GetNullableTimeSpan("nullableTimeSpan", format: "c", Requiredness.InferFromNullability),
+            Enum = x.GetEnum<global::MyNamespace.OrderStatus>("enum", global::MyNamespace.OrderStatus.Pending, format: "G", Requiredness.InferFromNullability),
+            NullableEnum = x.GetNullableEnum<global::MyNamespace.OrderStatus>("nullableEnum", format: "G", Requiredness.InferFromNullability),
         };
         return exampleEntity;
     }

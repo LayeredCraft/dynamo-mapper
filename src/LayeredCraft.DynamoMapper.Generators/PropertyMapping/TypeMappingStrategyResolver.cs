@@ -122,7 +122,14 @@ internal static class TypeMappingStrategyResolver
             INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_Guid, context) =>
                 CreateStrategy("Guid", analysis.Nullability),
             INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_TimeSpan, context) =>
-                CreateStrategy("TimeSpan", analysis.Nullability),
+                $"\"{context.MapperOptions.TimeSpanFormat}\"".Map(timeFmt =>
+                    CreateStrategy(
+                        "TimeSpan",
+                        analysis.Nullability,
+                        fromArg: timeFmt,
+                        toArg: timeFmt
+                    )
+                ),
             INamedTypeSymbol { TypeKind: TypeKind.Enum } enumType => CreateEnumStrategy(
                 enumType,
                 analysis,
@@ -215,8 +222,10 @@ internal static class TypeMappingStrategyResolver
         }
 
         // For maps, validate key type is string
-        if (collectionInfo.Category == CollectionCategory.Map
-            && collectionInfo.KeyType?.SpecialType != SpecialType.System_String)
+        if (
+            collectionInfo.Category == CollectionCategory.Map
+            && collectionInfo.KeyType?.SpecialType != SpecialType.System_String
+        )
         {
             return DiagnosticResult<TypeMappingStrategy?>.Failure(
                 DiagnosticDescriptors.DictionaryKeyMustBeString,
@@ -253,29 +262,32 @@ internal static class TypeMappingStrategyResolver
         // Determine TypeName and GenericArgument for method name resolution
         var (typeName, genericArg) = collectionInfo.Category switch
         {
-            CollectionCategory.List => ("List", $"<{collectionInfo.ElementType.ToDisplayString()}>"),
+            CollectionCategory.List => (
+                "List",
+                $"<{collectionInfo.ElementType.ToDisplayString()}>"
+            ),
             CollectionCategory.Map => ("Map", $"<{collectionInfo.ElementType.ToDisplayString()}>"),
             CollectionCategory.Set => collectionInfo.TargetKind switch
             {
                 DynamoKind.SS => ("StringSet", ""),
                 DynamoKind.NS => ("NumberSet", $"<{collectionInfo.ElementType.ToDisplayString()}>"),
                 DynamoKind.BS => ("BinarySet", ""),
-                _ => throw new InvalidOperationException($"Unexpected set kind: {collectionInfo.TargetKind}")
+                _ => throw new InvalidOperationException(
+                    $"Unexpected set kind: {collectionInfo.TargetKind}"
+                ),
             },
-            _ => throw new InvalidOperationException($"Unexpected category: {collectionInfo.Category}")
+            _ => throw new InvalidOperationException(
+                $"Unexpected category: {collectionInfo.Category}"
+            ),
         };
 
         // Build strategy - collections are nullable at collection level, not element level
-        var strategy = CreateStrategy(
-            typeName,
-            analysis.Nullability,
-            genericArg: genericArg
-        );
+        var strategy = CreateStrategy(typeName, analysis.Nullability, genericArg: genericArg);
 
         // Apply Kind override if present (or use inferred kind)
         return strategy with
         {
-            KindOverride = analysis.FieldOptions?.Kind ?? collectionInfo.TargetKind
+            KindOverride = analysis.FieldOptions?.Kind ?? collectionInfo.TargetKind,
         };
     }
 }

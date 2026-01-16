@@ -20,11 +20,12 @@ internal static partial class UserMapper
 {
     [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
     internal static partial global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> ToItem(global::User user) =>
-        new Dictionary<string, AttributeValue>(5)
+        new Dictionary<string, AttributeValue>(6)
             .SetString("firstName", user.FirstName, false, true)
             .SetString("middleName", user.MiddleName, false, true)
             .SetString("lastName", user.LastName, false, true)
             .SetInt("age", user.Age, false, true)
+            .SetDateTimeOffset("dateCreated", user.DateCreated, format: "O", false, true)
             .SetString("fullName", user.FullName, false, true);
 
     [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
@@ -36,7 +37,8 @@ internal static partial class UserMapper
             LastName = item.GetString("lastName", Requiredness.InferFromNullability),
             Age = item.GetInt("age", Requiredness.InferFromNullability),
         };
-        if (item.TryGetString("middleName", out var middleName, Requiredness.InferFromNullability)) user.MiddleName = middleName!;
+        if (item.TryGetString("middleName", out var var1, Requiredness.InferFromNullability)) user.MiddleName = var1!;
+        if (item.TryGetDateTimeOffset("dateCreated", out var var4, format: "O", Requiredness.InferFromNullability)) user.DateCreated = var4!;
         return user;
     }
 }

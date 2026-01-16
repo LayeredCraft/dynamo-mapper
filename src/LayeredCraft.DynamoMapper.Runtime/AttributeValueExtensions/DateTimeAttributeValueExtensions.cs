@@ -11,77 +11,16 @@ public static class DateTimeAttributeValueExtensions
 {
     extension(Dictionary<string, AttributeValue> attributes)
     {
-        /// <summary>Tries to get a <see cref="DateTime" /> value from the attribute dictionary.</summary>
-        /// <param name="key">The attribute key to retrieve.</param>
-        /// <param name="value">The <see cref="DateTime" /> value when found.</param>
-        /// <param name="requiredness">
-        ///     Specifies whether the attribute is required. Default is
-        ///     <see cref="Requiredness.InferFromNullability" />.
-        /// </param>
-        /// <param name="kind">The DynamoDB attribute kind to interpret as a string.</param>
-        /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
-        /// <remarks>
-        ///     Parsing uses <see cref="CultureInfo.InvariantCulture" /> with
-        ///     <see cref="DateTimeStyles.RoundtripKind" /> for ISO-8601 format.
-        /// </remarks>
-        public bool TryGetDateTime(
-            string key,
-            out DateTime value,
-            Requiredness requiredness = Requiredness.InferFromNullability,
-            DynamoKind kind = DynamoKind.S
-        )
-        {
-            value = DateTime.MinValue;
-            if (!attributes.TryGetValue(key, requiredness, out var attribute))
-                return false;
-
-            var stringValue = attribute!.GetString(kind);
-            value =
-                stringValue.Length == 0
-                    ? DateTime.MinValue
-                    : DateTime.Parse(
-                        stringValue,
-                        CultureInfo.InvariantCulture,
-                        DateTimeStyles.RoundtripKind
-                    );
-            return true;
-        }
-
-        /// <summary>Gets a <see cref="DateTime" /> value from the attribute dictionary.</summary>
-        /// <param name="key">The attribute key to retrieve.</param>
-        /// <param name="requiredness">
-        ///     Specifies whether the attribute is required. Default is
-        ///     <see cref="Requiredness.InferFromNullability" />.
-        /// </param>
-        /// <param name="kind">The DynamoDB attribute kind to interpret as a string.</param>
-        /// <returns>
-        ///     The <see cref="DateTime" /> value if the key exists and is valid; otherwise
-        ///     <see cref="DateTime.MinValue" /> if the key is missing or the attribute has a DynamoDB NULL
-        ///     value.
-        /// </returns>
-        /// <remarks>
-        ///     Parsing uses <see cref="CultureInfo.InvariantCulture" /> with
-        ///     <see cref="DateTimeStyles.RoundtripKind" /> for ISO-8601 format.
-        /// </remarks>
-        public DateTime GetDateTime(
-            string key,
-            Requiredness requiredness = Requiredness.InferFromNullability,
-            DynamoKind kind = DynamoKind.S
-        ) =>
-            attributes.TryGetDateTime(key, out var value, requiredness, kind)
-                ? value
-                : DateTime.MinValue;
-
         /// <summary>
         ///     Tries to get a <see cref="DateTime" /> value from the attribute dictionary using an exact
         ///     format string.
         /// </summary>
         /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="value">The <see cref="DateTime" /> value when found.</param>
         /// <param name="format">
         ///     The exact format string to use for parsing (e.g., "yyyy-MM-dd", "yyyyMMdd",
-        ///     "MM/dd/yyyy").
+        ///     "MM/dd/yyyy"). Default is "O" (round-trip format, ISO-8601).
         /// </param>
-        /// <param name="value">The <see cref="DateTime" /> value when found.</param>
         /// <param name="requiredness">
         ///     Specifies whether the attribute is required. Default is
         ///     <see cref="Requiredness.InferFromNullability" />.
@@ -94,8 +33,8 @@ public static class DateTimeAttributeValueExtensions
         /// </remarks>
         public bool TryGetDateTime(
             string key,
-            string format,
             out DateTime value,
+            string format = "O",
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.S
         )
@@ -124,7 +63,7 @@ public static class DateTimeAttributeValueExtensions
         /// <param name="key">The attribute key to retrieve.</param>
         /// <param name="format">
         ///     The exact format string to use for parsing (e.g., "yyyy-MM-dd", "yyyyMMdd",
-        ///     "MM/dd/yyyy").
+        ///     "MM/dd/yyyy"). Default is "O" (round-trip format, ISO-8601).
         /// </param>
         /// <param name="requiredness">
         ///     Specifies whether the attribute is required. Default is
@@ -142,86 +81,24 @@ public static class DateTimeAttributeValueExtensions
         /// </remarks>
         public DateTime GetDateTime(
             string key,
-            string format,
+            string format = "O",
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.S
         ) =>
-            attributes.TryGetDateTime(key, format, out var value, requiredness, kind)
+            attributes.TryGetDateTime(key, out var value, format, requiredness, kind)
                 ? value
                 : DateTime.MinValue;
-
-        /// <summary>Tries to get a nullable <see cref="DateTime" /> value from the attribute dictionary.</summary>
-        /// <param name="key">The attribute key to retrieve.</param>
-        /// <param name="value">The nullable <see cref="DateTime" /> value when found.</param>
-        /// <param name="requiredness">
-        ///     Specifies whether the attribute is required. Default is
-        ///     <see cref="Requiredness.InferFromNullability" />.
-        /// </param>
-        /// <param name="kind">The DynamoDB attribute kind to interpret as a string.</param>
-        /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
-        /// <remarks>
-        ///     Parsing uses <see cref="CultureInfo.InvariantCulture" /> with
-        ///     <see cref="DateTimeStyles.RoundtripKind" /> for ISO-8601 format.
-        /// </remarks>
-        public bool TryGetNullableDateTime(
-            string key,
-            out DateTime? value,
-            Requiredness requiredness = Requiredness.InferFromNullability,
-            DynamoKind kind = DynamoKind.S
-        )
-        {
-            value = null;
-            if (!attributes.TryGetNullableValue(key, requiredness, out var attribute))
-                return false;
-
-            if (attribute.IsNull)
-                return true;
-
-            var stringValue = attribute!.GetNullableString(kind);
-            value = stringValue is null
-                ? null
-                : DateTime.Parse(
-                    stringValue,
-                    CultureInfo.InvariantCulture,
-                    DateTimeStyles.RoundtripKind
-                );
-            return true;
-        }
-
-        /// <summary>Gets a nullable <see cref="DateTime" /> value from the attribute dictionary.</summary>
-        /// <param name="key">The attribute key to retrieve.</param>
-        /// <param name="requiredness">
-        ///     Specifies whether the attribute is required. Default is
-        ///     <see cref="Requiredness.InferFromNullability" />.
-        /// </param>
-        /// <param name="kind">The DynamoDB attribute kind to interpret as a string.</param>
-        /// <returns>
-        ///     The <see cref="DateTime" /> value if the key exists and is valid; otherwise <c>null</c> if
-        ///     the key is missing or the attribute has a DynamoDB NULL value.
-        /// </returns>
-        /// <remarks>
-        ///     Parsing uses <see cref="CultureInfo.InvariantCulture" /> with
-        ///     <see cref="DateTimeStyles.RoundtripKind" /> for ISO-8601 format.
-        /// </remarks>
-        public DateTime? GetNullableDateTime(
-            string key,
-            Requiredness requiredness = Requiredness.InferFromNullability,
-            DynamoKind kind = DynamoKind.S
-        ) =>
-            attributes.TryGetNullableDateTime(key, out var value, requiredness, kind)
-                ? value
-                : null;
 
         /// <summary>
         ///     Tries to get a nullable <see cref="DateTime" /> value from the attribute dictionary using
         ///     an exact format string.
         /// </summary>
         /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="value">The nullable <see cref="DateTime" /> value when found.</param>
         /// <param name="format">
         ///     The exact format string to use for parsing (e.g., "yyyy-MM-dd", "yyyyMMdd",
-        ///     "MM/dd/yyyy").
+        ///     "MM/dd/yyyy"). Default is "O" (round-trip format, ISO-8601).
         /// </param>
-        /// <param name="value">The nullable <see cref="DateTime" /> value when found.</param>
         /// <param name="requiredness">
         ///     Specifies whether the attribute is required. Default is
         ///     <see cref="Requiredness.InferFromNullability" />.
@@ -234,8 +111,8 @@ public static class DateTimeAttributeValueExtensions
         /// </remarks>
         public bool TryGetNullableDateTime(
             string key,
-            string format,
             out DateTime? value,
+            string format = "O",
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.S
         )
@@ -266,7 +143,7 @@ public static class DateTimeAttributeValueExtensions
         /// <param name="key">The attribute key to retrieve.</param>
         /// <param name="format">
         ///     The exact format string to use for parsing (e.g., "yyyy-MM-dd", "yyyyMMdd",
-        ///     "MM/dd/yyyy").
+        ///     "MM/dd/yyyy"). Default is "O" (round-trip format, ISO-8601).
         /// </param>
         /// <param name="requiredness">
         ///     Specifies whether the attribute is required. Default is
@@ -283,134 +160,11 @@ public static class DateTimeAttributeValueExtensions
         /// </remarks>
         public DateTime? GetNullableDateTime(
             string key,
-            string format,
+            string format = "O",
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.S
         ) =>
-            attributes.TryGetNullableDateTime(key, format, out var value, requiredness, kind)
-                ? value
-                : null;
-
-        /// <summary>Tries to get a <see cref="DateTimeOffset" /> value from the attribute dictionary.</summary>
-        /// <param name="key">The attribute key to retrieve.</param>
-        /// <param name="value">The <see cref="DateTimeOffset" /> value when found.</param>
-        /// <param name="requiredness">
-        ///     Specifies whether the attribute is required. Default is
-        ///     <see cref="Requiredness.InferFromNullability" />.
-        /// </param>
-        /// <param name="kind">The DynamoDB attribute kind to interpret as a string.</param>
-        /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
-        /// <remarks>
-        ///     Parsing uses <see cref="CultureInfo.InvariantCulture" /> with
-        ///     <see cref="DateTimeStyles.RoundtripKind" /> for ISO-8601 format.
-        /// </remarks>
-        public bool TryGetDateTimeOffset(
-            string key,
-            out DateTimeOffset value,
-            Requiredness requiredness = Requiredness.InferFromNullability,
-            DynamoKind kind = DynamoKind.S
-        )
-        {
-            value = DateTimeOffset.MinValue;
-            if (!attributes.TryGetValue(key, requiredness, out var attribute))
-                return false;
-
-            var stringValue = attribute!.GetString(kind);
-            value =
-                stringValue.Length == 0
-                    ? DateTimeOffset.MinValue
-                    : DateTimeOffset.Parse(
-                        stringValue,
-                        CultureInfo.InvariantCulture,
-                        DateTimeStyles.RoundtripKind
-                    );
-            return true;
-        }
-
-        /// <summary>Gets a <see cref="DateTimeOffset" /> value from the attribute dictionary.</summary>
-        /// <param name="key">The attribute key to retrieve.</param>
-        /// <param name="requiredness">
-        ///     Specifies whether the attribute is required. Default is
-        ///     <see cref="Requiredness.InferFromNullability" />.
-        /// </param>
-        /// <param name="kind">The DynamoDB attribute kind to interpret as a string.</param>
-        /// <returns>
-        ///     The <see cref="DateTimeOffset" /> value if the key exists and is valid; otherwise
-        ///     <see cref="DateTimeOffset.MinValue" /> if the key is missing or the attribute has a DynamoDB
-        ///     NULL value.
-        /// </returns>
-        /// <remarks>
-        ///     Parsing uses <see cref="CultureInfo.InvariantCulture" /> with
-        ///     <see cref="DateTimeStyles.RoundtripKind" /> for ISO-8601 format.
-        /// </remarks>
-        public DateTimeOffset GetDateTimeOffset(
-            string key,
-            Requiredness requiredness = Requiredness.InferFromNullability,
-            DynamoKind kind = DynamoKind.S
-        ) =>
-            attributes.TryGetDateTimeOffset(key, out var value, requiredness, kind)
-                ? value
-                : DateTimeOffset.MinValue;
-
-        /// <summary>Tries to get a nullable <see cref="DateTimeOffset" /> value from the attribute dictionary.</summary>
-        /// <param name="key">The attribute key to retrieve.</param>
-        /// <param name="value">The nullable <see cref="DateTimeOffset" /> value when found.</param>
-        /// <param name="requiredness">
-        ///     Specifies whether the attribute is required. Default is
-        ///     <see cref="Requiredness.InferFromNullability" />.
-        /// </param>
-        /// <param name="kind">The DynamoDB attribute kind to interpret as a string.</param>
-        /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
-        /// <remarks>
-        ///     Parsing uses <see cref="CultureInfo.InvariantCulture" /> with
-        ///     <see cref="DateTimeStyles.RoundtripKind" /> for ISO-8601 format.
-        /// </remarks>
-        public bool TryGetNullableDateTimeOffset(
-            string key,
-            out DateTimeOffset? value,
-            Requiredness requiredness = Requiredness.InferFromNullability,
-            DynamoKind kind = DynamoKind.S
-        )
-        {
-            value = null;
-            if (!attributes.TryGetNullableValue(key, requiredness, out var attribute))
-                return false;
-
-            if (attribute.IsNull)
-                return true;
-
-            var stringValue = attribute!.GetNullableString(kind);
-            value = stringValue is null
-                ? null
-                : DateTimeOffset.Parse(
-                    stringValue,
-                    CultureInfo.InvariantCulture,
-                    DateTimeStyles.RoundtripKind
-                );
-            return true;
-        }
-
-        /// <summary>Gets a nullable <see cref="DateTimeOffset" /> value from the attribute dictionary.</summary>
-        /// <param name="key">The attribute key to retrieve.</param>
-        /// <param name="requiredness">
-        ///     Specifies whether the attribute is required. Default is
-        ///     <see cref="Requiredness.InferFromNullability" />.
-        /// </param>
-        /// <param name="kind">The DynamoDB attribute kind to interpret as a string.</param>
-        /// <returns>
-        ///     The <see cref="DateTimeOffset" /> value if the key exists and is valid; otherwise
-        ///     <c>null</c> if the key is missing or the attribute has a DynamoDB NULL value.
-        /// </returns>
-        /// <remarks>
-        ///     Parsing uses <see cref="CultureInfo.InvariantCulture" /> with
-        ///     <see cref="DateTimeStyles.RoundtripKind" /> for ISO-8601 format.
-        /// </remarks>
-        public DateTimeOffset? GetNullableDateTimeOffset(
-            string key,
-            Requiredness requiredness = Requiredness.InferFromNullability,
-            DynamoKind kind = DynamoKind.S
-        ) =>
-            attributes.TryGetNullableDateTimeOffset(key, out var value, requiredness, kind)
+            attributes.TryGetNullableDateTime(key, out var value, format, requiredness, kind)
                 ? value
                 : null;
 
@@ -419,11 +173,11 @@ public static class DateTimeAttributeValueExtensions
         ///     exact format string.
         /// </summary>
         /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="value">The <see cref="DateTimeOffset" /> value when found.</param>
         /// <param name="format">
         ///     The exact format string to use for parsing (e.g., "yyyy-MM-dd", "yyyyMMdd",
-        ///     "o").
+        ///     "o"). Default is "O" (round-trip format, ISO-8601).
         /// </param>
-        /// <param name="value">The <see cref="DateTimeOffset" /> value when found.</param>
         /// <param name="requiredness">
         ///     Specifies whether the attribute is required. Default is
         ///     <see cref="Requiredness.InferFromNullability" />.
@@ -436,8 +190,8 @@ public static class DateTimeAttributeValueExtensions
         /// </remarks>
         public bool TryGetDateTimeOffset(
             string key,
-            string format,
             out DateTimeOffset value,
+            string format = "O",
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.S
         )
@@ -466,7 +220,7 @@ public static class DateTimeAttributeValueExtensions
         /// <param name="key">The attribute key to retrieve.</param>
         /// <param name="format">
         ///     The exact format string to use for parsing (e.g., "yyyy-MM-dd", "yyyyMMdd",
-        ///     "o").
+        ///     "o"). Default is "O" (round-trip format, ISO-8601).
         /// </param>
         /// <param name="requiredness">
         ///     Specifies whether the attribute is required. Default is
@@ -484,11 +238,11 @@ public static class DateTimeAttributeValueExtensions
         /// </remarks>
         public DateTimeOffset GetDateTimeOffset(
             string key,
-            string format,
+            string format = "O",
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.S
         ) =>
-            attributes.TryGetDateTimeOffset(key, format, out var value, requiredness, kind)
+            attributes.TryGetDateTimeOffset(key, out var value, format, requiredness, kind)
                 ? value
                 : DateTimeOffset.MinValue;
 
@@ -497,11 +251,11 @@ public static class DateTimeAttributeValueExtensions
         ///     using an exact format string.
         /// </summary>
         /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="value">The nullable <see cref="DateTimeOffset" /> value when found.</param>
         /// <param name="format">
         ///     The exact format string to use for parsing (e.g., "yyyy-MM-dd", "yyyyMMdd",
-        ///     "o").
+        ///     "o"). Default is "O" (round-trip format, ISO-8601).
         /// </param>
-        /// <param name="value">The nullable <see cref="DateTimeOffset" /> value when found.</param>
         /// <param name="requiredness">
         ///     Specifies whether the attribute is required. Default is
         ///     <see cref="Requiredness.InferFromNullability" />.
@@ -514,8 +268,8 @@ public static class DateTimeAttributeValueExtensions
         /// </remarks>
         public bool TryGetNullableDateTimeOffset(
             string key,
-            string format,
             out DateTimeOffset? value,
+            string format = "O",
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.S
         )
@@ -546,7 +300,7 @@ public static class DateTimeAttributeValueExtensions
         /// <param name="key">The attribute key to retrieve.</param>
         /// <param name="format">
         ///     The exact format string to use for parsing (e.g., "yyyy-MM-dd", "yyyyMMdd",
-        ///     "o").
+        ///     "o"). Default is "O" (round-trip format, ISO-8601).
         /// </param>
         /// <param name="requiredness">
         ///     Specifies whether the attribute is required. Default is
@@ -563,113 +317,11 @@ public static class DateTimeAttributeValueExtensions
         /// </remarks>
         public DateTimeOffset? GetNullableDateTimeOffset(
             string key,
-            string format,
+            string format = "O",
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.S
         ) =>
-            attributes.TryGetNullableDateTimeOffset(key, format, out var value, requiredness, kind)
-                ? value
-                : null;
-
-        /// <summary>Tries to get a <see cref="TimeSpan" /> value from the attribute dictionary.</summary>
-        /// <param name="key">The attribute key to retrieve.</param>
-        /// <param name="value">The <see cref="TimeSpan" /> value when found.</param>
-        /// <param name="requiredness">
-        ///     Specifies whether the attribute is required. Default is
-        ///     <see cref="Requiredness.InferFromNullability" />.
-        /// </param>
-        /// <param name="kind">The DynamoDB attribute kind to interpret as a string.</param>
-        /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
-        /// <remarks>Parsing uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
-        public bool TryGetTimeSpan(
-            string key,
-            out TimeSpan value,
-            Requiredness requiredness = Requiredness.InferFromNullability,
-            DynamoKind kind = DynamoKind.S
-        )
-        {
-            value = TimeSpan.Zero;
-            if (!attributes.TryGetValue(key, requiredness, out var attribute))
-                return false;
-
-            var stringValue = attribute!.GetString(kind);
-            value =
-                stringValue.Length == 0
-                    ? TimeSpan.Zero
-                    : TimeSpan.Parse(stringValue, CultureInfo.InvariantCulture);
-            return true;
-        }
-
-        /// <summary>Gets a <see cref="TimeSpan" /> value from the attribute dictionary.</summary>
-        /// <param name="key">The attribute key to retrieve.</param>
-        /// <param name="requiredness">
-        ///     Specifies whether the attribute is required. Default is
-        ///     <see cref="Requiredness.InferFromNullability" />.
-        /// </param>
-        /// <param name="kind">The DynamoDB attribute kind to interpret as a string.</param>
-        /// <returns>
-        ///     The <see cref="TimeSpan" /> value if the key exists and is valid; otherwise
-        ///     <see cref="TimeSpan.Zero" /> if the key is missing or the attribute has a DynamoDB NULL value.
-        /// </returns>
-        /// <remarks>Parsing uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
-        public TimeSpan GetTimeSpan(
-            string key,
-            Requiredness requiredness = Requiredness.InferFromNullability,
-            DynamoKind kind = DynamoKind.S
-        ) =>
-            attributes.TryGetTimeSpan(key, out var value, requiredness, kind)
-                ? value
-                : TimeSpan.Zero;
-
-        /// <summary>Tries to get a nullable <see cref="TimeSpan" /> value from the attribute dictionary.</summary>
-        /// <param name="key">The attribute key to retrieve.</param>
-        /// <param name="value">The nullable <see cref="TimeSpan" /> value when found.</param>
-        /// <param name="requiredness">
-        ///     Specifies whether the attribute is required. Default is
-        ///     <see cref="Requiredness.InferFromNullability" />.
-        /// </param>
-        /// <param name="kind">The DynamoDB attribute kind to interpret as a string.</param>
-        /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
-        /// <remarks>Parsing uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
-        public bool TryGetNullableTimeSpan(
-            string key,
-            out TimeSpan? value,
-            Requiredness requiredness = Requiredness.InferFromNullability,
-            DynamoKind kind = DynamoKind.S
-        )
-        {
-            value = null;
-            if (!attributes.TryGetNullableValue(key, requiredness, out var attribute))
-                return false;
-
-            if (attribute.IsNull)
-                return true;
-
-            var stringValue = attribute!.GetNullableString(kind);
-            value = stringValue is null
-                ? null
-                : TimeSpan.Parse(stringValue, CultureInfo.InvariantCulture);
-            return true;
-        }
-
-        /// <summary>Gets a nullable <see cref="TimeSpan" /> value from the attribute dictionary.</summary>
-        /// <param name="key">The attribute key to retrieve.</param>
-        /// <param name="requiredness">
-        ///     Specifies whether the attribute is required. Default is
-        ///     <see cref="Requiredness.InferFromNullability" />.
-        /// </param>
-        /// <param name="kind">The DynamoDB attribute kind to interpret as a string.</param>
-        /// <returns>
-        ///     The <see cref="TimeSpan" /> value if the key exists and is valid; otherwise <c>null</c> if
-        ///     the key is missing or the attribute has a DynamoDB NULL value.
-        /// </returns>
-        /// <remarks>Parsing uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
-        public TimeSpan? GetNullableTimeSpan(
-            string key,
-            Requiredness requiredness = Requiredness.InferFromNullability,
-            DynamoKind kind = DynamoKind.S
-        ) =>
-            attributes.TryGetNullableTimeSpan(key, out var value, requiredness, kind)
+            attributes.TryGetNullableDateTimeOffset(key, out var value, format, requiredness, kind)
                 ? value
                 : null;
 
@@ -678,11 +330,11 @@ public static class DateTimeAttributeValueExtensions
         ///     format string.
         /// </summary>
         /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="value">The <see cref="TimeSpan" /> value when found.</param>
         /// <param name="format">
         ///     The exact format string to use for parsing (e.g., "c", "g", "G", or custom
-        ///     patterns like "hh\\:mm\\:ss").
+        ///     patterns like "hh\\:mm\\:ss"). Default is "c" (constant/invariant format).
         /// </param>
-        /// <param name="value">The <see cref="TimeSpan" /> value when found.</param>
         /// <param name="requiredness">
         ///     Specifies whether the attribute is required. Default is
         ///     <see cref="Requiredness.InferFromNullability" />.
@@ -692,8 +344,8 @@ public static class DateTimeAttributeValueExtensions
         /// <remarks>Parsing uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
         public bool TryGetTimeSpan(
             string key,
-            string format,
             out TimeSpan value,
+            string format = "c",
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.S
         )
@@ -717,7 +369,7 @@ public static class DateTimeAttributeValueExtensions
         /// <param name="key">The attribute key to retrieve.</param>
         /// <param name="format">
         ///     The exact format string to use for parsing (e.g., "c", "g", "G", or custom
-        ///     patterns like "hh\\:mm\\:ss").
+        ///     patterns like "hh\\:mm\\:ss"). Default is "c" (constant/invariant format).
         /// </param>
         /// <param name="requiredness">
         ///     Specifies whether the attribute is required. Default is
@@ -731,11 +383,11 @@ public static class DateTimeAttributeValueExtensions
         /// <remarks>Parsing uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
         public TimeSpan GetTimeSpan(
             string key,
-            string format,
+            string format = "c",
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.S
         ) =>
-            attributes.TryGetTimeSpan(key, format, out var value, requiredness, kind)
+            attributes.TryGetTimeSpan(key, out var value, format, requiredness, kind)
                 ? value
                 : TimeSpan.Zero;
 
@@ -744,11 +396,11 @@ public static class DateTimeAttributeValueExtensions
         ///     an exact format string.
         /// </summary>
         /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="value">The nullable <see cref="TimeSpan" /> value when found.</param>
         /// <param name="format">
         ///     The exact format string to use for parsing (e.g., "c", "g", "G", or custom
-        ///     patterns like "hh\\:mm\\:ss").
+        ///     patterns like "hh\\:mm\\:ss"). Default is "c" (constant/invariant format).
         /// </param>
-        /// <param name="value">The nullable <see cref="TimeSpan" /> value when found.</param>
         /// <param name="requiredness">
         ///     Specifies whether the attribute is required. Default is
         ///     <see cref="Requiredness.InferFromNullability" />.
@@ -758,8 +410,8 @@ public static class DateTimeAttributeValueExtensions
         /// <remarks>Parsing uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
         public bool TryGetNullableTimeSpan(
             string key,
-            string format,
             out TimeSpan? value,
+            string format = "c",
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.S
         )
@@ -785,7 +437,7 @@ public static class DateTimeAttributeValueExtensions
         /// <param name="key">The attribute key to retrieve.</param>
         /// <param name="format">
         ///     The exact format string to use for parsing (e.g., "c", "g", "G", or custom
-        ///     patterns like "hh\\:mm\\:ss").
+        ///     patterns like "hh\\:mm\\:ss"). Default is "c" (constant/invariant format).
         /// </param>
         /// <param name="requiredness">
         ///     Specifies whether the attribute is required. Default is
@@ -799,11 +451,11 @@ public static class DateTimeAttributeValueExtensions
         /// <remarks>Parsing uses <see cref="CultureInfo.InvariantCulture" />.</remarks>
         public TimeSpan? GetNullableTimeSpan(
             string key,
-            string format,
+            string format = "c",
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.S
         ) =>
-            attributes.TryGetNullableTimeSpan(key, format, out var value, requiredness, kind)
+            attributes.TryGetNullableTimeSpan(key, out var value, format, requiredness, kind)
                 ? value
                 : null;
 

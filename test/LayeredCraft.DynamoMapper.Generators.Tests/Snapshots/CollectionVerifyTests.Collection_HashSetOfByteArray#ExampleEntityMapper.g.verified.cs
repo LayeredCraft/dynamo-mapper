@@ -27,7 +27,7 @@ public static partial class ExampleEntityMapper
     public static partial global::MyNamespace.Entity FromItem(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> item)
     {
         var entity = new global::MyNamespace.Entity();
-        if (item.TryGetBinarySet("payloads", out var payloads, Requiredness.InferFromNullability, DynamoKind.BS)) entity.Payloads = payloads!;
+        if (item.TryGetBinarySet("payloads", out var var0, Requiredness.InferFromNullability, DynamoKind.BS)) entity.Payloads = var0!;
         return entity;
     }
 }

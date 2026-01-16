@@ -178,6 +178,66 @@ public class SimpleVerifyTests
         );
 
     [Fact]
+    public async Task Simple_AllHelperTypes_Optional() =>
+        await GeneratorTestHelpers.Verify(
+            new VerifyTestOptions
+            {
+                SourceCode = """
+                using System;
+                using System.Collections.Generic;
+                using Amazon.DynamoDBv2.Model;
+                using DynamoMapper.Runtime;
+
+                namespace MyNamespace;
+
+                [DynamoMapper]
+                public static partial class ExampleEntityMapper
+                {
+                    public static partial Dictionary<string, AttributeValue> ToItem(ExampleEntity source);
+
+                    public static partial ExampleEntity FromItem(Dictionary<string, AttributeValue> x);
+                }
+
+                public class ExampleEntity
+                {
+                    public bool Bool { get; set; } = false;
+                    public bool? NullableBool { get; set; } = null;
+                    public DateTime DateTime { get; set; } = DateTime.MinValue;
+                    public DateTime? NullableDateTime { get; set; } = null;
+                    public DateTimeOffset DateTimeOffset { get; set; } = DateTimeOffset.MinValue;
+                    public DateTimeOffset? NullableDateTimeOffset { get; set; } = null;
+                    public decimal Decimal { get; set; } = 0m;
+                    public decimal? NullableDecimal { get; set; } = null;
+                    public double Double { get; set; } = 0d;
+                    public double? NullableDouble { get; set; } = null;
+                    public Guid Guid { get; set; } = Guid.Empty;
+                    public Guid? NullableGuid { get; set; } = null;
+                    public int Int { get; set; } = 0;
+                    public int? NullableInt { get; set; } = null;
+                    public long Long { get; set; } = 0L;
+                    public long? NullableLong { get; set; } = null;
+                    public string String { get; set; } = string.Empty;
+                    public string? NullableString { get; set; } = null;
+                    public TimeSpan TimeSpan { get; set; } = TimeSpan.Zero;
+                    public TimeSpan? NullableTimeSpan { get; set; } = null;
+                    public OrderStatus Enum { get; set; } = OrderStatus.Pending;
+                    public OrderStatus? NullableEnum { get; set; } = null;
+                }
+
+                public enum OrderStatus
+                {
+                    Pending,
+                    Processing,
+                    Shipped,
+                    Delivered,
+                    Cancelled,
+                }
+                """,
+            },
+            TestContext.Current.CancellationToken
+        );
+
+    [Fact]
     public async Task Simple_InitProperty() =>
         await GeneratorTestHelpers.Verify(
             new VerifyTestOptions
@@ -467,6 +527,7 @@ public class SimpleVerifyTests
             new VerifyTestOptions
             {
                 SourceCode = """
+                using System;
                 using System.Collections.Generic;
                 using Amazon.DynamoDBv2.Model;
                 using DynamoMapper.Runtime;
@@ -485,6 +546,7 @@ public class SimpleVerifyTests
                     public string MiddleName { get; set; } = string.Empty;
                     public required string LastName { get; set; }
                     public int Age { get; set; }
+                    public DateTimeOffset DateCreated { get; set; } = DateTimeOffset.UtcNow;
                     public string FullName => $"{FirstName} {LastName}";
                 }
                 """,

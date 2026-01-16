@@ -16,6 +16,7 @@ internal static class PropertyMappingCodeRenderer
         PropertyMappingSpec spec,
         PropertyAnalysis analysis,
         string modelVarName,
+        int index,
         GeneratorContext context
     )
     {
@@ -30,7 +31,7 @@ internal static class PropertyMappingCodeRenderer
             && analysis.HasSetter
             && spec.FromItemMethod is not null
             && useRegularAssignment
-                ? RenderFromAssignment(spec, modelVarName, analysis, context)
+                ? RenderFromAssignment(spec, modelVarName, analysis, index, context)
                 : null;
 
         var fromInitAssignment =
@@ -88,6 +89,7 @@ internal static class PropertyMappingCodeRenderer
         PropertyMappingSpec spec,
         string modelVarName,
         PropertyAnalysis analysis,
+        int index,
         GeneratorContext context
     )
     {
@@ -98,7 +100,17 @@ internal static class PropertyMappingCodeRenderer
         );
 
         var argsList = spec.FromItemMethod.Arguments.Select(a => a.Value).ToList();
-        argsList.Insert(1, $"out var {spec.Key}");
+
+        // For NULLABLE Enum methods with format, format comes before out parameter (position 1)
+        // For non-nullable enums, out comes first (after key), then defaultValue, then format
+        // For DateTime/DateTimeOffset/TimeSpan, out comes before format
+        var isNullableEnumWithFormat =
+            spec.TypeStrategy?.TypeName == "Enum"
+            && spec.TypeStrategy?.NullableModifier == "Nullable"
+            && argsList.Any(a => a.Contains("format:"));
+        var outPosition = isNullableEnumWithFormat ? 2 : 1;
+
+        argsList.Insert(outPosition, $"out var var{index}");
         var args = string.Join(", ", argsList);
 
         var methodCall =
@@ -110,7 +122,7 @@ internal static class PropertyMappingCodeRenderer
         var toArray =
             isArrayProperty && !spec.FromItemMethod.IsCustomMethod ? ".ToArray()" : string.Empty;
 
-        return $"if ({context.MapperOptions.FromMethodParameterName}.{methodCall}) {modelVarName}.{spec.PropertyName} = {spec.Key}!{toArray};";
+        return $"if ({context.MapperOptions.FromMethodParameterName}.{methodCall}) {modelVarName}.{spec.PropertyName} = var{index}!{toArray};";
     }
 
     /// <summary>

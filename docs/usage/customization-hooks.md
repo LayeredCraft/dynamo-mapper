@@ -112,6 +112,7 @@ static partial void AfterFromItem(Dictionary<string, AttributeValue> item, ref T
 
 ```csharp
 using Amazon.DynamoDBv2.Model;
+using DynamoMapper.Runtime;
 
 [DynamoMapper(Convention = DynamoNamingConvention.CamelCase)]
 public static partial class ProductMapper
@@ -121,9 +122,9 @@ public static partial class ProductMapper
 
     static partial void AfterToItem(Product source, Dictionary<string, AttributeValue> item)
     {
-        item["pk"] = new AttributeValue { S = $"PRODUCT#{source.ProductId}" };
-        item["sk"] = new AttributeValue { S = "METADATA" };
-        item["recordType"] = new AttributeValue { S = "Product" };
+        item.SetString("pk", $"PRODUCT#{source.ProductId}");
+        item.SetString("sk", "METADATA");
+        item.SetString("recordType", "Product");
     }
 }
 ```
@@ -151,9 +152,9 @@ public static partial class ProductMapper
 
     static partial void AfterToItem(Product source, Dictionary<string, AttributeValue> item)
     {
-        item["pk"] = new AttributeValue { S = $"PRODUCT#{source.ProductId}" };
-        item["sk"] = new AttributeValue { S = "METADATA" };
-        item["recordType"] = new AttributeValue { S = "Product" };
+        item.SetString("pk", $"PRODUCT#{source.ProductId}");
+        item.SetString("sk", "METADATA");
+        item.SetString("recordType", "Product");
     }
 
     static partial void AfterFromItem(Dictionary<string, AttributeValue> item, ref Product entity)
@@ -187,9 +188,9 @@ public static partial class OrderMapper
     static partial void AfterToItem(Order source, Dictionary<string, AttributeValue> item)
     {
         // Composite keys for single-table design
-        item["pk"] = new AttributeValue { S = $"CUSTOMER#{source.CustomerId}" };
-        item["sk"] = new AttributeValue { S = $"ORDER#{source.OrderId}" };
-        item["recordType"] = new AttributeValue { S = "Order" };
+        item.SetString("pk", $"CUSTOMER#{source.CustomerId}");
+        item.SetString("sk", $"ORDER#{source.OrderId}");
+        item.SetString("recordType", "Order");
     }
 }
 ```
@@ -207,7 +208,7 @@ public static partial class CustomerMapper
 
     static partial void AfterToItem(Customer source, Dictionary<string, AttributeValue> item)
     {
-        item["entityType"] = new AttributeValue { S = nameof(Customer) };
+        item.SetString("entityType", nameof(Customer));
     }
 
     static partial void AfterFromItem(Dictionary<string, AttributeValue> item, ref Customer entity)
@@ -247,7 +248,7 @@ public static partial class SessionMapper
     {
         // Set TTL to 24 hours from now
         var ttl = DateTimeOffset.UtcNow.AddHours(24).ToUnixTimeSeconds();
-        item["ttl"] = new AttributeValue { N = ttl.ToString() };
+        item.SetLong("ttl", ttl);
     }
 }
 ```
@@ -317,12 +318,11 @@ public class User
 }
 
 [DynamoMapper(Convention = DynamoNamingConvention.CamelCase)]
+[DynamoIgnore(nameof(User.FullName))]
 public static partial class UserMapper
 {
-    [DynamoIgnore(nameof(User.FullName))]
     public static partial Dictionary<string, AttributeValue> ToItem(User source);
 
-    [DynamoIgnore(nameof(User.FullName))]
     public static partial User FromItem(Dictionary<string, AttributeValue> item);
 
     static partial void AfterFromItem(Dictionary<string, AttributeValue> item, ref User entity)
@@ -358,12 +358,12 @@ public static partial class OrderMapper
     static partial void AfterToItem(Order source, Dictionary<string, AttributeValue> item)
     {
         // Main table keys
-        item["pk"] = new AttributeValue { S = $"CUSTOMER#{source.CustomerId}" };
-        item["sk"] = new AttributeValue { S = $"ORDER#{source.OrderId}" };
+        item.SetString("pk", $"CUSTOMER#{source.CustomerId}");
+        item.SetString("sk", $"ORDER#{source.OrderId}");
 
         // GSI for querying by status
-        item["gsi1pk"] = new AttributeValue { S = $"STATUS#{source.Status.Name}" };
-        item["gsi1sk"] = new AttributeValue { S = source.CreatedAt.ToString("O") };
+        item.SetString("gsi1pk", $"STATUS#{source.Status.Name}");
+        item.SetString("gsi1sk", source.CreatedAt.ToString("O"));
     }
 }
 ```
@@ -394,20 +394,20 @@ public static partial class OrderMapper
     static partial void AfterToItem(Order source, Dictionary<string, AttributeValue> item)
     {
         // Primary access pattern: Get order by customer
-        item["pk"] = new AttributeValue { S = $"CUSTOMER#{source.CustomerId}" };
-        item["sk"] = new AttributeValue { S = $"ORDER#{source.OrderId}#{source.CreatedAt:yyyy-MM-dd}" };
+        item.SetString("pk", $"CUSTOMER#{source.CustomerId}");
+        item.SetString("sk", $"ORDER#{source.OrderId}#{source.CreatedAt:yyyy-MM-dd}");
 
         // Entity type for polymorphic queries
-        item["entityType"] = new AttributeValue { S = "Order" };
-        item["recordType"] = new AttributeValue { S = "Order" };
+        item.SetString("entityType", "Order");
+        item.SetString("recordType", "Order");
 
         // GSI1: Query orders by status
-        item["gsi1pk"] = new AttributeValue { S = $"STATUS#{source.Status.Name}" };
-        item["gsi1sk"] = new AttributeValue { S = source.CreatedAt.ToString("O") };
+        item.SetString("gsi1pk", $"STATUS#{source.Status.Name}");
+        item.SetString("gsi1sk", source.CreatedAt.ToString("O"));
 
         // GSI2: Query orders by date range
-        item["gsi2pk"] = new AttributeValue { S = "ORDER" };
-        item["gsi2sk"] = new AttributeValue { S = source.CreatedAt.ToString("O") };
+        item.SetString("gsi2pk", "ORDER");
+        item.SetString("gsi2sk", source.CreatedAt.ToString("O"));
 
         // Merge metadata bag
         if (source.Metadata != null)
@@ -461,19 +461,19 @@ public static partial class ProductMapper
         // Conditional keys based on product type
         if (source.IsDigital)
         {
-            item["pk"] = new AttributeValue { S = $"DIGITAL#{source.Category}" };
-            item["sk"] = new AttributeValue { S = $"PRODUCT#{source.ProductId}" };
+            item.SetString("pk", $"DIGITAL#{source.Category}");
+            item.SetString("sk", $"PRODUCT#{source.ProductId}");
         }
         else
         {
-            item["pk"] = new AttributeValue { S = $"PHYSICAL#{source.Warehouse}" };
-            item["sk"] = new AttributeValue { S = $"PRODUCT#{source.ProductId}" };
+            item.SetString("pk", $"PHYSICAL#{source.Warehouse}");
+            item.SetString("sk", $"PRODUCT#{source.ProductId}");
         }
 
         // Add inventory tracking only for physical products
         if (!source.IsDigital)
         {
-            item["inventoryRequired"] = new AttributeValue { BOOL = true };
+            item.SetBool("inventoryRequired", true);
         }
     }
 }
@@ -504,20 +504,10 @@ Hooks execute in a deterministic, predictable order:
 Unimplemented hooks compile away completely:
 
 ```csharp
-// If BeforeToItem is not implemented:
-public static partial Dictionary<string, AttributeValue> ToItem(Product source)
-{
-    var item = new Dictionary<string, AttributeValue>(5);
-
-    // BeforeToItem call is removed by compiler (partial void)
-
-    // Property mapping...
-    item["productId"] = new AttributeValue { S = source.ProductId.ToString() };
-
-    AfterToItem(source, item); // Only this hook is implemented
-
-    return item;
-}
+// If no hooks are implemented:
+public static partial Dictionary<string, AttributeValue> ToItem(Product source) =>
+    new Dictionary<string, AttributeValue>(1)
+        .SetGuid("productId", source.ProductId, false, true);
 ```
 
 ### No Reflection
@@ -544,15 +534,15 @@ public static partial class OrderMapper
         map.BeforeToItem((source, item) =>
         {
             // Limited DSL hook support
-            item["pk"] = new AttributeValue { S = $"CUSTOMER#{source.CustomerId}" };
+            item.SetString("pk", $"CUSTOMER#{source.CustomerId}");
         });
     }
 
     // Partial method hooks are still supported and recommended for complex logic
     static partial void AfterToItem(Order source, Dictionary<string, AttributeValue> item)
     {
-        item["sk"] = new AttributeValue { S = $"ORDER#{source.OrderId}" };
-        item["recordType"] = new AttributeValue { S = "Order" };
+        item.SetString("sk", $"ORDER#{source.OrderId}");
+        item.SetString("recordType", "Order");
     }
 }
 ```
@@ -566,14 +556,14 @@ Note: DSL hooks have limited expression support. Partial method hooks are more p
    // Good: focused on keys
    static partial void AfterToItem(Product source, Dictionary<string, AttributeValue> item)
    {
-       item["pk"] = new AttributeValue { S = $"PRODUCT#{source.ProductId}" };
-       item["sk"] = new AttributeValue { S = "METADATA" };
+       item.SetString("pk", $"PRODUCT#{source.ProductId}");
+       item.SetString("sk", "METADATA");
    }
 
    // Avoid: mixing concerns
    static partial void AfterToItem(Product source, Dictionary<string, AttributeValue> item)
    {
-       item["pk"] = new AttributeValue { S = $"PRODUCT#{source.ProductId}" };
+       item.SetString("pk", $"PRODUCT#{source.ProductId}");
        // Don't do business logic in hooks
        SendProductAnalyticsEvent(source);
        UpdateInventoryCache(source);
@@ -601,8 +591,8 @@ Note: DSL hooks have limited expression support. Partial method hooks are more p
    /// </summary>
    static partial void AfterToItem(Customer source, Dictionary<string, AttributeValue> item)
    {
-       item["pk"] = new AttributeValue { S = $"CUSTOMER#{source.CustomerId}" };
-       item["sk"] = new AttributeValue { S = "METADATA" };
+       item.SetString("pk", $"CUSTOMER#{source.CustomerId}");
+       item.SetString("sk", "METADATA");
    }
    ```
 

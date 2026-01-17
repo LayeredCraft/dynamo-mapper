@@ -57,15 +57,15 @@ public class Product
 ### 2. Create a mapper class
 
 ```csharp
-using DynamoMapper.Attributes;
+using DynamoMapper.Runtime;
 using Amazon.DynamoDBv2.Model;
 
 namespace MyApp.Data;
 
 [DynamoMapper(Convention = DynamoNamingConvention.CamelCase)]
+[DynamoField(nameof(Product.Description), OmitIfNull = true, OmitIfEmptyString = true)]
 public static partial class ProductMapper
 {
-    [DynamoField(nameof(Product.Description), OmitIfNullOrWhiteSpace = true)]
     public static partial Dictionary<string, AttributeValue> ToItem(Product source);
 
     public static partial Product FromItem(Dictionary<string, AttributeValue> item);
@@ -111,7 +111,7 @@ For more examples including single-table patterns and custom converters, see the
 
 ## Key Features
 
-- **Attribute-Based Configuration** (Phase 1): Configure mapping via `[DynamoField]` and `[DynamoIgnore]` attributes on mapper methods
+- **Attribute-Based Configuration** (Phase 1): Configure mapping via `[DynamoField]` and `[DynamoIgnore]` on mapper classes
 - **Fluent DSL Configuration** (Phase 2): Optional strongly-typed DSL for configuration
 - **Naming Conventions**: CamelCase, SnakeCase, or Exact field naming
 - **Required Field Validation**: Compile-time and runtime validation of required fields
@@ -119,7 +119,7 @@ For more examples including single-table patterns and custom converters, see the
 - **Custom Converters**: Type-safe converter pattern for custom serialization
 - **Customization Hooks**: Before/After hooks for injecting pk/sk and custom logic
 - **Single-Table Support**: Built for single-table DynamoDB design patterns
-- **Supported Types**: string, numeric types, bool, Guid, DateTime, DateTimeOffset, TimeSpan, enums
+- **Supported Types**: strings, numerics, bool, Guid, DateTime, DateTimeOffset, TimeSpan, enums, plus lists/maps/sets of supported element types
 - **Comprehensive Diagnostics**: Clear compile-time errors with actionable messages
 - **Zero Configuration**: Sensible defaults for most use cases
 

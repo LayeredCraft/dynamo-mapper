@@ -1,7 +1,5 @@
-using System.IO;
 using Amazon.DynamoDBv2.Model;
 using DynamoMapper.Runtime;
-using LayeredCraft.DynamoMapper.TestKit.Attributes;
 
 namespace LayeredCraft.DynamoMapper.Runtime.Tests;
 
@@ -29,7 +27,7 @@ public class AttributeValueExtensionsCollectionTests
         // Arrange
         var attributes = new Dictionary<string, AttributeValue>
         {
-            ["tags"] = new() { NULL = true }
+            ["tags"] = new() { NULL = true },
         };
 
         // Act
@@ -46,7 +44,7 @@ public class AttributeValueExtensionsCollectionTests
         // Arrange
         var attributes = new Dictionary<string, AttributeValue>
         {
-            ["tags"] = new() { L = new List<AttributeValue>() }
+            ["tags"] = new() { L = new List<AttributeValue>() },
         };
 
         // Act
@@ -69,9 +67,9 @@ public class AttributeValueExtensionsCollectionTests
                 {
                     new() { S = "tag1" },
                     new() { S = "tag2" },
-                    new() { S = "tag3" }
-                }
-            }
+                    new() { S = "tag3" },
+                },
+            },
         };
 
         // Act
@@ -96,9 +94,9 @@ public class AttributeValueExtensionsCollectionTests
                 {
                     new() { N = "100" },
                     new() { N = "200" },
-                    new() { N = "300" }
-                }
-            }
+                    new() { N = "300" },
+                },
+            },
         };
 
         // Act
@@ -122,9 +120,9 @@ public class AttributeValueExtensionsCollectionTests
                 L = new List<AttributeValue>
                 {
                     new() { B = new MemoryStream(new byte[] { 1, 2, 3 }) },
-                    new() { B = new MemoryStream(new byte[] { 4, 5, 6 }) }
-                }
-            }
+                    new() { B = new MemoryStream(new byte[] { 4, 5, 6 }) },
+                },
+            },
         };
 
         // Act
@@ -148,9 +146,9 @@ public class AttributeValueExtensionsCollectionTests
                 {
                     new() { N = "100" },
                     new() { NULL = true },
-                    new() { N = "300" }
-                }
-            }
+                    new() { N = "300" },
+                },
+            },
         };
 
         // Act
@@ -182,7 +180,7 @@ public class AttributeValueExtensionsCollectionTests
         // Arrange
         var attributes = new Dictionary<string, AttributeValue>
         {
-            ["tags"] = new() { NULL = true }
+            ["tags"] = new() { NULL = true },
         };
 
         // Act
@@ -321,11 +319,7 @@ public class AttributeValueExtensionsCollectionTests
     {
         // Arrange
         var attributes = new Dictionary<string, AttributeValue>();
-        var original = new List<byte[]>
-        {
-            new byte[] { 0, 1, 2 },
-            new byte[] { 3, 4, 5 }
-        };
+        var original = new List<byte[]> { new byte[] { 0, 1, 2 }, new byte[] { 3, 4, 5 } };
 
         // Act
         attributes.SetList("payloads", original);
@@ -359,7 +353,7 @@ public class AttributeValueExtensionsCollectionTests
         // Arrange
         var attributes = new Dictionary<string, AttributeValue>
         {
-            ["metadata"] = new() { NULL = true }
+            ["metadata"] = new() { NULL = true },
         };
 
         // Act
@@ -381,9 +375,9 @@ public class AttributeValueExtensionsCollectionTests
                 M = new Dictionary<string, AttributeValue>
                 {
                     ["count"] = new() { N = "42" },
-                    ["version"] = new() { N = "2" }
-                }
-            }
+                    ["version"] = new() { N = "2" },
+                },
+            },
         };
 
         // Act
@@ -461,7 +455,12 @@ public class AttributeValueExtensionsCollectionTests
     {
         // Arrange
         var attributes = new Dictionary<string, AttributeValue>();
-        var original = new Dictionary<string, int> { ["count"] = 42, ["version"] = 2, ["retries"] = 3 };
+        var original = new Dictionary<string, int>
+        {
+            ["count"] = 42,
+            ["version"] = 2,
+            ["retries"] = 3,
+        };
 
         // Act
         attributes.SetMap("metadata", original);
@@ -480,7 +479,7 @@ public class AttributeValueExtensionsCollectionTests
         {
             ["name"] = "John",
             ["city"] = "Seattle",
-            ["country"] = "USA"
+            ["country"] = "USA",
         };
 
         // Act
@@ -490,7 +489,6 @@ public class AttributeValueExtensionsCollectionTests
         // Assert
         Assert.Equal(original, result);
     }
-
 
     // ==================== STRING SET TESTS ====================
 
@@ -514,7 +512,7 @@ public class AttributeValueExtensionsCollectionTests
         // Arrange
         var attributes = new Dictionary<string, AttributeValue>
         {
-            ["categories"] = new() { NULL = true }
+            ["categories"] = new() { NULL = true },
         };
 
         // Act
@@ -533,8 +531,8 @@ public class AttributeValueExtensionsCollectionTests
         {
             ["categories"] = new()
             {
-                SS = new List<string> { "electronics", "computers", "laptops" }
-            }
+                SS = new List<string> { "electronics", "computers", "laptops" },
+            },
         };
 
         // Act
@@ -661,8 +659,8 @@ public class AttributeValueExtensionsCollectionTests
         {
             ["numbers"] = new()
             {
-                NS = new List<string> { "1", "2", "3", "5", "8" }
-            }
+                NS = new List<string> { "1", "2", "3", "5", "8" },
+            },
         };
 
         // Act
@@ -685,8 +683,8 @@ public class AttributeValueExtensionsCollectionTests
         {
             ["prices"] = new()
             {
-                NS = new List<string> { "19.99", "29.99", "39.99" }
-            }
+                NS = new List<string> { "19.99", "29.99", "39.99" },
+            },
         };
 
         // Act
@@ -796,7 +794,7 @@ public class AttributeValueExtensionsCollectionTests
         // Arrange
         var attributes = new Dictionary<string, AttributeValue>
         {
-            ["payloads"] = new() { NULL = true }
+            ["payloads"] = new() { NULL = true },
         };
 
         // Act
@@ -818,9 +816,9 @@ public class AttributeValueExtensionsCollectionTests
                 BS = new List<MemoryStream>
                 {
                     new(new byte[] { 1, 2, 3 }),
-                    new(new byte[] { 4, 5, 6 })
-                }
-            }
+                    new(new byte[] { 4, 5, 6 }),
+                },
+            },
         };
 
         // Act
@@ -838,7 +836,7 @@ public class AttributeValueExtensionsCollectionTests
         // Arrange
         var attributes = new Dictionary<string, AttributeValue>
         {
-            ["payloads"] = new() { NULL = true }
+            ["payloads"] = new() { NULL = true },
         };
 
         // Act
@@ -853,11 +851,7 @@ public class AttributeValueExtensionsCollectionTests
     {
         // Arrange
         var attributes = new Dictionary<string, AttributeValue>();
-        var payloads = new List<byte[]>
-        {
-            new byte[] { 1, 2, 3 },
-            new byte[] { 4, 5, 6 }
-        };
+        var payloads = new List<byte[]> { new byte[] { 1, 2, 3 }, new byte[] { 4, 5, 6 } };
 
         // Act
         attributes.SetBinarySet("payloads", payloads);
@@ -873,18 +867,14 @@ public class AttributeValueExtensionsCollectionTests
     {
         // Arrange
         var attributes = new Dictionary<string, AttributeValue>();
-        var payloads = new List<byte[]>
-        {
-            new byte[] { 1, 2, 3 },
-            new byte[] { 1, 2, 3 }
-        };
+        var payloads = new List<byte[]> { new byte[] { 1, 2, 3 }, new byte[] { 1, 2, 3 } };
 
         // Act
         attributes.SetBinarySet("payloads", payloads);
 
         // Assert
         Assert.True(attributes.ContainsKey("payloads"));
-        Assert.Equal(1, attributes["payloads"].BS.Count);
+        Assert.Single(attributes["payloads"].BS);
     }
 
     [Fact]
@@ -906,11 +896,7 @@ public class AttributeValueExtensionsCollectionTests
     {
         // Arrange
         var attributes = new Dictionary<string, AttributeValue>();
-        var original = new List<byte[]>
-        {
-            new byte[] { 7, 8, 9 },
-            new byte[] { 10, 11, 12 }
-        };
+        var original = new List<byte[]> { new byte[] { 7, 8, 9 }, new byte[] { 10, 11, 12 } };
         var expected = original
             .Select(bytes => string.Join(",", bytes))
             .ToHashSet(StringComparer.Ordinal);

@@ -30,7 +30,7 @@ public class AttributeValueExtensionsGuidTests
         var attributes = new Dictionary<string, AttributeValue>();
 
         // Act
-        var result = attributes.GetGuid("id", Requiredness.Optional);
+        var result = attributes.GetGuid("id", requiredness: Requiredness.Optional);
 
         // Assert
         Assert.Equal(Guid.Empty, result);
@@ -43,7 +43,7 @@ public class AttributeValueExtensionsGuidTests
         var attributes = new Dictionary<string, AttributeValue> { ["id"] = new() { NULL = true } };
 
         // Act
-        var result = attributes.GetGuid("id", Requiredness.Optional);
+        var result = attributes.GetGuid("id", requiredness: Requiredness.Optional);
 
         // Assert
         Assert.Equal(Guid.Empty, result);

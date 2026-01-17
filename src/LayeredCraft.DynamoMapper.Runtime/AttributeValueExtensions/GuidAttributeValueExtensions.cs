@@ -10,103 +10,16 @@ public static class GuidAttributeValueExtensions
 {
     extension(Dictionary<string, AttributeValue> attributes)
     {
-        /// <summary>Tries to get a <see cref="Guid" /> value from the attribute dictionary.</summary>
-        /// <param name="key">The attribute key to retrieve.</param>
-        /// <param name="value">The <see cref="Guid" /> value when found.</param>
-        /// <param name="requiredness">
-        ///     Specifies whether the attribute is required. Default is
-        ///     <see cref="Requiredness.InferFromNullability" />.
-        /// </param>
-        /// <param name="kind">The DynamoDB attribute kind to interpret as a string.</param>
-        /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
-        public bool TryGetGuid(
-            string key,
-            out Guid value,
-            Requiredness requiredness = Requiredness.InferFromNullability,
-            DynamoKind kind = DynamoKind.S
-        )
-        {
-            value = Guid.Empty;
-            if (!attributes.TryGetValue(key, requiredness, out var attribute))
-                return false;
-
-            var stringValue = attribute!.GetString(kind);
-            value = stringValue.Length == 0 ? Guid.Empty : Guid.Parse(stringValue);
-            return true;
-        }
-
-        /// <summary>Gets a <see cref="Guid" /> value from the attribute dictionary.</summary>
-        /// <param name="key">The attribute key to retrieve.</param>
-        /// <param name="requiredness">
-        ///     Specifies whether the attribute is required. Default is
-        ///     <see cref="Requiredness.InferFromNullability" />.
-        /// </param>
-        /// <param name="kind">The DynamoDB attribute kind to interpret as a string.</param>
-        /// <returns>
-        ///     The <see cref="Guid" /> value if the key exists and is valid; otherwise
-        ///     <see cref="Guid.Empty" /> if the key is missing or the attribute has a DynamoDB NULL value.
-        /// </returns>
-        public Guid GetGuid(
-            string key,
-            Requiredness requiredness = Requiredness.InferFromNullability,
-            DynamoKind kind = DynamoKind.S
-        ) => attributes.TryGetGuid(key, out var value, requiredness, kind) ? value : Guid.Empty;
-
-        /// <summary>Tries to get a nullable <see cref="Guid" /> value from the attribute dictionary.</summary>
-        /// <param name="key">The attribute key to retrieve.</param>
-        /// <param name="value">The nullable <see cref="Guid" /> value when found.</param>
-        /// <param name="requiredness">
-        ///     Specifies whether the attribute is required. Default is
-        ///     <see cref="Requiredness.InferFromNullability" />.
-        /// </param>
-        /// <param name="kind">The DynamoDB attribute kind to interpret as a string.</param>
-        /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
-        public bool TryGetNullableGuid(
-            string key,
-            out Guid? value,
-            Requiredness requiredness = Requiredness.InferFromNullability,
-            DynamoKind kind = DynamoKind.S
-        )
-        {
-            value = null;
-            if (!attributes.TryGetNullableValue(key, requiredness, out var attribute))
-                return false;
-
-            if (attribute.IsNull)
-                return true;
-
-            var stringValue = attribute!.GetNullableString(kind);
-            value = stringValue is null ? null : Guid.Parse(stringValue);
-            return true;
-        }
-
-        /// <summary>Gets a nullable <see cref="Guid" /> value from the attribute dictionary.</summary>
-        /// <param name="key">The attribute key to retrieve.</param>
-        /// <param name="requiredness">
-        ///     Specifies whether the attribute is required. Default is
-        ///     <see cref="Requiredness.InferFromNullability" />.
-        /// </param>
-        /// <param name="kind">The DynamoDB attribute kind to interpret as a string.</param>
-        /// <returns>
-        ///     The <see cref="Guid" /> value if the key exists and is valid; otherwise <c>null</c> if the
-        ///     key is missing or the attribute has a DynamoDB NULL value.
-        /// </returns>
-        public Guid? GetNullableGuid(
-            string key,
-            Requiredness requiredness = Requiredness.InferFromNullability,
-            DynamoKind kind = DynamoKind.S
-        ) => attributes.TryGetNullableGuid(key, out var value, requiredness, kind) ? value : null;
-
         /// <summary>
         ///     Tries to get a <see cref="Guid" /> value from the attribute dictionary using an exact
         ///     format string.
         /// </summary>
         /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="value">The <see cref="Guid" /> value when found.</param>
         /// <param name="format">
         ///     The exact format string to use for parsing. Valid formats: "N" (32 digits),
-        ///     "D" (hyphens), "B" (braces), "P" (parentheses), "X" (hexadecimal).
+        ///     "D" (hyphens), "B" (braces), "P" (parentheses), "X" (hexadecimal). Default is "D".
         /// </param>
-        /// <param name="value">The <see cref="Guid" /> value when found.</param>
         /// <param name="requiredness">
         ///     Specifies whether the attribute is required. Default is
         ///     <see cref="Requiredness.InferFromNullability" />.
@@ -115,8 +28,8 @@ public static class GuidAttributeValueExtensions
         /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
         public bool TryGetGuid(
             string key,
-            string format,
             out Guid value,
+            string format = "D",
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.S
         )
@@ -137,7 +50,7 @@ public static class GuidAttributeValueExtensions
         /// <param name="key">The attribute key to retrieve.</param>
         /// <param name="format">
         ///     The exact format string to use for parsing. Valid formats: "N" (32 digits),
-        ///     "D" (hyphens), "B" (braces), "P" (parentheses), "X" (hexadecimal).
+        ///     "D" (hyphens), "B" (braces), "P" (parentheses), "X" (hexadecimal). Default is "D".
         /// </param>
         /// <param name="requiredness">
         ///     Specifies whether the attribute is required. Default is
@@ -150,11 +63,11 @@ public static class GuidAttributeValueExtensions
         /// </returns>
         public Guid GetGuid(
             string key,
-            string format,
+            string format = "D",
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.S
         ) =>
-            attributes.TryGetGuid(key, format, out var value, requiredness, kind)
+            attributes.TryGetGuid(key, out var value, format, requiredness, kind)
                 ? value
                 : Guid.Empty;
 
@@ -163,11 +76,11 @@ public static class GuidAttributeValueExtensions
         ///     exact format string.
         /// </summary>
         /// <param name="key">The attribute key to retrieve.</param>
+        /// <param name="value">The nullable <see cref="Guid" /> value when found.</param>
         /// <param name="format">
         ///     The exact format string to use for parsing. Valid formats: "N" (32 digits),
-        ///     "D" (hyphens), "B" (braces), "P" (parentheses), "X" (hexadecimal).
+        ///     "D" (hyphens), "B" (braces), "P" (parentheses), "X" (hexadecimal). Default is "D".
         /// </param>
-        /// <param name="value">The nullable <see cref="Guid" /> value when found.</param>
         /// <param name="requiredness">
         ///     Specifies whether the attribute is required. Default is
         ///     <see cref="Requiredness.InferFromNullability" />.
@@ -176,8 +89,8 @@ public static class GuidAttributeValueExtensions
         /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
         public bool TryGetNullableGuid(
             string key,
-            string format,
             out Guid? value,
+            string format = "D",
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.S
         )
@@ -201,7 +114,7 @@ public static class GuidAttributeValueExtensions
         /// <param name="key">The attribute key to retrieve.</param>
         /// <param name="format">
         ///     The exact format string to use for parsing. Valid formats: "N" (32 digits),
-        ///     "D" (hyphens), "B" (braces), "P" (parentheses), "X" (hexadecimal).
+        ///     "D" (hyphens), "B" (braces), "P" (parentheses), "X" (hexadecimal). Default is "D".
         /// </param>
         /// <param name="requiredness">
         ///     Specifies whether the attribute is required. Default is
@@ -214,11 +127,11 @@ public static class GuidAttributeValueExtensions
         /// </returns>
         public Guid? GetNullableGuid(
             string key,
-            string format,
+            string format = "D",
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.S
         ) =>
-            attributes.TryGetNullableGuid(key, format, out var value, requiredness, kind)
+            attributes.TryGetNullableGuid(key, out var value, format, requiredness, kind)
                 ? value
                 : null;
 

@@ -10,6 +10,7 @@ internal class MapperOptions
     internal string TimeSpanFormat { get; set; } = "c";
     internal Requiredness DefaultRequiredness { get; set; } = Requiredness.InferFromNullability;
     internal string EnumFormat { get; set; } = "G";
+    internal string GuidFormat { get; set; } = "D";
     internal bool OmitEmptyStrings { get; set; } = false;
     internal bool OmitNullStrings { get; set; } = true;
 

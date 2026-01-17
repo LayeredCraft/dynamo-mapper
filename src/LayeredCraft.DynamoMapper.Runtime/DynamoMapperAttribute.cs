@@ -52,4 +52,23 @@ public sealed class DynamoMapperAttribute : Attribute
     ///     </list>
     /// </remarks>
     public string EnumFormat { get; set; } = "G";
+
+    /// <summary>Gets or sets the default Guid format string.</summary>
+    /// <remarks>
+    ///     <para>The default is "D" (standard format with hyphens): 00000000-0000-0000-0000-000000000000</para>
+    ///     <para>Valid format strings:</para>
+    ///     <list type="bullet">
+    ///         <item>"N" - 32 digits: 00000000000000000000000000000000</item>
+    ///         <item>"D" - 32 digits separated by hyphens: 00000000-0000-0000-0000-000000000000</item>
+    ///         <item>
+    ///             "B" - 32 digits separated by hyphens, enclosed in braces:
+    ///             {00000000-0000-0000-0000-000000000000}
+    ///         </item>
+    ///         <item>
+    ///             "P" - 32 digits separated by hyphens, enclosed in parentheses:
+    ///             (00000000-0000-0000-0000-000000000000)
+    ///         </item>
+    ///     </list>
+    /// </remarks>
+    public string GuidFormat { get; set; } = "D";
 }

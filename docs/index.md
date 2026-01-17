@@ -41,9 +41,9 @@ public class Product
 
 // Mapper - configuration lives here
 [DynamoMapper(Convention = DynamoNamingConvention.CamelCase)]
+[DynamoField(nameof(Product.Description), OmitIfNull = true, OmitIfEmptyString = true)]
 public static partial class ProductMapper
 {
-    [DynamoField(nameof(Product.Description), OmitIfNullOrWhiteSpace = true)]
     public static partial Dictionary<string, AttributeValue> ToItem(Product source);
     public static partial Product FromItem(Dictionary<string, AttributeValue> item);
 }

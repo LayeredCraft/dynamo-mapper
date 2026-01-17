@@ -35,7 +35,7 @@ Ensure your project uses C# 11 or later in your `.csproj` file:
 Create a simple test mapper to verify installation:
 
 ```csharp
-using DynamoMapper.Attributes;
+using DynamoMapper.Runtime;
 using Amazon.DynamoDBv2.Model;
 
 [DynamoMapper]

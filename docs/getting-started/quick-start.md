@@ -27,15 +27,15 @@ public enum OrderStatus
 ## Step 2: Create a Mapper
 
 ```csharp
-using DynamoMapper.Attributes;
+using DynamoMapper.Runtime;
 using Amazon.DynamoDBv2.Model;
 
 namespace MyApp.Data;
 
 [DynamoMapper(Convention = DynamoNamingConvention.CamelCase)]
+[DynamoField(nameof(Order.Notes), OmitIfNull = true, OmitIfEmptyString = true)]
 public static partial class OrderMapper
 {
-    [DynamoField(nameof(Order.Notes), OmitIfNullOrWhiteSpace = true)]
     public static partial Dictionary<string, AttributeValue> ToItem(Order source);
 
     public static partial Order FromItem(Dictionary<string, AttributeValue> item);
@@ -82,7 +82,7 @@ var retrievedOrder = OrderMapper.FromItem(response.Item);
 ## What Just Happened?
 
 1. **`[DynamoMapper]`** - Marks the mapper and sets CamelCase naming (OrderId → orderId)
-2. **`[DynamoField]`** - Configured Notes field to omit if null/whitespace
+2. **`[DynamoField]`** - Configured Notes field to omit if null/empty
 3. **Generated Code** - DynamoMapper generated ToItem and FromItem implementations at compile time
 
 ## Next Steps

@@ -100,37 +100,33 @@ internal static class TypeMappingStrategyResolver
                 "Decimal",
                 analysis.Nullability
             ),
-            { SpecialType: SpecialType.System_DateTime } =>
-                $"\"{context.MapperOptions.DateTimeFormat}\"".Map(dateFmt =>
-                    CreateStrategy(
-                        "DateTime",
-                        analysis.Nullability,
-                        fromArg: dateFmt,
-                        toArg: dateFmt
-                    )
-                ),
+            { SpecialType: SpecialType.System_DateTime } => CreateStrategy(
+                "DateTime",
+                analysis.Nullability,
+                fromArg: $"\"{analysis.FieldOptions?.Format ?? context.MapperOptions.DateTimeFormat}\"",
+                toArg: $"\"{analysis.FieldOptions?.Format ?? context.MapperOptions.DateTimeFormat}\""
+            ),
             INamedTypeSymbol t
                 when t.IsAssignableTo(WellKnownType.System_DateTimeOffset, context) =>
-                $"\"{context.MapperOptions.DateTimeFormat}\"".Map(dateFmt =>
-                    CreateStrategy(
-                        "DateTimeOffset",
-                        analysis.Nullability,
-                        fromArg: dateFmt,
-                        toArg: dateFmt
-                    )
+                CreateStrategy(
+                    "DateTimeOffset",
+                    analysis.Nullability,
+                    fromArg: $"\"{analysis.FieldOptions?.Format ?? context.MapperOptions.DateTimeFormat}\"",
+                    toArg: $"\"{analysis.FieldOptions?.Format ?? context.MapperOptions.DateTimeFormat}\""
                 ),
             INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_Guid, context) =>
-                $"\"{context.MapperOptions.GuidFormat}\"".Map(guidFmt =>
-                    CreateStrategy("Guid", analysis.Nullability, fromArg: guidFmt, toArg: guidFmt)
+                CreateStrategy(
+                    "Guid",
+                    analysis.Nullability,
+                    fromArg: $"\"{analysis.FieldOptions?.Format ?? context.MapperOptions.GuidFormat}\"",
+                    toArg: $"\"{analysis.FieldOptions?.Format ?? context.MapperOptions.GuidFormat}\""
                 ),
             INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_TimeSpan, context) =>
-                $"\"{context.MapperOptions.TimeSpanFormat}\"".Map(timeFmt =>
-                    CreateStrategy(
-                        "TimeSpan",
-                        analysis.Nullability,
-                        fromArg: timeFmt,
-                        toArg: timeFmt
-                    )
+                CreateStrategy(
+                    "TimeSpan",
+                    analysis.Nullability,
+                    fromArg: $"\"{analysis.FieldOptions?.Format ?? context.MapperOptions.TimeSpanFormat}\"",
+                    toArg: $"\"{analysis.FieldOptions?.Format ?? context.MapperOptions.TimeSpanFormat}\""
                 ),
             INamedTypeSymbol { TypeKind: TypeKind.Enum } enumType => CreateEnumStrategy(
                 enumType,
@@ -189,7 +185,11 @@ internal static class TypeMappingStrategyResolver
     )
     {
         var enumName = enumType.QualifiedName;
-        var enumFormat = $"\"{context.MapperOptions.EnumFormat}\"";
+
+        // Field-level format override > mapper-level default
+        var format = analysis.FieldOptions?.Format ?? context.MapperOptions.EnumFormat;
+        var enumFormat = $"\"{format}\"";
+
         var nullableModifier = analysis.Nullability.IsNullableType ? "Nullable" : "";
 
         // Non-nullable enums need a default value in FromItem

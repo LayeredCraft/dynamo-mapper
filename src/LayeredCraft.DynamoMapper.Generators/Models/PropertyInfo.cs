@@ -25,7 +25,6 @@ internal static class PropertyInfoExtensions
         ///     PropertySymbol → Analysis → Strategy → Spec → Code → PropertyInfo
         ///     Short-circuits when strategy is null (property won't be used in any method).
         /// </summary>
-        /// <param name="initMethod">How this property should be initialized (constructor, init, or post-construction).</param>
         internal static DiagnosticResult<PropertyInfo> Create(
             IPropertySymbol propertySymbol,
             string modelVarName,

@@ -13,7 +13,6 @@ namespace DynamoMapper.Generator.PropertyMapping;
 internal static class PropertyMappingCodeRenderer
 {
     /// <summary>Renders a property mapping specification into PropertyInfo.</summary>
-    /// <param name="initMethod">How this property should be initialized (constructor, init, or post-construction).</param>
     internal static PropertyInfo Render(
         PropertyMappingSpec spec,
         PropertyAnalysis analysis,

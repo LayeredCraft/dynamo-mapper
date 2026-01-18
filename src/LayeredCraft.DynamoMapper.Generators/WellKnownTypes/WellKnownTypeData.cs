@@ -52,6 +52,7 @@ internal static class WellKnownTypeData
         DynamoMapper_Runtime_DynamoMapperAttribute,
         DynamoMapper_Runtime_DynamoFieldAttribute,
         DynamoMapper_Runtime_DynamoIgnoreAttribute,
+        DynamoMapper_Runtime_DynamoMapperConstructorAttribute,
     }
 
     public static readonly string[] WellKnownTypeNames =
@@ -94,5 +95,6 @@ internal static class WellKnownTypeData
         "DynamoMapper.Runtime.DynamoMapperAttribute",
         "DynamoMapper.Runtime.DynamoFieldAttribute",
         "DynamoMapper.Runtime.DynamoIgnoreAttribute",
+        "DynamoMapper.Runtime.DynamoMapperConstructorAttribute",
     ];
 }

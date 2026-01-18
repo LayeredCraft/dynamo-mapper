@@ -34,6 +34,28 @@ using Amazon.DynamoDBv2.Model;
     {{ generated_code_attribute }}
     {{ mapper_class.from_item_signature }}
     {
+        {{~ if model_class.constructor != null ~}}
+        {{~ # Constructor-based initialization ~}}
+        {{~ if from_init_assignments.size == 0 ~}}
+        var {{ model_var_name }} = new {{ model_class.fully_qualified_type }}(
+            {{~ for param in model_class.constructor.parameters ~}}
+            {{ param.parameter_name }}: {{ param.rendered_argument }}{{ if !for.last }},{{ end }}
+            {{~ end ~}}
+        );
+        {{~ else ~}}
+        var {{ model_var_name }} = new {{ model_class.fully_qualified_type }}(
+            {{~ for param in model_class.constructor.parameters ~}}
+            {{ param.parameter_name }}: {{ param.rendered_argument }}{{ if !for.last }},{{ end }}
+            {{~ end ~}}
+        )
+        {
+            {{~ for assignment in from_init_assignments ~}}
+            {{ assignment }}
+            {{~ end ~}}
+        };
+        {{~ end ~}}
+        {{~ else ~}}
+        {{~ # Property-based initialization (existing logic) ~}}
         {{~ if from_init_assignments.size == 0 ~}}
         var {{ model_var_name }} = new {{ model_class.fully_qualified_type }}();
         {{~ else ~}}
@@ -43,6 +65,7 @@ using Amazon.DynamoDBv2.Model;
             {{ assignment }}
             {{~ end ~}}
         };
+        {{~ end ~}}
         {{~ end ~}}
         {{~ for assignment in from_assignments ~}}
         {{ assignment }}

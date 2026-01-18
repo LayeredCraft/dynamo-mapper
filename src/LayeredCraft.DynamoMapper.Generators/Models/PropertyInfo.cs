@@ -1,3 +1,4 @@
+using DynamoMapper.Generator.ConstructorMapping.Models;
 using DynamoMapper.Generator.Diagnostics;
 using DynamoMapper.Generator.PropertyMapping;
 using Microsoft.CodeAnalysis;
@@ -7,10 +8,12 @@ namespace DynamoMapper.Generator.Models;
 internal sealed record PropertyInfo(
     string? FromAssignment,
     string? FromInitAssignment,
-    string? ToAssignments
+    string? ToAssignments,
+    // Constructor argument rendering (used when InitializationMethod is ConstructorParameter)
+    string? FromConstructorArgument
 )
 {
-    internal static readonly PropertyInfo None = new(null, null, null);
+    internal static readonly PropertyInfo None = new(null, null, null, null);
 }
 
 internal static class PropertyInfoExtensions
@@ -22,10 +25,12 @@ internal static class PropertyInfoExtensions
         ///     PropertySymbol → Analysis → Strategy → Spec → Code → PropertyInfo
         ///     Short-circuits when strategy is null (property won't be used in any method).
         /// </summary>
+        /// <param name="initMethod">How this property should be initialized (constructor, init, or post-construction).</param>
         internal static DiagnosticResult<PropertyInfo> Create(
             IPropertySymbol propertySymbol,
             string modelVarName,
             int index,
+            InitializationMethod initMethod,
             GeneratorContext context
         ) =>
             PropertyAnalyzer
@@ -50,6 +55,7 @@ internal static class PropertyInfoExtensions
                                     tuple.analysis,
                                     modelVarName,
                                     index,
+                                    initMethod,
                                     context
                                 )
                             )

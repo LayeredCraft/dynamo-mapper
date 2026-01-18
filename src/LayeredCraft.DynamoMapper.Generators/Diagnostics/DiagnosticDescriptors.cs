@@ -59,4 +59,13 @@ internal static class DiagnosticDescriptors
         DiagnosticSeverity.Error,
         true
     );
+
+    internal static readonly DiagnosticDescriptor MultipleConstructorsWithAttribute = new(
+        "DM0103",
+        "Multiple constructors marked with [DynamoMapperConstructor]",
+        "The type '{0}' has multiple constructors marked with [DynamoMapperConstructor]. Only one constructor can be marked with this attribute",
+        UsageCategory,
+        DiagnosticSeverity.Error,
+        true
+    );
 }

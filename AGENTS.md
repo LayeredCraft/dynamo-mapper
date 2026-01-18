@@ -19,17 +19,54 @@ dotnet build examples/DynamoMapper.SimpleExample/DynamoMapper.SimpleExample.cspr
 # Run all tests across all target frameworks (net8.0, net9.0, net10.0)
 dotnet test
 
-# Run tests for specific framework
+# Run tests for a specific framework
+# (recommended when working on a single test failure)
 dotnet test --framework net8.0
 
 # Run tests with verbose output
 dotnet test --logger "console;verbosity=detailed"
 
-# Run specific test (example)
-dotnet test --filter "FullyQualifiedName~Simple_HelloWorld"
+# Run tests in a specific project (avoid running other test projects)
+dotnet test --project test/LayeredCraft.DynamoMapper.Generators.Tests/LayeredCraft.DynamoMapper.Generators.Tests.csproj
 
-# Run tests in specific project
-dotnet test test/LayeredCraft.DynamoMapper.Generators.Tests/LayeredCraft.DynamoMapper.Generators.Tests.csproj
+# Discover available tests (xUnit v3 + Microsoft.Testing.Platform)
+# Copy the fully-qualified test name from this output.
+DOTNET_NOLOGO=1 dotnet test \
+  --project test/LayeredCraft.DynamoMapper.Generators.Tests/LayeredCraft.DynamoMapper.Generators.Tests.csproj \
+  -f net10.0 \
+  -v q \
+  --list-tests \
+  --no-progress \
+  --no-ansi
+
+# Run a single test method (exact fully-qualified name)
+DOTNET_NOLOGO=1 dotnet test \
+  --project test/LayeredCraft.DynamoMapper.Generators.Tests/LayeredCraft.DynamoMapper.Generators.Tests.csproj \
+  -f net10.0 \
+  -v q \
+  --filter-method "MyNamespace.MyTestClass.MyTestMethod" \
+  --minimum-expected-tests 1 \
+  --no-progress \
+  --no-ansi
+
+# Common filter variants
+DOTNET_NOLOGO=1 dotnet test \
+  --project test/LayeredCraft.DynamoMapper.Generators.Tests/LayeredCraft.DynamoMapper.Generators.Tests.csproj \
+  -f net10.0 \
+  -v q \
+  --filter-class "MyNamespace.MyTestClass" \
+  --minimum-expected-tests 1 \
+  --no-progress \
+  --no-ansi
+
+DOTNET_NOLOGO=1 dotnet test \
+  --project test/LayeredCraft.DynamoMapper.Generators.Tests/LayeredCraft.DynamoMapper.Generators.Tests.csproj \
+  -f net10.0 \
+  -v q \
+  --filter-namespace "MyNamespace.Tests" \
+  --minimum-expected-tests 1 \
+  --no-progress \
+  --no-ansi
 ```
 
 ### Taskfile Commands (if task is installed)

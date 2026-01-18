@@ -64,8 +64,9 @@ internal static class ConstructorSelector
             return AnalyzeConstructorSelection(selectedConstructor, properties, false, context);
         }
 
-        // PRIORITY 3: Parameterless constructor exists - check property accessibility
-        if (AllPropertiesAccessible(properties))
+        // PRIORITY 3: Parameterless constructor exists - check deserialization accessibility
+        // Ignore computed/read-only properties that can't be populated from the item anyway.
+        if (AllPropertiesAccessible(properties, constructors))
         {
             // Use property initialization (parameterless + object initializer)
             return DiagnosticResult<ConstructorSelectionResult?>.Success(null);
@@ -117,15 +118,36 @@ internal static class ConstructorSelector
         return DiagnosticResult<IMethodSymbol?>.Success(attributedConstructors[0]);
     }
 
-    /// <summary>Checks if all properties are accessible (have both getter and setter/init).</summary>
-    private static bool AllPropertiesAccessible(IPropertySymbol[] properties)
+    /// <summary>
+    ///     Checks if the model can be deserialized using a parameterless constructor plus property
+    ///     assignments (object initializer + post-construction assignments).
+    /// </summary>
+    /// <remarks>
+    ///     Read-only properties should only force constructor-based deserialization if there is a
+    ///     constructor parameter that can populate them. Computed properties (e.g. expression-bodied
+    ///     getters) are ignored for deserialization and should not affect constructor selection.
+    /// </remarks>
+    private static bool AllPropertiesAccessible(
+        IPropertySymbol[] properties,
+        IMethodSymbol[] constructors
+    )
     {
         foreach (var property in properties)
         {
-            var hasGetter = property.GetMethod is not null;
-            var hasSetter = property.SetMethod is not null; // includes init-only setters
+            // Settable (including init-only) properties can be initialized via object initializer
+            // or assignment.
+            if (property.SetMethod is not null)
+                continue;
 
-            if (!hasGetter || !hasSetter)
+            // Read-only property: only matters for deserialization if a constructor parameter can
+            // populate it.
+            var hasMatchingConstructorParameter = constructors.Any(c =>
+                c.Parameters.Any(p =>
+                    string.Equals(p.Name, property.Name, StringComparison.OrdinalIgnoreCase)
+                )
+            );
+
+            if (hasMatchingConstructorParameter)
                 return false;
         }
 

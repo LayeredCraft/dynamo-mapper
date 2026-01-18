@@ -1,0 +1,15 @@
+using System.Collections.Generic;
+using Amazon.DynamoDBv2.Model;
+using DynamoMapper.Runtime;
+
+namespace DynamoMapper.MapperConstructor;
+
+[DynamoMapper]
+public static partial class PersonRecordMapper
+{
+    public static partial Dictionary<string, AttributeValue> ToItem(PersonRecord personRecord);
+
+    public static partial PersonRecord FromItem(Dictionary<string, AttributeValue> item);
+}
+
+public record PersonRecord(string FirstName, string LastName, int Age);

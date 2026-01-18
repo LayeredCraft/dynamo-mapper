@@ -9,22 +9,22 @@ using WellKnownType = DynamoMapper.Generator.WellKnownTypes.WellKnownTypeData.We
 namespace DynamoMapper.Generator.ConstructorMapping;
 
 /// <summary>
-///     Centralized logic for selecting which constructor to use for deserialization. Implements
-///     the constructor selection priority rules.
+///     Centralized logic for selecting which constructor to use for deserialization.
+///     Implements the constructor selection priority rules.
 /// </summary>
 internal static class ConstructorSelector
 {
     /// <summary>
-    ///     Selects constructor and determines how each property should be initialized. Returns null
-    ///     if parameterless constructor + property initialization should be used.
+    ///     Selects constructor and determines how each property should be initialized.
+    ///     Returns null if parameterless constructor + property initialization should be used.
     /// </summary>
     /// <param name="modelType">The model type symbol.</param>
     /// <param name="properties">All properties on the model type.</param>
     /// <param name="context">The generator context.</param>
     /// <returns>
-    ///     Success with null = use property initialization only. Success with
-    ///     ConstructorSelectionResult = use specified constructor. Failure with diagnostic = constructor
-    ///     selection error.
+    ///     Success with null = use property initialization only.
+    ///     Success with ConstructorSelectionResult = use specified constructor.
+    ///     Failure with diagnostic = constructor selection error.
     /// </returns>
     internal static DiagnosticResult<ConstructorSelectionResult?> Select(
         ITypeSymbol modelType,
@@ -50,7 +50,9 @@ internal static class ConstructorSelector
             return DiagnosticResult<ConstructorSelectionResult?>.Failure(attributedResult.Error!);
 
         if (attributedResult.Value is not null)
+        {
             return AnalyzeConstructorSelection(attributedResult.Value, properties, true, context);
+        }
 
         // PRIORITY 2: Check if parameterless constructor exists
         var hasParameterlessConstructor = constructors.Any(c => c.Parameters.Length == 0);
@@ -64,8 +66,10 @@ internal static class ConstructorSelector
 
         // PRIORITY 3: Parameterless constructor exists - check property accessibility
         if (AllPropertiesAccessible(properties))
+        {
             // Use property initialization (parameterless + object initializer)
             return DiagnosticResult<ConstructorSelectionResult?>.Success(null);
+        }
 
         // PRIORITY 4: Has read-only properties - use constructor with most parameters
         var selectedConstructor2 = SelectConstructorWithMostParameters(constructors);
@@ -73,8 +77,8 @@ internal static class ConstructorSelector
     }
 
     /// <summary>
-    ///     Finds the constructor with [DynamoMapperConstructor] attribute. Returns error DM0103 if
-    ///     multiple attributed constructors found.
+    ///     Finds the constructor with [DynamoMapperConstructor] attribute.
+    ///     Returns error DM0103 if multiple attributed constructors found.
     /// </summary>
     private static DiagnosticResult<IMethodSymbol?> FindAttributedConstructor(
         IMethodSymbol[] constructors,
@@ -101,12 +105,14 @@ internal static class ConstructorSelector
             return DiagnosticResult<IMethodSymbol?>.Success(null);
 
         if (attributedConstructors.Length > 1)
+        {
             // DM0103: Multiple [DynamoMapperConstructor] attributes found
             return DiagnosticResult<IMethodSymbol?>.Failure(
                 DiagnosticDescriptors.MultipleConstructorsWithAttribute,
                 attributedConstructors[1].Locations.FirstOrDefault()?.CreateLocationInfo(),
                 attributedConstructors[0].ContainingType.ToDisplayString()
             );
+        }
 
         return DiagnosticResult<IMethodSymbol?>.Success(attributedConstructors[0]);
     }
@@ -203,9 +209,11 @@ internal static class ConstructorSelector
         var hasSetter = property.SetMethod is not null;
 
         if (!hasSetter)
+        {
             // Read-only property not in constructor - this shouldn't happen in valid scenarios
             // but we'll treat it as constructor parameter (will likely cause a compile error)
             return InitializationMethod.ConstructorParameter;
+        }
 
         // Property is settable
         return isInitOnly ? InitializationMethod.InitSyntax : InitializationMethod.PostConstruction;

@@ -6,8 +6,8 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace DynamoMapper.Generator.PropertyMapping;
 
 /// <summary>
-///     Performs shared semantic analysis on property and parameter symbols. Extracts common
-///     information needed for type mapping without any mapping logic.
+///     Performs shared semantic analysis on property and parameter symbols. Extracts common information
+///     needed for type mapping without any mapping logic.
 /// </summary>
 internal static class MemberAnalyzer
 {

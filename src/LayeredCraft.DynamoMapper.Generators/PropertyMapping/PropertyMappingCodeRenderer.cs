@@ -52,8 +52,7 @@ internal static class PropertyMappingCodeRenderer
             context.HasFromItemMethod
             && analysis.HasSetter
             && spec.FromItemMethod is not null
-            && !useInitSyntax
-            && useRegularAssignment
+            && (!useInitSyntax || useRegularAssignment)
                 ? RenderFromAssignment(spec, modelVarName, analysis, index, context)
                 : null;
 
@@ -61,7 +60,8 @@ internal static class PropertyMappingCodeRenderer
             context.HasFromItemMethod
             && analysis.HasSetter
             && spec.FromItemMethod is not null
-            && (useInitSyntax || !useRegularAssignment)
+            && useInitSyntax
+            && !useRegularAssignment
                 ? RenderFromInitAssignment(spec, analysis, context)
                 : null;
 
@@ -195,7 +195,9 @@ internal static class PropertyMappingCodeRenderer
         // For array properties, append .ToArray() to convert the List to an array
         var isArrayProperty = analysis.PropertyType.TypeKind == TypeKind.Array;
         if (isArrayProperty && !spec.FromItemMethod.IsCustomMethod)
+        {
             methodCall += ".ToArray()";
+        }
 
         return methodCall;
     }

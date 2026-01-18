@@ -71,9 +71,13 @@ internal static class ModelClassInfoExtensions
                 );
 
                 if (!propertyInfoResult.IsSuccess)
+                {
                     propertyDiagnosticsList.Add(propertyInfoResult.Error!);
+                }
                 else
+                {
                     propertyInfosList.Add(propertyInfoResult.Value!);
+                }
             }
 
             // Phase 2B: Build constructor parameter info (if constructor selected)
@@ -100,12 +104,14 @@ internal static class ModelClassInfoExtensions
                         var matchingPropertyInfo = propertyInfosList[propertyIndex];
 
                         if (matchingPropertyInfo.FromConstructorArgument is not null)
+                        {
                             parameterInfosList.Add(
                                 new ConstructorParameterInfo(
                                     paramAnalysis.MemberInfo.MemberName,
                                     matchingPropertyInfo.FromConstructorArgument
                                 )
                             );
+                        }
                     }
                 }
 

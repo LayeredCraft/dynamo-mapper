@@ -45,3 +45,27 @@ internal static partial class DuplicateResultMapper
 Notes:
 - Generated code uses `SetX`/`GetX` helpers from `DynamoMapper.Runtime`.
 - Class-level `[DynamoField]`/`[DynamoIgnore]` configuration influences argument values.
+
+## Constructor-Based `FromItem`
+
+If your model type uses a constructor (records, get-only properties, or an explicitly attributed
+constructor), DynamoMapper will generate `FromItem` with constructor arguments.
+
+```csharp
+[global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
+public static partial global::MyNamespace.Product FromItem(
+    global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> item
+)
+{
+    var product = new global::MyNamespace.Product(
+        Id: item.GetString("id", Requiredness.InferFromNullability),
+        Name: item.GetString("name", Requiredness.InferFromNullability)
+    )
+    {
+        Price = item.GetDecimal("price", Requiredness.InferFromNullability),
+        Quantity = item.GetInt("quantity", Requiredness.InferFromNullability),
+    };
+
+    return product;
+}
+```

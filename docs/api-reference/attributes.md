@@ -62,3 +62,37 @@ public static partial class OrderMapper
 Properties:
 - `MemberName` (ctor) - target member name
 - `Ignore` - `IgnoreMapping.All`, `IgnoreMapping.FromModel`, or `IgnoreMapping.ToModel`
+
+## DynamoMapperConstructorAttribute
+
+Marks which constructor DynamoMapper should use when generating `FromItem` for a model type.
+
+This attribute is applied to the **model's constructor**, not the mapper class.
+
+```csharp
+using DynamoMapper.Runtime;
+
+public class User
+{
+    public User()
+    {
+        Id = string.Empty;
+        Name = string.Empty;
+    }
+
+    [DynamoMapperConstructor]
+    public User(string id, string name)
+    {
+        Id = id;
+        Name = name;
+    }
+
+    public string Id { get; set; }
+    public string Name { get; set; }
+}
+```
+
+Rules:
+
+- Only one constructor can be marked with `[DynamoMapperConstructor]`.
+- If multiple are marked, DynamoMapper emits diagnostic `DM0103`.

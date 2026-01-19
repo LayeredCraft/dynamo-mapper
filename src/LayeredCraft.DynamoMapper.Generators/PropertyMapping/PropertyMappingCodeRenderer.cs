@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using DynamoMapper.Generator.ConstructorMapping.Models;
 using DynamoMapper.Generator.Models;
 using DynamoMapper.Generator.PropertyMapping.Models;
 using Microsoft.CodeAnalysis;
@@ -17,20 +18,40 @@ internal static class PropertyMappingCodeRenderer
         PropertyAnalysis analysis,
         string modelVarName,
         int index,
+        InitializationMethod initMethod,
         GeneratorContext context
     )
     {
+        // If this property is a constructor parameter, render as constructor argument
+        if (initMethod == InitializationMethod.ConstructorParameter && context.HasFromItemMethod)
+        {
+            var constructorArg = spec.FromItemMethod is not null
+                ? RenderConstructorArgument(spec, analysis, context)
+                : null;
+
+            // Constructor parameters still need ToAssignments for serialization
+            var toAssignment =
+                context.HasToItemMethod && analysis.HasGetter && spec.ToItemMethod is not null
+                    ? RenderToAssignment(spec)
+                    : null;
+
+            return new PropertyInfo(null, null, toAssignment, constructorArg);
+        }
+
         // Determine if we should use regular assignment vs init assignment
         var useRegularAssignment =
             spec.FromItemMethod is { IsCustomMethod: false }
             && analysis is { IsRequired: false, IsInitOnly: false, HasDefaultValue: true };
+
+        // Use init syntax for InitSyntax mode, regular assignment for PostConstruction
+        var useInitSyntax = initMethod == InitializationMethod.InitSyntax;
 
         // FromItem requires both: setter on property AND FromItem method exists
         var fromAssignment =
             context.HasFromItemMethod
             && analysis.HasSetter
             && spec.FromItemMethod is not null
-            && useRegularAssignment
+            && (!useInitSyntax || useRegularAssignment)
                 ? RenderFromAssignment(spec, modelVarName, analysis, index, context)
                 : null;
 
@@ -38,6 +59,7 @@ internal static class PropertyMappingCodeRenderer
             context.HasFromItemMethod
             && analysis.HasSetter
             && spec.FromItemMethod is not null
+            && useInitSyntax
             && !useRegularAssignment
                 ? RenderFromInitAssignment(spec, analysis, context)
                 : null;
@@ -48,7 +70,7 @@ internal static class PropertyMappingCodeRenderer
                 ? RenderToAssignment(spec)
                 : null;
 
-        return new PropertyInfo(fromAssignment, fromInitAssignment, toAssignments);
+        return new PropertyInfo(fromAssignment, fromInitAssignment, toAssignments, null);
     }
 
     /// <summary>
@@ -143,6 +165,38 @@ internal static class PropertyMappingCodeRenderer
             ? $".{spec.ToItemMethod.MethodName}({args})" // Custom: .Set("key",
             // CustomMethod(source))
             : $".{spec.ToItemMethod.MethodName}{spec.TypeStrategy!.GenericArgument}({args})"; // Standard: .SetXxx<T>(args)
+
+        return methodCall;
+    }
+
+    /// <summary>
+    ///     Renders a constructor argument expression. This is similar to FromInitAssignment but
+    ///     without the "PropertyName = " prefix, as it's used as a constructor parameter value.
+    /// </summary>
+    private static string RenderConstructorArgument(
+        PropertyMappingSpec spec,
+        PropertyAnalysis analysis,
+        GeneratorContext context
+    )
+    {
+        Debug.Assert(spec.FromItemMethod is not null, "FromItemMethod should not be null");
+        Debug.Assert(
+            spec.FromItemMethod!.IsCustomMethod || spec.TypeStrategy is not null,
+            "TypeStrategy should not be null for standard methods"
+        );
+
+        var args = string.Join(", ", spec.FromItemMethod.Arguments.Select(a => a.Value));
+
+        var methodCall = spec.FromItemMethod.IsCustomMethod
+            ? $"{spec.FromItemMethod.MethodName}({args})" // Custom: MethodName(item)
+            : $"{context.MapperOptions.FromMethodParameterName}.{spec.FromItemMethod.MethodName}{spec.TypeStrategy!.GenericArgument}({args})"; // Standard: item.GetXxx<T>(args)
+
+        // For array properties, append .ToArray() to convert the List to an array
+        var isArrayProperty = analysis.PropertyType.TypeKind == TypeKind.Array;
+        if (isArrayProperty && !spec.FromItemMethod.IsCustomMethod)
+        {
+            methodCall += ".ToArray()";
+        }
 
         return methodCall;
     }

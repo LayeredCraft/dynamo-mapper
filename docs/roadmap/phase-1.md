@@ -131,7 +131,8 @@ public static partial class JediCharacterMapper
 - **records** (with settable properties)
 - `init` setters supported (generator uses object initializer)
 
-**Not required for Phase 1:** mapping to constructors / positional records.
+Constructor/record-based deserialization is supported via constructor selection and
+`[DynamoMapperConstructor]`.
 
 ### 4.2 Property Inclusion Rules (Defaults)
 By default, generator maps:

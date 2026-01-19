@@ -1,12 +1,12 @@
 {
   Diagnostics: [
     {
-      Message: The property 'NestedList' has element type 'System.Collections.Generic.List<string>' which is not supported. Only primitive types are supported as collection elements,
+      Message: The property 'NestedList' has element type 'System.Collections.Generic.List<string>' which is not supported. Only primitive types are supported as collection elements.,
       Severity: Error,
       Descriptor: {
         Id: DM0003,
         Title: Collection element type not supported,
-        MessageFormat: The property '{0}' has element type '{1}' which is not supported. Only primitive types are supported as collection elements,
+        MessageFormat: The property '{0}' has element type '{1}' which is not supported. Only primitive types are supported as collection elements.,
         Category: DynamoMapper.Usage,
         DefaultSeverity: Error,
         IsEnabledByDefault: true

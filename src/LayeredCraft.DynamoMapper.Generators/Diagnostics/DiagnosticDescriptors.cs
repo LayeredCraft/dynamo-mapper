@@ -18,7 +18,7 @@ internal static class DiagnosticDescriptors
     internal static readonly DiagnosticDescriptor UnsupportedCollectionElementType = new(
         "DM0003",
         "Collection element type not supported",
-        "The property '{0}' has element type '{1}' which is not supported. Only primitive types are supported as collection elements",
+        "The property '{0}' has element type '{1}' which is not supported. Only primitive types are supported as collection elements.",
         UsageCategory,
         DiagnosticSeverity.Error,
         true
@@ -55,6 +55,15 @@ internal static class DiagnosticDescriptors
         "DM0102",
         "Mapper methods use different POCO types",
         "The mapper methods '{0}' and '{1}' must use the same POCO type, but '{2}' and '{3}' were found",
+        UsageCategory,
+        DiagnosticSeverity.Error,
+        true
+    );
+
+    internal static readonly DiagnosticDescriptor MultipleConstructorsWithAttribute = new(
+        "DM0103",
+        "Multiple constructors marked with [DynamoMapperConstructor]",
+        "The type '{0}' has multiple constructors marked with [DynamoMapperConstructor]. Only one constructor can be marked with this attribute.",
         UsageCategory,
         DiagnosticSeverity.Error,
         true

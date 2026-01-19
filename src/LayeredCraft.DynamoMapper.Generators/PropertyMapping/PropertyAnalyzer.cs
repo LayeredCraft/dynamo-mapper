@@ -1,7 +1,6 @@
 using DynamoMapper.Generator.Diagnostics;
 using DynamoMapper.Generator.PropertyMapping.Models;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace DynamoMapper.Generator.PropertyMapping;
 
@@ -22,74 +21,32 @@ internal static class PropertyAnalyzer
     {
         context.ThrowIfCancellationRequested();
 
-        var nullability = AnalyzeNullability(propertySymbol);
-        var underlyingType = UnwrapNullableType(propertySymbol.Type);
+        // Use shared MemberAnalyzer for common analysis
+        var memberInfoResult = MemberAnalyzer.AnalyzeProperty(propertySymbol, context);
+        if (!memberInfoResult.IsSuccess)
+            return DiagnosticResult<PropertyAnalysis>.Failure(memberInfoResult.Error!);
 
-        // Lookup field-level overrides from DynamoFieldAttribute
-        context.FieldOptions.TryGetValue(propertySymbol.Name, out var fieldOptions);
+        var memberInfo = memberInfoResult.Value!;
 
-        // Detect property accessors
+        // Detect property-specific accessors
         var hasGetter = propertySymbol.GetMethod is not null;
         var hasSetter = propertySymbol.SetMethod is not null; // includes init-only setters
 
         var isRequired = propertySymbol.IsRequired;
         var isInitOnly = propertySymbol.SetMethod?.IsInitOnly ?? false;
 
-        var hasDefaultValue = HasDefaultValue(propertySymbol);
-
         return new PropertyAnalysis(
-            propertySymbol.Name,
-            propertySymbol.Type,
-            underlyingType,
-            nullability,
-            fieldOptions,
+            memberInfo.MemberName,
+            memberInfo.MemberType,
+            memberInfo.UnderlyingType,
+            memberInfo.Nullability,
+            memberInfo.FieldOptions,
             hasGetter,
             hasSetter,
             isRequired,
             isInitOnly,
-            hasDefaultValue
+            memberInfo.HasDefaultValue,
+            memberInfo
         );
-    }
-
-    /// <summary>Analyzes the nullability characteristics of a property.</summary>
-    private static PropertyNullabilityInfo AnalyzeNullability(IPropertySymbol propertySymbol)
-    {
-        var type = propertySymbol.Type;
-        var isReferenceType = type.IsReferenceType;
-        var annotation = type.NullableAnnotation;
-
-        // A type is nullable if:
-        // 1. It's Nullable<T> (value type)
-        // 2. It's a reference type with Annotated nullable annotation
-        var isNullableType =
-            type
-                is INamedTypeSymbol
-                {
-                    OriginalDefinition.SpecialType: SpecialType.System_Nullable_T,
-                }
-            || (isReferenceType && annotation == NullableAnnotation.Annotated);
-
-        return new PropertyNullabilityInfo(isNullableType, isReferenceType, annotation);
-    }
-
-    private static bool HasDefaultValue(IPropertySymbol property) =>
-        property.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax()
-            is PropertyDeclarationSyntax { Initializer: not null };
-
-    /// <summary>
-    ///     Unwraps Nullable&lt;T&gt; to get the underlying type T. If the type is not nullable,
-    ///     returns the type unchanged.
-    /// </summary>
-    private static ITypeSymbol UnwrapNullableType(ITypeSymbol type)
-    {
-        if (
-            type is INamedTypeSymbol
-            {
-                OriginalDefinition.SpecialType: SpecialType.System_Nullable_T,
-            } namedType
-        )
-            return namedType.TypeArguments[0];
-
-        return type;
     }
 }

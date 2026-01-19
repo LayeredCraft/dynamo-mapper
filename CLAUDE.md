@@ -29,11 +29,53 @@ dotnet build
 # Run all tests across all target frameworks (net8.0, net9.0, net10.0)
 dotnet test
 
-# Run tests for specific framework
+# Run tests for a specific framework
+# (recommended when working on a single test failure)
 dotnet test --framework net8.0
 
 # Run tests with verbose output
 dotnet test --logger "console;verbosity=detailed"
+
+# --- xUnit v3 + Microsoft.Testing.Platform (lowest-noise filtered runs) ---
+
+# List available tests (discovery)
+# Copy the fully-qualified test name from this output.
+DOTNET_NOLOGO=1 dotnet test \
+  --project test/LayeredCraft.DynamoMapper.Generators.Tests/LayeredCraft.DynamoMapper.Generators.Tests.csproj \
+  -f net10.0 \
+  -v q \
+  --list-tests \
+  --no-progress \
+  --no-ansi
+
+# Run a single test method (exact fully-qualified name)
+DOTNET_NOLOGO=1 dotnet test \
+  --project test/LayeredCraft.DynamoMapper.Generators.Tests/LayeredCraft.DynamoMapper.Generators.Tests.csproj \
+  -f net10.0 \
+  -v q \
+  --filter-method "MyNamespace.MyTestClass.MyTestMethod" \
+  --minimum-expected-tests 1 \
+  --no-progress \
+  --no-ansi
+
+# Variants: class / namespace
+DOTNET_NOLOGO=1 dotnet test \
+  --project test/LayeredCraft.DynamoMapper.Generators.Tests/LayeredCraft.DynamoMapper.Generators.Tests.csproj \
+  -f net10.0 \
+  -v q \
+  --filter-class "MyNamespace.MyTestClass" \
+  --minimum-expected-tests 1 \
+  --no-progress \
+  --no-ansi
+
+DOTNET_NOLOGO=1 dotnet test \
+  --project test/LayeredCraft.DynamoMapper.Generators.Tests/LayeredCraft.DynamoMapper.Generators.Tests.csproj \
+  -f net10.0 \
+  -v q \
+  --filter-namespace "MyNamespace.Tests" \
+  --minimum-expected-tests 1 \
+  --no-progress \
+  --no-ansi
 ```
 
 ### Restore Dependencies

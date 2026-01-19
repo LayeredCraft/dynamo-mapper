@@ -1,0 +1,17 @@
+{
+  Diagnostics: [
+    {
+      Location: Program.cs: (23,11)-(23,17),
+      Message: The type 'MyNamespace.Person' has multiple constructors marked with [DynamoMapperConstructor]. Only one constructor can be marked with this attribute.,
+      Severity: Error,
+      Descriptor: {
+        Id: DM0103,
+        Title: Multiple constructors marked with [DynamoMapperConstructor],
+        MessageFormat: The type '{0}' has multiple constructors marked with [DynamoMapperConstructor]. Only one constructor can be marked with this attribute.,
+        Category: DynamoMapper.Usage,
+        DefaultSeverity: Error,
+        IsEnabledByDefault: true
+      }
+    }
+  ]
+}

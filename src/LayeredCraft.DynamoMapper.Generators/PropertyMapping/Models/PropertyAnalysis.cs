@@ -16,5 +16,7 @@ internal sealed record PropertyAnalysis(
     bool HasSetter,
     bool IsRequired,
     bool IsInitOnly,
-    bool HasDefaultValue
+    bool HasDefaultValue,
+    // Shared member analysis for code reuse with constructor parameters
+    MemberAnalysis MemberInfo
 );

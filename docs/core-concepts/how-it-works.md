@@ -170,7 +170,8 @@ Constructor-based construction is used for records/record structs with primary c
 classes where read-only properties must be populated through a constructor. You can also explicitly
 choose a constructor using `[DynamoMapperConstructor]`.
 
-See [Basic Mapping](../usage/basic-mapping.md) for the full selection rules.
+See [Basic Mapping](../usage/basic-mapping.md#constructor-mapping-rules-fromitem) for the full
+selection rules.
 
 ### Key Characteristics
 

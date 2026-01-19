@@ -39,26 +39,73 @@ When generating `FromItem`, DynamoMapper chooses between:
 - **Constructor-based construction**: `new T(arg1, arg2, ...)` (optionally combined with an object
   initializer for settable/`init` properties).
 
-### Constructor Selection Rules
+## Constructor Mapping Rules (`FromItem`)
 
-Constructor selection is deterministic and follows these priorities:
+Constructor selection is deterministic and follows these priorities.
 
-1. If exactly one constructor is marked with `[DynamoMapperConstructor]`, use it.
-2. If there is no parameterless constructor, use the constructor with the most parameters.
-3. If a parameterless constructor exists and all relevant properties can be populated via setters,
-   use property-based construction.
-4. Otherwise, use the constructor with the most parameters.
+### 1) When Constructor Selection Runs
 
-Parameter names are matched to property names case-insensitively (e.g. `firstName` matches
-`FirstName`).
+Constructor selection is only evaluated when the mapper defines a `FromItem(...)` method.
+
+### 2) Selection Priority
+
+1. **Explicit constructor wins**
+
+   If exactly one constructor is marked with `[DynamoMapperConstructor]`, DynamoMapper uses that
+   constructor.
+
+   If multiple constructors are marked, DynamoMapper emits diagnostic `DM0103`.
+
+2. **No parameterless constructor**
+
+   If the type has no parameterless constructor, DynamoMapper must use a non-parameterless
+   constructor and selects the constructor with the most parameters.
+
+3. **Parameterless constructor exists (prefer property initialization when possible)**
+
+   If a parameterless constructor exists and all relevant properties can be populated via setters
+   (`set` or `init`), DynamoMapper uses property-based construction (`new T { ... }`).
+
+   Getter-only properties only force constructor-based deserialization if there is a constructor
+   parameter that can populate them.
+
+4. **Otherwise, use the constructor with the most parameters**
+
+   This typically happens when the model has one or more getter-only properties that can be
+   populated via constructor parameters.
+
+### 3) Parameter Matching
+
+Constructor parameters are matched to properties by a case-insensitive name comparison (e.g.
+`firstName` matches `FirstName`).
 
 !!! note
 
     Getter-only and computed properties have different behavior depending on mapping direction:
 
-    - **ToItem (model → item):** they are included as long as they have a getter.
-    - **FromItem (item → model):** they can only be populated if DynamoMapper can supply the value
-      via a constructor parameter. Otherwise they are ignored.
+    - **ToItem (model → item):** included if the property has a getter and its type is mappable.
+    - **FromItem (item → model):** can only be populated if DynamoMapper can supply the value via a
+      constructor parameter; otherwise it is ignored.
+
+### 4) How Values Are Applied (Constructor Args vs Initializers)
+
+When a constructor is selected:
+
+- Properties matched to constructor parameters are emitted as named constructor arguments.
+- Remaining settable/`init` properties are emitted in an object initializer.
+- Some optional settable properties with default initializers may be assigned after construction to
+  avoid overwriting defaults when the DynamoDB attribute is missing.
+
+## Gotchas
+
+- `[DynamoMapperConstructor]` can only be applied to one constructor; multiple will emit `DM0103`.
+- Constructor parameter matching is based on the .NET property name (case-insensitive). It is not
+  based on DynamoDB `AttributeName` overrides.
+- Adding a constructor parameter that matches a previously computed/get-only property can change
+  whether DynamoMapper uses constructor-based deserialization.
+- If the selected constructor contains required parameters that do not correspond to mappable
+  properties, the generated `FromItem` code may fail to compile because DynamoMapper cannot supply
+  arguments.
 
 ## Examples
 
@@ -92,5 +139,21 @@ public class Person
     public int Age { get; }
 }
 ```
+
+### Hybrid: Constructor + Object Initializer
+
+If some values come from the constructor and others are settable/`init`, DynamoMapper can generate a
+hybrid `FromItem`:
+
+```csharp
+public record Product(string Id, string Name)
+{
+    public decimal Price { get; set; }
+    public int Quantity { get; init; }
+}
+```
+
+Generated code will call the constructor for `Id`/`Name` and use an object initializer for `Price`
+and `Quantity`.
 
 See `examples/DynamoMapper.MapperConstructor` for a working sample.

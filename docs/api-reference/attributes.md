@@ -96,3 +96,6 @@ Rules:
 
 - Only one constructor can be marked with `[DynamoMapperConstructor]`.
 - If multiple are marked, DynamoMapper emits diagnostic `DM0103`.
+
+See [Basic Mapping](../usage/basic-mapping.md#constructor-mapping-rules-fromitem) for the full
+constructor selection rules and gotchas.

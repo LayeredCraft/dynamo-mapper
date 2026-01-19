@@ -51,6 +51,9 @@ Notes:
 If your model type uses a constructor (records, get-only properties, or an explicitly attributed
 constructor), DynamoMapper will generate `FromItem` with constructor arguments.
 
+See [Basic Mapping](../usage/basic-mapping.md#constructor-mapping-rules-fromitem) for the full
+constructor selection rules and gotchas.
+
 ```csharp
 [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
 public static partial global::MyNamespace.Product FromItem(

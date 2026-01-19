@@ -237,7 +237,12 @@ internal static class ConstructorSelector
             return InitializationMethod.ConstructorParameter;
         }
 
-        // Property is settable
-        return isInitOnly ? InitializationMethod.InitSyntax : InitializationMethod.PostConstruction;
+        // Property is settable.
+        // Prefer object-initializer assignments so that settable properties can be initialized
+        // together with init-only properties when using constructor-based instantiation.
+        //
+        // When a property has a default value and is optional, the renderer may still emit
+        // a post-construction TryGet assignment to avoid overwriting defaults.
+        return InitializationMethod.InitSyntax;
     }
 }

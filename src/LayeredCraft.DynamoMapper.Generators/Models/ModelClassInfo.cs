@@ -25,110 +25,180 @@ internal static class ModelClassInfoExtensions
         {
             context.ThrowIfCancellationRequested();
 
-            var properties = modelTypeSymbol
-                .GetMembers()
-                .OfType<IPropertySymbol>()
-                .Where(p =>
-                    !p.IsStatic && (!modelTypeSymbol.IsRecord || p.Name != "EqualityContract")
-                )
-                .ToArray();
+            var properties = GetModelProperties(modelTypeSymbol);
 
-            var varName = context
-                .MapperOptions.KeyNamingConventionConverter(modelTypeSymbol.Name)
-                .Map(name => name == fromItemParameterName ? name + "1" : name);
+            var varName = GetModelVarName(modelTypeSymbol, fromItemParameterName, context);
 
-            // Phase 1: Constructor Selection (only for FromItem methods)
-            var constructorSelectionResult = context.HasFromItemMethod
-                ? ConstructorSelector.Select(modelTypeSymbol, properties, context)
-                : DiagnosticResult<ConstructorSelectionResult?>.Success(null);
+            var constructorSelectionResult = SelectConstructorIfNeeded(
+                modelTypeSymbol,
+                properties,
+                context
+            );
 
             if (!constructorSelectionResult.IsSuccess)
                 return (null, [constructorSelectionResult.Error!]);
 
             var selectedConstructor = constructorSelectionResult.Value;
 
-            // Phase 2A: Analyze properties with InitializationMethod
-            var propertyDiagnosticsList = new List<DiagnosticInfo>();
-            var propertyInfosList = new List<PropertyInfo>();
+            var (propertyInfos, propertyInfosByIndex, propertyDiagnostics) = CreatePropertyInfos(
+                properties,
+                varName,
+                selectedConstructor,
+                context
+            );
 
-            for (var i = 0; i < properties.Length; i++)
-            {
-                var property = properties[i];
+            var constructorInfo = selectedConstructor is null
+                ? null
+                : CreateConstructorInfo(selectedConstructor, properties, propertyInfosByIndex);
 
-                // Determine initialization method for this property
-                var initMethod =
-                    selectedConstructor
-                        ?.PropertyModes.FirstOrDefault(pm => pm.PropertyName == property.Name)
-                        ?.Method
-                    ?? InitializationMethod.InitSyntax;
-
-                var propertyInfoResult = PropertyInfo.Create(
-                    property,
-                    varName,
-                    i,
-                    initMethod,
-                    context
-                );
-
-                if (!propertyInfoResult.IsSuccess)
-                {
-                    propertyDiagnosticsList.Add(propertyInfoResult.Error!);
-                }
-                else
-                {
-                    propertyInfosList.Add(propertyInfoResult.Value!);
-                }
-            }
-
-            // Phase 2B: Build constructor parameter info (if constructor selected)
-            ConstructorInfo? constructorInfo = null;
-            if (selectedConstructor is not null)
-            {
-                var parameterInfosList = new List<ConstructorParameterInfo>();
-
-                foreach (var paramAnalysis in selectedConstructor.Constructor.Parameters)
-                {
-                    // Find the matching property's PropertyInfo by property name
-                    var matchingProperty = paramAnalysis.MatchedProperty;
-                    if (matchingProperty is null)
-                        continue;
-
-                    // Find the property index in the properties array
-                    var propertyIndex = Array.FindIndex(
-                        properties,
-                        p => SymbolEqualityComparer.Default.Equals(p, matchingProperty)
-                    );
-
-                    if (propertyIndex >= 0 && propertyIndex < propertyInfosList.Count)
-                    {
-                        var matchingPropertyInfo = propertyInfosList[propertyIndex];
-
-                        if (matchingPropertyInfo.FromConstructorArgument is not null)
-                        {
-                            parameterInfosList.Add(
-                                new ConstructorParameterInfo(
-                                    paramAnalysis.MemberInfo.MemberName,
-                                    matchingPropertyInfo.FromConstructorArgument
-                                )
-                            );
-                        }
-                    }
-                }
-
-                constructorInfo = new ConstructorInfo(
-                    new EquatableArray<ConstructorParameterInfo>(parameterInfosList.ToArray())
-                );
-            }
-
-            // Phase 3: Create ModelClassInfo with constructor info
             var modelClassInfo = new ModelClassInfo(
                 modelTypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
                 varName,
-                new EquatableArray<PropertyInfo>(propertyInfosList.ToArray()),
+                new EquatableArray<PropertyInfo>(propertyInfos),
                 constructorInfo
             );
 
-            return (modelClassInfo, propertyDiagnosticsList.ToArray());
+            return (modelClassInfo, propertyDiagnostics);
         }
+    }
+
+    private static IPropertySymbol[] GetModelProperties(ITypeSymbol modelTypeSymbol) =>
+        modelTypeSymbol
+            .GetMembers()
+            .OfType<IPropertySymbol>()
+            .Where(p => IsMappableProperty(p, modelTypeSymbol))
+            .ToArray();
+
+    private static bool IsMappableProperty(IPropertySymbol property, ITypeSymbol modelTypeSymbol) =>
+        !property.IsStatic && !(modelTypeSymbol.IsRecord && property.Name == "EqualityContract");
+
+    private static string GetModelVarName(
+        ITypeSymbol modelTypeSymbol,
+        string? fromItemParameterName,
+        GeneratorContext context
+    )
+    {
+        var varName = context.MapperOptions.KeyNamingConventionConverter(modelTypeSymbol.Name);
+        return varName == fromItemParameterName ? varName + "1" : varName;
+    }
+
+    private static DiagnosticResult<ConstructorSelectionResult?> SelectConstructorIfNeeded(
+        ITypeSymbol modelTypeSymbol,
+        IPropertySymbol[] properties,
+        GeneratorContext context
+    ) =>
+        context.HasFromItemMethod
+            ? ConstructorSelector.Select(modelTypeSymbol, properties, context)
+            : DiagnosticResult<ConstructorSelectionResult?>.Success(null);
+
+    private static (
+        PropertyInfo[] PropertyInfos,
+        PropertyInfo?[] PropertyInfosByIndex,
+        DiagnosticInfo[] Diagnostics
+    ) CreatePropertyInfos(
+        IPropertySymbol[] properties,
+        string modelVarName,
+        ConstructorSelectionResult? selectedConstructor,
+        GeneratorContext context
+    )
+    {
+        var initMethodsByPropertyName = selectedConstructor is null
+            ? null
+            : selectedConstructor.PropertyModes.ToDictionary(
+                pm => pm.PropertyName,
+                pm => pm.Method,
+                StringComparer.Ordinal
+            );
+
+        var propertyDiagnosticsList = new List<DiagnosticInfo>();
+        var propertyInfosList = new List<PropertyInfo>(properties.Length);
+
+        var propertyInfosByIndex = new PropertyInfo?[properties.Length];
+
+        for (var i = 0; i < properties.Length; i++)
+        {
+            var property = properties[i];
+
+            var initMethod = InitializationMethod.InitSyntax;
+            if (
+                initMethodsByPropertyName is not null
+                && initMethodsByPropertyName.TryGetValue(property.Name, out var initMethod2)
+            )
+                initMethod = initMethod2;
+
+            var propertyInfoResult = PropertyInfo.Create(
+                property,
+                modelVarName,
+                i,
+                initMethod,
+                context
+            );
+
+            if (!propertyInfoResult.IsSuccess)
+            {
+                propertyDiagnosticsList.Add(propertyInfoResult.Error!);
+                continue;
+            }
+
+            propertyInfosList.Add(propertyInfoResult.Value!);
+            propertyInfosByIndex[i] = propertyInfoResult.Value!;
+        }
+
+        return (
+            propertyInfosList.ToArray(),
+            propertyInfosByIndex,
+            propertyDiagnosticsList.ToArray()
+        );
+    }
+
+    private static ConstructorInfo CreateConstructorInfo(
+        ConstructorSelectionResult selectedConstructor,
+        IPropertySymbol[] properties,
+        PropertyInfo?[] propertyInfosByIndex
+    )
+    {
+        var propertyIndexBySymbol = CreatePropertyIndexBySymbol(properties);
+
+        var parameterInfosList = new List<ConstructorParameterInfo>(
+            selectedConstructor.Constructor.Constructor.Parameters.Length
+        );
+
+        foreach (var paramAnalysis in selectedConstructor.Constructor.Parameters)
+        {
+            var matchingProperty = paramAnalysis.MatchedProperty;
+            if (matchingProperty is null)
+                continue;
+
+            if (!propertyIndexBySymbol.TryGetValue(matchingProperty, out var propertyIndex))
+                continue;
+
+            var argument = propertyInfosByIndex[propertyIndex]?.FromConstructorArgument;
+
+            if (argument is null)
+                continue;
+
+            parameterInfosList.Add(
+                new ConstructorParameterInfo(paramAnalysis.MemberInfo.MemberName, argument)
+            );
+        }
+
+        return new ConstructorInfo(
+            new EquatableArray<ConstructorParameterInfo>(parameterInfosList.ToArray())
+        );
+    }
+
+    private static Dictionary<IPropertySymbol, int> CreatePropertyIndexBySymbol(
+        IPropertySymbol[] properties
+    )
+    {
+        var propertyIndexBySymbol = new Dictionary<IPropertySymbol, int>(
+            properties.Length,
+            SymbolEqualityComparer.Default
+        );
+
+        for (var i = 0; i < properties.Length; i++)
+            propertyIndexBySymbol[properties[i]] = i;
+
+        return propertyIndexBySymbol;
     }
 }

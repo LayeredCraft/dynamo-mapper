@@ -33,6 +33,7 @@
     <File Path="docs\examples\custom-converters.md" />
     <File Path="docs\examples\index.md" />
     <File Path="docs\examples\lambda-functions.md" />
+    <File Path="docs\examples\nested-mapping.md" />
     <File Path="docs\examples\single-table-design.md" />
   </Folder>
   <Folder Name="/docs/getting-started/">

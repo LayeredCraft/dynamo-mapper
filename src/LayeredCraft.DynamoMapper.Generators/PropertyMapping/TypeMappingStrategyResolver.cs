@@ -236,12 +236,15 @@ internal static class TypeMappingStrategyResolver
     )
     {
         // Validate element type - can be primitive or nested object
-        var (isValid, elementNestedMapping) = CollectionTypeAnalyzer.ValidateElementType(
+        var elementValidation = CollectionTypeAnalyzer.ValidateElementType(
             collectionInfo.ElementType,
             context
         );
 
-        if (!isValid)
+        if (elementValidation.Error is not null)
+            return DiagnosticResult<TypeMappingStrategy?>.Failure(elementValidation.Error);
+
+        if (!elementValidation.IsValid)
         {
             return DiagnosticResult<TypeMappingStrategy?>.Failure(
                 DiagnosticDescriptors.UnsupportedCollectionElementType,
@@ -250,6 +253,8 @@ internal static class TypeMappingStrategyResolver
                 collectionInfo.ElementType.ToDisplayString()
             );
         }
+
+        var elementNestedMapping = elementValidation.NestedMapping;
 
         // For maps, validate key type is string
         if (

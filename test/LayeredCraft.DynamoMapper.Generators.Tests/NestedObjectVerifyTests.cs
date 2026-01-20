@@ -121,6 +121,49 @@ public class NestedObjectVerifyTests
         );
 
     [Fact]
+    public async Task NestedObject_MapperBased_MissingFromMethod_FallsBackToInline() =>
+        await GeneratorTestHelpers.Verify(
+            new VerifyTestOptions
+            {
+                SourceCode = """
+                using System.Collections.Generic;
+                using Amazon.DynamoDBv2.Model;
+                using DynamoMapper.Runtime;
+
+                namespace MyNamespace;
+
+                [DynamoMapper]
+                public static partial class AddressMapper
+                {
+                    public static partial Dictionary<string, AttributeValue> ToItem(Address source);
+                }
+
+                [DynamoMapper]
+                public static partial class OrderMapper
+                {
+                    public static partial Dictionary<string, AttributeValue> ToItem(Order source);
+
+                    public static partial Order FromItem(Dictionary<string, AttributeValue> item);
+                }
+
+                public class Order
+                {
+                    public string Id { get; set; }
+                    public Address ShippingAddress { get; set; }
+                }
+
+                public class Address
+                {
+                    public string Line1 { get; set; }
+                    public string City { get; set; }
+                    public string PostalCode { get; set; }
+                }
+                """,
+            },
+            TestContext.Current.CancellationToken
+        );
+
+    [Fact]
     public async Task NestedObject_MultiLevel() =>
         await GeneratorTestHelpers.Verify(
             new VerifyTestOptions
@@ -579,6 +622,37 @@ public class NestedObjectVerifyTests
                 {
                     public string Id { get; set; }
                     public NodeA Parent { get; set; }  // Back reference creates cycle
+                }
+                """,
+                ExpectedDiagnosticId = "DM0006",
+            },
+            TestContext.Current.CancellationToken
+        );
+
+    [Fact]
+    public async Task NestedCollection_CycleDetected_ShouldFail_DM0006() =>
+        await GeneratorTestHelpers.VerifyFailure(
+            new VerifyTestOptions
+            {
+                SourceCode = """
+                using System.Collections.Generic;
+                using Amazon.DynamoDBv2.Model;
+                using DynamoMapper.Runtime;
+
+                namespace MyNamespace;
+
+                [DynamoMapper]
+                public static partial class NodeMapper
+                {
+                    public static partial Dictionary<string, AttributeValue> ToItem(Node source);
+
+                    public static partial Node FromItem(Dictionary<string, AttributeValue> item);
+                }
+
+                public class Node
+                {
+                    public string Name { get; set; }
+                    public List<Node> Children { get; set; }
                 }
                 """,
                 ExpectedDiagnosticId = "DM0006",

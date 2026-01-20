@@ -53,12 +53,21 @@ internal static class NestedObjectTypeAnalyzer
             return AnalyzeForInline(type, contextWithPath);
         }
 
-        // Step 3: Check if a mapper exists for this type
+        // Step 3: Check if a mapper exists for this type and supports required directions
         if (nestedContext.Registry.TryGetMapper(type, out var mapperReference) && mapperReference != null)
         {
-            return DiagnosticResult<NestedMappingInfo?>.Success(
-                new MapperBasedNesting(mapperReference)
-            );
+            var requiresTo = nestedContext.Context.HasToItemMethod;
+            var requiresFrom = nestedContext.Context.HasFromItemMethod;
+
+            if (
+                (!requiresTo || mapperReference.HasToItemMethod)
+                && (!requiresFrom || mapperReference.HasFromItemMethod)
+            )
+            {
+                return DiagnosticResult<NestedMappingInfo?>.Success(
+                    new MapperBasedNesting(mapperReference)
+                );
+            }
         }
 
         // Step 4: Default to inline generation
@@ -189,8 +198,18 @@ internal static class NestedObjectTypeAnalyzer
             var collectionInfo = CollectionTypeAnalyzer.Analyze(underlyingType, nestedContext.Context);
             if (collectionInfo != null)
             {
-                // For now, only support primitive element types in nested collections
-                if (!CollectionTypeAnalyzer.IsValidElementType(collectionInfo.ElementType, nestedContext.Context))
+                var validation = CollectionTypeAnalyzer.ValidateElementType(
+                    collectionInfo.ElementType,
+                    contextWithAncestor
+                );
+
+                if (validation.Error is not null)
+                {
+                    diagnostics.Add(validation.Error);
+                    continue;
+                }
+
+                if (!validation.IsValid)
                 {
                     diagnostics.Add(new DiagnosticInfo(
                         DiagnosticDescriptors.UnsupportedNestedMemberType,

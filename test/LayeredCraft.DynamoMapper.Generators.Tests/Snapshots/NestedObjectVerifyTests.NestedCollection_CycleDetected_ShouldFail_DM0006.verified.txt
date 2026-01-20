@@ -1,0 +1,17 @@
+﻿{
+  Diagnostics: [
+    {
+      Location: Program.cs: (14,13)-(14,17),
+      Message: The property 'element' creates a circular reference with type 'global::MyNamespace.Node'. Cycles are not supported in nested object mapping.,
+      Severity: Error,
+      Descriptor: {
+        Id: DM0006,
+        Title: Circular reference detected in nested type,
+        MessageFormat: The property '{0}' creates a circular reference with type '{1}'. Cycles are not supported in nested object mapping.,
+        Category: DynamoMapper.Usage,
+        DefaultSeverity: Error,
+        IsEnabledByDefault: true
+      }
+    }
+  ]
+}

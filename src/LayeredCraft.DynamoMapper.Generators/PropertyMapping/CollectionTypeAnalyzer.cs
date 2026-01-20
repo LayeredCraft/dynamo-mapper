@@ -116,12 +116,27 @@ internal static class CollectionTypeAnalyzer
 
     /// <summary>
     /// Determines if an element type is valid for use in collections.
-    /// Only primitive types are supported (no nested complex types or collections).
+    /// Supports primitive types and nested objects (no nested collections).
     /// </summary>
     /// <param name="elementType">The element type to validate.</param>
     /// <param name="context">The generator context.</param>
     /// <returns>True if the element type is a supported primitive, false otherwise.</returns>
     internal static bool IsValidElementType(ITypeSymbol elementType, GeneratorContext context)
+    {
+        var (isValid, _) = ValidateElementType(elementType, context);
+        return isValid;
+    }
+
+    /// <summary>
+    /// Validates an element type and returns nested mapping info if it's a nested object.
+    /// </summary>
+    /// <param name="elementType">The element type to validate.</param>
+    /// <param name="context">The generator context.</param>
+    /// <returns>A tuple of (isValid, nestedMappingInfo). nestedMappingInfo is null for primitives.</returns>
+    internal static (bool IsValid, NestedMappingInfo? NestedMapping) ValidateElementType(
+        ITypeSymbol elementType,
+        GeneratorContext context
+    )
     {
         // Unwrap Nullable<T> - nullable elements are allowed
         var underlyingType = elementType;
@@ -144,7 +159,7 @@ internal static class CollectionTypeAnalyzer
             case SpecialType.System_Double:
             case SpecialType.System_Decimal:
             case SpecialType.System_DateTime:
-                return true;
+                return (true, null);
         }
 
         // Check for other supported types
@@ -153,36 +168,49 @@ internal static class CollectionTypeAnalyzer
             // Guid
             var guidType = context.WellKnownTypes.Get(WellKnownType.System_Guid);
             if (SymbolEqualityComparer.Default.Equals(namedType, guidType))
-                return true;
+                return (true, null);
 
             // DateTimeOffset
             var dateTimeOffsetType = context.WellKnownTypes.Get(WellKnownType.System_DateTimeOffset);
             if (SymbolEqualityComparer.Default.Equals(namedType, dateTimeOffsetType))
-                return true;
+                return (true, null);
 
             // TimeSpan
             var timeSpanType = context.WellKnownTypes.Get(WellKnownType.System_TimeSpan);
             if (SymbolEqualityComparer.Default.Equals(namedType, timeSpanType))
-                return true;
+                return (true, null);
 
             // Enums
             if (namedType.TypeKind == TypeKind.Enum)
-                return true;
+                return (true, null);
         }
 
         // Check for byte[] (valid for BS - Binary Set)
         if (underlyingType is IArrayTypeSymbol arrayType
             && arrayType.ElementType.SpecialType == SpecialType.System_Byte)
         {
-            return true;
+            return (true, null);
         }
 
         // Reject nested collections
         if (Analyze(underlyingType, context) is not null)
-            return false;
+            return (false, null);
 
-        // Reject complex types
-        return false;
+        // Try to analyze as a nested object
+        var nestedContext = NestedAnalysisContext.Create(context, context.MapperRegistry);
+        var nestedResult = NestedObjectTypeAnalyzer.Analyze(
+            underlyingType,
+            "element", // property name doesn't matter for element type analysis
+            nestedContext
+        );
+
+        if (nestedResult.IsSuccess && nestedResult.Value is not null)
+        {
+            return (true, nestedResult.Value);
+        }
+
+        // Reject unsupported types
+        return (false, null);
     }
 
     /// <summary>

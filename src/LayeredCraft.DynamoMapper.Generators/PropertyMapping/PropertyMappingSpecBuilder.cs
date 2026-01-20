@@ -30,6 +30,10 @@ internal static class PropertyMappingSpecBuilder
 
         var key = GetAttributeKey(analysis, context);
 
+        // Handle nested objects specially - they don't use standard Get/Set methods
+        if (strategy?.NestedMapping is not null)
+            return BuildNestedObjectSpec(analysis, strategy, key, context);
+
         // Check if property should be ignored in specific directions
         var ignoreOptions = context.IgnoreOptions.TryGetValue(analysis.PropertyName, out var opts)
             ? opts
@@ -279,5 +283,37 @@ internal static class PropertyMappingSpecBuilder
             new ArgumentSpec($"{methodName}({paramName})", ArgumentSource.FieldOverride),
         };
         return new MethodCallSpec("Set", args, true);
+    }
+
+    /// <summary>
+    ///     Builds a property mapping spec for nested objects. Nested objects don't use standard
+    ///     Get/Set methods - they use custom code generation based on the NestedMapping info.
+    ///     We pass null for methods and let the renderer handle the special case.
+    /// </summary>
+    private static PropertyMappingSpec BuildNestedObjectSpec(
+        PropertyAnalysis analysis,
+        TypeMappingStrategy strategy,
+        string key,
+        GeneratorContext context
+    )
+    {
+        // Check if property should be ignored in specific directions
+        var ignoreOptions = context.IgnoreOptions.TryGetValue(analysis.PropertyName, out var opts)
+            ? opts
+            : null;
+        var shouldIgnoreToItem =
+            ignoreOptions?.Ignore is IgnoreMapping.All or IgnoreMapping.FromModel;
+        var shouldIgnoreFromItem =
+            ignoreOptions?.Ignore is IgnoreMapping.All or IgnoreMapping.ToModel;
+
+        // For nested objects, we set methods to null - the renderer will use the
+        // NestedMapping info from the strategy to generate appropriate code
+        return new PropertyMappingSpec(
+            analysis.PropertyName,
+            key,
+            strategy,
+            ToItemMethod: context.HasToItemMethod && !shouldIgnoreToItem ? MethodCallSpec.Placeholder : null,
+            FromItemMethod: context.HasFromItemMethod && !shouldIgnoreFromItem ? MethodCallSpec.Placeholder : null
+        );
     }
 }

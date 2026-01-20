@@ -19,12 +19,17 @@ namespace DynamoMapper.Generator.PropertyMapping.Models;
 /// <param name="IsArray">
 ///     True if the original property type is an array (T[]), false otherwise.
 /// </param>
+/// <param name="ElementNestedMapping">
+///     For collections of nested objects, contains the nested mapping info for the element type.
+///     Null for primitive element types.
+/// </param>
 internal sealed record CollectionInfo(
     CollectionCategory Category,
     ITypeSymbol ElementType,
     DynamoKind TargetKind,
     ITypeSymbol? KeyType = null,
-    bool IsArray = false
+    bool IsArray = false,
+    NestedMappingInfo? ElementNestedMapping = null
 );
 
 /// <summary>

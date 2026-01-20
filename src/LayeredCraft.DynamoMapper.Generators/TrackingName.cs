@@ -10,6 +10,18 @@ internal static class TrackingName
         MapperSyntaxProvider_FilterNotNull
     );
 
+    internal const string MapperReferenceExtractor_Extract = nameof(
+        MapperReferenceExtractor_Extract
+    );
+
+    internal const string MapperReferenceExtractor_FilterNotNull = nameof(
+        MapperReferenceExtractor_FilterNotNull
+    );
+
+    internal const string MapperRegistry_Build = nameof(MapperRegistry_Build);
+
+    internal const string MapperSyntaxContext_Extract = nameof(MapperSyntaxContext_Extract);
+
     internal const string DiagnosticsProvider = nameof(DiagnosticsProvider);
 
     internal const string GeneratorInfo_CollectMapperInfos = nameof(

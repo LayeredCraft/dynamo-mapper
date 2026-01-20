@@ -55,6 +55,7 @@
   <Folder Name="/examples/">
     <Project Path="examples/DynamoMapper.FieldLevelOverride/DynamoMapper.FieldLevelOverride.csproj" />
     <Project Path="examples/DynamoMapper.MapperConstructor/DynamoMapper.MapperConstructor.csproj" />
+    <Project Path="examples/DynamoMapper.Nested/DynamoMapper.Nested.csproj" />
     <Project Path="examples/DynamoMapper.SimpleExample/DynamoMapper.SimpleExample.csproj" />
   </Folder>
   <Folder Name="/git/">

@@ -302,8 +302,8 @@ public class CollectionVerifyTests
         );
 
     [Fact]
-    public async Task Collection_ComplexElementType_ShouldFail() =>
-        await GeneratorTestHelpers.VerifyFailure(
+    public async Task Collection_NestedObjectElementType_ShouldSucceed() =>
+        await GeneratorTestHelpers.Verify(
             new VerifyTestOptions
             {
                 SourceCode = """
@@ -331,7 +331,6 @@ public class CollectionVerifyTests
                     public string Name { get; set; }
                 }
                 """,
-                ExpectedDiagnosticId = "DM0003",
             },
             TestContext.Current.CancellationToken
         );

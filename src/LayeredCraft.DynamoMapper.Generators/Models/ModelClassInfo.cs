@@ -1,6 +1,7 @@
 using DynamoMapper.Generator.ConstructorMapping;
 using DynamoMapper.Generator.ConstructorMapping.Models;
 using DynamoMapper.Generator.Diagnostics;
+using DynamoMapper.Generator.PropertyMapping;
 using LayeredCraft.SourceGeneratorTools.Types;
 using Microsoft.CodeAnalysis;
 
@@ -39,6 +40,14 @@ internal static class ModelClassInfoExtensions
                 return (null, [constructorSelectionResult.Error!]);
 
             var selectedConstructor = constructorSelectionResult.Value;
+
+            // Set the root model type for cycle detection in nested objects
+            context.RootModelType = modelTypeSymbol as INamedTypeSymbol;
+
+            // Validate dot-notation paths in field options
+            var dotNotationDiagnostics = ValidateDotNotationPaths(modelTypeSymbol, context);
+            if (dotNotationDiagnostics.Length > 0)
+                return (null, dotNotationDiagnostics);
 
             var (propertyInfos, propertyInfosByIndex, propertyDiagnostics) = CreatePropertyInfos(
                 properties,
@@ -200,5 +209,92 @@ internal static class ModelClassInfoExtensions
             propertyIndexBySymbol[properties[i]] = i;
 
         return propertyIndexBySymbol;
+    }
+
+    /// <summary>
+    ///     Validates that all dot-notation paths in field options and ignore options
+    ///     refer to valid property paths on the model type.
+    /// </summary>
+    private static DiagnosticInfo[] ValidateDotNotationPaths(
+        ITypeSymbol modelTypeSymbol,
+        GeneratorContext context
+    )
+    {
+        var diagnostics = new List<DiagnosticInfo>();
+
+        // Validate field options paths
+        foreach (var path in context.FieldOptions.Keys)
+        {
+            if (!path.Contains('.'))
+                continue;
+
+            var diagnostic = ValidatePath(path, modelTypeSymbol, context);
+            if (diagnostic != null)
+                diagnostics.Add(diagnostic);
+        }
+
+        // Validate ignore options paths
+        foreach (var path in context.IgnoreOptions.Keys)
+        {
+            if (!path.Contains('.'))
+                continue;
+
+            var diagnostic = ValidatePath(path, modelTypeSymbol, context);
+            if (diagnostic != null)
+                diagnostics.Add(diagnostic);
+        }
+
+        return diagnostics.ToArray();
+    }
+
+    /// <summary>
+    ///     Validates a dot-notation path against the model type hierarchy.
+    /// </summary>
+    private static DiagnosticInfo? ValidatePath(
+        string path,
+        ITypeSymbol rootType,
+        GeneratorContext context
+    )
+    {
+        var segments = path.Split('.');
+        var currentType = rootType;
+
+        for (var i = 0; i < segments.Length; i++)
+        {
+            var segment = segments[i];
+
+            // Find the property on the current type
+            var property = currentType
+                .GetMembers()
+                .OfType<IPropertySymbol>()
+                .FirstOrDefault(p => p.Name == segment);
+
+            if (property == null)
+            {
+                return new DiagnosticInfo(
+                    DiagnosticDescriptors.InvalidDotNotationPath,
+                    context.TargetNode.GetLocation().CreateLocationInfo(),
+                    path,
+                    segment,
+                    currentType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)
+                );
+            }
+
+            // For intermediate segments, navigate to the property type
+            if (i < segments.Length - 1)
+            {
+                // Unwrap nullable if needed
+                var propertyType = property.Type;
+                if (propertyType is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } nullableType
+                    && nullableType.TypeArguments.Length == 1)
+                {
+                    propertyType = nullableType.TypeArguments[0];
+                }
+
+                currentType = propertyType;
+            }
+        }
+
+        return null;
     }
 }

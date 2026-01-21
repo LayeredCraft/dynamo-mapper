@@ -68,4 +68,31 @@ internal static class DiagnosticDescriptors
         DiagnosticSeverity.Error,
         true
     );
+
+    internal static readonly DiagnosticDescriptor CycleDetectedInNestedType = new(
+        "DM0006",
+        "Circular reference detected in nested type",
+        "The property '{0}' creates a circular reference with type '{1}'. Cycles are not supported in nested object mapping.",
+        UsageCategory,
+        DiagnosticSeverity.Error,
+        true
+    );
+
+    internal static readonly DiagnosticDescriptor UnsupportedNestedMemberType = new(
+        "DM0007",
+        "Unsupported nested member type",
+        "The nested property '{0}.{1}' has type '{2}' which cannot be mapped",
+        UsageCategory,
+        DiagnosticSeverity.Error,
+        true
+    );
+
+    internal static readonly DiagnosticDescriptor InvalidDotNotationPath = new(
+        "DM0008",
+        "Invalid dot-notation path",
+        "The dot-notation path '{0}' is invalid. Property '{1}' not found on type '{2}'.",
+        UsageCategory,
+        DiagnosticSeverity.Error,
+        true
+    );
 }

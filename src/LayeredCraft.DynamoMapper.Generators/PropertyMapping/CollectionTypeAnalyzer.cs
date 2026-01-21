@@ -1,3 +1,4 @@
+using DynamoMapper.Generator.Diagnostics;
 using DynamoMapper.Generator.PropertyMapping.Models;
 using DynamoMapper.Runtime;
 using Microsoft.CodeAnalysis;
@@ -10,6 +11,11 @@ namespace DynamoMapper.Generator.PropertyMapping;
 /// </summary>
 internal static class CollectionTypeAnalyzer
 {
+    internal readonly record struct ElementTypeValidationResult(
+        bool IsValid,
+        NestedMappingInfo? NestedMapping,
+        DiagnosticInfo? Error
+    );
     /// <summary>
     /// Analyzes a type to determine if it's a collection type and returns metadata about it.
     /// </summary>
@@ -116,13 +122,51 @@ internal static class CollectionTypeAnalyzer
 
     /// <summary>
     /// Determines if an element type is valid for use in collections.
-    /// Only primitive types are supported (no nested complex types or collections).
+    /// Supports primitive types and nested objects (no nested collections).
     /// </summary>
     /// <param name="elementType">The element type to validate.</param>
     /// <param name="context">The generator context.</param>
     /// <returns>True if the element type is a supported primitive, false otherwise.</returns>
     internal static bool IsValidElementType(ITypeSymbol elementType, GeneratorContext context)
     {
+        var result = ValidateElementType(elementType, context);
+        var isValid = result.IsValid;
+        return isValid;
+    }
+
+    /// <summary>
+    /// Validates an element type and returns nested mapping info if it's a nested object.
+    /// </summary>
+    /// <param name="elementType">The element type to validate.</param>
+    /// <param name="context">The generator context.</param>
+    /// <returns>A tuple of (isValid, nestedMappingInfo). nestedMappingInfo is null for primitives.</returns>
+    internal static ElementTypeValidationResult ValidateElementType(
+        ITypeSymbol elementType,
+        GeneratorContext context
+    )
+    {
+        var nestedContext = NestedAnalysisContext.Create(context, context.MapperRegistry);
+        if (context.RootModelType is not null)
+        {
+            nestedContext = nestedContext.WithAncestor(context.RootModelType);
+        }
+
+        return ValidateElementType(elementType, nestedContext);
+    }
+
+    /// <summary>
+    /// Validates an element type and returns nested mapping info if it's a nested object.
+    /// </summary>
+    /// <param name="elementType">The element type to validate.</param>
+    /// <param name="nestedContext">The nested analysis context to preserve ancestor tracking.</param>
+    /// <returns>A tuple of (isValid, nestedMappingInfo). nestedMappingInfo is null for primitives.</returns>
+    internal static ElementTypeValidationResult ValidateElementType(
+        ITypeSymbol elementType,
+        NestedAnalysisContext nestedContext
+    )
+    {
+        var context = nestedContext.Context;
+
         // Unwrap Nullable<T> - nullable elements are allowed
         var underlyingType = elementType;
         if (elementType is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } nullableType
@@ -144,7 +188,7 @@ internal static class CollectionTypeAnalyzer
             case SpecialType.System_Double:
             case SpecialType.System_Decimal:
             case SpecialType.System_DateTime:
-                return true;
+                return new ElementTypeValidationResult(true, null, null);
         }
 
         // Check for other supported types
@@ -153,36 +197,49 @@ internal static class CollectionTypeAnalyzer
             // Guid
             var guidType = context.WellKnownTypes.Get(WellKnownType.System_Guid);
             if (SymbolEqualityComparer.Default.Equals(namedType, guidType))
-                return true;
+                return new ElementTypeValidationResult(true, null, null);
 
             // DateTimeOffset
             var dateTimeOffsetType = context.WellKnownTypes.Get(WellKnownType.System_DateTimeOffset);
             if (SymbolEqualityComparer.Default.Equals(namedType, dateTimeOffsetType))
-                return true;
+                return new ElementTypeValidationResult(true, null, null);
 
             // TimeSpan
             var timeSpanType = context.WellKnownTypes.Get(WellKnownType.System_TimeSpan);
             if (SymbolEqualityComparer.Default.Equals(namedType, timeSpanType))
-                return true;
+                return new ElementTypeValidationResult(true, null, null);
 
             // Enums
             if (namedType.TypeKind == TypeKind.Enum)
-                return true;
+                return new ElementTypeValidationResult(true, null, null);
         }
 
         // Check for byte[] (valid for BS - Binary Set)
         if (underlyingType is IArrayTypeSymbol arrayType
             && arrayType.ElementType.SpecialType == SpecialType.System_Byte)
         {
-            return true;
+            return new ElementTypeValidationResult(true, null, null);
         }
 
         // Reject nested collections
         if (Analyze(underlyingType, context) is not null)
-            return false;
+            return new ElementTypeValidationResult(false, null, null);
 
-        // Reject complex types
-        return false;
+        // Try to analyze as a nested object
+        var nestedResult = NestedObjectTypeAnalyzer.Analyze(
+            underlyingType,
+            "element", // property name doesn't matter for element type analysis
+            nestedContext
+        );
+
+        if (!nestedResult.IsSuccess)
+            return new ElementTypeValidationResult(false, null, nestedResult.Error);
+
+        if (nestedResult.Value is not null)
+            return new ElementTypeValidationResult(true, nestedResult.Value, null);
+
+        // Reject unsupported types
+        return new ElementTypeValidationResult(false, null, null);
     }
 
     /// <summary>

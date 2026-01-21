@@ -69,6 +69,29 @@ internal static class TypeMappingStrategyResolver
             return CreateCollectionStrategy(collectionInfo, analysis, context);
         }
 
+        // Try nested object analysis before scalar type resolution
+        // Include the root model type in the ancestor chain to detect self-referencing cycles
+        var nestedContext = NestedAnalysisContext.Create(context, context.MapperRegistry);
+        if (context.RootModelType is not null)
+        {
+            nestedContext = nestedContext.WithAncestor(context.RootModelType);
+        }
+        var nestedResult = NestedObjectTypeAnalyzer.Analyze(
+            analysis.UnderlyingType,
+            analysis.PropertyName,
+            nestedContext
+        );
+
+        if (!nestedResult.IsSuccess)
+        {
+            return DiagnosticResult<TypeMappingStrategy?>.Failure(nestedResult.Error!);
+        }
+
+        if (nestedResult.Value is not null)
+        {
+            return CreateNestedObjectStrategy(nestedResult.Value, analysis);
+        }
+
         // Resolve the base type mapping strategy (existing logic unchanged)
         var strategyResult = analysis.UnderlyingType switch
         {
@@ -212,8 +235,16 @@ internal static class TypeMappingStrategyResolver
         GeneratorContext context
     )
     {
-        // Validate element type is supported primitive
-        if (!CollectionTypeAnalyzer.IsValidElementType(collectionInfo.ElementType, context))
+        // Validate element type - can be primitive or nested object
+        var elementValidation = CollectionTypeAnalyzer.ValidateElementType(
+            collectionInfo.ElementType,
+            context
+        );
+
+        if (elementValidation.Error is not null)
+            return DiagnosticResult<TypeMappingStrategy?>.Failure(elementValidation.Error);
+
+        if (!elementValidation.IsValid)
         {
             return DiagnosticResult<TypeMappingStrategy?>.Failure(
                 DiagnosticDescriptors.UnsupportedCollectionElementType,
@@ -222,6 +253,8 @@ internal static class TypeMappingStrategyResolver
                 collectionInfo.ElementType.ToDisplayString()
             );
         }
+
+        var elementNestedMapping = elementValidation.NestedMapping;
 
         // For maps, validate key type is string
         if (
@@ -234,6 +267,17 @@ internal static class TypeMappingStrategyResolver
                 analysis.PropertyType.Locations.FirstOrDefault()?.CreateLocationInfo(),
                 analysis.PropertyName,
                 collectionInfo.KeyType?.ToDisplayString() ?? "unknown"
+            );
+        }
+
+        // Nested objects are not supported in sets (only SS, NS, BS are valid set types)
+        if (collectionInfo.Category == CollectionCategory.Set && elementNestedMapping is not null)
+        {
+            return DiagnosticResult<TypeMappingStrategy?>.Failure(
+                DiagnosticDescriptors.UnsupportedCollectionElementType,
+                analysis.PropertyType.Locations.FirstOrDefault()?.CreateLocationInfo(),
+                analysis.PropertyName,
+                collectionInfo.ElementType.ToDisplayString()
             );
         }
 
@@ -259,6 +303,16 @@ internal static class TypeMappingStrategyResolver
                     collectionInfo.TargetKind.ToString()
                 );
             }
+        }
+
+        // If element type is a nested object, use special handling
+        if (elementNestedMapping is not null)
+        {
+            return CreateNestedCollectionStrategy(
+                collectionInfo,
+                elementNestedMapping,
+                analysis
+            );
         }
 
         // Determine TypeName and GenericArgument for method name resolution
@@ -291,5 +345,63 @@ internal static class TypeMappingStrategyResolver
         {
             KindOverride = analysis.FieldOptions?.Kind ?? collectionInfo.TargetKind,
         };
+    }
+
+    /// <summary>
+    ///     Creates a type mapping strategy for collections of nested objects.
+    /// </summary>
+    private static DiagnosticResult<TypeMappingStrategy?> CreateNestedCollectionStrategy(
+        CollectionInfo collectionInfo,
+        NestedMappingInfo elementNestedMapping,
+        PropertyAnalysis analysis
+    )
+    {
+        var nullableModifier = analysis.Nullability.IsNullableType ? "Nullable" : "";
+
+        // Use special type names for nested collections
+        var typeName = collectionInfo.Category switch
+        {
+            CollectionCategory.List => "NestedList",
+            CollectionCategory.Map => "NestedMap",
+            _ => throw new InvalidOperationException($"Unexpected category for nested collection: {collectionInfo.Category}")
+        };
+
+        var strategy = new TypeMappingStrategy(
+            TypeName: typeName,
+            GenericArgument: $"<{collectionInfo.ElementType.ToDisplayString()}>",
+            NullableModifier: nullableModifier,
+            FromTypeSpecificArgs: [],
+            ToTypeSpecificArgs: [],
+            KindOverride: collectionInfo.TargetKind,
+            NestedMapping: elementNestedMapping,
+            CollectionInfo: collectionInfo with { ElementNestedMapping = elementNestedMapping }
+        );
+
+        return DiagnosticResult<TypeMappingStrategy?>.Success(strategy);
+    }
+
+    /// <summary>
+    ///     Creates a type mapping strategy for nested object types.
+    /// </summary>
+    private static DiagnosticResult<TypeMappingStrategy?> CreateNestedObjectStrategy(
+        NestedMappingInfo nestedMapping,
+        PropertyAnalysis analysis
+    )
+    {
+        var nullableModifier = analysis.Nullability.IsNullableType ? "Nullable" : "";
+
+        // NestedObject is a special type name that signals code generation
+        // to use nested object handling rather than scalar Get/Set methods
+        var strategy = new TypeMappingStrategy(
+            TypeName: "NestedObject",
+            GenericArgument: "",
+            NullableModifier: nullableModifier,
+            FromTypeSpecificArgs: [],
+            ToTypeSpecificArgs: [],
+            KindOverride: DynamoKind.M, // Nested objects are always DynamoDB maps
+            NestedMapping: nestedMapping
+        );
+
+        return DiagnosticResult<TypeMappingStrategy?>.Success(strategy);
     }
 }

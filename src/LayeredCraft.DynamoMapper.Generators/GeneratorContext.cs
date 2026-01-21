@@ -1,3 +1,4 @@
+using DynamoMapper.Generator.Models;
 using Microsoft.CodeAnalysis;
 
 namespace DynamoMapper.Generator;
@@ -10,6 +11,7 @@ internal class GeneratorContext
         MapperOptions mapperOptions,
         Dictionary<string, DynamoFieldOptions> fieldOptions,
         Dictionary<string, DynamoIgnoreOptions> ignoreOptions,
+        MapperRegistry? mapperRegistry,
         CancellationToken cancellationToken
     )
     {
@@ -21,6 +23,7 @@ internal class GeneratorContext
         MapperOptions = mapperOptions;
         FieldOptions = fieldOptions;
         IgnoreOptions = ignoreOptions;
+        MapperRegistry = mapperRegistry ?? MapperRegistry.Empty;
     }
 
     internal CancellationToken CancellationToken { get; }
@@ -31,6 +34,7 @@ internal class GeneratorContext
     internal MapperOptions MapperOptions { get; }
     internal Dictionary<string, DynamoFieldOptions> FieldOptions { get; }
     internal Dictionary<string, DynamoIgnoreOptions> IgnoreOptions { get; }
+    internal MapperRegistry MapperRegistry { get; }
 
     /// <summary>
     ///     Indicates whether a ToItem method is defined in the mapper class. Used to determine if
@@ -43,6 +47,11 @@ internal class GeneratorContext
     ///     properties need to be validated for deserialization.
     /// </summary>
     internal bool HasFromItemMethod { get; set; }
+
+    /// <summary>
+    ///     The root model type being mapped. Used for cycle detection in nested objects.
+    /// </summary>
+    internal INamedTypeSymbol? RootModelType { get; set; }
 }
 
 internal static class GeneratorContextExtensions

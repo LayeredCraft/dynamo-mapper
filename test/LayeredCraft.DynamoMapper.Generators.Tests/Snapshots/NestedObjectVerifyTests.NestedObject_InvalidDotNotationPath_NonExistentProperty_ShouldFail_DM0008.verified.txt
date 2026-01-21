@@ -1,0 +1,17 @@
+﻿{
+  Diagnostics: [
+    {
+      Location: Program.cs: (6,0)-(13,1),
+      Message: The dot-notation path 'NonExistentProperty.Line1' is invalid. Property 'NonExistentProperty' not found on type 'Order'.,
+      Severity: Error,
+      Descriptor: {
+        Id: DM0008,
+        Title: Invalid dot-notation path,
+        MessageFormat: The dot-notation path '{0}' is invalid. Property '{1}' not found on type '{2}'.,
+        Category: DynamoMapper.Usage,
+        DefaultSeverity: Error,
+        IsEnabledByDefault: true
+      }
+    }
+  ]
+}

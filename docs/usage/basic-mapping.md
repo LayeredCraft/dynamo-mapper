@@ -39,6 +39,51 @@ When generating `FromItem`, DynamoMapper chooses between:
 - **Constructor-based construction**: `new T(arg1, arg2, ...)` (optionally combined with an object
   initializer for settable/`init` properties).
 
+## Nested Object Mapping
+
+DynamoMapper supports nested objects and nested collections when the nested types are mappable.
+
+### How Nested Mapping Is Chosen
+
+For each nested object property, the generator uses this decision order:
+
+1. **Dot-notation overrides**: if there are overrides for the nested path, inline mapping is used.
+2. **Mapper-based**: if a mapper exists for the nested type and it defines the required direction
+   (`ToItem` and/or `FromItem`), the nested mapper is used.
+3. **Inline mapping**: otherwise, the nested type is inlined into the parent mapper.
+
+### Nested Collections
+
+Collections with nested element types are supported for:
+
+- `List<T>` / `IEnumerable<T>` and arrays (`T[]`)
+- `Dictionary<string, T>`
+
+Nested collections of sets (SS/NS/BS) are not supported.
+
+### Cycles
+
+Nested object graphs cannot contain cycles. Cycles emit `DM0006`.
+
+### Example
+
+```csharp
+public class Order
+{
+    public string Id { get; set; }
+    public Address ShippingAddress { get; set; }
+    public List<LineItem> Items { get; set; }
+}
+
+public class Address
+{
+    public string Line1 { get; set; }
+    public string City { get; set; }
+}
+```
+
+See `examples/DynamoMapper.Nested` for a complete example.
+
 ## Constructor Mapping Rules (`FromItem`)
 
 Constructor selection is deterministic and follows these priorities.

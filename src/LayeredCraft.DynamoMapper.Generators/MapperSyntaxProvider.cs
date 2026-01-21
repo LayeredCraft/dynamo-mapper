@@ -11,8 +11,30 @@ internal static class MapperSyntaxProvider
     internal static bool Predicate(SyntaxNode node, CancellationToken _) =>
         node is ClassDeclarationSyntax;
 
+    /// <summary>
+    ///     Transforms a syntax context into a MapperInfo with the provided registry.
+    ///     This is the primary entry point used by the generator pipeline.
+    /// </summary>
+    internal static MapperInfo? TransformerWithRegistry(
+        GeneratorAttributeSyntaxContext syntaxContext,
+        MapperRegistry registry,
+        CancellationToken cancellationToken
+    ) =>
+        TransformCore(syntaxContext, registry, cancellationToken);
+
+    /// <summary>
+    ///     Transforms a syntax context into a MapperInfo without a registry.
+    ///     Used for backwards compatibility and testing.
+    /// </summary>
     internal static MapperInfo? Transformer(
         GeneratorAttributeSyntaxContext syntaxContext,
+        CancellationToken cancellationToken
+    ) =>
+        TransformCore(syntaxContext, null, cancellationToken);
+
+    private static MapperInfo? TransformCore(
+        GeneratorAttributeSyntaxContext syntaxContext,
+        MapperRegistry? registry,
         CancellationToken cancellationToken
     )
     {
@@ -78,6 +100,7 @@ internal static class MapperSyntaxProvider
             mapperOptions,
             fieldOptions,
             ignoreOptions,
+            registry,
             cancellationToken
         );
 

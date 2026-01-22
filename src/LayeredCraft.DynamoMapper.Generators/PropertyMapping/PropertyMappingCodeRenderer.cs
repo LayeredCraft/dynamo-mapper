@@ -230,7 +230,7 @@ internal static class PropertyMappingCodeRenderer
 
         var methodCall = spec.ToItemMethod.IsCustomMethod
             ? $".{spec.ToItemMethod.MethodName}({args})" // Custom: .Set("key",
-            // CustomMethod(source))
+                                                         // CustomMethod(source))
             : $".{spec.ToItemMethod.MethodName}{spec.TypeStrategy!.GenericArgument}({args})"; // Standard: .SetXxx<T>(args)
 
         return methodCall;

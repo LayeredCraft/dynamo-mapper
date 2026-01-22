@@ -79,9 +79,9 @@ internal static class MemberAnalyzer
         var isNullableType =
             type
                 is INamedTypeSymbol
-                {
-                    OriginalDefinition.SpecialType: SpecialType.System_Nullable_T,
-                }
+            {
+                OriginalDefinition.SpecialType: SpecialType.System_Nullable_T,
+            }
             || (isReferenceType && annotation == NullableAnnotation.Annotated);
 
         return new PropertyNullabilityInfo(isNullableType, isReferenceType, annotation);

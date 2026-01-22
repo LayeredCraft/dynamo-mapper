@@ -63,7 +63,9 @@ var productWithWarranty =
 var productWithoutWarranty =
     new Product
     {
-        Sku = "CABLE-001", Name = "USB Cable", Warranty = null, // No warranty
+        Sku = "CABLE-001",
+        Name = "USB Cable",
+        Warranty = null, // No warranty
     };
 
 Console.WriteLine($"Product with warranty: {productWithWarranty}");
@@ -208,7 +210,9 @@ var directory =
                 ["emp002"] =
                     new Employee
                     {
-                        Name = "Bob Smith", Title = "Junior Engineer", Salary = 75000m,
+                        Name = "Bob Smith",
+                        Title = "Junior Engineer",
+                        Salary = 75000m,
                     },
             },
     };

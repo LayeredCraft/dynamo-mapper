@@ -8,14 +8,14 @@ namespace DynamoMapper.Nested;
 /// </summary>
 public record ShoppingCart
 {
-    public string CartId { get; set; }
-    public List<CartItem> Items { get; set; }
+    public required string CartId { get; set; }
+    public required List<CartItem> Items { get; set; }
 }
 
 public record CartItem
 {
-    public string ProductId { get; set; }
-    public string ProductName { get; set; }
+    public required string ProductId { get; set; }
+    public required string ProductName { get; set; }
     public int Quantity { get; set; }
     public decimal UnitPrice { get; set; }
 }

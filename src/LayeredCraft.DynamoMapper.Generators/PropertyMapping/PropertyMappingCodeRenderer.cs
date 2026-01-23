@@ -402,29 +402,52 @@ internal static class PropertyMappingCodeRenderer
         var nestedMapping = spec.TypeStrategy!.NestedMapping!;
         var itemParam = context.MapperOptions.FromMethodParameterName;
 
+        // Determine fallback based on required keyword and nullability
+        var fallback = GetNestedObjectFallback(spec, analysis);
+
         return nestedMapping switch
         {
             MapperBasedNesting mapperBased => RenderMapperBasedFromInitAssignment(
-                spec, itemParam, mapperBased.Mapper
+                spec, itemParam, mapperBased.Mapper, fallback
             ),
             InlineNesting inline => RenderInlineFromInitAssignment(
-                spec, itemParam, inline.Info, context
+                spec, itemParam, inline.Info, context, fallback
             ),
             _ => throw new InvalidOperationException($"Unknown nested mapping type: {nestedMapping.GetType()}")
         };
     }
 
     /// <summary>
+    ///     Determines the fallback expression for a nested object when not found in DynamoDB.
+    /// </summary>
+    private static string GetNestedObjectFallback(PropertyMappingSpec spec, PropertyAnalysis analysis)
+    {
+        // If property has 'required' keyword, throw on missing
+        if (analysis.IsRequired)
+            return $"throw new System.InvalidOperationException(\"Required attribute '{spec.Key}' not found.\")";
+
+        // For nullable types, return null
+        if (analysis.Nullability.IsNullableType)
+            return "null";
+
+        // For non-nullable, non-required types, we still use null but this may cause CS8601
+        // This is a design limitation - the model should either mark as required or nullable
+        return "null";
+    }
+
+    /// <summary>
     ///     Renders FromItem init-style code for mapper-based nested objects.
-    ///     Output: PropertyName = item.TryGetValue("key", out var attr) &amp;&amp; attr.M is { } map ? MapperName.FromItem(map) : null,
+    ///     Output: PropertyName = item.TryGetValue("key", out var attr) &amp;&amp; attr.M is { } map ? MapperName.FromItem(map) : fallback,
     /// </summary>
     private static string RenderMapperBasedFromInitAssignment(
         PropertyMappingSpec spec,
         string itemParam,
-        MapperReference mapper
+        MapperReference mapper,
+        string fallback
     )
     {
-        return $"{spec.PropertyName} = {itemParam}.TryGetValue(\"{spec.Key}\", out var {spec.PropertyName.ToLowerInvariant()}Attr) && {spec.PropertyName.ToLowerInvariant()}Attr.M is {{ }} {spec.PropertyName.ToLowerInvariant()}Map ? {mapper.MapperFullyQualifiedName}.FromItem({spec.PropertyName.ToLowerInvariant()}Map) : null,";
+        var varName = spec.PropertyName.ToLowerInvariant();
+        return $"{spec.PropertyName} = {itemParam}.TryGetValue(\"{spec.Key}\", out var {varName}Attr) && {varName}Attr.M is {{ }} {varName}Map ? {mapper.MapperFullyQualifiedName}.FromItem({varName}Map) : {fallback},";
     }
 
     /// <summary>
@@ -434,13 +457,14 @@ internal static class PropertyMappingCodeRenderer
         PropertyMappingSpec spec,
         string itemParam,
         NestedInlineInfo inlineInfo,
-        GeneratorContext context
+        GeneratorContext context,
+        string fallback
     )
     {
         var varName = spec.PropertyName.ToLowerInvariant();
         var initCode = RenderInlineNestedFromItem(varName + "Map", inlineInfo, context);
 
-        return $"{spec.PropertyName} = {itemParam}.TryGetValue(\"{spec.Key}\", out var {varName}Attr) && {varName}Attr.M is {{ }} {varName}Map ? {initCode} : null,";
+        return $"{spec.PropertyName} = {itemParam}.TryGetValue(\"{spec.Key}\", out var {varName}Attr) && {varName}Attr.M is {{ }} {varName}Map ? {initCode} : {fallback},";
     }
 
     /// <summary>
@@ -698,16 +722,37 @@ internal static class PropertyMappingCodeRenderer
         var itemParam = context.MapperOptions.FromMethodParameterName;
         var varName = spec.PropertyName.ToLowerInvariant();
 
+        // Determine fallback based on required keyword and nullability
+        var fallback = GetNestedCollectionFallback(spec, analysis);
+
         return collectionInfo.Category switch
         {
             CollectionCategory.List => RenderNestedListFromInitAssignment(
-                spec, itemParam, varName, elementMapping, collectionInfo, context
+                spec, itemParam, varName, elementMapping, collectionInfo, context, fallback
             ),
             CollectionCategory.Map => RenderNestedMapFromInitAssignment(
-                spec, itemParam, varName, elementMapping, context
+                spec, itemParam, varName, elementMapping, context, fallback
             ),
             _ => throw new InvalidOperationException($"Unexpected collection category for nested collection: {collectionInfo.Category}")
         };
+    }
+
+    /// <summary>
+    ///     Determines the fallback expression for a nested collection when not found in DynamoDB.
+    /// </summary>
+    private static string GetNestedCollectionFallback(PropertyMappingSpec spec, PropertyAnalysis analysis)
+    {
+        // If property has 'required' keyword, throw on missing
+        if (analysis.IsRequired)
+            return $"throw new System.InvalidOperationException(\"Required attribute '{spec.Key}' not found.\")";
+
+        // For nullable types, return null
+        if (analysis.Nullability.IsNullableType)
+            return "null";
+
+        // For non-nullable, non-required collections, return empty collection
+        // Using collection expression [] which works for arrays, lists, and dictionaries in C# 12+
+        return "[]";
     }
 
     /// <summary>
@@ -719,7 +764,8 @@ internal static class PropertyMappingCodeRenderer
         string varName,
         NestedMappingInfo elementMapping,
         CollectionInfo collectionInfo,
-        GeneratorContext context
+        GeneratorContext context,
+        string fallback
     )
     {
         var elementConverter = elementMapping switch
@@ -736,7 +782,7 @@ internal static class PropertyMappingCodeRenderer
         // For arrays, add .ToArray()
         var toArray = collectionInfo.IsArray ? ".ToArray()" : "";
 
-        return $"{spec.PropertyName} = {itemParam}.TryGetValue(\"{spec.Key}\", out var {varName}Attr) && {varName}Attr.L is {{ }} {varName}List ? {selectExpr}{toArray} : null,";
+        return $"{spec.PropertyName} = {itemParam}.TryGetValue(\"{spec.Key}\", out var {varName}Attr) && {varName}Attr.L is {{ }} {varName}List ? {selectExpr}{toArray} : {fallback},";
     }
 
     /// <summary>
@@ -747,7 +793,8 @@ internal static class PropertyMappingCodeRenderer
         string itemParam,
         string varName,
         NestedMappingInfo elementMapping,
-        GeneratorContext context
+        GeneratorContext context,
+        string fallback
     )
     {
         var valueConverter = elementMapping switch
@@ -761,7 +808,7 @@ internal static class PropertyMappingCodeRenderer
 
         var toDictExpr = $"{varName}Map.ToDictionary(kvp => kvp.Key, kvp => {valueConverter})";
 
-        return $"{spec.PropertyName} = {itemParam}.TryGetValue(\"{spec.Key}\", out var {varName}Attr) && {varName}Attr.M is {{ }} {varName}Map ? {toDictExpr} : null,";
+        return $"{spec.PropertyName} = {itemParam}.TryGetValue(\"{spec.Key}\", out var {varName}Attr) && {varName}Attr.M is {{ }} {varName}Map ? {toDictExpr} : {fallback},";
     }
 
     /// <summary>

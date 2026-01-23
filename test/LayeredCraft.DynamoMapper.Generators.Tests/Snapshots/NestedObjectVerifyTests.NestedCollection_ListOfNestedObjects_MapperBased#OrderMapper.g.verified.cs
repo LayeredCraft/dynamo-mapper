@@ -31,7 +31,7 @@ public static partial class OrderMapper
         var order = new global::MyNamespace.Order
         {
             Id = item.GetString("id", Requiredness.InferFromNullability),
-            Items = item.TryGetValue("items", out var itemsAttr) && itemsAttr.L is { } itemsList ? itemsList.Select(av => global::MyNamespace.LineItemMapper.FromItem(av.M)).ToList() : null,
+            Items = item.TryGetValue("items", out var itemsAttr) && itemsAttr.L is { } itemsList ? itemsList.Select(av => global::MyNamespace.LineItemMapper.FromItem(av.M)).ToList() : [],
         };
         return order;
     }

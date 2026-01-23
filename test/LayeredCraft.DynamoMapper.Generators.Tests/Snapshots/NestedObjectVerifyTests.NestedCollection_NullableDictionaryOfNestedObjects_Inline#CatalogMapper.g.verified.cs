@@ -23,7 +23,7 @@ public static partial class CatalogMapper
     public static partial global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> ToItem(global::MyNamespace.Catalog source) =>
         new Dictionary<string, AttributeValue>(2)
             .SetString("id", source.Id, false, true)
-            .Set("products", new AttributeValue { M = source.Products.ToDictionary(kvp => kvp.Key, kvp => new AttributeValue { M = new Dictionary<string, AttributeValue>().SetString("name", kvp.Value.Name, false, true).SetDecimal("price", kvp.Value.Price, false, true) }) });
+            .Set("products", source.Products is null ? new AttributeValue { NULL = true } : new AttributeValue { M = source.Products?.ToDictionary(kvp => kvp.Key, kvp => new AttributeValue { M = new Dictionary<string, AttributeValue>().SetString("name", kvp.Value.Name, false, true).SetDecimal("price", kvp.Value.Price, false, true) }) });
 
     [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
     public static partial global::MyNamespace.Catalog FromItem(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> item)
@@ -31,7 +31,7 @@ public static partial class CatalogMapper
         var catalog = new global::MyNamespace.Catalog
         {
             Id = item.GetString("id", Requiredness.InferFromNullability),
-            Products = item.TryGetValue("products", out var productsAttr) && productsAttr.M is { } productsMap ? productsMap.ToDictionary(kvp => kvp.Key, kvp => new global::MyNamespace.Product { Name = kvp.Value.M.GetString("name", Requiredness.Optional), Price = kvp.Value.M.GetDecimal("price", Requiredness.Optional), }) : [],
+            Products = item.TryGetValue("products", out var productsAttr) && productsAttr.M is { } productsMap ? productsMap.ToDictionary(kvp => kvp.Key, kvp => new global::MyNamespace.Product { Name = kvp.Value.M.GetString("name", Requiredness.Optional), Price = kvp.Value.M.GetDecimal("price", Requiredness.Optional), }) : null,
         };
         return catalog;
     }

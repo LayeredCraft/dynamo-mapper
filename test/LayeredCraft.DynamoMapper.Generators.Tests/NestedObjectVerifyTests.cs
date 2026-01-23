@@ -76,6 +76,50 @@ public class NestedObjectVerifyTests
         );
 
     [Fact]
+    public async Task NestedObject_NullableMapperBased() =>
+        await GeneratorTestHelpers.Verify(
+            new VerifyTestOptions
+            {
+                SourceCode = """
+                using System.Collections.Generic;
+                using Amazon.DynamoDBv2.Model;
+                using DynamoMapper.Runtime;
+
+                namespace MyNamespace;
+
+                [DynamoMapper]
+                public static partial class AddressMapper
+                {
+                    public static partial Dictionary<string, AttributeValue> ToItem(Address source);
+
+                    public static partial Address FromItem(Dictionary<string, AttributeValue> item);
+                }
+
+                [DynamoMapper]
+                public static partial class OrderMapper
+                {
+                    public static partial Dictionary<string, AttributeValue> ToItem(Order source);
+
+                    public static partial Order FromItem(Dictionary<string, AttributeValue> item);
+                }
+
+                public class Order
+                {
+                    public string Id { get; set; }
+                    public Address? BillingAddress { get; set; }
+                }
+
+                public class Address
+                {
+                    public string Line1 { get; set; }
+                    public string City { get; set; }
+                }
+                """,
+            },
+            TestContext.Current.CancellationToken
+        );
+
+    [Fact]
     public async Task NestedObject_MapperBased() =>
         await GeneratorTestHelpers.Verify(
             new VerifyTestOptions
@@ -553,6 +597,168 @@ public class NestedObjectVerifyTests
                     public string Message { get; set; }
                     public int Severity { get; set; }
                     public bool IsError { get; set; }
+                }
+                """,
+            },
+            TestContext.Current.CancellationToken
+        );
+
+    // ==================== NULLABLE COLLECTION TESTS ====================
+
+    [Fact]
+    public async Task NestedCollection_NullableListOfNestedObjects_Inline() =>
+        await GeneratorTestHelpers.Verify(
+            new VerifyTestOptions
+            {
+                SourceCode = """
+                using System.Collections.Generic;
+                using Amazon.DynamoDBv2.Model;
+                using DynamoMapper.Runtime;
+
+                namespace MyNamespace;
+
+                [DynamoMapper]
+                public static partial class OrderMapper
+                {
+                    public static partial Dictionary<string, AttributeValue> ToItem(Order source);
+
+                    public static partial Order FromItem(Dictionary<string, AttributeValue> item);
+                }
+
+                public class Order
+                {
+                    public string Id { get; set; }
+                    public List<LineItem>? Items { get; set; }
+                }
+
+                public class LineItem
+                {
+                    public string ProductId { get; set; }
+                    public int Quantity { get; set; }
+                }
+                """,
+            },
+            TestContext.Current.CancellationToken
+        );
+
+    [Fact]
+    public async Task NestedCollection_NullableListOfNestedObjects_MapperBased() =>
+        await GeneratorTestHelpers.Verify(
+            new VerifyTestOptions
+            {
+                SourceCode = """
+                using System.Collections.Generic;
+                using Amazon.DynamoDBv2.Model;
+                using DynamoMapper.Runtime;
+
+                namespace MyNamespace;
+
+                [DynamoMapper]
+                public static partial class LineItemMapper
+                {
+                    public static partial Dictionary<string, AttributeValue> ToItem(LineItem source);
+
+                    public static partial LineItem FromItem(Dictionary<string, AttributeValue> item);
+                }
+
+                [DynamoMapper]
+                public static partial class OrderMapper
+                {
+                    public static partial Dictionary<string, AttributeValue> ToItem(Order source);
+
+                    public static partial Order FromItem(Dictionary<string, AttributeValue> item);
+                }
+
+                public class Order
+                {
+                    public string Id { get; set; }
+                    public List<LineItem>? Items { get; set; }
+                }
+
+                public class LineItem
+                {
+                    public string ProductId { get; set; }
+                    public int Quantity { get; set; }
+                }
+                """,
+            },
+            TestContext.Current.CancellationToken
+        );
+
+    [Fact]
+    public async Task NestedCollection_NullableDictionaryOfNestedObjects_Inline() =>
+        await GeneratorTestHelpers.Verify(
+            new VerifyTestOptions
+            {
+                SourceCode = """
+                using System.Collections.Generic;
+                using Amazon.DynamoDBv2.Model;
+                using DynamoMapper.Runtime;
+
+                namespace MyNamespace;
+
+                [DynamoMapper]
+                public static partial class CatalogMapper
+                {
+                    public static partial Dictionary<string, AttributeValue> ToItem(Catalog source);
+
+                    public static partial Catalog FromItem(Dictionary<string, AttributeValue> item);
+                }
+
+                public class Catalog
+                {
+                    public string Id { get; set; }
+                    public Dictionary<string, Product>? Products { get; set; }
+                }
+
+                public class Product
+                {
+                    public string Name { get; set; }
+                    public decimal Price { get; set; }
+                }
+                """,
+            },
+            TestContext.Current.CancellationToken
+        );
+
+    [Fact]
+    public async Task NestedCollection_NullableDictionaryOfNestedObjects_MapperBased() =>
+        await GeneratorTestHelpers.Verify(
+            new VerifyTestOptions
+            {
+                SourceCode = """
+                using System.Collections.Generic;
+                using Amazon.DynamoDBv2.Model;
+                using DynamoMapper.Runtime;
+
+                namespace MyNamespace;
+
+                [DynamoMapper]
+                public static partial class ProductMapper
+                {
+                    public static partial Dictionary<string, AttributeValue> ToItem(Product source);
+
+                    public static partial Product FromItem(Dictionary<string, AttributeValue> item);
+                }
+
+                [DynamoMapper]
+                public static partial class CatalogMapper
+                {
+                    public static partial Dictionary<string, AttributeValue> ToItem(Catalog source);
+
+                    public static partial Catalog FromItem(Dictionary<string, AttributeValue> item);
+                }
+
+                public class Catalog
+                {
+                    public string Id { get; set; }
+                    public Dictionary<string, Product>? Products { get; set; }
+                }
+
+                public class Product
+                {
+                    public string Name { get; set; }
+                    public decimal Price { get; set; }
                 }
                 """,
             },

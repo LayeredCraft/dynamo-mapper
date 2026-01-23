@@ -31,7 +31,7 @@ public static partial class CatalogMapper
         var catalog = new global::MyNamespace.Catalog
         {
             Id = item.GetString("id", Requiredness.InferFromNullability),
-            Products = item.TryGetValue("products", out var productsAttr) && productsAttr.M is { } productsMap ? productsMap.ToDictionary(kvp => kvp.Key, kvp => global::MyNamespace.ProductMapper.FromItem(kvp.Value.M)) : null,
+            Products = item.TryGetValue("products", out var productsAttr) && productsAttr.M is { } productsMap ? productsMap.ToDictionary(kvp => kvp.Key, kvp => global::MyNamespace.ProductMapper.FromItem(kvp.Value.M)) : [],
         };
         return catalog;
     }

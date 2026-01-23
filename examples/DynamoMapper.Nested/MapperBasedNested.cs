@@ -8,16 +8,16 @@ namespace DynamoMapper.Nested;
 /// </summary>
 public record BlogPost
 {
-    public string Slug { get; set; }
-    public string Title { get; set; }
-    public Author Writer { get; set; }
+    public required string Slug { get; set; }
+    public required string Title { get; set; }
+    public required Author Writer { get; set; }
 }
 
 public record Author
 {
-    public string Handle { get; set; }
-    public string DisplayName { get; set; }
-    public string Bio { get; set; }
+    public required string Handle { get; set; }
+    public required string DisplayName { get; set; }
+    public required string Bio { get; set; }
 }
 
 // Author has its own mapper - BlogPostMapper will use this

@@ -8,8 +8,8 @@ namespace DynamoMapper.Nested;
 /// </summary>
 public record Invoice
 {
-    public string InvoiceNumber { get; set; }
-    public PaymentInfo Payment { get; set; }
+    public required string InvoiceNumber { get; set; }
+    public required PaymentInfo Payment { get; set; }
 }
 
 public record PaymentInfo

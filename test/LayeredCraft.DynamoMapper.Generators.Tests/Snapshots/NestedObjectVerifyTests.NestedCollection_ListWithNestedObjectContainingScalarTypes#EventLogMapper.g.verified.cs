@@ -31,7 +31,7 @@ public static partial class EventLogMapper
         var eventLog = new global::MyNamespace.EventLog
         {
             Id = item.GetString("id", Requiredness.InferFromNullability),
-            Entries = item.TryGetValue("entries", out var entriesAttr) && entriesAttr.L is { } entriesList ? entriesList.Select(av => new global::MyNamespace.LogEntry { Timestamp = av.M.GetDateTime("timestamp", format: "O", Requiredness.Optional), Message = av.M.GetString("message", Requiredness.Optional), Severity = av.M.GetInt("severity", Requiredness.Optional), IsError = av.M.GetBool("isError", Requiredness.Optional), }).ToList() : null,
+            Entries = item.TryGetValue("entries", out var entriesAttr) && entriesAttr.L is { } entriesList ? entriesList.Select(av => new global::MyNamespace.LogEntry { Timestamp = av.M.GetDateTime("timestamp", format: "O", Requiredness.Optional), Message = av.M.GetString("message", Requiredness.Optional), Severity = av.M.GetInt("severity", Requiredness.Optional), IsError = av.M.GetBool("isError", Requiredness.Optional), }).ToList() : [],
         };
         return eventLog;
     }

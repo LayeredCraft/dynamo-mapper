@@ -60,8 +60,12 @@ internal static class ConstructorSelector
         if (!hasParameterlessConstructor)
         {
             // NO parameterless constructor → MUST use a non-parameterless constructor
-            var selectedConstructor = SelectConstructorWithMostParameters(constructors);
-            return AnalyzeConstructorSelection(selectedConstructor, properties, false, context);
+            return AnalyzeConstructorSelection(
+                SelectConstructorWithMostParameters(constructors),
+                properties,
+                false,
+                context
+            );
         }
 
         // PRIORITY 3: Parameterless constructor exists - check deserialization accessibility
@@ -73,8 +77,12 @@ internal static class ConstructorSelector
         }
 
         // PRIORITY 4: Has read-only properties - use constructor with most parameters
-        var selectedConstructor2 = SelectConstructorWithMostParameters(constructors);
-        return AnalyzeConstructorSelection(selectedConstructor2, properties, false, context);
+        return AnalyzeConstructorSelection(
+            SelectConstructorWithMostParameters(constructors),
+            properties,
+            false,
+            context
+        );
     }
 
     /// <summary>

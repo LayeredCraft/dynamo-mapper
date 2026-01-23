@@ -5,15 +5,15 @@ namespace DynamoMapper.Nested;
 
 public record Order
 {
-    public string Id { get; set; }
-    public Address ShippingAddress { get; set; }
+    public required string Id { get; set; }
+    public required Address ShippingAddress { get; set; }
 }
 
 public record Address
 {
-    public string Line1 { get; set; }
-    public string City { get; set; }
-    public string PostalCode { get; set; }
+    public required string Line1 { get; set; }
+    public required string City { get; set; }
+    public required string PostalCode { get; set; }
 }
 
 [DynamoMapper]

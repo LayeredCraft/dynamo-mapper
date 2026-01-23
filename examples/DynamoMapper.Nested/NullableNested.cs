@@ -8,15 +8,15 @@ namespace DynamoMapper.Nested;
 /// </summary>
 public record Product
 {
-    public string Sku { get; set; }
-    public string Name { get; set; }
+    public required string Sku { get; set; }
+    public required string Name { get; set; }
     public Warranty? Warranty { get; set; }  // Nullable nested object
 }
 
 public record Warranty
 {
     public int DurationMonths { get; set; }
-    public string Provider { get; set; }
+    public required string Provider { get; set; }
 }
 
 [DynamoMapper]

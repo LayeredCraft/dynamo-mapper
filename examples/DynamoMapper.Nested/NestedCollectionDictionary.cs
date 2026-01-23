@@ -8,15 +8,15 @@ namespace DynamoMapper.Nested;
 /// </summary>
 public record EmployeeDirectory
 {
-    public string DepartmentId { get; set; }
-    public string DepartmentName { get; set; }
-    public Dictionary<string, Employee> Employees { get; set; }
+    public required string DepartmentId { get; set; }
+    public required string DepartmentName { get; set; }
+    public required Dictionary<string, Employee> Employees { get; set; }
 }
 
 public record Employee
 {
-    public string Name { get; set; }
-    public string Title { get; set; }
+    public required string Name { get; set; }
+    public required string Title { get; set; }
     public decimal Salary { get; set; }
 }
 

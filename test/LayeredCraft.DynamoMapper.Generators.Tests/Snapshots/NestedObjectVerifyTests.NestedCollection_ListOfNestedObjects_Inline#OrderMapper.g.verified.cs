@@ -31,7 +31,7 @@ public static partial class OrderMapper
         var order = new global::MyNamespace.Order
         {
             Id = item.GetString("id", Requiredness.InferFromNullability),
-            Items = item.TryGetValue("items", out var itemsAttr) && itemsAttr.L is { } itemsList ? itemsList.Select(av => new global::MyNamespace.LineItem { ProductId = av.M.GetString("productId", Requiredness.Optional), Quantity = av.M.GetInt("quantity", Requiredness.Optional), Price = av.M.GetDecimal("price", Requiredness.Optional), }).ToList() : null,
+            Items = item.TryGetValue("items", out var itemsAttr) && itemsAttr.L is { } itemsList ? itemsList.Select(av => new global::MyNamespace.LineItem { ProductId = av.M.GetString("productId", Requiredness.Optional), Quantity = av.M.GetInt("quantity", Requiredness.Optional), Price = av.M.GetDecimal("price", Requiredness.Optional), }).ToList() : [],
         };
         return order;
     }

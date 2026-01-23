@@ -8,22 +8,22 @@ namespace DynamoMapper.Nested;
 /// </summary>
 public record Company
 {
-    public string Id { get; set; }
-    public string Name { get; set; }
-    public Department HeadOffice { get; set; }
+    public required string Id { get; set; }
+    public required string Name { get; set; }
+    public required Department HeadOffice { get; set; }
 }
 
 public record Department
 {
-    public string Code { get; set; }
-    public string Name { get; set; }
-    public Manager Lead { get; set; }
+    public required string Code { get; set; }
+    public required string Name { get; set; }
+    public required Manager Lead { get; set; }
 }
 
 public record Manager
 {
-    public string EmployeeId { get; set; }
-    public string FullName { get; set; }
+    public required string EmployeeId { get; set; }
+    public required string FullName { get; set; }
 }
 
 [DynamoMapper]

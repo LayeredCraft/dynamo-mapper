@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Amazon.DynamoDBv2.Model;
 using DynamoMapper.Runtime;
 

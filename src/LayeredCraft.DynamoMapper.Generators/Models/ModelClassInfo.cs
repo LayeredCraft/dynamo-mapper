@@ -26,7 +26,7 @@ internal static class ModelClassInfoExtensions
         {
             context.ThrowIfCancellationRequested();
 
-            var properties = GetModelProperties(modelTypeSymbol);
+            var properties = GetModelProperties(modelTypeSymbol, context);
 
             var varName = GetModelVarName(modelTypeSymbol, fromItemParameterName, context);
 
@@ -71,15 +71,29 @@ internal static class ModelClassInfoExtensions
         }
     }
 
-    private static IPropertySymbol[] GetModelProperties(ITypeSymbol modelTypeSymbol) =>
-        modelTypeSymbol
-            .GetMembers()
-            .OfType<IPropertySymbol>()
-            .Where(p => IsMappableProperty(p, modelTypeSymbol))
-            .ToArray();
+    private static IPropertySymbol[] GetModelProperties(
+        ITypeSymbol modelTypeSymbol,
+        GeneratorContext context
+    )
+    {
+        if (modelTypeSymbol is not INamedTypeSymbol namedType)
+        {
+            return modelTypeSymbol
+                .GetMembers()
+                .OfType<IPropertySymbol>()
+                .Where(p => IsMappableProperty(p, modelTypeSymbol))
+                .ToArray();
+        }
 
-    private static bool IsMappableProperty(IPropertySymbol property, ITypeSymbol modelTypeSymbol) =>
-        !property.IsStatic && !(modelTypeSymbol.IsRecord && property.Name == "EqualityContract");
+        return PropertySymbolLookup.GetProperties(
+            namedType,
+            context.MapperOptions.IncludeBaseClassProperties,
+            static (p, declaringType) => IsMappableProperty(p, declaringType)
+        );
+    }
+
+    private static bool IsMappableProperty(IPropertySymbol property, ITypeSymbol declaringType) =>
+        !property.IsStatic && !(declaringType.IsRecord && property.Name == "EqualityContract");
 
     private static string GetModelVarName(
         ITypeSymbol modelTypeSymbol,
@@ -264,10 +278,11 @@ internal static class ModelClassInfoExtensions
             var segment = segments[i];
 
             // Find the property on the current type
-            var property = currentType
-                .GetMembers()
-                .OfType<IPropertySymbol>()
-                .FirstOrDefault(p => p.Name == segment);
+            var property = PropertySymbolLookup.FindPropertyByName(
+                currentType,
+                segment,
+                context.MapperOptions.IncludeBaseClassProperties
+            );
 
             if (property == null)
             {

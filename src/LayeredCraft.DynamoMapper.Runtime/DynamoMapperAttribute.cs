@@ -22,6 +22,21 @@ public sealed class DynamoMapperAttribute : Attribute
     /// </remarks>
     public Requiredness DefaultRequiredness { get; set; } = Requiredness.InferFromNullability;
 
+    /// <summary>
+    ///     Gets or sets whether properties declared on base classes should be included in mapping.
+    /// </summary>
+    /// <remarks>
+    ///     <para>
+    ///         When <c>false</c> (default), only properties declared on the model type are considered.
+    ///     </para>
+    ///     <para>
+    ///         When <c>true</c>, properties declared on base classes are also considered. If a derived
+    ///         type declares a property with the same name as an inherited property, the derived
+    ///         property wins.
+    ///     </para>
+    /// </remarks>
+    public bool IncludeBaseClassProperties { get; set; } = false;
+
     /// <summary>Gets or sets whether to omit null string values from the DynamoDB item.</summary>
     /// <remarks>Default is <c>true</c>.</remarks>
     public bool OmitNullStrings { get; set; } = true;

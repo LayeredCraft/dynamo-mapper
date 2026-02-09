@@ -10,6 +10,7 @@ Marks a static partial class as a mapper and sets defaults.
 [DynamoMapper(
     Convention = DynamoNamingConvention.CamelCase,
     DefaultRequiredness = Requiredness.InferFromNullability,
+    IncludeBaseClassProperties = false,
     OmitNullStrings = true,
     OmitEmptyStrings = false,
     DateTimeFormat = "O",
@@ -20,6 +21,25 @@ public static partial class OrderMapper
     public static partial Order FromItem(Dictionary<string, AttributeValue> item);
 }
 ```
+
+Properties:
+
+- `Convention` - key naming convention
+- `DefaultRequiredness` - default requiredness
+- `IncludeBaseClassProperties` - include properties declared on base classes (opt-in)
+- `OmitNullStrings` - omit null string attributes
+- `OmitEmptyStrings` - omit empty string attributes
+- `DateTimeFormat` - `DateTime`/`DateTimeOffset` format
+- `TimeSpanFormat` - `TimeSpan` format
+- `EnumFormat` - enum format
+- `GuidFormat` - `Guid` format
+
+Notes:
+
+- When `IncludeBaseClassProperties = true`, inherited properties are included for root models and
+  nested inline objects.
+- If a derived type declares a property with the same name as an inherited property, the derived
+  property wins.
 
 ## DynamoFieldAttribute
 

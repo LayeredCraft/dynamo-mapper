@@ -104,7 +104,7 @@ internal static class NestedObjectTypeAnalyzer
             return false;
 
         // Check it has mappable properties
-        var properties = GetMappableProperties(namedType);
+        var properties = GetMappableProperties(namedType, context);
         if (properties.Length == 0)
             return false;
 
@@ -133,15 +133,16 @@ internal static class NestedObjectTypeAnalyzer
     /// <summary>
     ///     Gets the mappable properties from a type.
     /// </summary>
-    private static IPropertySymbol[] GetMappableProperties(INamedTypeSymbol type)
-    {
-        return type
-            .GetMembers()
-            .OfType<IPropertySymbol>()
-            .Where(p => !p.IsStatic && !p.IsIndexer && (p.GetMethod != null || p.SetMethod != null))
-            .Where(p => !(type.IsRecord && p.Name == "EqualityContract"))
-            .ToArray();
-    }
+    private static IPropertySymbol[] GetMappableProperties(INamedTypeSymbol type, GeneratorContext context) =>
+        PropertySymbolLookup.GetProperties(
+            type,
+            context.MapperOptions.IncludeBaseClassProperties,
+            static (p, declaringType) =>
+                !p.IsStatic
+                && !p.IsIndexer
+                && (p.GetMethod != null || p.SetMethod != null)
+                && !(declaringType.IsRecord && p.Name == "EqualityContract")
+        );
 
     /// <summary>
     ///     Analyzes a type for inline code generation, recursively building property specs.
@@ -157,7 +158,7 @@ internal static class NestedObjectTypeAnalyzer
         // Add this type to the ancestor chain for cycle detection
         var contextWithAncestor = nestedContext.WithAncestor(type);
 
-        var properties = GetMappableProperties(namedType);
+        var properties = GetMappableProperties(namedType, nestedContext.Context);
         var propertySpecs = new List<NestedPropertySpec>();
         var diagnostics = new List<DiagnosticInfo>();
 

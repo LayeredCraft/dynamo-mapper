@@ -84,6 +84,38 @@ public class Address
 
 See `examples/DynamoMapper.Nested` for a complete example.
 
+## Inheritance (Base Class Properties)
+
+By default, DynamoMapper only considers properties declared on the model type being mapped. It does
+not include properties declared on base classes.
+
+If you want inherited properties to participate in mapping, enable it on the mapper:
+
+```csharp
+[DynamoMapper(IncludeBaseClassProperties = true)]
+public static partial class OrderMapper
+{
+    public static partial Dictionary<string, AttributeValue> ToItem(Order source);
+    public static partial Order FromItem(Dictionary<string, AttributeValue> item);
+}
+
+public class BaseEntity
+{
+    public string Id { get; set; }
+}
+
+public class Order : BaseEntity
+{
+    public string Name { get; set; }
+}
+```
+
+Notes:
+
+- This option also affects nested inline object mapping.
+- If a derived type declares a property with the same name as an inherited property, the derived
+  property wins.
+
 ## Constructor Mapping Rules (`FromItem`)
 
 Constructor selection is deterministic and follows these priorities.

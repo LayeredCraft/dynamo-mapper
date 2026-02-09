@@ -9,6 +9,7 @@ internal class MapperOptions
     internal string DateTimeFormat { get; set; } = "O";
     internal string TimeSpanFormat { get; set; } = "c";
     internal Requiredness DefaultRequiredness { get; set; } = Requiredness.InferFromNullability;
+    internal bool IncludeBaseClassProperties { get; set; } = false;
     internal string EnumFormat { get; set; } = "G";
     internal string GuidFormat { get; set; } = "D";
     internal bool OmitEmptyStrings { get; set; } = false;

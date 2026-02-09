@@ -121,6 +121,7 @@ nav:
     - Single-Table Design: examples/single-table-design.md
     - Custom Converters: examples/custom-converters.md
     - Lambda Functions: examples/lambda-functions.md
+    - Inheritance Mapping: examples/inheritance-mapping.md
   - Advanced:
     - Performance: advanced/performance.md
     - Diagnostics: advanced/diagnostics.md

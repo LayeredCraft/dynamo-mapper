@@ -31,6 +31,7 @@
   </Folder>
   <Folder Name="/docs/examples/">
     <File Path="docs\examples\custom-converters.md" />
+    <File Path="docs\examples\inheritance-mapping.md" />
     <File Path="docs\examples\index.md" />
     <File Path="docs\examples\lambda-functions.md" />
     <File Path="docs\examples\nested-mapping.md" />
@@ -55,6 +56,7 @@
   </Folder>
   <Folder Name="/examples/">
     <Project Path="examples/DynamoMapper.FieldLevelOverride/DynamoMapper.FieldLevelOverride.csproj" />
+    <Project Path="examples/DynamoMapper.Inheritance/DynamoMapper.Inheritance.csproj" />
     <Project Path="examples/DynamoMapper.MapperConstructor/DynamoMapper.MapperConstructor.csproj" />
     <Project Path="examples/DynamoMapper.Nested/DynamoMapper.Nested.csproj" />
     <Project Path="examples/DynamoMapper.SimpleExample/DynamoMapper.SimpleExample.csproj" />

@@ -63,6 +63,7 @@ See the [Quick Start Guide](getting-started/quick-start.md) for a complete tutor
 - **Clean Domain Models** - No attributes required on your domain classes
 - **Convention-First** - Sensible defaults with selective overrides
 - **Nested Mapping** - Inline or mapper-based support for nested objects and collections
+- **Optional Inheritance Support** - Opt-in mapping for properties declared on base classes
 - **Single-Table Friendly** - Built-in support for DynamoDB single-table patterns
 - **Comprehensive Diagnostics** - Clear compile-time errors with actionable messages
 

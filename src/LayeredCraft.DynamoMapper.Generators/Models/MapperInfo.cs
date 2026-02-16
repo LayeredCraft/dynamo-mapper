@@ -1,4 +1,5 @@
 using DynamoMapper.Generator.Diagnostics;
+using DynamoMapper.Generator.PropertyMapping;
 using LayeredCraft.SourceGeneratorTools.Types;
 using Microsoft.CodeAnalysis;
 
@@ -8,7 +9,8 @@ internal sealed record MapperInfo(
     MapperClassInfo? MapperClass,
     ModelClassInfo? ModelClass,
     EquatableArray<DiagnosticInfo> Diagnostics,
-    GeneratorContext? Context
+    GeneratorContext? Context,
+    HelperMethodRegistry? HelperRegistry
 );
 
 internal static class MapperInfoExtensions
@@ -32,11 +34,15 @@ internal static class MapperInfoExtensions
             context.HasToItemMethod = mapperClassInfo.ToItemSignature != null;
             context.HasFromItemMethod = mapperClassInfo.FromItemSignature != null;
 
+            // Create registry to track helper methods for nested objects
+            var helperRegistry = new HelperMethodRegistry();
+
             var (modelClassInfo, diagnosticInfos, helperMethods) =
                 ModelClassInfo.Create(
                     modelTypeSymbol,
                     mapperClassInfo.FromItemParameterName,
-                    context
+                    context,
+                    helperRegistry
                 );
 
             // Add helper methods to mapper class info
@@ -50,7 +56,8 @@ internal static class MapperInfoExtensions
                 updatedMapperClassInfo,
                 modelClassInfo,
                 diagnosticInfos.ToEquatableArray(),
-                context
+                context,
+                helperRegistry
             );
         }
 
@@ -59,7 +66,8 @@ internal static class MapperInfoExtensions
         ///     normal analysis.
         /// </summary>
         private static MapperInfo CreateWithDiagnostics(
-            IEnumerable<DiagnosticInfo> diagnostics, GeneratorContext? context = null
-        ) => new(null, null, diagnostics.ToEquatableArray(), context);
+            IEnumerable<DiagnosticInfo> diagnostics, GeneratorContext? context = null,
+            HelperMethodRegistry? helperRegistry = null
+        ) => new(null, null, diagnostics.ToEquatableArray(), context, helperRegistry);
     }
 }

@@ -19,7 +19,8 @@ internal static class ModelClassInfoExtensions
     extension(ModelClassInfo)
     {
         internal static (ModelClassInfo?, DiagnosticInfo[], HelperMethodInfo[]) Create(
-            ITypeSymbol modelTypeSymbol, string? fromItemParameterName, GeneratorContext context
+            ITypeSymbol modelTypeSymbol, string? fromItemParameterName, GeneratorContext context,
+            HelperMethodRegistry helperRegistry
         )
         {
             context.ThrowIfCancellationRequested();
@@ -43,9 +44,6 @@ internal static class ModelClassInfoExtensions
             var dotNotationDiagnostics = ValidateDotNotationPaths(modelTypeSymbol, context);
             if (dotNotationDiagnostics.Length > 0)
                 return (null, dotNotationDiagnostics, []);
-
-            // Create helper registry for tracking nested object helper methods
-            var helperRegistry = new HelperMethodRegistry();
 
             var (propertyInfos, propertyInfosByIndex, propertyDiagnostics) =
                 CreatePropertyInfos(

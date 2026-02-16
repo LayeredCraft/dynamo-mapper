@@ -8,7 +8,9 @@ namespace DynamoMapper.Generator.Emitters;
 internal static class HelperMethodEmitter
 {
     /// <summary>Renders a ToItem helper method.</summary>
-    public static string RenderToItemHelper(HelperMethodInfo helper, GeneratorContext context)
+    public static string RenderToItemHelper(
+        HelperMethodInfo helper, GeneratorContext context, HelperMethodRegistry helperRegistry
+    )
     {
         var sb = new StringBuilder();
         var typeName = ExtractSimpleTypeName(helper.ModelFullyQualifiedType);
@@ -27,7 +29,8 @@ internal static class HelperMethodEmitter
             PropertyMappingCodeRenderer.RenderInlineNestedToItem(
                 paramName,
                 helper.InlineInfo,
-                context
+                context,
+                helperRegistry
             );
 
         // Format chained method calls on separate lines
@@ -40,7 +43,9 @@ internal static class HelperMethodEmitter
     }
 
     /// <summary>Renders a FromItem helper method.</summary>
-    public static string RenderFromItemHelper(HelperMethodInfo helper, GeneratorContext context)
+    public static string RenderFromItemHelper(
+        HelperMethodInfo helper, GeneratorContext context, HelperMethodRegistry helperRegistry
+    )
     {
         var sb = new StringBuilder();
         var mapParamName = "map";
@@ -58,7 +63,8 @@ internal static class HelperMethodEmitter
             PropertyMappingCodeRenderer.RenderInlineNestedFromItem(
                 mapParamName,
                 helper.InlineInfo,
-                context
+                context,
+                helperRegistry
             );
 
         // Format object initializer on separate lines

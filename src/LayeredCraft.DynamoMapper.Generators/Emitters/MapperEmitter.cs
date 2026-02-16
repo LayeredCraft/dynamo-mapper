@@ -43,23 +43,46 @@ internal static class MapperEmitter
                 .ToArray();
 
         // Render helper methods for nested objects
+        // We need to render iteratively because rendering a helper might register new helpers
         var helperMethods = Array.Empty<string>();
         if (mapperInfo.MapperClass is not null && mapperInfo.Context is not null &&
-            mapperInfo.MapperClass.HelperMethods.Any())
-            helperMethods =
-                mapperInfo.MapperClass.HelperMethods.Select(
-                        helper =>
-                            helper.Direction == HelperMethodDirection.ToItem
-                                ? HelperMethodEmitter.RenderToItemHelper(
-                                    helper,
-                                    mapperInfo.Context!
-                                )
-                                : HelperMethodEmitter.RenderFromItemHelper(
-                                    helper,
-                                    mapperInfo.Context!
-                                )
-                    )
-                    .ToArray();
+            mapperInfo.HelperRegistry is not null && mapperInfo.MapperClass.HelperMethods.Any())
+        {
+            var renderedHelpers = new HashSet<string>();
+            var helperList = new List<string>();
+
+            // Keep rendering until all helpers are processed
+            while (true)
+            {
+                var allHelpers = mapperInfo.HelperRegistry.GetAllHelpers();
+                var newHelpers =
+                    allHelpers.Where(h => !renderedHelpers.Contains(h.MethodName)).ToArray();
+
+                if (newHelpers.Length == 0)
+                    break;
+
+                foreach (var helper in newHelpers)
+                {
+                    var rendered =
+                        helper.Direction == HelperMethodDirection.ToItem
+                            ? HelperMethodEmitter.RenderToItemHelper(
+                                helper,
+                                mapperInfo.Context!,
+                                mapperInfo.HelperRegistry!
+                            )
+                            : HelperMethodEmitter.RenderFromItemHelper(
+                                helper,
+                                mapperInfo.Context!,
+                                mapperInfo.HelperRegistry!
+                            );
+
+                    helperList.Add(rendered);
+                    renderedHelpers.Add(helper.MethodName);
+                }
+            }
+
+            helperMethods = helperList.ToArray();
+        }
 
         var model =
             new

@@ -365,7 +365,8 @@ internal static class PropertyMappingCodeRenderer
     ///     Made internal to allow reuse by HelperMethodEmitter.
     /// </summary>
     internal static string RenderInlineNestedToItem(
-        string sourcePrefix, NestedInlineInfo inlineInfo, GeneratorContext context
+        string sourcePrefix, NestedInlineInfo inlineInfo, GeneratorContext context,
+        HelperMethodRegistry helperRegistry
     )
     {
         var sb = new StringBuilder();
@@ -377,15 +378,29 @@ internal static class PropertyMappingCodeRenderer
             {
                 // Recursive nested object
                 var nestedSourcePrefix = $"{sourcePrefix}.{prop.PropertyName}";
-                var nestedCode =
-                    prop.NestedMapping switch
-                    {
-                        MapperBasedNesting mapperBased =>
-                            $"new AttributeValue {{ M = {mapperBased.Mapper.MapperFullyQualifiedName}.ToItem({nestedSourcePrefix}) }}",
-                        InlineNesting inline =>
-                            $"new AttributeValue {{ M = {RenderInlineNestedToItem(nestedSourcePrefix, inline.Info, context)} }}",
-                        _ => throw new InvalidOperationException("Unknown nested mapping type"),
-                    };
+
+                string nestedCode;
+                if (prop.NestedMapping is MapperBasedNesting mapperBased)
+                {
+                    nestedCode =
+                        $"new AttributeValue {{ M = {mapperBased.Mapper.MapperFullyQualifiedName}.ToItem({nestedSourcePrefix}) }}";
+                }
+                else if (prop.NestedMapping is InlineNesting inline)
+                {
+                    // Register helper and generate call instead of inlining
+                    var helperMethodName =
+                        helperRegistry.GetOrRegisterToItemHelper(
+                            inline.Info.ModelFullyQualifiedType,
+                            inline.Info
+                        );
+                    nestedCode =
+                        $"new AttributeValue {{ M = {helperMethodName}({nestedSourcePrefix}) }}";
+                }
+                else
+                {
+                    throw new InvalidOperationException("Unknown nested mapping type");
+                }
+
                 sb.Append(
                     $".Set(\"{prop.DynamoKey}\", {nestedSourcePrefix} is null ? new AttributeValue {{ NULL = true }} : {nestedCode})"
                 );
@@ -513,7 +528,8 @@ internal static class PropertyMappingCodeRenderer
     ///     Made internal to allow reuse by HelperMethodEmitter.
     /// </summary>
     internal static string RenderInlineNestedFromItem(
-        string mapVarName, NestedInlineInfo inlineInfo, GeneratorContext context
+        string mapVarName, NestedInlineInfo inlineInfo, GeneratorContext context,
+        HelperMethodRegistry helperRegistry
     )
     {
         var sb = new StringBuilder();
@@ -529,15 +545,29 @@ internal static class PropertyMappingCodeRenderer
             {
                 // Recursive nested object
                 var nestedVarName = $"{mapVarName}_{prop.PropertyName.ToLowerInvariant()}";
-                var nestedCode =
-                    prop.NestedMapping switch
-                    {
-                        MapperBasedNesting mapperBased =>
-                            $"{mapVarName}.TryGetValue(\"{prop.DynamoKey}\", out var {nestedVarName}Attr) && {nestedVarName}Attr.M is {{ }} {nestedVarName} ? {mapperBased.Mapper.MapperFullyQualifiedName}.FromItem({nestedVarName}) : null",
-                        InlineNesting inline =>
-                            $"{mapVarName}.TryGetValue(\"{prop.DynamoKey}\", out var {nestedVarName}Attr) && {nestedVarName}Attr.M is {{ }} {nestedVarName} ? {RenderInlineNestedFromItem(nestedVarName, inline.Info, context)} : null",
-                        _ => throw new InvalidOperationException("Unknown nested mapping type"),
-                    };
+
+                string nestedCode;
+                if (prop.NestedMapping is MapperBasedNesting mapperBased)
+                {
+                    nestedCode =
+                        $"{mapVarName}.TryGetValue(\"{prop.DynamoKey}\", out var {nestedVarName}Attr) && {nestedVarName}Attr.M is {{ }} {nestedVarName} ? {mapperBased.Mapper.MapperFullyQualifiedName}.FromItem({nestedVarName}) : null";
+                }
+                else if (prop.NestedMapping is InlineNesting inline)
+                {
+                    // Register helper and generate call instead of inlining
+                    var helperMethodName =
+                        helperRegistry.GetOrRegisterFromItemHelper(
+                            inline.Info.ModelFullyQualifiedType,
+                            inline.Info
+                        );
+                    nestedCode =
+                        $"{mapVarName}.TryGetValue(\"{prop.DynamoKey}\", out var {nestedVarName}Attr) && {nestedVarName}Attr.M is {{ }} {nestedVarName} ? {helperMethodName}({nestedVarName}) : null";
+                }
+                else
+                {
+                    throw new InvalidOperationException("Unknown nested mapping type");
+                }
+
                 sb.Append($"{prop.PropertyName} = {nestedCode},");
             }
             else if (prop.Strategy is not null)

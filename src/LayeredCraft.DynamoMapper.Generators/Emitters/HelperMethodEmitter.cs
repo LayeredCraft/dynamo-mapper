@@ -16,13 +16,12 @@ internal static class HelperMethodEmitter
         var typeName = ExtractSimpleTypeName(helper.ModelFullyQualifiedType);
         var paramName = typeName.ToLowerInvariant();
 
-        // Method signature with block syntax (no leading spaces - template handles base
+        // Method signature with arrow syntax (no leading spaces - template handles base
         // indentation)
         sb.AppendLine(
-            $"private static Dictionary<string, AttributeValue> {helper.MethodName}({helper.ModelFullyQualifiedType} {paramName})"
+            $"private static Dictionary<string, AttributeValue> {helper.MethodName}({helper.ModelFullyQualifiedType} {paramName}) =>"
         );
-        sb.AppendLine("{");
-        sb.Append("    return ");
+        sb.Append("    ");
 
         // Reuse existing RenderInlineNestedToItem logic
         var bodyCode =
@@ -36,8 +35,7 @@ internal static class HelperMethodEmitter
         // Format chained method calls on separate lines
         var formattedBody = FormatToItemChainedCalls(bodyCode);
         sb.Append(formattedBody);
-        sb.AppendLine(";");
-        sb.AppendLine("}");
+        sb.Append(";");
 
         return sb.ToString();
     }

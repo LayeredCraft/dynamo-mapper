@@ -38,14 +38,11 @@ public static partial class OrderMapper
 
     // Helper methods for nested object mapping
 
-    private static Dictionary<string, AttributeValue> ToItem_Address(global::MyNamespace.Address address)
-    {
-        return new Dictionary<string, AttributeValue>(3)
+    private static Dictionary<string, AttributeValue> ToItem_Address(global::MyNamespace.Address address) =>
+        new Dictionary<string, AttributeValue>(3)
             .SetString("line1", address.Line1, false, true)
             .SetString("city", address.City, false, true)
             .SetString("postalCode", address.PostalCode, false, true);
-    }
-
 
     private static global::MyNamespace.Address FromItem_Address(Dictionary<string, AttributeValue> map)
     {

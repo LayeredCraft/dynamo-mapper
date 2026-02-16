@@ -38,15 +38,12 @@ public static partial class EventLogMapper
 
     // Helper methods for nested object mapping
 
-    private static Dictionary<string, AttributeValue> ToItem_LogEntry(global::MyNamespace.LogEntry logentry)
-    {
-        return new Dictionary<string, AttributeValue>(4)
+    private static Dictionary<string, AttributeValue> ToItem_LogEntry(global::MyNamespace.LogEntry logentry) =>
+        new Dictionary<string, AttributeValue>(4)
             .SetDateTime("timestamp", logentry.Timestamp, "O", false, true)
             .SetString("message", logentry.Message, false, true)
             .SetInt("severity", logentry.Severity, false, true)
             .SetBool("isError", logentry.IsError, false, true);
-    }
-
 
     private static global::MyNamespace.LogEntry FromItem_LogEntry(Dictionary<string, AttributeValue> map)
     {

@@ -36,12 +36,9 @@ public static partial class ExampleEntityMapper
 
     // Helper methods for nested object mapping
 
-    private static Dictionary<string, AttributeValue> ToItem_CustomClass(global::MyNamespace.CustomClass customclass)
-    {
-        return new Dictionary<string, AttributeValue>(1)
+    private static Dictionary<string, AttributeValue> ToItem_CustomClass(global::MyNamespace.CustomClass customclass) =>
+        new Dictionary<string, AttributeValue>(1)
             .SetString("name", customclass.Name, false, true);
-    }
-
 
     private static global::MyNamespace.CustomClass FromItem_CustomClass(Dictionary<string, AttributeValue> map)
     {

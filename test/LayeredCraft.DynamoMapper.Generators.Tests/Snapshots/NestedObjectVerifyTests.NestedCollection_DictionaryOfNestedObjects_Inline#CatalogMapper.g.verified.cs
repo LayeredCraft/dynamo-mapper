@@ -38,13 +38,10 @@ public static partial class CatalogMapper
 
     // Helper methods for nested object mapping
 
-    private static Dictionary<string, AttributeValue> ToItem_Product(global::MyNamespace.Product product)
-    {
-        return new Dictionary<string, AttributeValue>(2)
+    private static Dictionary<string, AttributeValue> ToItem_Product(global::MyNamespace.Product product) =>
+        new Dictionary<string, AttributeValue>(2)
             .SetString("name", product.Name, false, true)
             .SetDecimal("price", product.Price, false, true);
-    }
-
 
     private static global::MyNamespace.Product FromItem_Product(Dictionary<string, AttributeValue> map)
     {

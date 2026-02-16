@@ -40,14 +40,11 @@ public static partial class Level1Mapper
 
     // Helper methods for nested object mapping
 
-    private static Dictionary<string, AttributeValue> ToItem_Level2(global::MyNamespace.Level2 level2)
-    {
-        return new Dictionary<string, AttributeValue>(3)
+    private static Dictionary<string, AttributeValue> ToItem_Level2(global::MyNamespace.Level2 level2) =>
+        new Dictionary<string, AttributeValue>(3)
             .SetString("id", level2.Id, false, true)
             .SetString("description", level2.Description, false, true)
             .Set("level3Data", level2.Level3Data is null ? new AttributeValue { NULL = true } : new AttributeValue { M = ToItem_Level3(level2.Level3Data) });
-    }
-
 
     private static global::MyNamespace.Level2 FromItem_Level2(Dictionary<string, AttributeValue> map)
     {
@@ -60,14 +57,11 @@ public static partial class Level1Mapper
     }
 
 
-    private static Dictionary<string, AttributeValue> ToItem_Level3(global::MyNamespace.Level3 level3)
-    {
-        return new Dictionary<string, AttributeValue>(3)
+    private static Dictionary<string, AttributeValue> ToItem_Level3(global::MyNamespace.Level3 level3) =>
+        new Dictionary<string, AttributeValue>(3)
             .SetString("id", level3.Id, false, true)
             .SetInt("value", level3.Value, false, true)
             .Set("level4Data", level3.Level4Data is null ? new AttributeValue { NULL = true } : new AttributeValue { M = ToItem_Level4(level3.Level4Data) });
-    }
-
 
     private static global::MyNamespace.Level3 FromItem_Level3(Dictionary<string, AttributeValue> map)
     {
@@ -80,14 +74,11 @@ public static partial class Level1Mapper
     }
 
 
-    private static Dictionary<string, AttributeValue> ToItem_Level4(global::MyNamespace.Level4 level4)
-    {
-        return new Dictionary<string, AttributeValue>(3)
+    private static Dictionary<string, AttributeValue> ToItem_Level4(global::MyNamespace.Level4 level4) =>
+        new Dictionary<string, AttributeValue>(3)
             .SetString("id", level4.Id, false, true)
             .SetBool("isActive", level4.IsActive, false, true)
             .SetDecimal("price", level4.Price, false, true);
-    }
-
 
     private static global::MyNamespace.Level4 FromItem_Level4(Dictionary<string, AttributeValue> map)
     {

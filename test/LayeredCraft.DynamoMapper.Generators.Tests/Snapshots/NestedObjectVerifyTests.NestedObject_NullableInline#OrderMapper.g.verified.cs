@@ -40,7 +40,7 @@ public static partial class OrderMapper
 
     private static Dictionary<string, AttributeValue> ToItem_Address(global::MyNamespace.Address address)
     {
-        return new Dictionary<string, AttributeValue>()
+        return new Dictionary<string, AttributeValue>(2)
             .SetString("line1", address.Line1, false, true)
             .SetString("city", address.City, false, true);
     }

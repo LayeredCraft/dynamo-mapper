@@ -40,7 +40,7 @@ public static partial class CatalogMapper
 
     private static Dictionary<string, AttributeValue> ToItem_Product(global::MyNamespace.Product product)
     {
-        return new Dictionary<string, AttributeValue>()
+        return new Dictionary<string, AttributeValue>(2)
             .SetString("name", product.Name, false, true)
             .SetDecimal("price", product.Price, false, true);
     }

@@ -40,7 +40,7 @@ public static partial class EventLogMapper
 
     private static Dictionary<string, AttributeValue> ToItem_LogEntry(global::MyNamespace.LogEntry logentry)
     {
-        return new Dictionary<string, AttributeValue>()
+        return new Dictionary<string, AttributeValue>(4)
             .SetDateTime("timestamp", logentry.Timestamp, "O", false, true)
             .SetString("message", logentry.Message, false, true)
             .SetInt("severity", logentry.Severity, false, true)

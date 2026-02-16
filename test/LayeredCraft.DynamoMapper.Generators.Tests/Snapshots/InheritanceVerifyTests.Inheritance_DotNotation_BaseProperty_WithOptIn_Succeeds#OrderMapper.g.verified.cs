@@ -38,7 +38,7 @@ internal static partial class OrderMapper
 
     private static Dictionary<string, AttributeValue> ToItem_Address(global::MyNamespace.Address address)
     {
-        return new Dictionary<string, AttributeValue>()
+        return new Dictionary<string, AttributeValue>(2)
             .SetString("city", address.City, false, true)
             .SetString("line_1", address.Line1, false, true);
     }

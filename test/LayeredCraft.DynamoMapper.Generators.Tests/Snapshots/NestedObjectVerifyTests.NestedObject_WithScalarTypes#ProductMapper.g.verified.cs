@@ -42,7 +42,7 @@ public static partial class ProductMapper
 
     private static Dictionary<string, AttributeValue> ToItem_ProductDetails(global::MyNamespace.ProductDetails productdetails)
     {
-        return new Dictionary<string, AttributeValue>()
+        return new Dictionary<string, AttributeValue>(4)
             .SetDecimal("price", productdetails.Price, false, true)
             .SetInt("stockCount", productdetails.StockCount, false, true)
             .SetDateTime("lastUpdated", productdetails.LastUpdated, "O", false, true)

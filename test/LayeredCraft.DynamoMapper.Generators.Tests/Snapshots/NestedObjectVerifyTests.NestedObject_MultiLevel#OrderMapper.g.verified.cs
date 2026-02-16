@@ -40,7 +40,7 @@ public static partial class OrderMapper
 
     private static Dictionary<string, AttributeValue> ToItem_Customer(global::MyNamespace.Customer customer)
     {
-        return new Dictionary<string, AttributeValue>()
+        return new Dictionary<string, AttributeValue>(4)
             .SetString("name", customer.Name, false, true)
             .Set("address", customer.Address is null ? new AttributeValue { NULL = true } : new AttributeValue { M = new Dictionary<string, AttributeValue>().SetString("line1", customer.Address.Line1, false, true).SetString("city", customer.Address.City, false, true) });
     }

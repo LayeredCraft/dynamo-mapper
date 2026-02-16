@@ -38,7 +38,7 @@ public static partial class ExampleEntityMapper
 
     private static Dictionary<string, AttributeValue> ToItem_CustomClass(global::MyNamespace.CustomClass customclass)
     {
-        return new Dictionary<string, AttributeValue>()
+        return new Dictionary<string, AttributeValue>(1)
             .SetString("name", customclass.Name, false, true);
     }
 

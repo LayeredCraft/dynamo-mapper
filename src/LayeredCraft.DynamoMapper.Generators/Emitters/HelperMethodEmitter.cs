@@ -73,12 +73,15 @@ internal static class HelperMethodEmitter
     /// <summary>
     ///     Formats ToItem chained method calls on separate lines. Input: new Dictionary&lt;string,
     ///     AttributeValue&gt;().SetString(...).SetDecimal(...) Output: new Dictionary&lt;string,
-    ///     AttributeValue&gt;() .SetString(...) .SetDecimal(...)
+    ///     AttributeValue&gt;(capacity) .SetString(...) .SetDecimal(...)
     /// </summary>
     private static string FormatToItemChainedCalls(string bodyCode)
     {
+        // Count how many .Set* method calls there are for capacity pre-allocation
+        var capacity = CountSetMethodCalls(bodyCode);
+
         var sb = new StringBuilder();
-        sb.Append("new Dictionary<string, AttributeValue>()");
+        sb.Append($"new Dictionary<string, AttributeValue>({capacity})");
 
         // Find each .Set* method call and put it on a new line
         var startIndex = bodyCode.IndexOf(".Set", StringComparison.Ordinal);
@@ -167,6 +170,21 @@ internal static class HelperMethodEmitter
         sb.Append("    }");
 
         return sb.ToString();
+    }
+
+    /// <summary>Counts the number of .Set* method calls in the body code for dictionary capacity.</summary>
+    private static int CountSetMethodCalls(string bodyCode)
+    {
+        var count = 0;
+        var index = 0;
+
+        while ((index = bodyCode.IndexOf(".Set", index, StringComparison.Ordinal)) >= 0)
+        {
+            count++;
+            index += 4; // Move past ".Set"
+        }
+
+        return count;
     }
 
     /// <summary>Splits property assignments by comma, respecting nested parentheses.</summary>

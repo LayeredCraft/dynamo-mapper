@@ -26,34 +26,56 @@ internal static class MapperEmitter
 
     internal static void Generate(SourceProductionContext context, MapperInfo mapperInfo)
     {
-        var toAssignments = mapperInfo
-            .ModelClass!.Properties.Where(p => !string.IsNullOrEmpty(p.ToAssignments))
-            .Select(p => p.ToAssignments)
-            .ToArray();
+        var toAssignments =
+            mapperInfo.ModelClass!.Properties.Where(p => !string.IsNullOrEmpty(p.ToAssignments))
+                .Select(p => p.ToAssignments)
+                .ToArray();
 
-        var fromAssignments = mapperInfo
-            .ModelClass!.Properties.Where(p => !string.IsNullOrEmpty(p.FromAssignment))
-            .Select(p => p.FromAssignment)
-            .ToArray();
+        var fromAssignments =
+            mapperInfo.ModelClass!.Properties.Where(p => !string.IsNullOrEmpty(p.FromAssignment))
+                .Select(p => p.FromAssignment)
+                .ToArray();
 
-        var fromInitAssignments = mapperInfo
-            .ModelClass!.Properties.Where(p => !string.IsNullOrEmpty(p.FromInitAssignment))
-            .Select(p => p.FromInitAssignment)
-            .ToArray();
+        var fromInitAssignments =
+            mapperInfo.ModelClass!.Properties
+                .Where(p => !string.IsNullOrEmpty(p.FromInitAssignment))
+                .Select(p => p.FromInitAssignment)
+                .ToArray();
 
-        var model = new
-        {
-            GeneratedCodeAttribute,
-            mapperInfo.MapperClass,
-            ModelClass = mapperInfo.ModelClass!,
-            ModelVarName = mapperInfo.ModelClass.VarName,
-            ToAssignments = toAssignments,
-            FromAssignments = fromAssignments,
-            FromInitAssignments = fromInitAssignments,
-            MapperClassNamespace = mapperInfo.MapperClass?.Namespace,
-            MapperClassSignature = mapperInfo.MapperClass?.ClassSignature,
-            DictionaryCapacity = toAssignments.Length,
-        };
+        // Render helper methods for nested objects
+        var helperMethods = Array.Empty<string>();
+        if (mapperInfo.MapperClass is not null && mapperInfo.Context is not null &&
+            mapperInfo.MapperClass.HelperMethods.Any())
+            helperMethods =
+                mapperInfo.MapperClass.HelperMethods.Select(
+                        helper =>
+                            helper.Direction == HelperMethodDirection.ToItem
+                                ? HelperMethodEmitter.RenderToItemHelper(
+                                    helper,
+                                    mapperInfo.Context!
+                                )
+                                : HelperMethodEmitter.RenderFromItemHelper(
+                                    helper,
+                                    mapperInfo.Context!
+                                )
+                    )
+                    .ToArray();
+
+        var model =
+            new
+            {
+                GeneratedCodeAttribute,
+                mapperInfo.MapperClass,
+                ModelClass = mapperInfo.ModelClass!,
+                ModelVarName = mapperInfo.ModelClass.VarName,
+                ToAssignments = toAssignments,
+                FromAssignments = fromAssignments,
+                FromInitAssignments = fromInitAssignments,
+                MapperClassNamespace = mapperInfo.MapperClass?.Namespace,
+                MapperClassSignature = mapperInfo.MapperClass?.ClassSignature,
+                DictionaryCapacity = toAssignments.Length,
+                HelperMethods = helperMethods,
+            };
 
         var outputCode = TemplateHelper.Render("Templates.Mapper.scriban", model);
 

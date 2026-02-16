@@ -23,7 +23,7 @@ public static partial class OrderMapper
     public static partial global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> ToItem(global::MyNamespace.Order source) =>
         new Dictionary<string, AttributeValue>(2)
             .SetString("id", source.Id, false, true)
-            .Set("customer", new AttributeValue { M = new Dictionary<string, AttributeValue>().SetString("name", source.Customer.Name, false, true).Set("address", source.Customer.Address is null ? new AttributeValue { NULL = true } : new AttributeValue { M = new Dictionary<string, AttributeValue>().SetString("line1", source.Customer.Address.Line1, false, true).SetString("city", source.Customer.Address.City, false, true) }) });
+            .Set("customer", new AttributeValue { M = ToItem_Customer(source.Customer) });
 
     [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
     public static partial global::MyNamespace.Order FromItem(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> item)
@@ -31,8 +31,30 @@ public static partial class OrderMapper
         var order = new global::MyNamespace.Order
         {
             Id = item.GetString("id", Requiredness.InferFromNullability),
-            Customer = item.TryGetValue("customer", out var customerAttr) && customerAttr.M is { } customerMap ? new global::MyNamespace.Customer { Name = customerMap.GetString("name", Requiredness.Optional), Address = customerMap.TryGetValue("address", out var customerMap_addressAttr) && customerMap_addressAttr.M is { } customerMap_address ? new global::MyNamespace.Address { Line1 = customerMap_address.GetString("line1", Requiredness.Optional), City = customerMap_address.GetString("city", Requiredness.Optional), } : null, } : null,
+            Customer = item.TryGetValue("customer", out var customerAttr) && customerAttr.M is { } customerMap ? FromItem_Customer(customerMap) : null,
         };
         return order;
     }
+
+    // Helper methods for nested object mapping
+
+    private static Dictionary<string, AttributeValue> ToItem_Customer(global::MyNamespace.Customer customer)
+    {
+        return new Dictionary<string, AttributeValue>()
+            .SetString("name", customer.Name, false, true)
+            .Set("address", customer.Address is null ? new AttributeValue { NULL = true } : new AttributeValue { M = new Dictionary<string, AttributeValue>().SetString("line1", customer.Address.Line1, false, true).SetString("city", customer.Address.City, false, true) });
+    }
+
+
+    private static global::MyNamespace.Customer FromItem_Customer(Dictionary<string, AttributeValue> map)
+    {
+        return new global::MyNamespace.Customer
+        {
+            Name = map.GetString("name", Requiredness.Optional),
+            Address = map.TryGetValue("address", out var map_addressAttr) && map_addressAttr.M is { } map_address ? new global::MyNamespace.Address { Line1 = map_address.GetString("line1", Requiredness.Optional),
+            City = map_address.GetString("city", Requiredness.Optional),
+            } : null,
+        };
+    }
+
 }

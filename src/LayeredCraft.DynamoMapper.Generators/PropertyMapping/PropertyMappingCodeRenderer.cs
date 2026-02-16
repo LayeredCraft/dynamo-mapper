@@ -15,37 +15,39 @@ internal static class PropertyMappingCodeRenderer
 {
     /// <summary>Renders a property mapping specification into PropertyInfo.</summary>
     internal static PropertyInfo Render(
-        PropertyMappingSpec spec,
-        PropertyAnalysis analysis,
-        string modelVarName,
-        int index,
-        InitializationMethod initMethod,
-        GeneratorContext context
+        PropertyMappingSpec spec, PropertyAnalysis analysis, string modelVarName, int index,
+        InitializationMethod initMethod, GeneratorContext context,
+        HelperMethodRegistry helperRegistry
     )
     {
         // Check if this is a nested object - requires special handling
-        var isNestedObject = spec.TypeStrategy?.NestedMapping is not null
-            && spec.TypeStrategy.CollectionInfo is null;
+        var isNestedObject =
+            spec.TypeStrategy?.NestedMapping is not null &&
+            spec.TypeStrategy.CollectionInfo is null;
 
         // Check if this is a nested collection (List<NestedType> or Dictionary<string, NestedType>)
-        var isNestedCollection = spec.TypeStrategy?.CollectionInfo?.ElementNestedMapping is not null;
+        var isNestedCollection =
+            spec.TypeStrategy?.CollectionInfo?.ElementNestedMapping is not null;
 
         // If this property is a constructor parameter, render as constructor argument
         if (initMethod == InitializationMethod.ConstructorParameter && context.HasFromItemMethod)
         {
             // Nested objects/collections in constructors are not yet supported
-            var constructorArg = spec.FromItemMethod is not null && !isNestedObject && !isNestedCollection
-                ? RenderConstructorArgument(spec, analysis, context)
-                : null;
+            var constructorArg =
+                spec.FromItemMethod is not null && !isNestedObject && !isNestedCollection
+                    ? RenderConstructorArgument(spec, analysis, context)
+                    : null;
 
             // Constructor parameters still need ToAssignments for serialization
             string? toAssignment = null;
             if (context.HasToItemMethod && analysis.HasGetter && spec.ToItemMethod is not null)
             {
                 if (isNestedObject)
-                    toAssignment = RenderNestedObjectToAssignment(spec, analysis, context);
+                    toAssignment =
+                        RenderNestedObjectToAssignment(spec, analysis, context, helperRegistry);
                 else if (isNestedCollection)
-                    toAssignment = RenderNestedCollectionToAssignment(spec, analysis, context);
+                    toAssignment =
+                        RenderNestedCollectionToAssignment(spec, analysis, context, helperRegistry);
                 else
                     toAssignment = RenderToAssignment(spec);
             }
@@ -56,38 +58,47 @@ internal static class PropertyMappingCodeRenderer
         // Handle nested collections specially (List<Address>, Dictionary<string, Address>)
         if (isNestedCollection)
         {
-            return RenderNestedCollectionProperty(spec, analysis, modelVarName, initMethod, context);
+            return RenderNestedCollectionProperty(
+                spec,
+                analysis,
+                modelVarName,
+                initMethod,
+                context,
+                helperRegistry
+            );
         }
 
         // Handle nested objects specially
         if (isNestedObject)
         {
-            return RenderNestedObjectProperty(spec, analysis, modelVarName, initMethod, context);
+            return RenderNestedObjectProperty(
+                spec,
+                analysis,
+                modelVarName,
+                initMethod,
+                context,
+                helperRegistry
+            );
         }
 
         // Determine if we should use regular assignment vs init assignment
         var useRegularAssignment =
-            spec.FromItemMethod is { IsCustomMethod: false }
-            && analysis is { IsRequired: false, IsInitOnly: false, HasDefaultValue: true };
+            spec.FromItemMethod is { IsCustomMethod: false } && analysis is
+                { IsRequired: false, IsInitOnly: false, HasDefaultValue: true };
 
         // Use init syntax for InitSyntax mode, regular assignment for PostConstruction
         var useInitSyntax = initMethod == InitializationMethod.InitSyntax;
 
         // FromItem requires both: setter on property AND FromItem method exists
         var fromAssignment =
-            context.HasFromItemMethod
-            && analysis.HasSetter
-            && spec.FromItemMethod is not null
-            && (!useInitSyntax || useRegularAssignment)
+            context.HasFromItemMethod && analysis.HasSetter && spec.FromItemMethod is not null &&
+            (!useInitSyntax || useRegularAssignment)
                 ? RenderFromAssignment(spec, modelVarName, analysis, index, context)
                 : null;
 
         var fromInitAssignment =
-            context.HasFromItemMethod
-            && analysis.HasSetter
-            && spec.FromItemMethod is not null
-            && useInitSyntax
-            && !useRegularAssignment
+            context.HasFromItemMethod && analysis.HasSetter && spec.FromItemMethod is not null &&
+            useInitSyntax && !useRegularAssignment
                 ? RenderFromInitAssignment(spec, analysis, context)
                 : null;
 
@@ -104,11 +115,9 @@ internal static class PropertyMappingCodeRenderer
     ///     Renders a nested object property into PropertyInfo.
     /// </summary>
     private static PropertyInfo RenderNestedObjectProperty(
-        PropertyMappingSpec spec,
-        PropertyAnalysis analysis,
-        string modelVarName,
-        InitializationMethod initMethod,
-        GeneratorContext context
+        PropertyMappingSpec spec, PropertyAnalysis analysis, string modelVarName,
+        InitializationMethod initMethod, GeneratorContext context,
+        HelperMethodRegistry helperRegistry
     )
     {
         // Use init syntax for InitSyntax mode, regular assignment for PostConstruction
@@ -116,25 +125,27 @@ internal static class PropertyMappingCodeRenderer
 
         // FromItem for nested objects
         var fromAssignment =
-            context.HasFromItemMethod
-            && analysis.HasSetter
-            && spec.FromItemMethod is not null
-            && !useInitSyntax
-                ? RenderNestedObjectFromAssignment(spec, modelVarName, analysis, context)
+            context.HasFromItemMethod && analysis.HasSetter && spec.FromItemMethod is not null &&
+            !useInitSyntax
+                ? RenderNestedObjectFromAssignment(
+                    spec,
+                    modelVarName,
+                    analysis,
+                    context,
+                    helperRegistry
+                )
                 : null;
 
         var fromInitAssignment =
-            context.HasFromItemMethod
-            && analysis.HasSetter
-            && spec.FromItemMethod is not null
-            && useInitSyntax
-                ? RenderNestedObjectFromInitAssignment(spec, analysis, context)
+            context.HasFromItemMethod && analysis.HasSetter && spec.FromItemMethod is not null &&
+            useInitSyntax
+                ? RenderNestedObjectFromInitAssignment(spec, analysis, context, helperRegistry)
                 : null;
 
         // ToItem for nested objects
         var toAssignments =
             context.HasToItemMethod && analysis.HasGetter && spec.ToItemMethod is not null
-                ? RenderNestedObjectToAssignment(spec, analysis, context)
+                ? RenderNestedObjectToAssignment(spec, analysis, context, helperRegistry)
                 : null;
 
         return new PropertyInfo(fromAssignment, fromInitAssignment, toAssignments, null);
@@ -146,9 +157,7 @@ internal static class PropertyMappingCodeRenderer
     ///     custom methods
     /// </summary>
     private static string RenderFromInitAssignment(
-        PropertyMappingSpec spec,
-        PropertyAnalysis analysis,
-        GeneratorContext context
+        PropertyMappingSpec spec, PropertyAnalysis analysis, GeneratorContext context
     )
     {
         Debug.Assert(spec.FromItemMethod is not null, "FromItemMethod should not be null");
@@ -159,9 +168,10 @@ internal static class PropertyMappingCodeRenderer
 
         var args = string.Join(", ", spec.FromItemMethod.Arguments.Select(a => a.Value));
 
-        var methodCall = spec.FromItemMethod.IsCustomMethod
-            ? $"{spec.FromItemMethod.MethodName}({args})" // Custom: MethodName(item)
-            : $"{context.MapperOptions.FromMethodParameterName}.{spec.FromItemMethod.MethodName}{spec.TypeStrategy!.GenericArgument}({args})"; // Standard: item.GetXxx<T>(args)
+        var methodCall =
+            spec.FromItemMethod.IsCustomMethod
+                ? $"{spec.FromItemMethod.MethodName}({args})" // Custom: MethodName(item)
+                : $"{context.MapperOptions.FromMethodParameterName}.{spec.FromItemMethod.MethodName}{spec.TypeStrategy!.GenericArgument}({args})"; // Standard: item.GetXxx<T>(args)
 
         // For array properties, append .ToArray() to convert the List to an array
         // GetList returns List<T>, but if the property is T[], we need to convert it
@@ -175,10 +185,7 @@ internal static class PropertyMappingCodeRenderer
     }
 
     private static string RenderFromAssignment(
-        PropertyMappingSpec spec,
-        string modelVarName,
-        PropertyAnalysis analysis,
-        int index,
+        PropertyMappingSpec spec, string modelVarName, PropertyAnalysis analysis, int index,
         GeneratorContext context
     )
     {
@@ -194,9 +201,9 @@ internal static class PropertyMappingCodeRenderer
         // For non-nullable enums, out comes first (after key), then defaultValue, then format
         // For DateTime/DateTimeOffset/TimeSpan, out comes before format
         var isNullableEnumWithFormat =
-            spec.TypeStrategy?.TypeName == "Enum"
-            && spec.TypeStrategy?.NullableModifier == "Nullable"
-            && argsList.Any(a => a.Contains("format:"));
+            spec.TypeStrategy?.TypeName == "Enum" &&
+            spec.TypeStrategy?.NullableModifier == "Nullable" &&
+            argsList.Any(a => a.Contains("format:"));
         var outPosition = isNullableEnumWithFormat ? 2 : 1;
 
         argsList.Insert(outPosition, $"out var var{index}");
@@ -211,7 +218,8 @@ internal static class PropertyMappingCodeRenderer
         var toArray =
             isArrayProperty && !spec.FromItemMethod.IsCustomMethod ? ".ToArray()" : string.Empty;
 
-        return $"if ({context.MapperOptions.FromMethodParameterName}.{methodCall}) {modelVarName}.{spec.PropertyName} = var{index}!{toArray};";
+        return
+            $"if ({context.MapperOptions.FromMethodParameterName}.{methodCall}) {modelVarName}.{spec.PropertyName} = var{index}!{toArray};";
     }
 
     /// <summary>
@@ -228,10 +236,11 @@ internal static class PropertyMappingCodeRenderer
 
         var args = string.Join(", ", spec.ToItemMethod.Arguments.Select(a => a.Value));
 
-        var methodCall = spec.ToItemMethod.IsCustomMethod
-            ? $".{spec.ToItemMethod.MethodName}({args})" // Custom: .Set("key",
-                                                         // CustomMethod(source))
-            : $".{spec.ToItemMethod.MethodName}{spec.TypeStrategy!.GenericArgument}({args})"; // Standard: .SetXxx<T>(args)
+        var methodCall =
+            spec.ToItemMethod.IsCustomMethod
+                ? $".{spec.ToItemMethod.MethodName}({args})" // Custom: .Set("key",
+                // CustomMethod(source))
+                : $".{spec.ToItemMethod.MethodName}{spec.TypeStrategy!.GenericArgument}({args})"; // Standard: .SetXxx<T>(args)
 
         return methodCall;
     }
@@ -241,9 +250,7 @@ internal static class PropertyMappingCodeRenderer
     ///     without the "PropertyName = " prefix, as it's used as a constructor parameter value.
     /// </summary>
     private static string RenderConstructorArgument(
-        PropertyMappingSpec spec,
-        PropertyAnalysis analysis,
-        GeneratorContext context
+        PropertyMappingSpec spec, PropertyAnalysis analysis, GeneratorContext context
     )
     {
         Debug.Assert(spec.FromItemMethod is not null, "FromItemMethod should not be null");
@@ -254,9 +261,10 @@ internal static class PropertyMappingCodeRenderer
 
         var args = string.Join(", ", spec.FromItemMethod.Arguments.Select(a => a.Value));
 
-        var methodCall = spec.FromItemMethod.IsCustomMethod
-            ? $"{spec.FromItemMethod.MethodName}({args})" // Custom: MethodName(item)
-            : $"{context.MapperOptions.FromMethodParameterName}.{spec.FromItemMethod.MethodName}{spec.TypeStrategy!.GenericArgument}({args})"; // Standard: item.GetXxx<T>(args)
+        var methodCall =
+            spec.FromItemMethod.IsCustomMethod
+                ? $"{spec.FromItemMethod.MethodName}({args})" // Custom: MethodName(item)
+                : $"{context.MapperOptions.FromMethodParameterName}.{spec.FromItemMethod.MethodName}{spec.TypeStrategy!.GenericArgument}({args})"; // Standard: item.GetXxx<T>(args)
 
         // For array properties, append .ToArray() to convert the List to an array
         var isArrayProperty = analysis.PropertyType.TypeKind == TypeKind.Array;
@@ -274,9 +282,8 @@ internal static class PropertyMappingCodeRenderer
     ///     Renders the ToItem code for a nested object.
     /// </summary>
     private static string RenderNestedObjectToAssignment(
-        PropertyMappingSpec spec,
-        PropertyAnalysis analysis,
-        GeneratorContext context
+        PropertyMappingSpec spec, PropertyAnalysis analysis, GeneratorContext context,
+        HelperMethodRegistry helperRegistry
     )
     {
         var nestedMapping = spec.TypeStrategy!.NestedMapping!;
@@ -286,12 +293,22 @@ internal static class PropertyMappingCodeRenderer
         return nestedMapping switch
         {
             MapperBasedNesting mapperBased => RenderMapperBasedToAssignment(
-                spec, paramName, isNullable, mapperBased.Mapper
+                spec,
+                paramName,
+                isNullable,
+                mapperBased.Mapper
             ),
             InlineNesting inline => RenderInlineToAssignment(
-                spec, paramName, isNullable, inline.Info, context
+                spec,
+                paramName,
+                isNullable,
+                inline.Info,
+                context,
+                helperRegistry
             ),
-            _ => throw new InvalidOperationException($"Unknown nested mapping type: {nestedMapping.GetType()}")
+            _ => throw new InvalidOperationException(
+                $"Unknown nested mapping type: {nestedMapping.GetType()}"
+            ),
         };
     }
 
@@ -300,52 +317,55 @@ internal static class PropertyMappingCodeRenderer
     ///     Output: .Set("key", source.Prop is null ? new AttributeValue { NULL = true } : new AttributeValue { M = MapperName.ToItem(source.Prop) })
     /// </summary>
     private static string RenderMapperBasedToAssignment(
-        PropertyMappingSpec spec,
-        string paramName,
-        bool isNullable,
-        MapperReference mapper
+        PropertyMappingSpec spec, string paramName, bool isNullable, MapperReference mapper
     )
     {
         var propAccess = $"{paramName}.{spec.PropertyName}";
 
         if (isNullable)
         {
-            return $".Set(\"{spec.Key}\", {propAccess} is null ? new AttributeValue {{ NULL = true }} : new AttributeValue {{ M = {mapper.MapperFullyQualifiedName}.ToItem({propAccess}) }})";
+            return
+                $".Set(\"{spec.Key}\", {propAccess} is null ? new AttributeValue {{ NULL = true }} : new AttributeValue {{ M = {mapper.MapperFullyQualifiedName}.ToItem({propAccess}) }})";
         }
 
-        return $".Set(\"{spec.Key}\", new AttributeValue {{ M = {mapper.MapperFullyQualifiedName}.ToItem({propAccess}) }})";
+        return
+            $".Set(\"{spec.Key}\", new AttributeValue {{ M = {mapper.MapperFullyQualifiedName}.ToItem({propAccess}) }})";
     }
 
     /// <summary>
-    ///     Renders ToItem code for inline nested objects.
-    ///     Output: .Set("key", source.Prop is null ? new AttributeValue { NULL = true } : new AttributeValue { M = new Dictionary...().SetXxx()... })
+    ///     Renders ToItem code for inline nested objects using helper methods.
+    ///     Output: .Set("key", source.Prop is null ? new AttributeValue { NULL = true } : new AttributeValue { M = ToItem_Type(source.Prop) })
     /// </summary>
     private static string RenderInlineToAssignment(
-        PropertyMappingSpec spec,
-        string paramName,
-        bool isNullable,
-        NestedInlineInfo inlineInfo,
-        GeneratorContext context
+        PropertyMappingSpec spec, string paramName, bool isNullable, NestedInlineInfo inlineInfo,
+        GeneratorContext context, HelperMethodRegistry helperRegistry
     )
     {
         var propAccess = $"{paramName}.{spec.PropertyName}";
-        var inlineCode = RenderInlineNestedToItem(propAccess, inlineInfo, context);
+
+        // Register the helper method and get its name
+        var helperMethodName =
+            helperRegistry.GetOrRegisterToItemHelper(
+                inlineInfo.ModelFullyQualifiedType,
+                inlineInfo
+            );
 
         if (isNullable)
         {
-            return $".Set(\"{spec.Key}\", {propAccess} is null ? new AttributeValue {{ NULL = true }} : new AttributeValue {{ M = {inlineCode} }})";
+            return
+                $".Set(\"{spec.Key}\", {propAccess} is null ? new AttributeValue {{ NULL = true }} : new AttributeValue {{ M = {helperMethodName}({propAccess}) }})";
         }
 
-        return $".Set(\"{spec.Key}\", new AttributeValue {{ M = {inlineCode} }})";
+        return
+            $".Set(\"{spec.Key}\", new AttributeValue {{ M = {helperMethodName}({propAccess}) }})";
     }
 
     /// <summary>
     ///     Renders the inline Dictionary creation code for nested objects.
+    ///     Made internal to allow reuse by HelperMethodEmitter.
     /// </summary>
-    private static string RenderInlineNestedToItem(
-        string sourcePrefix,
-        NestedInlineInfo inlineInfo,
-        GeneratorContext context
+    internal static string RenderInlineNestedToItem(
+        string sourcePrefix, NestedInlineInfo inlineInfo, GeneratorContext context
     )
     {
         var sb = new StringBuilder();
@@ -357,15 +377,18 @@ internal static class PropertyMappingCodeRenderer
             {
                 // Recursive nested object
                 var nestedSourcePrefix = $"{sourcePrefix}.{prop.PropertyName}";
-                var nestedCode = prop.NestedMapping switch
-                {
-                    MapperBasedNesting mapperBased =>
-                        $"new AttributeValue {{ M = {mapperBased.Mapper.MapperFullyQualifiedName}.ToItem({nestedSourcePrefix}) }}",
-                    InlineNesting inline =>
-                        $"new AttributeValue {{ M = {RenderInlineNestedToItem(nestedSourcePrefix, inline.Info, context)} }}",
-                    _ => throw new InvalidOperationException($"Unknown nested mapping type")
-                };
-                sb.Append($".Set(\"{prop.DynamoKey}\", {nestedSourcePrefix} is null ? new AttributeValue {{ NULL = true }} : {nestedCode})");
+                var nestedCode =
+                    prop.NestedMapping switch
+                    {
+                        MapperBasedNesting mapperBased =>
+                            $"new AttributeValue {{ M = {mapperBased.Mapper.MapperFullyQualifiedName}.ToItem({nestedSourcePrefix}) }}",
+                        InlineNesting inline =>
+                            $"new AttributeValue {{ M = {RenderInlineNestedToItem(nestedSourcePrefix, inline.Info, context)} }}",
+                        _ => throw new InvalidOperationException("Unknown nested mapping type"),
+                    };
+                sb.Append(
+                    $".Set(\"{prop.DynamoKey}\", {nestedSourcePrefix} is null ? new AttributeValue {{ NULL = true }} : {nestedCode})"
+                );
             }
             else if (prop.Strategy is not null)
             {
@@ -375,15 +398,19 @@ internal static class PropertyMappingCodeRenderer
                 var propValue = $"{sourcePrefix}.{prop.PropertyName}";
 
                 // Build type-specific args
-                var typeArgs = prop.Strategy.ToTypeSpecificArgs.Length > 0
-                    ? ", " + string.Join(", ", prop.Strategy.ToTypeSpecificArgs)
-                    : "";
+                var typeArgs =
+                    prop.Strategy.ToTypeSpecificArgs.Length > 0
+                        ? ", " + string.Join(", ", prop.Strategy.ToTypeSpecificArgs)
+                        : "";
 
                 // Omit flags - use mapper defaults
-                var omitEmpty = context.MapperOptions.OmitEmptyStrings.ToString().ToLowerInvariant();
+                var omitEmpty =
+                    context.MapperOptions.OmitEmptyStrings.ToString().ToLowerInvariant();
                 var omitNull = context.MapperOptions.OmitNullStrings.ToString().ToLowerInvariant();
 
-                sb.Append($".{setMethod}{genericArg}(\"{prop.DynamoKey}\", {propValue}{typeArgs}, {omitEmpty}, {omitNull})");
+                sb.Append(
+                    $".{setMethod}{genericArg}(\"{prop.DynamoKey}\", {propValue}{typeArgs}, {omitEmpty}, {omitNull})"
+                );
             }
         }
 
@@ -394,9 +421,8 @@ internal static class PropertyMappingCodeRenderer
     ///     Renders the FromItem code for a nested object (init-style assignment).
     /// </summary>
     private static string RenderNestedObjectFromInitAssignment(
-        PropertyMappingSpec spec,
-        PropertyAnalysis analysis,
-        GeneratorContext context
+        PropertyMappingSpec spec, PropertyAnalysis analysis, GeneratorContext context,
+        HelperMethodRegistry helperRegistry
     )
     {
         var nestedMapping = spec.TypeStrategy!.NestedMapping!;
@@ -408,23 +434,36 @@ internal static class PropertyMappingCodeRenderer
         return nestedMapping switch
         {
             MapperBasedNesting mapperBased => RenderMapperBasedFromInitAssignment(
-                spec, itemParam, mapperBased.Mapper, fallback
+                spec,
+                itemParam,
+                mapperBased.Mapper,
+                fallback
             ),
             InlineNesting inline => RenderInlineFromInitAssignment(
-                spec, itemParam, inline.Info, context, fallback
+                spec,
+                itemParam,
+                inline.Info,
+                context,
+                fallback,
+                helperRegistry
             ),
-            _ => throw new InvalidOperationException($"Unknown nested mapping type: {nestedMapping.GetType()}")
+            _ => throw new InvalidOperationException(
+                $"Unknown nested mapping type: {nestedMapping.GetType()}"
+            ),
         };
     }
 
     /// <summary>
     ///     Determines the fallback expression for a nested object when not found in DynamoDB.
     /// </summary>
-    private static string GetNestedObjectFallback(PropertyMappingSpec spec, PropertyAnalysis analysis)
+    private static string GetNestedObjectFallback(
+        PropertyMappingSpec spec, PropertyAnalysis analysis
+    )
     {
         // If property has 'required' keyword, throw on missing
         if (analysis.IsRequired)
-            return $"throw new System.InvalidOperationException(\"Required attribute '{spec.Key}' not found.\")";
+            return
+                $"throw new System.InvalidOperationException(\"Required attribute '{spec.Key}' not found.\")";
 
         // For nullable types, return null
         if (analysis.Nullability.IsNullableType)
@@ -440,40 +479,41 @@ internal static class PropertyMappingCodeRenderer
     ///     Output: PropertyName = item.TryGetValue("key", out var attr) &amp;&amp; attr.M is { } map ? MapperName.FromItem(map) : fallback,
     /// </summary>
     private static string RenderMapperBasedFromInitAssignment(
-        PropertyMappingSpec spec,
-        string itemParam,
-        MapperReference mapper,
-        string fallback
+        PropertyMappingSpec spec, string itemParam, MapperReference mapper, string fallback
     )
     {
         var varName = spec.PropertyName.ToLowerInvariant();
-        return $"{spec.PropertyName} = {itemParam}.TryGetValue(\"{spec.Key}\", out var {varName}Attr) && {varName}Attr.M is {{ }} {varName}Map ? {mapper.MapperFullyQualifiedName}.FromItem({varName}Map) : {fallback},";
+        return
+            $"{spec.PropertyName} = {itemParam}.TryGetValue(\"{spec.Key}\", out var {varName}Attr) && {varName}Attr.M is {{ }} {varName}Map ? {mapper.MapperFullyQualifiedName}.FromItem({varName}Map) : {fallback},";
     }
 
     /// <summary>
     ///     Renders FromItem init-style code for inline nested objects.
     /// </summary>
     private static string RenderInlineFromInitAssignment(
-        PropertyMappingSpec spec,
-        string itemParam,
-        NestedInlineInfo inlineInfo,
-        GeneratorContext context,
-        string fallback
+        PropertyMappingSpec spec, string itemParam, NestedInlineInfo inlineInfo,
+        GeneratorContext context, string fallback, HelperMethodRegistry helperRegistry
     )
     {
         var varName = spec.PropertyName.ToLowerInvariant();
-        var initCode = RenderInlineNestedFromItem(varName + "Map", inlineInfo, context);
 
-        return $"{spec.PropertyName} = {itemParam}.TryGetValue(\"{spec.Key}\", out var {varName}Attr) && {varName}Attr.M is {{ }} {varName}Map ? {initCode} : {fallback},";
+        // Register the helper method and get its name
+        var helperMethodName =
+            helperRegistry.GetOrRegisterFromItemHelper(
+                inlineInfo.ModelFullyQualifiedType,
+                inlineInfo
+            );
+
+        return
+            $"{spec.PropertyName} = {itemParam}.TryGetValue(\"{spec.Key}\", out var {varName}Attr) && {varName}Attr.M is {{ }} {varName}Map ? {helperMethodName}({varName}Map) : {fallback},";
     }
 
     /// <summary>
     ///     Renders the inline object initializer for nested objects.
+    ///     Made internal to allow reuse by HelperMethodEmitter.
     /// </summary>
-    private static string RenderInlineNestedFromItem(
-        string mapVarName,
-        NestedInlineInfo inlineInfo,
-        GeneratorContext context
+    internal static string RenderInlineNestedFromItem(
+        string mapVarName, NestedInlineInfo inlineInfo, GeneratorContext context
     )
     {
         var sb = new StringBuilder();
@@ -489,14 +529,15 @@ internal static class PropertyMappingCodeRenderer
             {
                 // Recursive nested object
                 var nestedVarName = $"{mapVarName}_{prop.PropertyName.ToLowerInvariant()}";
-                var nestedCode = prop.NestedMapping switch
-                {
-                    MapperBasedNesting mapperBased =>
-                        $"{mapVarName}.TryGetValue(\"{prop.DynamoKey}\", out var {nestedVarName}Attr) && {nestedVarName}Attr.M is {{ }} {nestedVarName} ? {mapperBased.Mapper.MapperFullyQualifiedName}.FromItem({nestedVarName}) : null",
-                    InlineNesting inline =>
-                        $"{mapVarName}.TryGetValue(\"{prop.DynamoKey}\", out var {nestedVarName}Attr) && {nestedVarName}Attr.M is {{ }} {nestedVarName} ? {RenderInlineNestedFromItem(nestedVarName, inline.Info, context)} : null",
-                    _ => throw new InvalidOperationException($"Unknown nested mapping type")
-                };
+                var nestedCode =
+                    prop.NestedMapping switch
+                    {
+                        MapperBasedNesting mapperBased =>
+                            $"{mapVarName}.TryGetValue(\"{prop.DynamoKey}\", out var {nestedVarName}Attr) && {nestedVarName}Attr.M is {{ }} {nestedVarName} ? {mapperBased.Mapper.MapperFullyQualifiedName}.FromItem({nestedVarName}) : null",
+                        InlineNesting inline =>
+                            $"{mapVarName}.TryGetValue(\"{prop.DynamoKey}\", out var {nestedVarName}Attr) && {nestedVarName}Attr.M is {{ }} {nestedVarName} ? {RenderInlineNestedFromItem(nestedVarName, inline.Info, context)} : null",
+                        _ => throw new InvalidOperationException("Unknown nested mapping type"),
+                    };
                 sb.Append($"{prop.PropertyName} = {nestedCode},");
             }
             else if (prop.Strategy is not null)
@@ -506,12 +547,19 @@ internal static class PropertyMappingCodeRenderer
                 var genericArg = prop.Strategy.GenericArgument;
 
                 // Build type-specific args
-                var typeArgs = prop.Strategy.FromTypeSpecificArgs.Length > 0
-                    ? string.Join(", ", prop.Strategy.FromTypeSpecificArgs.Select(a =>
-                        a.StartsWith("\"") ? $"format: {a}" : a)) + ", "
-                    : "";
+                var typeArgs =
+                    prop.Strategy.FromTypeSpecificArgs.Length > 0
+                        ? string.Join(
+                            ", ",
+                            prop.Strategy.FromTypeSpecificArgs.Select(
+                                a => a.StartsWith("\"") ? $"format: {a}" : a
+                            )
+                        ) + ", "
+                        : "";
 
-                sb.Append($"{prop.PropertyName} = {mapVarName}.{getMethod}{genericArg}(\"{prop.DynamoKey}\", {typeArgs}Requiredness.Optional),");
+                sb.Append(
+                    $"{prop.PropertyName} = {mapVarName}.{getMethod}{genericArg}(\"{prop.DynamoKey}\", {typeArgs}Requiredness.Optional),"
+                );
             }
         }
 
@@ -523,10 +571,8 @@ internal static class PropertyMappingCodeRenderer
     ///     Renders the FromItem code for a nested object (regular assignment style).
     /// </summary>
     private static string RenderNestedObjectFromAssignment(
-        PropertyMappingSpec spec,
-        string modelVarName,
-        PropertyAnalysis analysis,
-        GeneratorContext context
+        PropertyMappingSpec spec, string modelVarName, PropertyAnalysis analysis,
+        GeneratorContext context, HelperMethodRegistry helperRegistry
     )
     {
         var nestedMapping = spec.TypeStrategy!.NestedMapping!;
@@ -535,12 +581,22 @@ internal static class PropertyMappingCodeRenderer
         return nestedMapping switch
         {
             MapperBasedNesting mapperBased => RenderMapperBasedFromAssignment(
-                spec, modelVarName, itemParam, mapperBased.Mapper
+                spec,
+                modelVarName,
+                itemParam,
+                mapperBased.Mapper
             ),
             InlineNesting inline => RenderInlineFromAssignment(
-                spec, modelVarName, itemParam, inline.Info, context
+                spec,
+                modelVarName,
+                itemParam,
+                inline.Info,
+                context,
+                helperRegistry
             ),
-            _ => throw new InvalidOperationException($"Unknown nested mapping type: {nestedMapping.GetType()}")
+            _ => throw new InvalidOperationException(
+                $"Unknown nested mapping type: {nestedMapping.GetType()}"
+            ),
         };
     }
 
@@ -548,30 +604,33 @@ internal static class PropertyMappingCodeRenderer
     ///     Renders FromItem regular assignment code for mapper-based nested objects.
     /// </summary>
     private static string RenderMapperBasedFromAssignment(
-        PropertyMappingSpec spec,
-        string modelVarName,
-        string itemParam,
-        MapperReference mapper
+        PropertyMappingSpec spec, string modelVarName, string itemParam, MapperReference mapper
     )
     {
         var varName = spec.PropertyName.ToLowerInvariant();
-        return $"if ({itemParam}.TryGetValue(\"{spec.Key}\", out var {varName}Attr) && {varName}Attr.M is {{ }} {varName}Map) {modelVarName}.{spec.PropertyName} = {mapper.MapperFullyQualifiedName}.FromItem({varName}Map);";
+        return
+            $"if ({itemParam}.TryGetValue(\"{spec.Key}\", out var {varName}Attr) && {varName}Attr.M is {{ }} {varName}Map) {modelVarName}.{spec.PropertyName} = {mapper.MapperFullyQualifiedName}.FromItem({varName}Map);";
     }
 
     /// <summary>
     ///     Renders FromItem regular assignment code for inline nested objects.
     /// </summary>
     private static string RenderInlineFromAssignment(
-        PropertyMappingSpec spec,
-        string modelVarName,
-        string itemParam,
-        NestedInlineInfo inlineInfo,
-        GeneratorContext context
+        PropertyMappingSpec spec, string modelVarName, string itemParam,
+        NestedInlineInfo inlineInfo, GeneratorContext context, HelperMethodRegistry helperRegistry
     )
     {
         var varName = spec.PropertyName.ToLowerInvariant();
-        var initCode = RenderInlineNestedFromItem(varName + "Map", inlineInfo, context);
-        return $"if ({itemParam}.TryGetValue(\"{spec.Key}\", out var {varName}Attr) && {varName}Attr.M is {{ }} {varName}Map) {modelVarName}.{spec.PropertyName} = {initCode};";
+
+        // Register the helper method and get its name
+        var helperMethodName =
+            helperRegistry.GetOrRegisterFromItemHelper(
+                inlineInfo.ModelFullyQualifiedType,
+                inlineInfo
+            );
+
+        return
+            $"if ({itemParam}.TryGetValue(\"{spec.Key}\", out var {varName}Attr) && {varName}Attr.M is {{ }} {varName}Map) {modelVarName}.{spec.PropertyName} = {helperMethodName}({varName}Map);";
     }
 
     #endregion
@@ -582,11 +641,9 @@ internal static class PropertyMappingCodeRenderer
     ///     Renders a nested collection property (List&lt;NestedType&gt; or Dictionary&lt;string, NestedType&gt;) into PropertyInfo.
     /// </summary>
     private static PropertyInfo RenderNestedCollectionProperty(
-        PropertyMappingSpec spec,
-        PropertyAnalysis analysis,
-        string modelVarName,
-        InitializationMethod initMethod,
-        GeneratorContext context
+        PropertyMappingSpec spec, PropertyAnalysis analysis, string modelVarName,
+        InitializationMethod initMethod, GeneratorContext context,
+        HelperMethodRegistry helperRegistry
     )
     {
         // Use init syntax for InitSyntax mode, regular assignment for PostConstruction
@@ -594,25 +651,27 @@ internal static class PropertyMappingCodeRenderer
 
         // FromItem for nested collections
         var fromAssignment =
-            context.HasFromItemMethod
-            && analysis.HasSetter
-            && spec.FromItemMethod is not null
-            && !useInitSyntax
-                ? RenderNestedCollectionFromAssignment(spec, modelVarName, analysis, context)
+            context.HasFromItemMethod && analysis.HasSetter && spec.FromItemMethod is not null &&
+            !useInitSyntax
+                ? RenderNestedCollectionFromAssignment(
+                    spec,
+                    modelVarName,
+                    analysis,
+                    context,
+                    helperRegistry
+                )
                 : null;
 
         var fromInitAssignment =
-            context.HasFromItemMethod
-            && analysis.HasSetter
-            && spec.FromItemMethod is not null
-            && useInitSyntax
-                ? RenderNestedCollectionFromInitAssignment(spec, analysis, context)
+            context.HasFromItemMethod && analysis.HasSetter && spec.FromItemMethod is not null &&
+            useInitSyntax
+                ? RenderNestedCollectionFromInitAssignment(spec, analysis, context, helperRegistry)
                 : null;
 
         // ToItem for nested collections
         var toAssignments =
             context.HasToItemMethod && analysis.HasGetter && spec.ToItemMethod is not null
-                ? RenderNestedCollectionToAssignment(spec, analysis, context)
+                ? RenderNestedCollectionToAssignment(spec, analysis, context, helperRegistry)
                 : null;
 
         return new PropertyInfo(fromAssignment, fromInitAssignment, toAssignments, null);
@@ -622,9 +681,8 @@ internal static class PropertyMappingCodeRenderer
     ///     Renders the ToItem code for a nested collection.
     /// </summary>
     private static string RenderNestedCollectionToAssignment(
-        PropertyMappingSpec spec,
-        PropertyAnalysis analysis,
-        GeneratorContext context
+        PropertyMappingSpec spec, PropertyAnalysis analysis, GeneratorContext context,
+        HelperMethodRegistry helperRegistry
     )
     {
         var collectionInfo = spec.TypeStrategy!.CollectionInfo!;
@@ -636,12 +694,25 @@ internal static class PropertyMappingCodeRenderer
         return collectionInfo.Category switch
         {
             CollectionCategory.List => RenderNestedListToAssignment(
-                spec, propAccess, isNullable, elementMapping, collectionInfo, context
+                spec,
+                propAccess,
+                isNullable,
+                elementMapping,
+                collectionInfo,
+                context,
+                helperRegistry
             ),
             CollectionCategory.Map => RenderNestedMapToAssignment(
-                spec, propAccess, isNullable, elementMapping, context
+                spec,
+                propAccess,
+                isNullable,
+                elementMapping,
+                context,
+                helperRegistry
             ),
-            _ => throw new InvalidOperationException($"Unexpected collection category for nested collection: {collectionInfo.Category}")
+            _ => throw new InvalidOperationException(
+                $"Unexpected collection category for nested collection: {collectionInfo.Category}"
+            ),
         };
     }
 
@@ -650,28 +721,28 @@ internal static class PropertyMappingCodeRenderer
     ///     Output: .Set("key", source.Prop?.Select(x => new AttributeValue { M = ... }).ToList())
     /// </summary>
     private static string RenderNestedListToAssignment(
-        PropertyMappingSpec spec,
-        string propAccess,
-        bool isNullable,
-        NestedMappingInfo elementMapping,
-        CollectionInfo collectionInfo,
-        GeneratorContext context
+        PropertyMappingSpec spec, string propAccess, bool isNullable,
+        NestedMappingInfo elementMapping, CollectionInfo collectionInfo, GeneratorContext context,
+        HelperMethodRegistry helperRegistry
     )
     {
-        var elementConverter = elementMapping switch
-        {
-            MapperBasedNesting mapperBased =>
-                $"new AttributeValue {{ M = {mapperBased.Mapper.MapperFullyQualifiedName}.ToItem(x) }}",
-            InlineNesting inline =>
-                $"new AttributeValue {{ M = {RenderInlineNestedToItem("x", inline.Info, context)} }}",
-            _ => throw new InvalidOperationException($"Unknown nested mapping type")
-        };
+        var elementConverter =
+            elementMapping switch
+            {
+                MapperBasedNesting mapperBased =>
+                    $"new AttributeValue {{ M = {mapperBased.Mapper.MapperFullyQualifiedName}.ToItem(x) }}",
+                InlineNesting inline =>
+                    $"new AttributeValue {{ M = {helperRegistry.GetOrRegisterToItemHelper(inline.Info.ModelFullyQualifiedType, inline.Info)}(x) }}",
+                _ => throw new InvalidOperationException("Unknown nested mapping type"),
+            };
 
-        var selectExpr = $"{propAccess}{(isNullable ? "?" : "")}.Select(x => {elementConverter}).ToList()";
+        var selectExpr =
+            $"{propAccess}{(isNullable ? "?" : "")}.Select(x => {elementConverter}).ToList()";
 
         if (isNullable)
         {
-            return $".Set(\"{spec.Key}\", {propAccess} is null ? new AttributeValue {{ NULL = true }} : new AttributeValue {{ L = {selectExpr} }})";
+            return
+                $".Set(\"{spec.Key}\", {propAccess} is null ? new AttributeValue {{ NULL = true }} : new AttributeValue {{ L = {selectExpr} }})";
         }
 
         return $".Set(\"{spec.Key}\", new AttributeValue {{ L = {selectExpr} }})";
@@ -682,27 +753,28 @@ internal static class PropertyMappingCodeRenderer
     ///     Output: .Set("key", source.Prop?.ToDictionary(kvp => kvp.Key, kvp => new AttributeValue { M = ... }))
     /// </summary>
     private static string RenderNestedMapToAssignment(
-        PropertyMappingSpec spec,
-        string propAccess,
-        bool isNullable,
-        NestedMappingInfo elementMapping,
-        GeneratorContext context
+        PropertyMappingSpec spec, string propAccess, bool isNullable,
+        NestedMappingInfo elementMapping, GeneratorContext context,
+        HelperMethodRegistry helperRegistry
     )
     {
-        var valueConverter = elementMapping switch
-        {
-            MapperBasedNesting mapperBased =>
-                $"new AttributeValue {{ M = {mapperBased.Mapper.MapperFullyQualifiedName}.ToItem(kvp.Value) }}",
-            InlineNesting inline =>
-                $"new AttributeValue {{ M = {RenderInlineNestedToItem("kvp.Value", inline.Info, context)} }}",
-            _ => throw new InvalidOperationException($"Unknown nested mapping type")
-        };
+        var valueConverter =
+            elementMapping switch
+            {
+                MapperBasedNesting mapperBased =>
+                    $"new AttributeValue {{ M = {mapperBased.Mapper.MapperFullyQualifiedName}.ToItem(kvp.Value) }}",
+                InlineNesting inline =>
+                    $"new AttributeValue {{ M = {helperRegistry.GetOrRegisterToItemHelper(inline.Info.ModelFullyQualifiedType, inline.Info)}(kvp.Value) }}",
+                _ => throw new InvalidOperationException("Unknown nested mapping type"),
+            };
 
-        var toDictExpr = $"{propAccess}{(isNullable ? "?" : "")}.ToDictionary(kvp => kvp.Key, kvp => {valueConverter})";
+        var toDictExpr =
+            $"{propAccess}{(isNullable ? "?" : "")}.ToDictionary(kvp => kvp.Key, kvp => {valueConverter})";
 
         if (isNullable)
         {
-            return $".Set(\"{spec.Key}\", {propAccess} is null ? new AttributeValue {{ NULL = true }} : new AttributeValue {{ M = {toDictExpr} }})";
+            return
+                $".Set(\"{spec.Key}\", {propAccess} is null ? new AttributeValue {{ NULL = true }} : new AttributeValue {{ M = {toDictExpr} }})";
         }
 
         return $".Set(\"{spec.Key}\", new AttributeValue {{ M = {toDictExpr} }})";
@@ -712,9 +784,8 @@ internal static class PropertyMappingCodeRenderer
     ///     Renders the FromItem code for a nested collection (init-style assignment).
     /// </summary>
     private static string RenderNestedCollectionFromInitAssignment(
-        PropertyMappingSpec spec,
-        PropertyAnalysis analysis,
-        GeneratorContext context
+        PropertyMappingSpec spec, PropertyAnalysis analysis, GeneratorContext context,
+        HelperMethodRegistry helperRegistry
     )
     {
         var collectionInfo = spec.TypeStrategy!.CollectionInfo!;
@@ -728,23 +799,41 @@ internal static class PropertyMappingCodeRenderer
         return collectionInfo.Category switch
         {
             CollectionCategory.List => RenderNestedListFromInitAssignment(
-                spec, itemParam, varName, elementMapping, collectionInfo, context, fallback
+                spec,
+                itemParam,
+                varName,
+                elementMapping,
+                collectionInfo,
+                context,
+                fallback,
+                helperRegistry
             ),
             CollectionCategory.Map => RenderNestedMapFromInitAssignment(
-                spec, itemParam, varName, elementMapping, context, fallback
+                spec,
+                itemParam,
+                varName,
+                elementMapping,
+                context,
+                fallback,
+                helperRegistry
             ),
-            _ => throw new InvalidOperationException($"Unexpected collection category for nested collection: {collectionInfo.Category}")
+            _ => throw new InvalidOperationException(
+                $"Unexpected collection category for nested collection: {collectionInfo.Category}"
+            ),
         };
     }
 
     /// <summary>
     ///     Determines the fallback expression for a nested collection when not found in DynamoDB.
     /// </summary>
-    private static string GetNestedCollectionFallback(PropertyMappingSpec spec, PropertyAnalysis analysis)
+    private static string GetNestedCollectionFallback(
+        PropertyMappingSpec spec, PropertyAnalysis analysis
+    )
     {
         // If property has 'required' keyword, throw on missing
         if (analysis.IsRequired)
-            return $"throw new System.InvalidOperationException(\"Required attribute '{spec.Key}' not found.\")";
+            return
+                $"throw new System.InvalidOperationException(\"Required attribute '{spec.Key}' not found.\")";
 
         // For nullable types, return null
         if (analysis.Nullability.IsNullableType)
@@ -759,66 +848,61 @@ internal static class PropertyMappingCodeRenderer
     ///     Renders FromItem init-style code for List&lt;NestedType&gt;.
     /// </summary>
     private static string RenderNestedListFromInitAssignment(
-        PropertyMappingSpec spec,
-        string itemParam,
-        string varName,
-        NestedMappingInfo elementMapping,
-        CollectionInfo collectionInfo,
-        GeneratorContext context,
-        string fallback
+        PropertyMappingSpec spec, string itemParam, string varName,
+        NestedMappingInfo elementMapping, CollectionInfo collectionInfo, GeneratorContext context,
+        string fallback, HelperMethodRegistry helperRegistry
     )
     {
-        var elementConverter = elementMapping switch
-        {
-            MapperBasedNesting mapperBased =>
-                $"{mapperBased.Mapper.MapperFullyQualifiedName}.FromItem(av.M)",
-            InlineNesting inline =>
-                RenderInlineNestedFromItem("av.M", inline.Info, context),
-            _ => throw new InvalidOperationException($"Unknown nested mapping type")
-        };
+        var elementConverter =
+            elementMapping switch
+            {
+                MapperBasedNesting mapperBased =>
+                    $"{mapperBased.Mapper.MapperFullyQualifiedName}.FromItem(av.M)",
+                InlineNesting inline =>
+                    $"{helperRegistry.GetOrRegisterFromItemHelper(inline.Info.ModelFullyQualifiedType, inline.Info)}(av.M)",
+                _ => throw new InvalidOperationException("Unknown nested mapping type"),
+            };
 
         var selectExpr = $"{varName}List.Select(av => {elementConverter}).ToList()";
 
         // For arrays, add .ToArray()
         var toArray = collectionInfo.IsArray ? ".ToArray()" : "";
 
-        return $"{spec.PropertyName} = {itemParam}.TryGetValue(\"{spec.Key}\", out var {varName}Attr) && {varName}Attr.L is {{ }} {varName}List ? {selectExpr}{toArray} : {fallback},";
+        return
+            $"{spec.PropertyName} = {itemParam}.TryGetValue(\"{spec.Key}\", out var {varName}Attr) && {varName}Attr.L is {{ }} {varName}List ? {selectExpr}{toArray} : {fallback},";
     }
 
     /// <summary>
     ///     Renders FromItem init-style code for Dictionary&lt;string, NestedType&gt;.
     /// </summary>
     private static string RenderNestedMapFromInitAssignment(
-        PropertyMappingSpec spec,
-        string itemParam,
-        string varName,
-        NestedMappingInfo elementMapping,
-        GeneratorContext context,
-        string fallback
+        PropertyMappingSpec spec, string itemParam, string varName,
+        NestedMappingInfo elementMapping, GeneratorContext context, string fallback,
+        HelperMethodRegistry helperRegistry
     )
     {
-        var valueConverter = elementMapping switch
-        {
-            MapperBasedNesting mapperBased =>
-                $"{mapperBased.Mapper.MapperFullyQualifiedName}.FromItem(kvp.Value.M)",
-            InlineNesting inline =>
-                RenderInlineNestedFromItem("kvp.Value.M", inline.Info, context),
-            _ => throw new InvalidOperationException($"Unknown nested mapping type")
-        };
+        var valueConverter =
+            elementMapping switch
+            {
+                MapperBasedNesting mapperBased =>
+                    $"{mapperBased.Mapper.MapperFullyQualifiedName}.FromItem(kvp.Value.M)",
+                InlineNesting inline =>
+                    $"{helperRegistry.GetOrRegisterFromItemHelper(inline.Info.ModelFullyQualifiedType, inline.Info)}(kvp.Value.M)",
+                _ => throw new InvalidOperationException("Unknown nested mapping type"),
+            };
 
         var toDictExpr = $"{varName}Map.ToDictionary(kvp => kvp.Key, kvp => {valueConverter})";
 
-        return $"{spec.PropertyName} = {itemParam}.TryGetValue(\"{spec.Key}\", out var {varName}Attr) && {varName}Attr.M is {{ }} {varName}Map ? {toDictExpr} : {fallback},";
+        return
+            $"{spec.PropertyName} = {itemParam}.TryGetValue(\"{spec.Key}\", out var {varName}Attr) && {varName}Attr.M is {{ }} {varName}Map ? {toDictExpr} : {fallback},";
     }
 
     /// <summary>
     ///     Renders the FromItem code for a nested collection (regular assignment style).
     /// </summary>
     private static string RenderNestedCollectionFromAssignment(
-        PropertyMappingSpec spec,
-        string modelVarName,
-        PropertyAnalysis analysis,
-        GeneratorContext context
+        PropertyMappingSpec spec, string modelVarName, PropertyAnalysis analysis,
+        GeneratorContext context, HelperMethodRegistry helperRegistry
     )
     {
         var collectionInfo = spec.TypeStrategy!.CollectionInfo!;
@@ -829,12 +913,27 @@ internal static class PropertyMappingCodeRenderer
         return collectionInfo.Category switch
         {
             CollectionCategory.List => RenderNestedListFromAssignment(
-                spec, modelVarName, itemParam, varName, elementMapping, collectionInfo, context
+                spec,
+                modelVarName,
+                itemParam,
+                varName,
+                elementMapping,
+                collectionInfo,
+                context,
+                helperRegistry
             ),
             CollectionCategory.Map => RenderNestedMapFromAssignment(
-                spec, modelVarName, itemParam, varName, elementMapping, context
+                spec,
+                modelVarName,
+                itemParam,
+                varName,
+                elementMapping,
+                context,
+                helperRegistry
             ),
-            _ => throw new InvalidOperationException($"Unexpected collection category for nested collection: {collectionInfo.Category}")
+            _ => throw new InvalidOperationException(
+                $"Unexpected collection category for nested collection: {collectionInfo.Category}"
+            ),
         };
     }
 
@@ -842,56 +941,53 @@ internal static class PropertyMappingCodeRenderer
     ///     Renders FromItem regular assignment code for List&lt;NestedType&gt;.
     /// </summary>
     private static string RenderNestedListFromAssignment(
-        PropertyMappingSpec spec,
-        string modelVarName,
-        string itemParam,
-        string varName,
-        NestedMappingInfo elementMapping,
-        CollectionInfo collectionInfo,
-        GeneratorContext context
+        PropertyMappingSpec spec, string modelVarName, string itemParam, string varName,
+        NestedMappingInfo elementMapping, CollectionInfo collectionInfo, GeneratorContext context,
+        HelperMethodRegistry helperRegistry
     )
     {
-        var elementConverter = elementMapping switch
-        {
-            MapperBasedNesting mapperBased =>
-                $"{mapperBased.Mapper.MapperFullyQualifiedName}.FromItem(av.M)",
-            InlineNesting inline =>
-                RenderInlineNestedFromItem("av.M", inline.Info, context),
-            _ => throw new InvalidOperationException($"Unknown nested mapping type")
-        };
+        var elementConverter =
+            elementMapping switch
+            {
+                MapperBasedNesting mapperBased =>
+                    $"{mapperBased.Mapper.MapperFullyQualifiedName}.FromItem(av.M)",
+                InlineNesting inline =>
+                    $"{helperRegistry.GetOrRegisterFromItemHelper(inline.Info.ModelFullyQualifiedType, inline.Info)}(av.M)",
+                _ => throw new InvalidOperationException("Unknown nested mapping type"),
+            };
 
         var selectExpr = $"{varName}List.Select(av => {elementConverter}).ToList()";
 
         // For arrays, add .ToArray()
         var toArray = collectionInfo.IsArray ? ".ToArray()" : "";
 
-        return $"if ({itemParam}.TryGetValue(\"{spec.Key}\", out var {varName}Attr) && {varName}Attr.L is {{ }} {varName}List) {modelVarName}.{spec.PropertyName} = {selectExpr}{toArray};";
+        return
+            $"if ({itemParam}.TryGetValue(\"{spec.Key}\", out var {varName}Attr) && {varName}Attr.L is {{ }} {varName}List) {modelVarName}.{spec.PropertyName} = {selectExpr}{toArray};";
     }
 
     /// <summary>
     ///     Renders FromItem regular assignment code for Dictionary&lt;string, NestedType&gt;.
     /// </summary>
     private static string RenderNestedMapFromAssignment(
-        PropertyMappingSpec spec,
-        string modelVarName,
-        string itemParam,
-        string varName,
-        NestedMappingInfo elementMapping,
-        GeneratorContext context
+        PropertyMappingSpec spec, string modelVarName, string itemParam, string varName,
+        NestedMappingInfo elementMapping, GeneratorContext context,
+        HelperMethodRegistry helperRegistry
     )
     {
-        var valueConverter = elementMapping switch
-        {
-            MapperBasedNesting mapperBased =>
-                $"{mapperBased.Mapper.MapperFullyQualifiedName}.FromItem(kvp.Value.M)",
-            InlineNesting inline =>
-                RenderInlineNestedFromItem("kvp.Value.M", inline.Info, context),
-            _ => throw new InvalidOperationException($"Unknown nested mapping type")
-        };
+        var valueConverter =
+            elementMapping switch
+            {
+                MapperBasedNesting mapperBased =>
+                    $"{mapperBased.Mapper.MapperFullyQualifiedName}.FromItem(kvp.Value.M)",
+                InlineNesting inline =>
+                    $"{helperRegistry.GetOrRegisterFromItemHelper(inline.Info.ModelFullyQualifiedType, inline.Info)}(kvp.Value.M)",
+                _ => throw new InvalidOperationException("Unknown nested mapping type"),
+            };
 
         var toDictExpr = $"{varName}Map.ToDictionary(kvp => kvp.Key, kvp => {valueConverter})";
 
-        return $"if ({itemParam}.TryGetValue(\"{spec.Key}\", out var {varName}Attr) && {varName}Attr.M is {{ }} {varName}Map) {modelVarName}.{spec.PropertyName} = {toDictExpr};";
+        return
+            $"if ({itemParam}.TryGetValue(\"{spec.Key}\", out var {varName}Attr) && {varName}Attr.M is {{ }} {varName}Map) {modelVarName}.{spec.PropertyName} = {toDictExpr};";
     }
 
     #endregion

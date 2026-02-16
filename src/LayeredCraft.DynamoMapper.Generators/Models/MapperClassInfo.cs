@@ -1,4 +1,5 @@
 using DynamoMapper.Generator.Diagnostics;
+using LayeredCraft.SourceGeneratorTools.Types;
 using Microsoft.CodeAnalysis;
 using WellKnownType = DynamoMapper.Generator.WellKnownTypes.WellKnownTypeData.WellKnownType;
 
@@ -11,7 +12,8 @@ internal sealed record MapperClassInfo(
     string? ToItemSignature,
     string? FromItemSignature,
     string? FromItemParameterName,
-    LocationInfo? Location
+    LocationInfo? Location,
+    EquatableArray<HelperMethodInfo> HelperMethods
 );
 
 internal static class MapperClassInfoExtensions
@@ -22,8 +24,7 @@ internal static class MapperClassInfoExtensions
     extension(MapperClassInfo)
     {
         internal static DiagnosticResult<(MapperClassInfo, ITypeSymbol)> CreateAndResolveModelType(
-            INamedTypeSymbol classSymbol,
-            GeneratorContext context
+            INamedTypeSymbol classSymbol, GeneratorContext context
         )
         {
             context.ThrowIfCancellationRequested();
@@ -47,46 +48,38 @@ internal static class MapperClassInfoExtensions
 
             // If there's an error in POCO type matching, propagate it
             return EnsurePocoTypesMatch(toItemMethod, fromItemMethod, classSymbol)
-                .Bind(modelType =>
-                {
-                    var classSignature = GetClassSignature(classSymbol);
-                    var toItemSignature = toItemMethod?.Map(GetMethodSignature);
-                    var fromItemSignature = fromItemMethod?.Map(GetMethodSignature);
-                    var namespaceStatement = classSymbol.ContainingNamespace
-                        is { IsGlobalNamespace: false } ns
-                        ? $"namespace {ns.ToDisplayString()};"
-                        : string.Empty;
+                .Bind(
+                    modelType =>
+                    {
+                        var classSignature = GetClassSignature(classSymbol);
+                        var toItemSignature = toItemMethod?.Map(GetMethodSignature);
+                        var fromItemSignature = fromItemMethod?.Map(GetMethodSignature);
+                        var namespaceStatement =
+                            classSymbol.ContainingNamespace is { IsGlobalNamespace: false } ns
+                                ? $"namespace {ns.ToDisplayString()};"
+                                : string.Empty;
 
-                    toItemMethod
-                        ?.Parameters.FirstOrDefault()
-                        ?.Name.Tap(name => context.MapperOptions.ToMethodParameterName = name);
-                    fromItemMethod
-                        ?.Parameters.FirstOrDefault()
-                        ?.Name.Tap(name => context.MapperOptions.FromMethodParameterName = name);
+                        toItemMethod?.Parameters.FirstOrDefault()
+                            ?.Name.Tap(name => context.MapperOptions.ToMethodParameterName = name);
+                        fromItemMethod?.Parameters.FirstOrDefault()
+                            ?.Name.Tap(
+                                name => context.MapperOptions.FromMethodParameterName = name
+                            );
 
-                    var fromItemParameterName = fromItemMethod?.Parameters.FirstOrDefault()?.Name;
+                        var fromItemParameterName =
+                            fromItemMethod?.Parameters.FirstOrDefault()?.Name;
 
-                    return DiagnosticResult<(MapperClassInfo, ITypeSymbol)>.Success(
-                        (
-                            new MapperClassInfo(
-                                classSymbol.Name,
-                                namespaceStatement,
-                                classSignature,
-                                toItemSignature,
-                                fromItemSignature,
-                                fromItemParameterName,
-                                context.TargetNode.CreateLocationInfo()
-                            ),
-                            modelType
-                        )
-                    );
-                });
+                        return DiagnosticResult<(MapperClassInfo, ITypeSymbol)>.Success(
+                            (new MapperClassInfo(classSymbol.Name, namespaceStatement, classSignature, toItemSignature, fromItemSignature, fromItemParameterName, context.TargetNode.CreateLocationInfo(), new EquatableArray<HelperMethodInfo>()),
+                                modelType)
+                        );
+                    }
+                );
         }
     }
 
     private static DiagnosticResult<ITypeSymbol> EnsurePocoTypesMatch(
-        IMethodSymbol? toItemMethod,
-        IMethodSymbol? fromItemMethod,
+        IMethodSymbol? toItemMethod, IMethodSymbol? fromItemMethod,
         INamedTypeSymbol mapperClassSymbol
     )
     {
@@ -100,11 +93,8 @@ internal static class MapperClassInfoExtensions
         var toItemPocoType = toItemMethod?.Parameters[0].Type;
         var fromItemPocoType = fromItemMethod?.ReturnType;
 
-        if (
-            toItemPocoType is not null
-            && fromItemPocoType is not null
-            && !SymbolEqualityComparer.Default.Equals(toItemPocoType, fromItemPocoType)
-        )
+        if (toItemPocoType is not null && fromItemPocoType is not null &&
+            !SymbolEqualityComparer.Default.Equals(toItemPocoType, fromItemPocoType))
             return DiagnosticResult<ITypeSymbol>.Failure(
                 DiagnosticDescriptors.MismatchedPocoTypes,
                 toItemMethod?.CreateLocationInfo(),
@@ -125,10 +115,10 @@ internal static class MapperClassInfoExtensions
     ///     </list>
     /// </summary>
     private static bool IsToMethod(IMethodSymbol method, GeneratorContext context) =>
-        method.Name.StartsWith(ToMethodPrefix)
-        && method
-            is { IsPartialDefinition: true, PartialImplementationPart: null, Parameters.Length: 1 }
-        && IsAttributeValueDictionary(method.ReturnType, context);
+        method.Name.StartsWith(ToMethodPrefix) && method is
+        {
+            IsPartialDefinition: true, PartialImplementationPart: null, Parameters.Length: 1,
+        } && IsAttributeValueDictionary(method.ReturnType, context);
 
     /// <summary>
     ///     From method must be:
@@ -138,20 +128,18 @@ internal static class MapperClassInfoExtensions
     ///     </list>
     /// </summary>
     private static bool IsFromMethod(IMethodSymbol method, GeneratorContext context) =>
-        method.Name.StartsWith(FromMethodPrefix)
-        && method
-            is { IsPartialDefinition: true, PartialImplementationPart: null, Parameters.Length: 1 }
-        && IsAttributeValueDictionary(method.Parameters[0].Type, context);
+        method.Name.StartsWith(FromMethodPrefix) && method is
+        {
+            IsPartialDefinition: true, PartialImplementationPart: null, Parameters.Length: 1,
+        } && IsAttributeValueDictionary(method.Parameters[0].Type, context);
 
     private static bool IsAttributeValueDictionary(ITypeSymbol type, GeneratorContext context) =>
-        type is INamedTypeSymbol { IsGenericType: true } namedType
-        && context.WellKnownTypes.IsType(
+        type is INamedTypeSymbol { IsGenericType: true } namedType && context.WellKnownTypes.IsType(
             namedType.ConstructedFrom,
             WellKnownType.System_Collections_Generic_Dictionary_2
-        )
-        && namedType.TypeArguments.Length == 2
-        && context.WellKnownTypes.IsType(namedType.TypeArguments[0], WellKnownType.System_String)
-        && context.WellKnownTypes.IsType(
+        ) && namedType.TypeArguments.Length == 2 &&
+        context.WellKnownTypes.IsType(namedType.TypeArguments[0], WellKnownType.System_String) &&
+        context.WellKnownTypes.IsType(
             namedType.TypeArguments[1],
             WellKnownType.Amazon_DynamoDBv2_Model_AttributeValue
         );
@@ -174,6 +162,7 @@ internal static class MapperClassInfoExtensions
         var modifiers = method.IsStatic ? "static " : string.Empty;
         var extensionMethod = method.IsExtensionMethod ? "this " : string.Empty;
 
-        return $"{accessibility} {modifiers}partial {returnType} {method.Name}({extensionMethod}{parameterType} {parameterName})";
+        return
+            $"{accessibility} {modifiers}partial {returnType} {method.Name}({extensionMethod}{parameterType} {parameterName})";
     }
 }

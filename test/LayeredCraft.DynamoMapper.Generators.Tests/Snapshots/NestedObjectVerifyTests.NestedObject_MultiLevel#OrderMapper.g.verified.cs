@@ -40,9 +40,9 @@ public static partial class OrderMapper
 
     private static Dictionary<string, AttributeValue> ToItem_Customer(global::MyNamespace.Customer customer)
     {
-        return new Dictionary<string, AttributeValue>(4)
+        return new Dictionary<string, AttributeValue>(2)
             .SetString("name", customer.Name, false, true)
-            .Set("address", customer.Address is null ? new AttributeValue { NULL = true } : new AttributeValue { M = new Dictionary<string, AttributeValue>().SetString("line1", customer.Address.Line1, false, true).SetString("city", customer.Address.City, false, true) });
+            .Set("address", customer.Address is null ? new AttributeValue { NULL = true } : new AttributeValue { M = ToItem_Address(customer.Address) });
     }
 
 
@@ -51,9 +51,25 @@ public static partial class OrderMapper
         return new global::MyNamespace.Customer
         {
             Name = map.GetString("name", Requiredness.Optional),
-            Address = map.TryGetValue("address", out var map_addressAttr) && map_addressAttr.M is { } map_address ? new global::MyNamespace.Address { Line1 = map_address.GetString("line1", Requiredness.Optional),
-            City = map_address.GetString("city", Requiredness.Optional),
-            } : null,
+            Address = map.TryGetValue("address", out var map_addressAttr) && map_addressAttr.M is { } map_address ? FromItem_Address(map_address) : null,
+        };
+    }
+
+
+    private static Dictionary<string, AttributeValue> ToItem_Address(global::MyNamespace.Address address)
+    {
+        return new Dictionary<string, AttributeValue>(2)
+            .SetString("line1", address.Line1, false, true)
+            .SetString("city", address.City, false, true);
+    }
+
+
+    private static global::MyNamespace.Address FromItem_Address(Dictionary<string, AttributeValue> map)
+    {
+        return new global::MyNamespace.Address
+        {
+            Line1 = map.GetString("line1", Requiredness.Optional),
+            City = map.GetString("city", Requiredness.Optional),
         };
     }
 

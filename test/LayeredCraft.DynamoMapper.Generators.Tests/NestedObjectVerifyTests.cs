@@ -3,11 +3,11 @@ namespace LayeredCraft.DynamoMapper.Generators.Tests;
 public class NestedObjectVerifyTests
 {
     [Fact]
-    public async Task NestedObject_SimpleInline() =>
-        await GeneratorTestHelpers.Verify(
-            new VerifyTestOptions
-            {
-                SourceCode = """
+    public async Task NestedObject_SimpleInline() => await GeneratorTestHelpers.Verify(
+        new VerifyTestOptions
+        {
+            SourceCode =
+                """
                 using System.Collections.Generic;
                 using Amazon.DynamoDBv2.Model;
                 using DynamoMapper.Runtime;
@@ -35,16 +35,16 @@ public class NestedObjectVerifyTests
                     public string PostalCode { get; set; }
                 }
                 """,
-            },
-            TestContext.Current.CancellationToken
-        );
+        },
+        TestContext.Current.CancellationToken
+    );
 
     [Fact]
-    public async Task NestedObject_NullableInline() =>
-        await GeneratorTestHelpers.Verify(
-            new VerifyTestOptions
-            {
-                SourceCode = """
+    public async Task NestedObject_NullableInline() => await GeneratorTestHelpers.Verify(
+        new VerifyTestOptions
+        {
+            SourceCode =
+                """
                 using System.Collections.Generic;
                 using Amazon.DynamoDBv2.Model;
                 using DynamoMapper.Runtime;
@@ -71,16 +71,16 @@ public class NestedObjectVerifyTests
                     public string City { get; set; }
                 }
                 """,
-            },
-            TestContext.Current.CancellationToken
-        );
+        },
+        TestContext.Current.CancellationToken
+    );
 
     [Fact]
-    public async Task NestedObject_NullableMapperBased() =>
-        await GeneratorTestHelpers.Verify(
-            new VerifyTestOptions
-            {
-                SourceCode = """
+    public async Task NestedObject_NullableMapperBased() => await GeneratorTestHelpers.Verify(
+        new VerifyTestOptions
+        {
+            SourceCode =
+                """
                 using System.Collections.Generic;
                 using Amazon.DynamoDBv2.Model;
                 using DynamoMapper.Runtime;
@@ -115,16 +115,16 @@ public class NestedObjectVerifyTests
                     public string City { get; set; }
                 }
                 """,
-            },
-            TestContext.Current.CancellationToken
-        );
+        },
+        TestContext.Current.CancellationToken
+    );
 
     [Fact]
-    public async Task NestedObject_MapperBased() =>
-        await GeneratorTestHelpers.Verify(
-            new VerifyTestOptions
-            {
-                SourceCode = """
+    public async Task NestedObject_MapperBased() => await GeneratorTestHelpers.Verify(
+        new VerifyTestOptions
+        {
+            SourceCode =
+                """
                 using System.Collections.Generic;
                 using Amazon.DynamoDBv2.Model;
                 using DynamoMapper.Runtime;
@@ -160,59 +160,60 @@ public class NestedObjectVerifyTests
                     public string PostalCode { get; set; }
                 }
                 """,
-            },
-            TestContext.Current.CancellationToken
-        );
+        },
+        TestContext.Current.CancellationToken
+    );
 
     [Fact]
     public async Task NestedObject_MapperBased_MissingFromMethod_FallsBackToInline() =>
         await GeneratorTestHelpers.Verify(
             new VerifyTestOptions
             {
-                SourceCode = """
-                using System.Collections.Generic;
-                using Amazon.DynamoDBv2.Model;
-                using DynamoMapper.Runtime;
+                SourceCode =
+                    """
+                    using System.Collections.Generic;
+                    using Amazon.DynamoDBv2.Model;
+                    using DynamoMapper.Runtime;
 
-                namespace MyNamespace;
+                    namespace MyNamespace;
 
-                [DynamoMapper]
-                public static partial class AddressMapper
-                {
-                    public static partial Dictionary<string, AttributeValue> ToItem(Address source);
-                }
+                    [DynamoMapper]
+                    public static partial class AddressMapper
+                    {
+                        public static partial Dictionary<string, AttributeValue> ToItem(Address source);
+                    }
 
-                [DynamoMapper]
-                public static partial class OrderMapper
-                {
-                    public static partial Dictionary<string, AttributeValue> ToItem(Order source);
+                    [DynamoMapper]
+                    public static partial class OrderMapper
+                    {
+                        public static partial Dictionary<string, AttributeValue> ToItem(Order source);
 
-                    public static partial Order FromItem(Dictionary<string, AttributeValue> item);
-                }
+                        public static partial Order FromItem(Dictionary<string, AttributeValue> item);
+                    }
 
-                public class Order
-                {
-                    public string Id { get; set; }
-                    public Address ShippingAddress { get; set; }
-                }
+                    public class Order
+                    {
+                        public string Id { get; set; }
+                        public Address ShippingAddress { get; set; }
+                    }
 
-                public class Address
-                {
-                    public string Line1 { get; set; }
-                    public string City { get; set; }
-                    public string PostalCode { get; set; }
-                }
-                """,
+                    public class Address
+                    {
+                        public string Line1 { get; set; }
+                        public string City { get; set; }
+                        public string PostalCode { get; set; }
+                    }
+                    """,
             },
             TestContext.Current.CancellationToken
         );
 
     [Fact]
-    public async Task NestedObject_MultiLevel() =>
-        await GeneratorTestHelpers.Verify(
-            new VerifyTestOptions
-            {
-                SourceCode = """
+    public async Task NestedObject_MultiLevel() => await GeneratorTestHelpers.Verify(
+        new VerifyTestOptions
+        {
+            SourceCode =
+                """
                 using System.Collections.Generic;
                 using Amazon.DynamoDBv2.Model;
                 using DynamoMapper.Runtime;
@@ -245,16 +246,16 @@ public class NestedObjectVerifyTests
                     public string City { get; set; }
                 }
                 """,
-            },
-            TestContext.Current.CancellationToken
-        );
+        },
+        TestContext.Current.CancellationToken
+    );
 
     [Fact]
-    public async Task NestedObject_WithScalarTypes() =>
-        await GeneratorTestHelpers.Verify(
-            new VerifyTestOptions
-            {
-                SourceCode = """
+    public async Task NestedObject_WithScalarTypes() => await GeneratorTestHelpers.Verify(
+        new VerifyTestOptions
+        {
+            SourceCode =
+                """
                 using System;
                 using System.Collections.Generic;
                 using Amazon.DynamoDBv2.Model;
@@ -285,16 +286,16 @@ public class NestedObjectVerifyTests
                     public bool IsActive { get; set; }
                 }
                 """,
-            },
-            TestContext.Current.CancellationToken
-        );
+        },
+        TestContext.Current.CancellationToken
+    );
 
     [Fact]
-    public async Task NestedObject_WithDotNotationOverride() =>
-        await GeneratorTestHelpers.Verify(
-            new VerifyTestOptions
-            {
-                SourceCode = """
+    public async Task NestedObject_WithDotNotationOverride() => await GeneratorTestHelpers.Verify(
+        new VerifyTestOptions
+        {
+            SourceCode =
+                """
                 using System.Collections.Generic;
                 using Amazon.DynamoDBv2.Model;
                 using DynamoMapper.Runtime;
@@ -324,9 +325,9 @@ public class NestedObjectVerifyTests
                     public string PostalCode { get; set; }
                 }
                 """,
-            },
-            TestContext.Current.CancellationToken
-        );
+        },
+        TestContext.Current.CancellationToken
+    );
 
     // ==================== NESTED COLLECTION TESTS ====================
 
@@ -335,34 +336,35 @@ public class NestedObjectVerifyTests
         await GeneratorTestHelpers.Verify(
             new VerifyTestOptions
             {
-                SourceCode = """
-                using System.Collections.Generic;
-                using Amazon.DynamoDBv2.Model;
-                using DynamoMapper.Runtime;
+                SourceCode =
+                    """
+                    using System.Collections.Generic;
+                    using Amazon.DynamoDBv2.Model;
+                    using DynamoMapper.Runtime;
 
-                namespace MyNamespace;
+                    namespace MyNamespace;
 
-                [DynamoMapper]
-                public static partial class OrderMapper
-                {
-                    public static partial Dictionary<string, AttributeValue> ToItem(Order source);
+                    [DynamoMapper]
+                    public static partial class OrderMapper
+                    {
+                        public static partial Dictionary<string, AttributeValue> ToItem(Order source);
 
-                    public static partial Order FromItem(Dictionary<string, AttributeValue> item);
-                }
+                        public static partial Order FromItem(Dictionary<string, AttributeValue> item);
+                    }
 
-                public class Order
-                {
-                    public string Id { get; set; }
-                    public List<LineItem> Items { get; set; }
-                }
+                    public class Order
+                    {
+                        public string Id { get; set; }
+                        public List<LineItem> Items { get; set; }
+                    }
 
-                public class LineItem
-                {
-                    public string ProductId { get; set; }
-                    public int Quantity { get; set; }
-                    public decimal Price { get; set; }
-                }
-                """,
+                    public class LineItem
+                    {
+                        public string ProductId { get; set; }
+                        public int Quantity { get; set; }
+                        public decimal Price { get; set; }
+                    }
+                    """,
             },
             TestContext.Current.CancellationToken
         );
@@ -372,42 +374,43 @@ public class NestedObjectVerifyTests
         await GeneratorTestHelpers.Verify(
             new VerifyTestOptions
             {
-                SourceCode = """
-                using System.Collections.Generic;
-                using Amazon.DynamoDBv2.Model;
-                using DynamoMapper.Runtime;
+                SourceCode =
+                    """
+                    using System.Collections.Generic;
+                    using Amazon.DynamoDBv2.Model;
+                    using DynamoMapper.Runtime;
 
-                namespace MyNamespace;
+                    namespace MyNamespace;
 
-                [DynamoMapper]
-                public static partial class LineItemMapper
-                {
-                    public static partial Dictionary<string, AttributeValue> ToItem(LineItem source);
+                    [DynamoMapper]
+                    public static partial class LineItemMapper
+                    {
+                        public static partial Dictionary<string, AttributeValue> ToItem(LineItem source);
 
-                    public static partial LineItem FromItem(Dictionary<string, AttributeValue> item);
-                }
+                        public static partial LineItem FromItem(Dictionary<string, AttributeValue> item);
+                    }
 
-                [DynamoMapper]
-                public static partial class OrderMapper
-                {
-                    public static partial Dictionary<string, AttributeValue> ToItem(Order source);
+                    [DynamoMapper]
+                    public static partial class OrderMapper
+                    {
+                        public static partial Dictionary<string, AttributeValue> ToItem(Order source);
 
-                    public static partial Order FromItem(Dictionary<string, AttributeValue> item);
-                }
+                        public static partial Order FromItem(Dictionary<string, AttributeValue> item);
+                    }
 
-                public class Order
-                {
-                    public string Id { get; set; }
-                    public List<LineItem> Items { get; set; }
-                }
+                    public class Order
+                    {
+                        public string Id { get; set; }
+                        public List<LineItem> Items { get; set; }
+                    }
 
-                public class LineItem
-                {
-                    public string ProductId { get; set; }
-                    public int Quantity { get; set; }
-                    public decimal Price { get; set; }
-                }
-                """,
+                    public class LineItem
+                    {
+                        public string ProductId { get; set; }
+                        public int Quantity { get; set; }
+                        public decimal Price { get; set; }
+                    }
+                    """,
             },
             TestContext.Current.CancellationToken
         );
@@ -417,43 +420,44 @@ public class NestedObjectVerifyTests
         await GeneratorTestHelpers.Verify(
             new VerifyTestOptions
             {
-                SourceCode = """
-                using System.Collections.Generic;
-                using Amazon.DynamoDBv2.Model;
-                using DynamoMapper.Runtime;
+                SourceCode =
+                    """
+                    using System.Collections.Generic;
+                    using Amazon.DynamoDBv2.Model;
+                    using DynamoMapper.Runtime;
 
-                namespace MyNamespace;
+                    namespace MyNamespace;
 
-                [DynamoMapper]
-                public static partial class OrderMapper
-                {
-                    public static partial Dictionary<string, AttributeValue> ToItem(Order source);
+                    [DynamoMapper]
+                    public static partial class OrderMapper
+                    {
+                        public static partial Dictionary<string, AttributeValue> ToItem(Order source);
 
-                    public static partial Order FromItem(Dictionary<string, AttributeValue> item);
-                }
+                        public static partial Order FromItem(Dictionary<string, AttributeValue> item);
+                    }
 
-                public class Order
-                {
-                    public string Id { get; set; }
-                    public List<LineItem>? Items { get; set; }
-                }
+                    public class Order
+                    {
+                        public string Id { get; set; }
+                        public List<LineItem>? Items { get; set; }
+                    }
 
-                public class LineItem
-                {
-                    public string ProductId { get; set; }
-                    public int Quantity { get; set; }
-                }
-                """,
+                    public class LineItem
+                    {
+                        public string ProductId { get; set; }
+                        public int Quantity { get; set; }
+                    }
+                    """,
             },
             TestContext.Current.CancellationToken
         );
 
     [Fact]
-    public async Task NestedCollection_ArrayOfNestedObjects() =>
-        await GeneratorTestHelpers.Verify(
-            new VerifyTestOptions
-            {
-                SourceCode = """
+    public async Task NestedCollection_ArrayOfNestedObjects() => await GeneratorTestHelpers.Verify(
+        new VerifyTestOptions
+        {
+            SourceCode =
+                """
                 using System.Collections.Generic;
                 using Amazon.DynamoDBv2.Model;
                 using DynamoMapper.Runtime;
@@ -480,42 +484,43 @@ public class NestedObjectVerifyTests
                     public int Quantity { get; set; }
                 }
                 """,
-            },
-            TestContext.Current.CancellationToken
-        );
+        },
+        TestContext.Current.CancellationToken
+    );
 
     [Fact]
     public async Task NestedCollection_DictionaryOfNestedObjects_Inline() =>
         await GeneratorTestHelpers.Verify(
             new VerifyTestOptions
             {
-                SourceCode = """
-                using System.Collections.Generic;
-                using Amazon.DynamoDBv2.Model;
-                using DynamoMapper.Runtime;
+                SourceCode =
+                    """
+                    using System.Collections.Generic;
+                    using Amazon.DynamoDBv2.Model;
+                    using DynamoMapper.Runtime;
 
-                namespace MyNamespace;
+                    namespace MyNamespace;
 
-                [DynamoMapper]
-                public static partial class CatalogMapper
-                {
-                    public static partial Dictionary<string, AttributeValue> ToItem(Catalog source);
+                    [DynamoMapper]
+                    public static partial class CatalogMapper
+                    {
+                        public static partial Dictionary<string, AttributeValue> ToItem(Catalog source);
 
-                    public static partial Catalog FromItem(Dictionary<string, AttributeValue> item);
-                }
+                        public static partial Catalog FromItem(Dictionary<string, AttributeValue> item);
+                    }
 
-                public class Catalog
-                {
-                    public string Id { get; set; }
-                    public Dictionary<string, Product> Products { get; set; }
-                }
+                    public class Catalog
+                    {
+                        public string Id { get; set; }
+                        public Dictionary<string, Product> Products { get; set; }
+                    }
 
-                public class Product
-                {
-                    public string Name { get; set; }
-                    public decimal Price { get; set; }
-                }
-                """,
+                    public class Product
+                    {
+                        public string Name { get; set; }
+                        public decimal Price { get; set; }
+                    }
+                    """,
             },
             TestContext.Current.CancellationToken
         );
@@ -525,41 +530,42 @@ public class NestedObjectVerifyTests
         await GeneratorTestHelpers.Verify(
             new VerifyTestOptions
             {
-                SourceCode = """
-                using System.Collections.Generic;
-                using Amazon.DynamoDBv2.Model;
-                using DynamoMapper.Runtime;
+                SourceCode =
+                    """
+                    using System.Collections.Generic;
+                    using Amazon.DynamoDBv2.Model;
+                    using DynamoMapper.Runtime;
 
-                namespace MyNamespace;
+                    namespace MyNamespace;
 
-                [DynamoMapper]
-                public static partial class ProductMapper
-                {
-                    public static partial Dictionary<string, AttributeValue> ToItem(Product source);
+                    [DynamoMapper]
+                    public static partial class ProductMapper
+                    {
+                        public static partial Dictionary<string, AttributeValue> ToItem(Product source);
 
-                    public static partial Product FromItem(Dictionary<string, AttributeValue> item);
-                }
+                        public static partial Product FromItem(Dictionary<string, AttributeValue> item);
+                    }
 
-                [DynamoMapper]
-                public static partial class CatalogMapper
-                {
-                    public static partial Dictionary<string, AttributeValue> ToItem(Catalog source);
+                    [DynamoMapper]
+                    public static partial class CatalogMapper
+                    {
+                        public static partial Dictionary<string, AttributeValue> ToItem(Catalog source);
 
-                    public static partial Catalog FromItem(Dictionary<string, AttributeValue> item);
-                }
+                        public static partial Catalog FromItem(Dictionary<string, AttributeValue> item);
+                    }
 
-                public class Catalog
-                {
-                    public string Id { get; set; }
-                    public Dictionary<string, Product> Products { get; set; }
-                }
+                    public class Catalog
+                    {
+                        public string Id { get; set; }
+                        public Dictionary<string, Product> Products { get; set; }
+                    }
 
-                public class Product
-                {
-                    public string Name { get; set; }
-                    public decimal Price { get; set; }
-                }
-                """,
+                    public class Product
+                    {
+                        public string Name { get; set; }
+                        public decimal Price { get; set; }
+                    }
+                    """,
             },
             TestContext.Current.CancellationToken
         );
@@ -569,36 +575,37 @@ public class NestedObjectVerifyTests
         await GeneratorTestHelpers.Verify(
             new VerifyTestOptions
             {
-                SourceCode = """
-                using System;
-                using System.Collections.Generic;
-                using Amazon.DynamoDBv2.Model;
-                using DynamoMapper.Runtime;
+                SourceCode =
+                    """
+                    using System;
+                    using System.Collections.Generic;
+                    using Amazon.DynamoDBv2.Model;
+                    using DynamoMapper.Runtime;
 
-                namespace MyNamespace;
+                    namespace MyNamespace;
 
-                [DynamoMapper]
-                public static partial class EventLogMapper
-                {
-                    public static partial Dictionary<string, AttributeValue> ToItem(EventLog source);
+                    [DynamoMapper]
+                    public static partial class EventLogMapper
+                    {
+                        public static partial Dictionary<string, AttributeValue> ToItem(EventLog source);
 
-                    public static partial EventLog FromItem(Dictionary<string, AttributeValue> item);
-                }
+                        public static partial EventLog FromItem(Dictionary<string, AttributeValue> item);
+                    }
 
-                public class EventLog
-                {
-                    public string Id { get; set; }
-                    public List<LogEntry> Entries { get; set; }
-                }
+                    public class EventLog
+                    {
+                        public string Id { get; set; }
+                        public List<LogEntry> Entries { get; set; }
+                    }
 
-                public class LogEntry
-                {
-                    public DateTime Timestamp { get; set; }
-                    public string Message { get; set; }
-                    public int Severity { get; set; }
-                    public bool IsError { get; set; }
-                }
-                """,
+                    public class LogEntry
+                    {
+                        public DateTime Timestamp { get; set; }
+                        public string Message { get; set; }
+                        public int Severity { get; set; }
+                        public bool IsError { get; set; }
+                    }
+                    """,
             },
             TestContext.Current.CancellationToken
         );
@@ -610,33 +617,34 @@ public class NestedObjectVerifyTests
         await GeneratorTestHelpers.Verify(
             new VerifyTestOptions
             {
-                SourceCode = """
-                using System.Collections.Generic;
-                using Amazon.DynamoDBv2.Model;
-                using DynamoMapper.Runtime;
+                SourceCode =
+                    """
+                    using System.Collections.Generic;
+                    using Amazon.DynamoDBv2.Model;
+                    using DynamoMapper.Runtime;
 
-                namespace MyNamespace;
+                    namespace MyNamespace;
 
-                [DynamoMapper]
-                public static partial class OrderMapper
-                {
-                    public static partial Dictionary<string, AttributeValue> ToItem(Order source);
+                    [DynamoMapper]
+                    public static partial class OrderMapper
+                    {
+                        public static partial Dictionary<string, AttributeValue> ToItem(Order source);
 
-                    public static partial Order FromItem(Dictionary<string, AttributeValue> item);
-                }
+                        public static partial Order FromItem(Dictionary<string, AttributeValue> item);
+                    }
 
-                public class Order
-                {
-                    public string Id { get; set; }
-                    public List<LineItem>? Items { get; set; }
-                }
+                    public class Order
+                    {
+                        public string Id { get; set; }
+                        public List<LineItem>? Items { get; set; }
+                    }
 
-                public class LineItem
-                {
-                    public string ProductId { get; set; }
-                    public int Quantity { get; set; }
-                }
-                """,
+                    public class LineItem
+                    {
+                        public string ProductId { get; set; }
+                        public int Quantity { get; set; }
+                    }
+                    """,
             },
             TestContext.Current.CancellationToken
         );
@@ -646,41 +654,42 @@ public class NestedObjectVerifyTests
         await GeneratorTestHelpers.Verify(
             new VerifyTestOptions
             {
-                SourceCode = """
-                using System.Collections.Generic;
-                using Amazon.DynamoDBv2.Model;
-                using DynamoMapper.Runtime;
+                SourceCode =
+                    """
+                    using System.Collections.Generic;
+                    using Amazon.DynamoDBv2.Model;
+                    using DynamoMapper.Runtime;
 
-                namespace MyNamespace;
+                    namespace MyNamespace;
 
-                [DynamoMapper]
-                public static partial class LineItemMapper
-                {
-                    public static partial Dictionary<string, AttributeValue> ToItem(LineItem source);
+                    [DynamoMapper]
+                    public static partial class LineItemMapper
+                    {
+                        public static partial Dictionary<string, AttributeValue> ToItem(LineItem source);
 
-                    public static partial LineItem FromItem(Dictionary<string, AttributeValue> item);
-                }
+                        public static partial LineItem FromItem(Dictionary<string, AttributeValue> item);
+                    }
 
-                [DynamoMapper]
-                public static partial class OrderMapper
-                {
-                    public static partial Dictionary<string, AttributeValue> ToItem(Order source);
+                    [DynamoMapper]
+                    public static partial class OrderMapper
+                    {
+                        public static partial Dictionary<string, AttributeValue> ToItem(Order source);
 
-                    public static partial Order FromItem(Dictionary<string, AttributeValue> item);
-                }
+                        public static partial Order FromItem(Dictionary<string, AttributeValue> item);
+                    }
 
-                public class Order
-                {
-                    public string Id { get; set; }
-                    public List<LineItem>? Items { get; set; }
-                }
+                    public class Order
+                    {
+                        public string Id { get; set; }
+                        public List<LineItem>? Items { get; set; }
+                    }
 
-                public class LineItem
-                {
-                    public string ProductId { get; set; }
-                    public int Quantity { get; set; }
-                }
-                """,
+                    public class LineItem
+                    {
+                        public string ProductId { get; set; }
+                        public int Quantity { get; set; }
+                    }
+                    """,
             },
             TestContext.Current.CancellationToken
         );
@@ -690,33 +699,34 @@ public class NestedObjectVerifyTests
         await GeneratorTestHelpers.Verify(
             new VerifyTestOptions
             {
-                SourceCode = """
-                using System.Collections.Generic;
-                using Amazon.DynamoDBv2.Model;
-                using DynamoMapper.Runtime;
+                SourceCode =
+                    """
+                    using System.Collections.Generic;
+                    using Amazon.DynamoDBv2.Model;
+                    using DynamoMapper.Runtime;
 
-                namespace MyNamespace;
+                    namespace MyNamespace;
 
-                [DynamoMapper]
-                public static partial class CatalogMapper
-                {
-                    public static partial Dictionary<string, AttributeValue> ToItem(Catalog source);
+                    [DynamoMapper]
+                    public static partial class CatalogMapper
+                    {
+                        public static partial Dictionary<string, AttributeValue> ToItem(Catalog source);
 
-                    public static partial Catalog FromItem(Dictionary<string, AttributeValue> item);
-                }
+                        public static partial Catalog FromItem(Dictionary<string, AttributeValue> item);
+                    }
 
-                public class Catalog
-                {
-                    public string Id { get; set; }
-                    public Dictionary<string, Product>? Products { get; set; }
-                }
+                    public class Catalog
+                    {
+                        public string Id { get; set; }
+                        public Dictionary<string, Product>? Products { get; set; }
+                    }
 
-                public class Product
-                {
-                    public string Name { get; set; }
-                    public decimal Price { get; set; }
-                }
-                """,
+                    public class Product
+                    {
+                        public string Name { get; set; }
+                        public decimal Price { get; set; }
+                    }
+                    """,
             },
             TestContext.Current.CancellationToken
         );
@@ -726,41 +736,42 @@ public class NestedObjectVerifyTests
         await GeneratorTestHelpers.Verify(
             new VerifyTestOptions
             {
-                SourceCode = """
-                using System.Collections.Generic;
-                using Amazon.DynamoDBv2.Model;
-                using DynamoMapper.Runtime;
+                SourceCode =
+                    """
+                    using System.Collections.Generic;
+                    using Amazon.DynamoDBv2.Model;
+                    using DynamoMapper.Runtime;
 
-                namespace MyNamespace;
+                    namespace MyNamespace;
 
-                [DynamoMapper]
-                public static partial class ProductMapper
-                {
-                    public static partial Dictionary<string, AttributeValue> ToItem(Product source);
+                    [DynamoMapper]
+                    public static partial class ProductMapper
+                    {
+                        public static partial Dictionary<string, AttributeValue> ToItem(Product source);
 
-                    public static partial Product FromItem(Dictionary<string, AttributeValue> item);
-                }
+                        public static partial Product FromItem(Dictionary<string, AttributeValue> item);
+                    }
 
-                [DynamoMapper]
-                public static partial class CatalogMapper
-                {
-                    public static partial Dictionary<string, AttributeValue> ToItem(Catalog source);
+                    [DynamoMapper]
+                    public static partial class CatalogMapper
+                    {
+                        public static partial Dictionary<string, AttributeValue> ToItem(Catalog source);
 
-                    public static partial Catalog FromItem(Dictionary<string, AttributeValue> item);
-                }
+                        public static partial Catalog FromItem(Dictionary<string, AttributeValue> item);
+                    }
 
-                public class Catalog
-                {
-                    public string Id { get; set; }
-                    public Dictionary<string, Product>? Products { get; set; }
-                }
+                    public class Catalog
+                    {
+                        public string Id { get; set; }
+                        public Dictionary<string, Product>? Products { get; set; }
+                    }
 
-                public class Product
-                {
-                    public string Name { get; set; }
-                    public decimal Price { get; set; }
-                }
-                """,
+                    public class Product
+                    {
+                        public string Name { get; set; }
+                        public decimal Price { get; set; }
+                    }
+                    """,
             },
             TestContext.Current.CancellationToken
         );
@@ -772,27 +783,28 @@ public class NestedObjectVerifyTests
         await GeneratorTestHelpers.VerifyFailure(
             new VerifyTestOptions
             {
-                SourceCode = """
-                using System.Collections.Generic;
-                using Amazon.DynamoDBv2.Model;
-                using DynamoMapper.Runtime;
+                SourceCode =
+                    """
+                    using System.Collections.Generic;
+                    using Amazon.DynamoDBv2.Model;
+                    using DynamoMapper.Runtime;
 
-                namespace MyNamespace;
+                    namespace MyNamespace;
 
-                [DynamoMapper]
-                public static partial class PersonMapper
-                {
-                    public static partial Dictionary<string, AttributeValue> ToItem(Person source);
+                    [DynamoMapper]
+                    public static partial class PersonMapper
+                    {
+                        public static partial Dictionary<string, AttributeValue> ToItem(Person source);
 
-                    public static partial Person FromItem(Dictionary<string, AttributeValue> item);
-                }
+                        public static partial Person FromItem(Dictionary<string, AttributeValue> item);
+                    }
 
-                public class Person
-                {
-                    public string Name { get; set; }
-                    public Person Parent { get; set; }  // Self-referencing cycle
-                }
-                """,
+                    public class Person
+                    {
+                        public string Name { get; set; }
+                        public Person Parent { get; set; }  // Self-referencing cycle
+                    }
+                    """,
                 ExpectedDiagnosticId = "DM0006",
             },
             TestContext.Current.CancellationToken
@@ -803,33 +815,34 @@ public class NestedObjectVerifyTests
         await GeneratorTestHelpers.VerifyFailure(
             new VerifyTestOptions
             {
-                SourceCode = """
-                using System.Collections.Generic;
-                using Amazon.DynamoDBv2.Model;
-                using DynamoMapper.Runtime;
+                SourceCode =
+                    """
+                    using System.Collections.Generic;
+                    using Amazon.DynamoDBv2.Model;
+                    using DynamoMapper.Runtime;
 
-                namespace MyNamespace;
+                    namespace MyNamespace;
 
-                [DynamoMapper]
-                public static partial class NodeAMapper
-                {
-                    public static partial Dictionary<string, AttributeValue> ToItem(NodeA source);
+                    [DynamoMapper]
+                    public static partial class NodeAMapper
+                    {
+                        public static partial Dictionary<string, AttributeValue> ToItem(NodeA source);
 
-                    public static partial NodeA FromItem(Dictionary<string, AttributeValue> item);
-                }
+                        public static partial NodeA FromItem(Dictionary<string, AttributeValue> item);
+                    }
 
-                public class NodeA
-                {
-                    public string Id { get; set; }
-                    public NodeB Child { get; set; }  // A -> B -> A cycle
-                }
+                    public class NodeA
+                    {
+                        public string Id { get; set; }
+                        public NodeB Child { get; set; }  // A -> B -> A cycle
+                    }
 
-                public class NodeB
-                {
-                    public string Id { get; set; }
-                    public NodeA Parent { get; set; }  // Back reference creates cycle
-                }
-                """,
+                    public class NodeB
+                    {
+                        public string Id { get; set; }
+                        public NodeA Parent { get; set; }  // Back reference creates cycle
+                    }
+                    """,
                 ExpectedDiagnosticId = "DM0006",
             },
             TestContext.Current.CancellationToken
@@ -840,27 +853,28 @@ public class NestedObjectVerifyTests
         await GeneratorTestHelpers.VerifyFailure(
             new VerifyTestOptions
             {
-                SourceCode = """
-                using System.Collections.Generic;
-                using Amazon.DynamoDBv2.Model;
-                using DynamoMapper.Runtime;
+                SourceCode =
+                    """
+                    using System.Collections.Generic;
+                    using Amazon.DynamoDBv2.Model;
+                    using DynamoMapper.Runtime;
 
-                namespace MyNamespace;
+                    namespace MyNamespace;
 
-                [DynamoMapper]
-                public static partial class NodeMapper
-                {
-                    public static partial Dictionary<string, AttributeValue> ToItem(Node source);
+                    [DynamoMapper]
+                    public static partial class NodeMapper
+                    {
+                        public static partial Dictionary<string, AttributeValue> ToItem(Node source);
 
-                    public static partial Node FromItem(Dictionary<string, AttributeValue> item);
-                }
+                        public static partial Node FromItem(Dictionary<string, AttributeValue> item);
+                    }
 
-                public class Node
-                {
-                    public string Name { get; set; }
-                    public List<Node> Children { get; set; }
-                }
-                """,
+                    public class Node
+                    {
+                        public string Name { get; set; }
+                        public List<Node> Children { get; set; }
+                    }
+                    """,
                 ExpectedDiagnosticId = "DM0006",
             },
             TestContext.Current.CancellationToken
@@ -871,34 +885,35 @@ public class NestedObjectVerifyTests
         await GeneratorTestHelpers.VerifyFailure(
             new VerifyTestOptions
             {
-                SourceCode = """
-                using System.Collections.Generic;
-                using Amazon.DynamoDBv2.Model;
-                using DynamoMapper.Runtime;
+                SourceCode =
+                    """
+                    using System.Collections.Generic;
+                    using Amazon.DynamoDBv2.Model;
+                    using DynamoMapper.Runtime;
 
-                namespace MyNamespace;
+                    namespace MyNamespace;
 
-                [DynamoMapper]
-                [DynamoField("Address.NonExistentProperty", AttributeName = "bad_path")]
-                public static partial class OrderMapper
-                {
-                    public static partial Dictionary<string, AttributeValue> ToItem(Order source);
+                    [DynamoMapper]
+                    [DynamoField("Address.NonExistentProperty", AttributeName = "bad_path")]
+                    public static partial class OrderMapper
+                    {
+                        public static partial Dictionary<string, AttributeValue> ToItem(Order source);
 
-                    public static partial Order FromItem(Dictionary<string, AttributeValue> item);
-                }
+                        public static partial Order FromItem(Dictionary<string, AttributeValue> item);
+                    }
 
-                public class Order
-                {
-                    public string Id { get; set; }
-                    public Address Address { get; set; }
-                }
+                    public class Order
+                    {
+                        public string Id { get; set; }
+                        public Address Address { get; set; }
+                    }
 
-                public class Address
-                {
-                    public string Line1 { get; set; }
-                    public string City { get; set; }
-                }
-                """,
+                    public class Address
+                    {
+                        public string Line1 { get; set; }
+                        public string City { get; set; }
+                    }
+                    """,
                 ExpectedDiagnosticId = "DM0008",
             },
             TestContext.Current.CancellationToken
@@ -909,36 +924,89 @@ public class NestedObjectVerifyTests
         await GeneratorTestHelpers.VerifyFailure(
             new VerifyTestOptions
             {
-                SourceCode = """
-                using System.Collections.Generic;
-                using Amazon.DynamoDBv2.Model;
-                using DynamoMapper.Runtime;
+                SourceCode =
+                    """
+                    using System.Collections.Generic;
+                    using Amazon.DynamoDBv2.Model;
+                    using DynamoMapper.Runtime;
 
-                namespace MyNamespace;
+                    namespace MyNamespace;
 
-                [DynamoMapper]
-                [DynamoField("NonExistentProperty.Line1", AttributeName = "bad_path")]
-                public static partial class OrderMapper
-                {
-                    public static partial Dictionary<string, AttributeValue> ToItem(Order source);
+                    [DynamoMapper]
+                    [DynamoField("NonExistentProperty.Line1", AttributeName = "bad_path")]
+                    public static partial class OrderMapper
+                    {
+                        public static partial Dictionary<string, AttributeValue> ToItem(Order source);
 
-                    public static partial Order FromItem(Dictionary<string, AttributeValue> item);
-                }
+                        public static partial Order FromItem(Dictionary<string, AttributeValue> item);
+                    }
 
-                public class Order
-                {
-                    public string Id { get; set; }
-                    public Address Address { get; set; }
-                }
+                    public class Order
+                    {
+                        public string Id { get; set; }
+                        public Address Address { get; set; }
+                    }
 
-                public class Address
-                {
-                    public string Line1 { get; set; }
-                    public string City { get; set; }
-                }
-                """,
+                    public class Address
+                    {
+                        public string Line1 { get; set; }
+                        public string City { get; set; }
+                    }
+                    """,
                 ExpectedDiagnosticId = "DM0008",
             },
             TestContext.Current.CancellationToken
         );
+
+    [Fact]
+    public async Task NestedObject_MultipleLevels() => await GeneratorTestHelpers.Verify(
+        new VerifyTestOptions
+        {
+            SourceCode =
+                """
+                namespace MyNamespace;
+
+                using System.Collections.Generic;
+                using Amazon.DynamoDBv2.Model;
+                using DynamoMapper.Runtime;
+
+                public class Level1
+                {
+                    public string Id { get; set; } = string.Empty;
+                    public string Name { get; set; } = string.Empty;
+                    public Level2? Level2Data { get; set; }
+                }
+
+                public class Level2
+                {
+                    public string Id { get; set; } = string.Empty;
+                    public string Description { get; set; } = string.Empty;
+                    public Level3? Level3Data { get; set; }
+                }
+
+                public class Level3
+                {
+                    public string Id { get; set; } = string.Empty;
+                    public int Value { get; set; }
+                    public Level4? Level4Data { get; set; }
+                }
+
+                public class Level4
+                {
+                    public string Id { get; set; } = string.Empty;
+                    public bool IsActive { get; set; }
+                    public decimal Price { get; set; }
+                }
+
+                [DynamoMapper]
+                public static partial class Level1Mapper
+                {
+                    public static partial Dictionary<string, AttributeValue> ToItem(Level1 source);
+
+                    public static partial Level1 FromItem(Dictionary<string, AttributeValue> item);
+                }
+                """,
+        },
+        TestContext.Current.CancellationToken
+    );
 }

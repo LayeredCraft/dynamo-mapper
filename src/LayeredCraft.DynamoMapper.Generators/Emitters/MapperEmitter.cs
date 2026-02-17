@@ -1,4 +1,5 @@
 using System.Reflection;
+using DynamoMapper.Generator.Diagnostics;
 using DynamoMapper.Generator.Models;
 using Microsoft.CodeAnalysis;
 
@@ -51,8 +52,16 @@ internal static class MapperEmitter
             var renderedHelpers = new HashSet<string>();
             var helperList = new List<string>();
 
-            // Keep rendering until all helpers are processed
-            while (true)
+            // Keep rendering until all helpers are processed.
+            // A safety bound prevents an infinite loop if a bug causes helpers to be
+            // registered under ever-changing names (e.g. non-deterministic type strings).
+            // Each iteration must render at least one helper, so the real limit is the
+            // number of distinct nested types; 1 000 is a generous upper bound.
+            const int maxIterations = 1_000;
+            var iterations = 0;
+            var limitExceeded = false;
+
+            while (iterations++ < maxIterations)
             {
                 var allHelpers = mapperInfo.HelperRegistry.GetAllHelpers();
                 var newHelpers =
@@ -79,6 +88,24 @@ internal static class MapperEmitter
                     helperList.Add(rendered);
                     renderedHelpers.Add(helper.MethodName);
                 }
+
+                if (iterations >= maxIterations)
+                {
+                    limitExceeded = true;
+                    break;
+                }
+            }
+
+            if (limitExceeded)
+            {
+                new DiagnosticInfo(
+                    DiagnosticDescriptors.HelperRenderingLimitExceeded,
+                    null,
+                    mapperInfo.MapperClass!.Name,
+                    maxIterations
+                ).ReportDiagnostic(context);
+
+                return;
             }
 
             helperMethods = helperList.ToArray();

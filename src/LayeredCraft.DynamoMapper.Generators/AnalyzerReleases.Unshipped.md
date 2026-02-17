@@ -12,6 +12,7 @@
  DM0006  | DynamoMapper.Usage | Error    | DiagnosticDescriptors 
  DM0007  | DynamoMapper.Usage | Error    | DiagnosticDescriptors 
  DM0008  | DynamoMapper.Usage | Error    | DiagnosticDescriptors 
+ DM0009  | DynamoMapper.Usage | Error    | DiagnosticDescriptors 
  DM0101  | DynamoMapper.Usage | Error    | DiagnosticDescriptors 
  DM0102  | DynamoMapper.Usage | Error    | DiagnosticDescriptors 
  DM0103  | DynamoMapper.Usage | Error    | DiagnosticDescriptors 

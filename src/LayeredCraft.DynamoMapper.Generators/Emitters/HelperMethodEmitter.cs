@@ -102,7 +102,7 @@ internal static class HelperMethodEmitter
         sb.Append($"new Dictionary<string, AttributeValue>({capacity})");
 
         // Find each .Set* method call and put it on a new line
-        var startIndex = bodyCode.IndexOf(".Set", StringComparison.Ordinal);
+        var startIndex = FindNextSetMethodCall(bodyCode, 0);
 
         while (startIndex >= 0)
         {
@@ -136,7 +136,7 @@ internal static class HelperMethodEmitter
             sb.Append(methodCall);
 
             // Find the next .Set call
-            startIndex = bodyCode.IndexOf(".Set", i, StringComparison.Ordinal);
+            startIndex = FindNextSetMethodCall(bodyCode, i);
         }
 
         return sb.ToString();
@@ -194,15 +194,55 @@ internal static class HelperMethodEmitter
     private static int CountSetMethodCalls(string bodyCode)
     {
         var count = 0;
-        var index = 0;
+        var searchFrom = 0;
 
-        while ((index = bodyCode.IndexOf(".Set", index, StringComparison.Ordinal)) >= 0)
+        while ((searchFrom = FindNextSetMethodCall(bodyCode, searchFrom)) >= 0)
         {
             count++;
-            index += 4; // Move past ".Set"
+            searchFrom += 4; // Move past ".Set"
         }
 
         return count;
+    }
+
+    /// <summary>
+    ///     Finds the next .Set* method call (not a property access like source.Settings) starting at
+    ///     startFrom. Returns the index of the leading '.' or -1 if none found.
+    /// </summary>
+    private static int FindNextSetMethodCall(string bodyCode, int startFrom)
+    {
+        var index = startFrom;
+
+        while ((index = bodyCode.IndexOf(".Set", index, StringComparison.Ordinal)) >= 0)
+        {
+            // Advance past ".Set" and any remaining identifier chars (the method name suffix)
+            var nameEnd = index + 4;
+            while (nameEnd < bodyCode.Length &&
+                   (char.IsLetterOrDigit(bodyCode[nameEnd]) || bodyCode[nameEnd] == '_'))
+                nameEnd++;
+
+            // Skip generic type parameters, e.g. <string> in .SetList<string>(...)
+            if (nameEnd < bodyCode.Length && bodyCode[nameEnd] == '<')
+            {
+                var depth = 1;
+                nameEnd++;
+                while (nameEnd < bodyCode.Length && depth > 0)
+                {
+                    if (bodyCode[nameEnd] == '<') depth++;
+                    else if (bodyCode[nameEnd] == '>') depth--;
+                    nameEnd++;
+                }
+            }
+
+            // A method call must be immediately followed by '('
+            if (nameEnd < bodyCode.Length && bodyCode[nameEnd] == '(')
+                return index;
+
+            // Not a method call (e.g. source.Settings); resume search after this position
+            index += 4;
+        }
+
+        return -1;
     }
 
     /// <summary>Splits property assignments by comma, respecting nested parentheses.</summary>

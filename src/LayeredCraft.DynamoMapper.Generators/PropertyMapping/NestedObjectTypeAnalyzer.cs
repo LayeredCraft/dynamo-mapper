@@ -1,6 +1,8 @@
 using DynamoMapper.Generator.Diagnostics;
 using DynamoMapper.Generator.Models;
 using DynamoMapper.Generator.PropertyMapping.Models;
+using DynamoMapper.Generator.WellKnownTypes;
+using DynamoMapper.Runtime;
 using LayeredCraft.SourceGeneratorTools.Types;
 using Microsoft.CodeAnalysis;
 
@@ -23,14 +25,13 @@ internal static class NestedObjectTypeAnalyzer
     ///     or a failure for cycles/unsupported types.
     /// </returns>
     internal static DiagnosticResult<NestedMappingInfo?> Analyze(
-        ITypeSymbol type,
-        string propertyName,
-        NestedAnalysisContext nestedContext
+        ITypeSymbol type, string propertyName, NestedAnalysisContext nestedContext
     )
     {
         nestedContext.Context.ThrowIfCancellationRequested();
 
-        // Check if type is a class or struct with properties (not a primitive, enum, collection, etc.)
+        // Check if type is a class or struct with properties (not a primitive, enum, collection,
+        // etc.)
         if (!IsNestedObjectType(type, nestedContext.Context))
             return DiagnosticResult<NestedMappingInfo?>.Success(null);
 
@@ -54,15 +55,14 @@ internal static class NestedObjectTypeAnalyzer
         }
 
         // Step 3: Check if a mapper exists for this type and supports required directions
-        if (nestedContext.Registry.TryGetMapper(type, out var mapperReference) && mapperReference != null)
+        if (nestedContext.Registry.TryGetMapper(type, out var mapperReference) &&
+            mapperReference != null)
         {
             var requiresTo = nestedContext.Context.HasToItemMethod;
             var requiresFrom = nestedContext.Context.HasFromItemMethod;
 
-            if (
-                (!requiresTo || mapperReference.HasToItemMethod)
-                && (!requiresFrom || mapperReference.HasFromItemMethod)
-            )
+            if ((!requiresTo || mapperReference.HasToItemMethod) &&
+                (!requiresFrom || mapperReference.HasFromItemMethod))
             {
                 return DiagnosticResult<NestedMappingInfo?>.Success(
                     new MapperBasedNesting(mapperReference)
@@ -120,11 +120,11 @@ internal static class NestedObjectTypeAnalyzer
         // DateTimeOffset, TimeSpan, Guid are well-known scalar types, not nested objects
         var wellKnown = context.WellKnownTypes;
 
-        if (wellKnown.IsType(type, WellKnownTypes.WellKnownTypeData.WellKnownType.System_DateTimeOffset))
+        if (wellKnown.IsType(type, WellKnownTypeData.WellKnownType.System_DateTimeOffset))
             return true;
-        if (wellKnown.IsType(type, WellKnownTypes.WellKnownTypeData.WellKnownType.System_TimeSpan))
+        if (wellKnown.IsType(type, WellKnownTypeData.WellKnownType.System_TimeSpan))
             return true;
-        if (wellKnown.IsType(type, WellKnownTypes.WellKnownTypeData.WellKnownType.System_Guid))
+        if (wellKnown.IsType(type, WellKnownTypeData.WellKnownType.System_Guid))
             return true;
 
         return false;
@@ -133,23 +133,22 @@ internal static class NestedObjectTypeAnalyzer
     /// <summary>
     ///     Gets the mappable properties from a type.
     /// </summary>
-    private static IPropertySymbol[] GetMappableProperties(INamedTypeSymbol type, GeneratorContext context) =>
+    private static IPropertySymbol[] GetMappableProperties(
+        INamedTypeSymbol type, GeneratorContext context
+    ) =>
         PropertySymbolLookup.GetProperties(
             type,
             context.MapperOptions.IncludeBaseClassProperties,
             static (p, declaringType) =>
-                !p.IsStatic
-                && !p.IsIndexer
-                && (p.GetMethod != null || p.SetMethod != null)
-                && !(declaringType.IsRecord && p.Name == "EqualityContract")
+                !p.IsStatic && !p.IsIndexer && (p.GetMethod != null || p.SetMethod != null) &&
+                !(declaringType.IsRecord && p.Name == "EqualityContract")
         );
 
     /// <summary>
     ///     Analyzes a type for inline code generation, recursively building property specs.
     /// </summary>
     private static DiagnosticResult<NestedMappingInfo?> AnalyzeForInline(
-        ITypeSymbol type,
-        NestedAnalysisContext nestedContext
+        ITypeSymbol type, NestedAnalysisContext nestedContext
     )
     {
         if (type is not INamedTypeSymbol namedType)
@@ -168,41 +167,69 @@ internal static class NestedObjectTypeAnalyzer
 
             // Check if this property should be ignored
             var ignoreOptions = nestedContext.GetIgnoreOptionsForProperty(property.Name);
-            if (ignoreOptions?.Ignore is Runtime.IgnoreMapping.All)
+            if (ignoreOptions?.Ignore is IgnoreMapping.All)
                 continue;
 
             // Get field options for this nested property
             var fieldOptions = nestedContext.GetFieldOptionsForProperty(property.Name);
 
+            // Analyze the property using PropertyAnalyzer
+            var propertyAnalysisResult =
+                PropertyAnalyzer.Analyze(property, contextWithAncestor.Context);
+            if (!propertyAnalysisResult.IsSuccess)
+            {
+                diagnostics.Add(propertyAnalysisResult.Error!);
+                continue;
+            }
+
+            var propertyAnalysis = propertyAnalysisResult.Value!;
+
             // Determine the DynamoDB attribute name
-            var dynamoKey = fieldOptions?.AttributeName
-                ?? nestedContext.Context.MapperOptions.KeyNamingConventionConverter(property.Name);
+            var dynamoKey =
+                fieldOptions?.AttributeName ??
+                nestedContext.Context.MapperOptions.KeyNamingConventionConverter(property.Name);
 
             // Analyze the property type
             var propertyType = property.Type;
             var underlyingType = UnwrapNullable(propertyType);
 
             // Try to resolve as a scalar type first
-            var scalarStrategy = TryResolveScalarStrategy(underlyingType, propertyType, fieldOptions, nestedContext.Context);
+            var scalarStrategy =
+                TryResolveScalarStrategy(
+                    underlyingType,
+                    propertyType,
+                    fieldOptions,
+                    nestedContext.Context
+                );
             if (scalarStrategy != null)
             {
-                propertySpecs.Add(new NestedPropertySpec(
-                    property.Name,
-                    dynamoKey,
-                    scalarStrategy,
-                    NestedMapping: null
-                ));
+                propertySpecs.Add(
+                    new NestedPropertySpec(
+                        property.Name,
+                        dynamoKey,
+                        scalarStrategy,
+                        propertyAnalysis.Nullability,
+                        propertyAnalysis.HasGetter,
+                        propertyAnalysis.HasSetter,
+                        propertyAnalysis.IsRequired,
+                        propertyAnalysis.IsInitOnly,
+                        propertyAnalysis.HasDefaultValue,
+                        null
+                    )
+                );
                 continue;
             }
 
             // Check for collections
-            var collectionInfo = CollectionTypeAnalyzer.Analyze(underlyingType, nestedContext.Context);
+            var collectionInfo =
+                CollectionTypeAnalyzer.Analyze(underlyingType, nestedContext.Context);
             if (collectionInfo != null)
             {
-                var validation = CollectionTypeAnalyzer.ValidateElementType(
-                    collectionInfo.ElementType,
-                    contextWithAncestor
-                );
+                var validation =
+                    CollectionTypeAnalyzer.ValidateElementType(
+                        collectionInfo.ElementType,
+                        contextWithAncestor
+                    );
 
                 if (validation.Error is not null)
                 {
@@ -212,29 +239,40 @@ internal static class NestedObjectTypeAnalyzer
 
                 if (!validation.IsValid)
                 {
-                    diagnostics.Add(new DiagnosticInfo(
-                        DiagnosticDescriptors.UnsupportedNestedMemberType,
-                        type.Locations.FirstOrDefault()?.CreateLocationInfo(),
-                        nestedContext.CurrentPath,
-                        property.Name,
-                        propertyType.ToDisplayString()
-                    ));
+                    diagnostics.Add(
+                        new DiagnosticInfo(
+                            DiagnosticDescriptors.UnsupportedNestedMemberType,
+                            type.Locations.FirstOrDefault()?.CreateLocationInfo(),
+                            nestedContext.CurrentPath,
+                            property.Name,
+                            propertyType.ToDisplayString()
+                        )
+                    );
                     continue;
                 }
 
                 // Create collection strategy (simplified for nested objects)
                 var collectionStrategy = CreateCollectionStrategy(collectionInfo, propertyType);
-                propertySpecs.Add(new NestedPropertySpec(
-                    property.Name,
-                    dynamoKey,
-                    collectionStrategy,
-                    NestedMapping: null
-                ));
+                propertySpecs.Add(
+                    new NestedPropertySpec(
+                        property.Name,
+                        dynamoKey,
+                        collectionStrategy,
+                        propertyAnalysis.Nullability,
+                        propertyAnalysis.HasGetter,
+                        propertyAnalysis.HasSetter,
+                        propertyAnalysis.IsRequired,
+                        propertyAnalysis.IsInitOnly,
+                        propertyAnalysis.HasDefaultValue,
+                        null
+                    )
+                );
                 continue;
             }
 
             // Try to analyze as a nested object (recursive)
-            var nestedResult = Analyze(underlyingType, property.Name, contextWithAncestor.WithPath(property.Name));
+            var nestedResult =
+                Analyze(underlyingType, property.Name, contextWithAncestor.WithPath(property.Name));
             if (!nestedResult.IsSuccess)
             {
                 diagnostics.Add(nestedResult.Error!);
@@ -244,33 +282,44 @@ internal static class NestedObjectTypeAnalyzer
             if (nestedResult.Value != null)
             {
                 // It's a nested object
-                propertySpecs.Add(new NestedPropertySpec(
-                    property.Name,
-                    dynamoKey,
-                    Strategy: null,
-                    NestedMapping: nestedResult.Value
-                ));
+                propertySpecs.Add(
+                    new NestedPropertySpec(
+                        property.Name,
+                        dynamoKey,
+                        null,
+                        propertyAnalysis.Nullability,
+                        propertyAnalysis.HasGetter,
+                        propertyAnalysis.HasSetter,
+                        propertyAnalysis.IsRequired,
+                        propertyAnalysis.IsInitOnly,
+                        propertyAnalysis.HasDefaultValue,
+                        nestedResult.Value
+                    )
+                );
                 continue;
             }
 
             // Unsupported type
-            diagnostics.Add(new DiagnosticInfo(
-                DiagnosticDescriptors.UnsupportedNestedMemberType,
-                type.Locations.FirstOrDefault()?.CreateLocationInfo(),
-                nestedContext.CurrentPath,
-                property.Name,
-                propertyType.ToDisplayString()
-            ));
+            diagnostics.Add(
+                new DiagnosticInfo(
+                    DiagnosticDescriptors.UnsupportedNestedMemberType,
+                    type.Locations.FirstOrDefault()?.CreateLocationInfo(),
+                    nestedContext.CurrentPath,
+                    property.Name,
+                    propertyType.ToDisplayString()
+                )
+            );
         }
 
         // If there were errors, return the first one
         if (diagnostics.Count > 0)
             return DiagnosticResult<NestedMappingInfo?>.Failure(diagnostics[0]);
 
-        var inlineInfo = new NestedInlineInfo(
-            type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-            new EquatableArray<NestedPropertySpec>(propertySpecs.ToArray())
-        );
+        var inlineInfo =
+            new NestedInlineInfo(
+                type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                new EquatableArray<NestedPropertySpec>(propertySpecs.ToArray())
+            );
 
         return DiagnosticResult<NestedMappingInfo?>.Success(new InlineNesting(inlineInfo));
     }
@@ -279,67 +328,108 @@ internal static class NestedObjectTypeAnalyzer
     ///     Tries to resolve a scalar type mapping strategy.
     /// </summary>
     private static TypeMappingStrategy? TryResolveScalarStrategy(
-        ITypeSymbol underlyingType,
-        ITypeSymbol originalType,
-        DynamoFieldOptions? fieldOptions,
+        ITypeSymbol underlyingType, ITypeSymbol originalType, DynamoFieldOptions? fieldOptions,
         GeneratorContext context
     )
     {
-        var isNullable = !SymbolEqualityComparer.Default.Equals(underlyingType, originalType)
-            || originalType.NullableAnnotation == NullableAnnotation.Annotated;
+        var isNullable =
+            !SymbolEqualityComparer.Default.Equals(underlyingType, originalType) ||
+            originalType.NullableAnnotation == NullableAnnotation.Annotated;
         var nullableModifier = isNullable ? "Nullable" : "";
 
         return underlyingType switch
         {
             { SpecialType: SpecialType.System_String } => new TypeMappingStrategy(
-                "String", "", nullableModifier, [], []
+                "String",
+                "",
+                nullableModifier,
+                [],
+                []
             ),
             { SpecialType: SpecialType.System_Boolean } => new TypeMappingStrategy(
-                "Bool", "", nullableModifier, [], []
+                "Bool",
+                "",
+                nullableModifier,
+                [],
+                []
             ),
             { SpecialType: SpecialType.System_Int32 } => new TypeMappingStrategy(
-                "Int", "", nullableModifier, [], []
+                "Int",
+                "",
+                nullableModifier,
+                [],
+                []
             ),
             { SpecialType: SpecialType.System_Int64 } => new TypeMappingStrategy(
-                "Long", "", nullableModifier, [], []
+                "Long",
+                "",
+                nullableModifier,
+                [],
+                []
             ),
             { SpecialType: SpecialType.System_Single } => new TypeMappingStrategy(
-                "Float", "", nullableModifier, [], []
+                "Float",
+                "",
+                nullableModifier,
+                [],
+                []
             ),
             { SpecialType: SpecialType.System_Double } => new TypeMappingStrategy(
-                "Double", "", nullableModifier, [], []
+                "Double",
+                "",
+                nullableModifier,
+                [],
+                []
             ),
             { SpecialType: SpecialType.System_Decimal } => new TypeMappingStrategy(
-                "Decimal", "", nullableModifier, [], []
+                "Decimal",
+                "",
+                nullableModifier,
+                [],
+                []
             ),
             { SpecialType: SpecialType.System_DateTime } => new TypeMappingStrategy(
-                "DateTime", "", nullableModifier,
+                "DateTime",
+                "",
+                nullableModifier,
                 [$"\"{fieldOptions?.Format ?? context.MapperOptions.DateTimeFormat}\""],
                 [$"\"{fieldOptions?.Format ?? context.MapperOptions.DateTimeFormat}\""]
             ),
             INamedTypeSymbol t when context.WellKnownTypes.IsType(
-                t, WellKnownTypes.WellKnownTypeData.WellKnownType.System_DateTimeOffset
+                t,
+                WellKnownTypeData.WellKnownType.System_DateTimeOffset
             ) => new TypeMappingStrategy(
-                "DateTimeOffset", "", nullableModifier,
+                "DateTimeOffset",
+                "",
+                nullableModifier,
                 [$"\"{fieldOptions?.Format ?? context.MapperOptions.DateTimeFormat}\""],
                 [$"\"{fieldOptions?.Format ?? context.MapperOptions.DateTimeFormat}\""]
             ),
             INamedTypeSymbol t when context.WellKnownTypes.IsType(
-                t, WellKnownTypes.WellKnownTypeData.WellKnownType.System_Guid
+                t,
+                WellKnownTypeData.WellKnownType.System_Guid
             ) => new TypeMappingStrategy(
-                "Guid", "", nullableModifier,
+                "Guid",
+                "",
+                nullableModifier,
                 [$"\"{fieldOptions?.Format ?? context.MapperOptions.GuidFormat}\""],
                 [$"\"{fieldOptions?.Format ?? context.MapperOptions.GuidFormat}\""]
             ),
             INamedTypeSymbol t when context.WellKnownTypes.IsType(
-                t, WellKnownTypes.WellKnownTypeData.WellKnownType.System_TimeSpan
+                t,
+                WellKnownTypeData.WellKnownType.System_TimeSpan
             ) => new TypeMappingStrategy(
-                "TimeSpan", "", nullableModifier,
+                "TimeSpan",
+                "",
+                nullableModifier,
                 [$"\"{fieldOptions?.Format ?? context.MapperOptions.TimeSpanFormat}\""],
                 [$"\"{fieldOptions?.Format ?? context.MapperOptions.TimeSpanFormat}\""]
             ),
             INamedTypeSymbol { TypeKind: TypeKind.Enum } enumType => CreateEnumStrategy(
-                enumType, isNullable, fieldOptions, context
+                enumType,
+                isNullable,
+                fieldOptions,
+                context
             ),
             _ => null
         };
@@ -349,9 +439,7 @@ internal static class NestedObjectTypeAnalyzer
     ///     Creates an enum type mapping strategy.
     /// </summary>
     private static TypeMappingStrategy CreateEnumStrategy(
-        INamedTypeSymbol enumType,
-        bool isNullable,
-        DynamoFieldOptions? fieldOptions,
+        INamedTypeSymbol enumType, bool isNullable, DynamoFieldOptions? fieldOptions,
         GeneratorContext context
     )
     {
@@ -360,40 +448,56 @@ internal static class NestedObjectTypeAnalyzer
         var enumFormat = $"\"{format}\"";
         var nullableModifier = isNullable ? "Nullable" : "";
 
-        string[] fromArgs = isNullable
-            ? [enumFormat]
-            : [$"{enumName}.{enumType.MemberNames.First()}", enumFormat];
+        string[] fromArgs =
+            isNullable ? [enumFormat] : [$"{enumName}.{enumType.MemberNames.First()}", enumFormat];
 
-        return new TypeMappingStrategy("Enum", $"<{enumName}>", nullableModifier, fromArgs, [enumFormat]);
+        return new TypeMappingStrategy(
+            "Enum",
+            $"<{enumName}>",
+            nullableModifier,
+            fromArgs,
+            [enumFormat]
+        );
     }
 
     /// <summary>
     ///     Creates a collection type mapping strategy.
     /// </summary>
     private static TypeMappingStrategy CreateCollectionStrategy(
-        CollectionInfo collectionInfo,
-        ITypeSymbol originalType
+        CollectionInfo collectionInfo, ITypeSymbol originalType
     )
     {
         var isNullable = originalType.NullableAnnotation == NullableAnnotation.Annotated;
         var nullableModifier = isNullable ? "Nullable" : "";
 
-        var (typeName, genericArg) = collectionInfo.Category switch
-        {
-            CollectionCategory.List => ("List", $"<{collectionInfo.ElementType.ToDisplayString()}>"),
-            CollectionCategory.Map => ("Map", $"<{collectionInfo.ElementType.ToDisplayString()}>"),
-            CollectionCategory.Set => collectionInfo.TargetKind switch
+        var (typeName, genericArg) =
+            collectionInfo.Category switch
             {
-                Runtime.DynamoKind.SS => ("StringSet", ""),
-                Runtime.DynamoKind.NS => ("NumberSet", $"<{collectionInfo.ElementType.ToDisplayString()}>"),
-                Runtime.DynamoKind.BS => ("BinarySet", ""),
-                _ => throw new InvalidOperationException($"Unexpected set kind: {collectionInfo.TargetKind}")
-            },
-            _ => throw new InvalidOperationException($"Unexpected category: {collectionInfo.Category}")
-        };
+                CollectionCategory.List => ("List",
+                    $"<{collectionInfo.ElementType.ToDisplayString()}>"),
+                CollectionCategory.Map => ("Map",
+                    $"<{collectionInfo.ElementType.ToDisplayString()}>"),
+                CollectionCategory.Set => collectionInfo.TargetKind switch
+                {
+                    DynamoKind.SS => ("StringSet", ""),
+                    DynamoKind.NS => ("NumberSet",
+                        $"<{collectionInfo.ElementType.ToDisplayString()}>"),
+                    DynamoKind.BS => ("BinarySet", ""),
+                    _ => throw new InvalidOperationException(
+                        $"Unexpected set kind: {collectionInfo.TargetKind}"
+                    ),
+                },
+                _ => throw new InvalidOperationException(
+                    $"Unexpected category: {collectionInfo.Category}"
+                ),
+            };
 
         return new TypeMappingStrategy(
-            typeName, genericArg, nullableModifier, [], [],
+            typeName,
+            genericArg,
+            nullableModifier,
+            [],
+            [],
             KindOverride: collectionInfo.TargetKind
         );
     }
@@ -403,11 +507,14 @@ internal static class NestedObjectTypeAnalyzer
     /// </summary>
     private static ITypeSymbol UnwrapNullable(ITypeSymbol type)
     {
-        if (type is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } nullableType
-            && nullableType.TypeArguments.Length == 1)
+        if (type is INamedTypeSymbol
+            {
+                OriginalDefinition.SpecialType: SpecialType.System_Nullable_T,
+            } nullableType && nullableType.TypeArguments.Length == 1)
         {
             return nullableType.TypeArguments[0];
         }
+
         return type;
     }
 }

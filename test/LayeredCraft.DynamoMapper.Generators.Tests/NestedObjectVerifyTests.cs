@@ -1009,4 +1009,50 @@ public class NestedObjectVerifyTests
         },
         TestContext.Current.CancellationToken
     );
+
+    [Fact]
+    public async Task NestedObject_WithRequiredProperties_ShouldUseCorrectRequiredness() =>
+        await GeneratorTestHelpers.Verify(
+            new VerifyTestOptions
+            {
+                SourceCode =
+                    """
+                    using System.Collections.Generic;
+                    using Amazon.DynamoDBv2.Model;
+                    using DynamoMapper.Runtime;
+
+                    namespace MyNamespace;
+
+                    public class Order
+                    {
+                        public string Id { get; set; } = string.Empty;
+                        public Address ShippingAddress { get; set; } = null!;
+                    }
+
+                    public class Address
+                    {
+                        // Required properties - should use Requiredness.Required
+                        public required string Line1 { get; set; }
+                        public required string City { get; set; }
+
+                        // Optional with default - should use Requiredness.Optional
+                        public string Country { get; set; } = "USA";
+
+                        // Nullable - should use Requiredness.Optional
+                        public string? PostalCode { get; set; }
+
+                        // Init-only required - should be in object initializer
+                        public required string State { get; init; }
+                    }
+
+                    [DynamoMapper]
+                    public static partial class OrderMapper
+                    {
+                        public static partial Dictionary<string, AttributeValue> ToItem(Order source);
+                        public static partial Order FromItem(Dictionary<string, AttributeValue> item);
+                    }
+                    """,
+            },
+            TestContext.Current.CancellationToken
+        );
 }

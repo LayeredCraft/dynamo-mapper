@@ -405,9 +405,9 @@ internal static class PropertyMappingCodeRenderer
                     $".Set(\"{prop.DynamoKey}\", {nestedSourcePrefix} is null ? new AttributeValue {{ NULL = true }} : {nestedCode})"
                 );
             }
-            else if (prop.Strategy is not null)
+            else if (prop.Strategy is not null && prop.HasGetter)
             {
-                // Scalar property
+                // Scalar property - only render if it has a getter
                 var setMethod = $"Set{prop.Strategy.TypeName}";
                 var genericArg = prop.Strategy.GenericArgument;
                 var propValue = $"{sourcePrefix}.{prop.PropertyName}";
@@ -546,11 +546,22 @@ internal static class PropertyMappingCodeRenderer
                 // Recursive nested object
                 var nestedVarName = $"{mapVarName}_{prop.PropertyName.ToLowerInvariant()}";
 
+                // Determine fallback based on required and nullability
+                string fallback;
+                if (prop.IsRequired)
+                    fallback =
+                        $"throw new System.InvalidOperationException(\"Required nested property '{prop.DynamoKey}' not found in DynamoDB item.\")";
+                else if (prop.Nullability.IsNullableType)
+                    fallback = "null";
+                else
+                    // Non-nullable, non-required - use null (design limitation)
+                    fallback = "null";
+
                 string nestedCode;
                 if (prop.NestedMapping is MapperBasedNesting mapperBased)
                 {
                     nestedCode =
-                        $"{mapVarName}.TryGetValue(\"{prop.DynamoKey}\", out var {nestedVarName}Attr) && {nestedVarName}Attr.M is {{ }} {nestedVarName} ? {mapperBased.Mapper.MapperFullyQualifiedName}.FromItem({nestedVarName}) : null";
+                        $"{mapVarName}.TryGetValue(\"{prop.DynamoKey}\", out var {nestedVarName}Attr) && {nestedVarName}Attr.M is {{ }} {nestedVarName} ? {mapperBased.Mapper.MapperFullyQualifiedName}.FromItem({nestedVarName}) : {fallback}";
                 }
                 else if (prop.NestedMapping is InlineNesting inline)
                 {
@@ -561,7 +572,7 @@ internal static class PropertyMappingCodeRenderer
                             inline.Info
                         );
                     nestedCode =
-                        $"{mapVarName}.TryGetValue(\"{prop.DynamoKey}\", out var {nestedVarName}Attr) && {nestedVarName}Attr.M is {{ }} {nestedVarName} ? {helperMethodName}({nestedVarName}) : null";
+                        $"{mapVarName}.TryGetValue(\"{prop.DynamoKey}\", out var {nestedVarName}Attr) && {nestedVarName}Attr.M is {{ }} {nestedVarName} ? {helperMethodName}({nestedVarName}) : {fallback}";
                 }
                 else
                 {
@@ -587,8 +598,12 @@ internal static class PropertyMappingCodeRenderer
                         ) + ", "
                         : "";
 
+                // Determine requiredness based on property analysis
+                var requiredness =
+                    prop.IsRequired ? "Requiredness.Required" : "Requiredness.Optional";
+
                 sb.Append(
-                    $"{prop.PropertyName} = {mapVarName}.{getMethod}{genericArg}(\"{prop.DynamoKey}\", {typeArgs}Requiredness.Optional),"
+                    $"{prop.PropertyName} = {mapVarName}.{getMethod}{genericArg}(\"{prop.DynamoKey}\", {typeArgs}{requiredness}),"
                 );
             }
         }

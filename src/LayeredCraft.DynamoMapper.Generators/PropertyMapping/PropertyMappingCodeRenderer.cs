@@ -374,62 +374,72 @@ internal static class PropertyMappingCodeRenderer
 
         foreach (var prop in inlineInfo.Properties)
         {
-            if (prop.NestedMapping is not null)
-            {
-                // Recursive nested object
-                var nestedSourcePrefix = $"{sourcePrefix}.{prop.PropertyName}";
-
-                string nestedCode;
-                if (prop.NestedMapping is MapperBasedNesting mapperBased)
-                {
-                    nestedCode =
-                        $"new AttributeValue {{ M = {mapperBased.Mapper.MapperFullyQualifiedName}.ToItem({nestedSourcePrefix}) }}";
-                }
-                else if (prop.NestedMapping is InlineNesting inline)
-                {
-                    // Register helper and generate call instead of inlining
-                    var helperMethodName =
-                        helperRegistry.GetOrRegisterToItemHelper(
-                            inline.Info.ModelFullyQualifiedType,
-                            inline.Info
-                        );
-                    nestedCode =
-                        $"new AttributeValue {{ M = {helperMethodName}({nestedSourcePrefix}) }}";
-                }
-                else
-                {
-                    throw new InvalidOperationException("Unknown nested mapping type");
-                }
-
-                sb.Append(
-                    $".Set(\"{prop.DynamoKey}\", {nestedSourcePrefix} is null ? new AttributeValue {{ NULL = true }} : {nestedCode})"
-                );
-            }
-            else if (prop.Strategy is not null && prop.HasGetter)
-            {
-                // Scalar property - only render if it has a getter
-                var setMethod = $"Set{prop.Strategy.TypeName}";
-                var genericArg = prop.Strategy.GenericArgument;
-                var propValue = $"{sourcePrefix}.{prop.PropertyName}";
-
-                // Build type-specific args
-                var typeArgs =
-                    prop.Strategy.ToTypeSpecificArgs.Length > 0
-                        ? ", " + string.Join(", ", prop.Strategy.ToTypeSpecificArgs)
-                        : "";
-
-                // Omit flags - use mapper defaults
-                var omitEmpty =
-                    context.MapperOptions.OmitEmptyStrings.ToString().ToLowerInvariant();
-                var omitNull = context.MapperOptions.OmitNullStrings.ToString().ToLowerInvariant();
-
-                sb.Append(
-                    $".{setMethod}{genericArg}(\"{prop.DynamoKey}\", {propValue}{typeArgs}, {omitEmpty}, {omitNull})"
-                );
-            }
+            var call = RenderToItemPropertyCall(prop, sourcePrefix, context, helperRegistry);
+            if (call is not null)
+                sb.Append(call);
         }
 
         return sb.ToString();
+    }
+
+    /// <summary>
+    ///     Renders a single property's .Set*(...) call fragment for ToItem mapping. Returns null if
+    ///     the property produces no call (no getter, no strategy, no nested mapping). Made internal to
+    ///     allow reuse by HelperMethodEmitter for formatted multi-line rendering.
+    /// </summary>
+    internal static string? RenderToItemPropertyCall(
+        NestedPropertySpec prop, string sourcePrefix, GeneratorContext context,
+        HelperMethodRegistry helperRegistry
+    )
+    {
+        if (prop.NestedMapping is not null)
+        {
+            var nestedSourcePrefix = $"{sourcePrefix}.{prop.PropertyName}";
+
+            string nestedCode;
+            if (prop.NestedMapping is MapperBasedNesting mapperBased)
+            {
+                nestedCode =
+                    $"new AttributeValue {{ M = {mapperBased.Mapper.MapperFullyQualifiedName}.ToItem({nestedSourcePrefix}) }}";
+            }
+            else if (prop.NestedMapping is InlineNesting inline)
+            {
+                var helperMethodName =
+                    helperRegistry.GetOrRegisterToItemHelper(
+                        inline.Info.ModelFullyQualifiedType,
+                        inline.Info
+                    );
+                nestedCode =
+                    $"new AttributeValue {{ M = {helperMethodName}({nestedSourcePrefix}) }}";
+            }
+            else
+            {
+                throw new InvalidOperationException("Unknown nested mapping type");
+            }
+
+            return
+                $".Set(\"{prop.DynamoKey}\", {nestedSourcePrefix} is null ? new AttributeValue {{ NULL = true }} : {nestedCode})";
+        }
+
+        if (prop.Strategy is not null && prop.HasGetter)
+        {
+            var setMethod = $"Set{prop.Strategy.TypeName}";
+            var genericArg = prop.Strategy.GenericArgument;
+            var propValue = $"{sourcePrefix}.{prop.PropertyName}";
+
+            var typeArgs =
+                prop.Strategy.ToTypeSpecificArgs.Length > 0
+                    ? ", " + string.Join(", ", prop.Strategy.ToTypeSpecificArgs)
+                    : "";
+
+            var omitEmpty = context.MapperOptions.OmitEmptyStrings.ToString().ToLowerInvariant();
+            var omitNull = context.MapperOptions.OmitNullStrings.ToString().ToLowerInvariant();
+
+            return
+                $".{setMethod}{genericArg}(\"{prop.DynamoKey}\", {propValue}{typeArgs}, {omitEmpty}, {omitNull})";
+        }
+
+        return null;
     }
 
     /// <summary>
@@ -618,8 +628,11 @@ internal static class PropertyMappingCodeRenderer
         return sb.ToString();
     }
 
-    /// <summary>Renders a single property initialization assignment for object initializer.</summary>
-    private static void RenderPropertyInitAssignment(
+    /// <summary>
+    ///     Renders a single property initialization assignment for object initializer. Made internal
+    ///     to allow reuse by HelperMethodEmitter for formatted multi-line rendering.
+    /// </summary>
+    internal static void RenderPropertyInitAssignment(
         NestedPropertySpec prop, string mapVarName, StringBuilder sb, GeneratorContext context,
         HelperMethodRegistry helperRegistry
     )

@@ -13,8 +13,7 @@ internal static class HelperMethodEmitter
     )
     {
         var sb = new StringBuilder();
-        var typeName = ExtractSimpleTypeName(helper.ModelFullyQualifiedType);
-        var paramName = typeName.ToLowerInvariant();
+        var paramName = TypeNameHelper.ToParameterName(helper.ModelFullyQualifiedType);
 
         // Method signature with arrow syntax (no leading spaces - template handles base
         // indentation)
@@ -279,8 +278,4 @@ internal static class HelperMethodEmitter
 
         return result.ToArray();
     }
-
-    private static string ExtractSimpleTypeName(string fullyQualifiedType) =>
-        // "global::MyNamespace.Address" -> "address"
-        fullyQualifiedType.Split('.').Last().ToLowerInvariant();
 }

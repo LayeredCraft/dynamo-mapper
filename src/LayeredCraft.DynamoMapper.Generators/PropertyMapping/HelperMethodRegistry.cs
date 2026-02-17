@@ -23,7 +23,7 @@ internal sealed class HelperMethodRegistry
         if (_toItemHelpers.TryGetValue(modelFullyQualifiedType, out var existing))
             return existing.MethodName;
 
-        var methodName = GenerateToItemHelperName(modelFullyQualifiedType);
+        var methodName = GenerateHelperName(modelFullyQualifiedType, "ToItem");
         var helperInfo =
             new HelperMethodInfo(
                 methodName,
@@ -47,7 +47,7 @@ internal sealed class HelperMethodRegistry
         if (_fromItemHelpers.TryGetValue(modelFullyQualifiedType, out var existing))
             return existing.MethodName;
 
-        var methodName = GenerateFromItemHelperName(modelFullyQualifiedType);
+        var methodName = GenerateHelperName(modelFullyQualifiedType, "FromItem");
         var helperInfo =
             new HelperMethodInfo(
                 methodName,
@@ -64,24 +64,6 @@ internal sealed class HelperMethodRegistry
     public HelperMethodInfo[] GetAllHelpers() =>
         _toItemHelpers.Values.Concat(_fromItemHelpers.Values).ToArray();
 
-    private static string GenerateToItemHelperName(string modelFullyQualifiedType)
-    {
-        // Extract simple type name from fully qualified name
-        // "global::MyNamespace.Address" -> "Address"
-        var typeName = modelFullyQualifiedType.Split('.').Last();
-
-        // Sanitize generic types: Result<Address> -> Result_Address
-        typeName = typeName.Replace("<", "_").Replace(">", "").Replace(",", "_").Replace(" ", "");
-
-        return $"ToItem_{typeName}";
-    }
-
-    private static string GenerateFromItemHelperName(string modelFullyQualifiedType)
-    {
-        var typeName = modelFullyQualifiedType.Split('.').Last();
-
-        typeName = typeName.Replace("<", "_").Replace(">", "").Replace(",", "_").Replace(" ", "");
-
-        return $"FromItem_{typeName}";
-    }
+    private static string GenerateHelperName(string modelFullyQualifiedType, string prefix) =>
+        $"{prefix}_{TypeNameHelper.ExtractSanitized(modelFullyQualifiedType)}";
 }

@@ -560,7 +560,7 @@ internal static class PropertyMappingCodeRenderer
 
         // Otherwise, use var + initializer + if statements pattern
         var sb = new StringBuilder();
-        var varName = ExtractSimpleVarName(inlineInfo.ModelFullyQualifiedType);
+        var varName = TypeNameHelper.ToVariableName(inlineInfo.ModelFullyQualifiedType);
 
         // Variable declaration with object initializer for required/init properties
         if (initProperties.Count == 0)
@@ -716,14 +716,6 @@ internal static class PropertyMappingCodeRenderer
 
         return
             $"{mapVarName}.{tryMethod}{genericArg}(\"{prop.DynamoKey}\", out var {outVarName}, {typeArgs}Requiredness.InferFromNullability)";
-    }
-
-    /// <summary>Extracts a simple variable name from a fully qualified type name.</summary>
-    private static string ExtractSimpleVarName(string fullyQualifiedType)
-    {
-        // Remove "global::" prefix and namespace, take last segment, lowercase first letter
-        var typeName = fullyQualifiedType.Replace("global::", "").Split('.').Last();
-        return char.ToLowerInvariant(typeName[0]) + typeName.Substring(1);
     }
 
     /// <summary>

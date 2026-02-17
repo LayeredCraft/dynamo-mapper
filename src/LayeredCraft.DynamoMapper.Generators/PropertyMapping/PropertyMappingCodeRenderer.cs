@@ -532,84 +532,198 @@ internal static class PropertyMappingCodeRenderer
         HelperMethodRegistry helperRegistry
     )
     {
+        // Split properties into object initializer vs post-construction
+        var initProperties = new List<NestedPropertySpec>();
+        var postConstructionProperties = new List<NestedPropertySpec>();
+
+        foreach (var prop in inlineInfo.Properties)
+        {
+            // Use post-construction for optional, settable properties with default values
+            var usePostConstruction =
+                !prop.IsRequired && !prop.IsInitOnly && prop.HasDefaultValue && prop.HasSetter;
+
+            if (usePostConstruction)
+                postConstructionProperties.Add(prop);
+            else
+                initProperties.Add(prop);
+        }
+
+        // If no post-construction properties, use simple expression
+        if (postConstructionProperties.Count == 0)
+            return RenderSimpleNestedFromItem(
+                mapVarName,
+                inlineInfo.ModelFullyQualifiedType,
+                initProperties,
+                context,
+                helperRegistry
+            );
+
+        // Otherwise, use var + initializer + if statements pattern
         var sb = new StringBuilder();
-        sb.Append($"new {inlineInfo.ModelFullyQualifiedType} {{ ");
+        var varName = ExtractSimpleVarName(inlineInfo.ModelFullyQualifiedType);
+
+        // Variable declaration with object initializer for required/init properties
+        if (initProperties.Count == 0)
+        {
+            sb.AppendLine($"    var {varName} = new {inlineInfo.ModelFullyQualifiedType}();");
+        }
+        else
+        {
+            sb.AppendLine($"    var {varName} = new {inlineInfo.ModelFullyQualifiedType}");
+            sb.AppendLine("    {");
+            foreach (var prop in initProperties)
+            {
+                sb.Append("        ");
+                RenderPropertyInitAssignment(prop, mapVarName, sb, context, helperRegistry);
+                sb.AppendLine();
+            }
+
+            sb.AppendLine("    };");
+        }
+
+        // Post-construction if statements for optional properties with defaults
+        var varIndex = 0;
+        foreach (var prop in postConstructionProperties)
+        {
+            sb.Append("    if (");
+            sb.Append(RenderTryGetCondition(prop, mapVarName, $"var{varIndex}", context));
+            sb.Append($") {varName}.{prop.PropertyName} = var{varIndex}!;");
+            sb.AppendLine();
+            varIndex++;
+        }
+
+        sb.Append($"    return {varName};");
+        return sb.ToString();
+    }
+
+    /// <summary>Renders a simple single-expression nested object creation (all properties in initializer).</summary>
+    private static string RenderSimpleNestedFromItem(
+        string mapVarName, string modelType, List<NestedPropertySpec> properties,
+        GeneratorContext context, HelperMethodRegistry helperRegistry
+    )
+    {
+        var sb = new StringBuilder();
+        sb.Append($"new {modelType} {{ ");
 
         var first = true;
-        foreach (var prop in inlineInfo.Properties)
+        foreach (var prop in properties)
         {
             if (!first) sb.Append(" ");
             first = false;
 
-            if (prop.NestedMapping is not null)
-            {
-                // Recursive nested object
-                var nestedVarName = $"{mapVarName}_{prop.PropertyName.ToLowerInvariant()}";
-
-                // Determine fallback based on required and nullability
-                string fallback;
-                if (prop.IsRequired)
-                    fallback =
-                        $"throw new System.InvalidOperationException(\"Required nested property '{prop.DynamoKey}' not found in DynamoDB item.\")";
-                else if (prop.Nullability.IsNullableType)
-                    fallback = "null";
-                else
-                    // Non-nullable, non-required - use null (design limitation)
-                    fallback = "null";
-
-                string nestedCode;
-                if (prop.NestedMapping is MapperBasedNesting mapperBased)
-                {
-                    nestedCode =
-                        $"{mapVarName}.TryGetValue(\"{prop.DynamoKey}\", out var {nestedVarName}Attr) && {nestedVarName}Attr.M is {{ }} {nestedVarName} ? {mapperBased.Mapper.MapperFullyQualifiedName}.FromItem({nestedVarName}) : {fallback}";
-                }
-                else if (prop.NestedMapping is InlineNesting inline)
-                {
-                    // Register helper and generate call instead of inlining
-                    var helperMethodName =
-                        helperRegistry.GetOrRegisterFromItemHelper(
-                            inline.Info.ModelFullyQualifiedType,
-                            inline.Info
-                        );
-                    nestedCode =
-                        $"{mapVarName}.TryGetValue(\"{prop.DynamoKey}\", out var {nestedVarName}Attr) && {nestedVarName}Attr.M is {{ }} {nestedVarName} ? {helperMethodName}({nestedVarName}) : {fallback}";
-                }
-                else
-                {
-                    throw new InvalidOperationException("Unknown nested mapping type");
-                }
-
-                sb.Append($"{prop.PropertyName} = {nestedCode},");
-            }
-            else if (prop.Strategy is not null)
-            {
-                // Scalar property
-                var getMethod = $"Get{prop.Strategy.NullableModifier}{prop.Strategy.TypeName}";
-                var genericArg = prop.Strategy.GenericArgument;
-
-                // Build type-specific args
-                var typeArgs =
-                    prop.Strategy.FromTypeSpecificArgs.Length > 0
-                        ? string.Join(
-                            ", ",
-                            prop.Strategy.FromTypeSpecificArgs.Select(
-                                a => a.StartsWith("\"") ? $"format: {a}" : a
-                            )
-                        ) + ", "
-                        : "";
-
-                // Determine requiredness based on property analysis
-                var requiredness =
-                    prop.IsRequired ? "Requiredness.Required" : "Requiredness.Optional";
-
-                sb.Append(
-                    $"{prop.PropertyName} = {mapVarName}.{getMethod}{genericArg}(\"{prop.DynamoKey}\", {typeArgs}{requiredness}),"
-                );
-            }
+            RenderPropertyInitAssignment(prop, mapVarName, sb, context, helperRegistry);
         }
 
         sb.Append(" }");
         return sb.ToString();
+    }
+
+    /// <summary>Renders a single property initialization assignment for object initializer.</summary>
+    private static void RenderPropertyInitAssignment(
+        NestedPropertySpec prop, string mapVarName, StringBuilder sb, GeneratorContext context,
+        HelperMethodRegistry helperRegistry
+    )
+    {
+        if (prop.NestedMapping is not null)
+        {
+            // Recursive nested object
+            var nestedVarName = $"{mapVarName}_{prop.PropertyName.ToLowerInvariant()}";
+
+            // Determine fallback based on required and nullability
+            string fallback;
+            if (prop.IsRequired)
+                fallback =
+                    $"throw new System.InvalidOperationException(\"Required nested property '{prop.DynamoKey}' not found in DynamoDB item.\")";
+            else if (prop.Nullability.IsNullableType)
+                fallback = "null";
+            else
+                // Non-nullable, non-required - use null (design limitation)
+                fallback = "null";
+
+            string nestedCode;
+            if (prop.NestedMapping is MapperBasedNesting mapperBased)
+            {
+                nestedCode =
+                    $"{mapVarName}.TryGetValue(\"{prop.DynamoKey}\", out var {nestedVarName}Attr) && {nestedVarName}Attr.M is {{ }} {nestedVarName} ? {mapperBased.Mapper.MapperFullyQualifiedName}.FromItem({nestedVarName}) : {fallback}";
+            }
+            else if (prop.NestedMapping is InlineNesting inline)
+            {
+                // Register helper and generate call instead of inlining
+                var helperMethodName =
+                    helperRegistry.GetOrRegisterFromItemHelper(
+                        inline.Info.ModelFullyQualifiedType,
+                        inline.Info
+                    );
+                nestedCode =
+                    $"{mapVarName}.TryGetValue(\"{prop.DynamoKey}\", out var {nestedVarName}Attr) && {nestedVarName}Attr.M is {{ }} {nestedVarName} ? {helperMethodName}({nestedVarName}) : {fallback}";
+            }
+            else
+            {
+                throw new InvalidOperationException("Unknown nested mapping type");
+            }
+
+            sb.Append($"{prop.PropertyName} = {nestedCode},");
+        }
+        else if (prop.Strategy is not null)
+        {
+            // Scalar property
+            var getMethod = $"Get{prop.Strategy.NullableModifier}{prop.Strategy.TypeName}";
+            var genericArg = prop.Strategy.GenericArgument;
+
+            // Build type-specific args
+            var typeArgs =
+                prop.Strategy.FromTypeSpecificArgs.Length > 0
+                    ? string.Join(
+                        ", ",
+                        prop.Strategy.FromTypeSpecificArgs.Select(
+                            a => a.StartsWith("\"") ? $"format: {a}" : a
+                        )
+                    ) + ", "
+                    : "";
+
+            // Determine requiredness based on property analysis
+            var requiredness = prop.IsRequired ? "Requiredness.Required" : "Requiredness.Optional";
+
+            sb.Append(
+                $"{prop.PropertyName} = {mapVarName}.{getMethod}{genericArg}(\"{prop.DynamoKey}\", {typeArgs}{requiredness}),"
+            );
+        }
+    }
+
+    /// <summary>Renders a TryGet condition for post-construction assignment.</summary>
+    private static string RenderTryGetCondition(
+        NestedPropertySpec prop, string mapVarName, string outVarName, GeneratorContext context
+    )
+    {
+        if (prop.Strategy is null)
+            throw new InvalidOperationException(
+                "Post-construction only supported for scalar properties"
+            );
+
+        var tryMethod = $"TryGet{prop.Strategy.NullableModifier}{prop.Strategy.TypeName}";
+        var genericArg = prop.Strategy.GenericArgument;
+
+        // Build type-specific args
+        var typeArgs =
+            prop.Strategy.FromTypeSpecificArgs.Length > 0
+                ? string.Join(
+                    ", ",
+                    prop.Strategy.FromTypeSpecificArgs.Select(
+                        a => a.StartsWith("\"") ? $"format: {a}" : a
+                    )
+                ) + ", "
+                : "";
+
+        return
+            $"{mapVarName}.{tryMethod}{genericArg}(\"{prop.DynamoKey}\", out var {outVarName}, {typeArgs}Requiredness.InferFromNullability)";
+    }
+
+    /// <summary>Extracts a simple variable name from a fully qualified type name.</summary>
+    private static string ExtractSimpleVarName(string fullyQualifiedType)
+    {
+        // Remove "global::" prefix and namespace, take last segment, lowercase first letter
+        var typeName = fullyQualifiedType.Replace("global::", "").Split('.').Last();
+        return char.ToLowerInvariant(typeName[0]) + typeName.Substring(1);
     }
 
     /// <summary>

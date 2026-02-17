@@ -48,14 +48,15 @@ public static partial class OrderMapper
 
     private static global::MyNamespace.Address FromItem_Address(Dictionary<string, AttributeValue> map)
     {
-        return new global::MyNamespace.Address
+        var address = new global::MyNamespace.Address
         {
             Line1 = map.GetString("line1", Requiredness.Required),
             City = map.GetString("city", Requiredness.Required),
-            Country = map.GetString("country", Requiredness.Optional),
             PostalCode = map.GetNullableString("postalCode", Requiredness.Optional),
             State = map.GetString("state", Requiredness.Required),
         };
+        if (map.TryGetString("country", out var var0, Requiredness.InferFromNullability)) address.Country = var0!;
+        return address;
     }
 
 }

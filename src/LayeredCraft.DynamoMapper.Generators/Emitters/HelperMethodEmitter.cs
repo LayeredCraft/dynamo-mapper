@@ -54,7 +54,6 @@ internal static class HelperMethodEmitter
             $"private static {helper.ModelFullyQualifiedType} {helper.MethodName}(Dictionary<string, AttributeValue> {mapParamName})"
         );
         sb.AppendLine("{");
-        sb.Append("    return ");
 
         // Reuse existing RenderInlineNestedFromItem logic
         var bodyCode =
@@ -65,10 +64,25 @@ internal static class HelperMethodEmitter
                 helperRegistry
             );
 
-        // Format object initializer on separate lines
-        var formattedBody = FormatFromItemObjectInitializer(bodyCode);
-        sb.Append(formattedBody);
-        sb.AppendLine(";");
+        // Check if body is simple expression or multi-statement block
+        var isSimpleExpression = bodyCode.TrimStart().StartsWith("new ");
+
+        if (isSimpleExpression)
+        {
+            // Simple expression: "new Type { ... }"
+            sb.Append("    return ");
+            var formattedBody = FormatFromItemObjectInitializer(bodyCode);
+            sb.Append(formattedBody);
+            sb.AppendLine(";");
+        }
+        else
+        {
+            // Multi-statement block: "var x = new Type { ... }; if (...) ...; return x;"
+            // Body already contains proper indentation and return statement
+            sb.Append(bodyCode);
+            sb.AppendLine();
+        }
+
         sb.AppendLine("}");
 
         return sb.ToString();

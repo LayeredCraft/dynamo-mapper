@@ -43,11 +43,10 @@ internal static partial class OrderMapper
 
     private static global::MyNamespace.Address FromItem_Address(Dictionary<string, AttributeValue> map)
     {
-        return new global::MyNamespace.Address
-        {
-            City = map.GetString("city", Requiredness.Optional),
-            Line1 = map.GetString("line_1", Requiredness.Optional),
-        };
+        var address = new global::MyNamespace.Address();
+        if (map.TryGetString("city", out var var0, Requiredness.InferFromNullability)) address.City = var0!;
+        if (map.TryGetString("line_1", out var var1, Requiredness.InferFromNullability)) address.Line1 = var1!;
+        return address;
     }
 
 }

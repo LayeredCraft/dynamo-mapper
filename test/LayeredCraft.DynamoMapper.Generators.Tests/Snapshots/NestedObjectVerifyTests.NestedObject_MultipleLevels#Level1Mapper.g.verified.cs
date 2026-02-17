@@ -48,12 +48,13 @@ public static partial class Level1Mapper
 
     private static global::MyNamespace.Level2 FromItem_Level2(Dictionary<string, AttributeValue> map)
     {
-        return new global::MyNamespace.Level2
+        var level2 = new global::MyNamespace.Level2
         {
-            Id = map.GetString("id", Requiredness.Optional),
-            Description = map.GetString("description", Requiredness.Optional),
             Level3Data = map.TryGetValue("level3Data", out var map_level3dataAttr) && map_level3dataAttr.M is { } map_level3data ? FromItem_Level3(map_level3data) : null,
         };
+        if (map.TryGetString("id", out var var0, Requiredness.InferFromNullability)) level2.Id = var0!;
+        if (map.TryGetString("description", out var var1, Requiredness.InferFromNullability)) level2.Description = var1!;
+        return level2;
     }
 
 
@@ -65,12 +66,13 @@ public static partial class Level1Mapper
 
     private static global::MyNamespace.Level3 FromItem_Level3(Dictionary<string, AttributeValue> map)
     {
-        return new global::MyNamespace.Level3
+        var level3 = new global::MyNamespace.Level3
         {
-            Id = map.GetString("id", Requiredness.Optional),
             Value = map.GetInt("value", Requiredness.Optional),
             Level4Data = map.TryGetValue("level4Data", out var map_level4dataAttr) && map_level4dataAttr.M is { } map_level4data ? FromItem_Level4(map_level4data) : null,
         };
+        if (map.TryGetString("id", out var var0, Requiredness.InferFromNullability)) level3.Id = var0!;
+        return level3;
     }
 
 
@@ -82,12 +84,13 @@ public static partial class Level1Mapper
 
     private static global::MyNamespace.Level4 FromItem_Level4(Dictionary<string, AttributeValue> map)
     {
-        return new global::MyNamespace.Level4
+        var level4 = new global::MyNamespace.Level4
         {
-            Id = map.GetString("id", Requiredness.Optional),
             IsActive = map.GetBool("isActive", Requiredness.Optional),
             Price = map.GetDecimal("price", Requiredness.Optional),
         };
+        if (map.TryGetString("id", out var var0, Requiredness.InferFromNullability)) level4.Id = var0!;
+        return level4;
     }
 
 }

@@ -216,11 +216,11 @@ internal static class HelperMethodEmitter
         {
             var ch = content[i];
 
-            if (ch == '(' || ch == '<')
+            if (ch == '(' || ch == '<' || ch == '{')
             {
                 depth++;
             }
-            else if (ch == ')' || ch == '>')
+            else if (ch == ')' || ch == '>' || ch == '}')
             {
                 depth--;
             }

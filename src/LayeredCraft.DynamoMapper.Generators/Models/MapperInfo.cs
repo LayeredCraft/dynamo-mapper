@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 
 namespace DynamoMapper.Generator.Models;
 
-internal record MapperInfo(
+internal sealed record MapperInfo(
     MapperClassInfo? MapperClass,
     ModelClassInfo? ModelClass,
     EquatableArray<DiagnosticInfo> Diagnostics,
@@ -13,10 +13,9 @@ internal record MapperInfo(
     HelperMethodRegistry? HelperRegistry
 )
 {
-    public virtual bool Equals(MapperInfo? other) => other is not null &&
-                                                     MapperClass == other.MapperClass &&
-                                                     ModelClass == other.ModelClass &&
-                                                     Diagnostics == other.Diagnostics;
+    public bool Equals(MapperInfo? other) => other is not null &&
+        MapperClass == other.MapperClass && ModelClass == other.ModelClass &&
+        Diagnostics == other.Diagnostics;
 
     public override int GetHashCode() => HashCode.Combine(MapperClass, ModelClass, Diagnostics);
 }

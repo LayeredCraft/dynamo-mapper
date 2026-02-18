@@ -23,7 +23,7 @@ public static partial class OrderMapper
     public static partial global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> ToItem(global::MyNamespace.Order source) =>
         new Dictionary<string, AttributeValue>(2)
             .SetString("id", source.Id, false, true)
-            .Set("items", new AttributeValue { L = source.Items.Select(x => new AttributeValue { M = new Dictionary<string, AttributeValue>().SetString("productId", x.ProductId, false, true).SetInt("quantity", x.Quantity, false, true).SetDecimal("price", x.Price, false, true) }).ToList() });
+            .Set("items", new AttributeValue { L = source.Items.Select(x => new AttributeValue { M = ToItem_LineItem(x) }).ToList() });
 
     [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
     public static partial global::MyNamespace.Order FromItem(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> item)
@@ -31,8 +31,27 @@ public static partial class OrderMapper
         var order = new global::MyNamespace.Order
         {
             Id = item.GetString("id", Requiredness.InferFromNullability),
-            Items = item.TryGetValue("items", out var itemsAttr) && itemsAttr.L is { } itemsList ? itemsList.Select(av => new global::MyNamespace.LineItem { ProductId = av.M.GetString("productId", Requiredness.Optional), Quantity = av.M.GetInt("quantity", Requiredness.Optional), Price = av.M.GetDecimal("price", Requiredness.Optional), }).ToList() : [],
+            Items = item.TryGetValue("items", out var itemsAttr) && itemsAttr.L is { } itemsList ? itemsList.Select(av => FromItem_LineItem(av.M)).ToList() : [],
         };
         return order;
     }
+
+    // Helper methods for nested object mapping
+
+    private static Dictionary<string, AttributeValue> ToItem_LineItem(global::MyNamespace.LineItem lineitem) =>
+        new Dictionary<string, AttributeValue>(3)
+            .SetString("productId", lineitem.ProductId, false, true)
+            .SetInt("quantity", lineitem.Quantity, false, true)
+            .SetDecimal("price", lineitem.Price, false, true);
+
+    private static global::MyNamespace.LineItem FromItem_LineItem(Dictionary<string, AttributeValue> map)
+    {
+        return new global::MyNamespace.LineItem
+        {
+            ProductId = map.GetString("productId", Requiredness.Optional),
+            Quantity = map.GetInt("quantity", Requiredness.Optional),
+            Price = map.GetDecimal("price", Requiredness.Optional),
+        };
+    }
+
 }

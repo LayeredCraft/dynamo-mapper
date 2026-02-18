@@ -23,7 +23,7 @@ public static partial class OrderMapper
     public static partial global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> ToItem(global::MyNamespace.Order source) =>
         new Dictionary<string, AttributeValue>(2)
             .SetString("id", source.Id, false, true)
-            .Set("shippingAddress", new AttributeValue { M = new Dictionary<string, AttributeValue>().SetString("addr_line1", source.ShippingAddress.Line1, false, true).SetString("addr_city", source.ShippingAddress.City, false, true).SetString("postalCode", source.ShippingAddress.PostalCode, false, true) });
+            .Set("shippingAddress", new AttributeValue { M = ToItem_Address(source.ShippingAddress) });
 
     [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
     public static partial global::MyNamespace.Order FromItem(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> item)
@@ -31,8 +31,27 @@ public static partial class OrderMapper
         var order = new global::MyNamespace.Order
         {
             Id = item.GetString("id", Requiredness.InferFromNullability),
-            ShippingAddress = item.TryGetValue("shippingAddress", out var shippingaddressAttr) && shippingaddressAttr.M is { } shippingaddressMap ? new global::MyNamespace.Address { Line1 = shippingaddressMap.GetString("addr_line1", Requiredness.Optional), City = shippingaddressMap.GetString("addr_city", Requiredness.Optional), PostalCode = shippingaddressMap.GetString("postalCode", Requiredness.Optional), } : null,
+            ShippingAddress = item.TryGetValue("shippingAddress", out var shippingaddressAttr) && shippingaddressAttr.M is { } shippingaddressMap ? FromItem_Address(shippingaddressMap) : null,
         };
         return order;
     }
+
+    // Helper methods for nested object mapping
+
+    private static Dictionary<string, AttributeValue> ToItem_Address(global::MyNamespace.Address address) =>
+        new Dictionary<string, AttributeValue>(3)
+            .SetString("addr_line1", address.Line1, false, true)
+            .SetString("addr_city", address.City, false, true)
+            .SetString("postalCode", address.PostalCode, false, true);
+
+    private static global::MyNamespace.Address FromItem_Address(Dictionary<string, AttributeValue> map)
+    {
+        return new global::MyNamespace.Address
+        {
+            Line1 = map.GetString("addr_line1", Requiredness.Optional),
+            City = map.GetString("addr_city", Requiredness.Optional),
+            PostalCode = map.GetString("postalCode", Requiredness.Optional),
+        };
+    }
+
 }

@@ -26,38 +26,34 @@ internal static class PropertyInfoExtensions
         ///     Short-circuits when strategy is null (property won't be used in any method).
         /// </summary>
         internal static DiagnosticResult<PropertyInfo> Create(
-            IPropertySymbol propertySymbol,
-            string modelVarName,
-            int index,
-            InitializationMethod initMethod,
-            GeneratorContext context
-        ) =>
-            PropertyAnalyzer
-                .Analyze(propertySymbol, context)
-                .Bind(analysis =>
-                    TypeMappingStrategyResolver
-                        .Resolve(analysis, context)
+            IPropertySymbol propertySymbol, string modelVarName, int index,
+            InitializationMethod initMethod, GeneratorContext context,
+            HelperMethodRegistry helperRegistry
+        ) => PropertyAnalyzer.Analyze(propertySymbol, context)
+            .Bind(
+                analysis =>
+                    TypeMappingStrategyResolver.Resolve(analysis, context)
                         .Map(strategy => (analysis, strategy))
-                )
-                .Bind<PropertyInfo>(tuple =>
+            )
+            .Bind<PropertyInfo>(
+                tuple =>
                     // Short-circuit if property won't be used AND has no custom methods
-                    tuple.strategy
-                        is null
-                    && tuple.analysis.FieldOptions?.ToMethod is null
-                    && tuple.analysis.FieldOptions?.FromMethod is null
+                    tuple.strategy is null && tuple.analysis.FieldOptions?.ToMethod is null &&
+                    tuple.analysis.FieldOptions?.FromMethod is null
                         ? PropertyInfo.None
-                        : PropertyMappingSpecBuilder
-                            .Build(tuple.analysis, tuple.strategy, context)
-                            .Map(spec =>
-                                PropertyMappingCodeRenderer.Render(
-                                    spec,
-                                    tuple.analysis,
-                                    modelVarName,
-                                    index,
-                                    initMethod,
-                                    context
-                                )
+                        : PropertyMappingSpecBuilder.Build(tuple.analysis, tuple.strategy, context)
+                            .Map(
+                                spec =>
+                                    PropertyMappingCodeRenderer.Render(
+                                        spec,
+                                        tuple.analysis,
+                                        modelVarName,
+                                        index,
+                                        initMethod,
+                                        context,
+                                        helperRegistry
+                                    )
                             )
-                );
+            );
     }
 }

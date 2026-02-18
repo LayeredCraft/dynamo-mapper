@@ -22,15 +22,30 @@ public static partial class ExampleEntityMapper
     [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
     public static partial global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> ToItem(global::MyNamespace.Entity source) =>
         new Dictionary<string, AttributeValue>(1)
-            .Set("items", new AttributeValue { L = source.Items.Select(x => new AttributeValue { M = new Dictionary<string, AttributeValue>().SetString("name", x.Name, false, true) }).ToList() });
+            .Set("items", new AttributeValue { L = source.Items.Select(x => new AttributeValue { M = ToItem_CustomClass(x) }).ToList() });
 
     [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
     public static partial global::MyNamespace.Entity FromItem(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> item)
     {
         var entity = new global::MyNamespace.Entity
         {
-            Items = item.TryGetValue("items", out var itemsAttr) && itemsAttr.L is { } itemsList ? itemsList.Select(av => new global::MyNamespace.CustomClass { Name = av.M.GetString("name", Requiredness.Optional), }).ToList() : [],
+            Items = item.TryGetValue("items", out var itemsAttr) && itemsAttr.L is { } itemsList ? itemsList.Select(av => FromItem_CustomClass(av.M)).ToList() : [],
         };
         return entity;
     }
+
+    // Helper methods for nested object mapping
+
+    private static Dictionary<string, AttributeValue> ToItem_CustomClass(global::MyNamespace.CustomClass customclass) =>
+        new Dictionary<string, AttributeValue>(1)
+            .SetString("name", customclass.Name, false, true);
+
+    private static global::MyNamespace.CustomClass FromItem_CustomClass(Dictionary<string, AttributeValue> map)
+    {
+        return new global::MyNamespace.CustomClass
+        {
+            Name = map.GetString("name", Requiredness.Optional),
+        };
+    }
+
 }

@@ -18,10 +18,9 @@ internal static class ModelClassInfoExtensions
 {
     extension(ModelClassInfo)
     {
-        internal static (ModelClassInfo?, DiagnosticInfo[]) Create(
-            ITypeSymbol modelTypeSymbol,
-            string? fromItemParameterName,
-            GeneratorContext context
+        internal static (ModelClassInfo?, DiagnosticInfo[], HelperMethodInfo[]) Create(
+            ITypeSymbol modelTypeSymbol, string? fromItemParameterName, GeneratorContext context,
+            HelperMethodRegistry helperRegistry
         )
         {
             context.ThrowIfCancellationRequested();
@@ -30,14 +29,11 @@ internal static class ModelClassInfoExtensions
 
             var varName = GetModelVarName(modelTypeSymbol, fromItemParameterName, context);
 
-            var constructorSelectionResult = SelectConstructorIfNeeded(
-                modelTypeSymbol,
-                properties,
-                context
-            );
+            var constructorSelectionResult =
+                SelectConstructorIfNeeded(modelTypeSymbol, properties, context);
 
             if (!constructorSelectionResult.IsSuccess)
-                return (null, [constructorSelectionResult.Error!]);
+                return (null, [constructorSelectionResult.Error!], []);
 
             var selectedConstructor = constructorSelectionResult.Value;
 
@@ -47,39 +43,44 @@ internal static class ModelClassInfoExtensions
             // Validate dot-notation paths in field options
             var dotNotationDiagnostics = ValidateDotNotationPaths(modelTypeSymbol, context);
             if (dotNotationDiagnostics.Length > 0)
-                return (null, dotNotationDiagnostics);
+                return (null, dotNotationDiagnostics, []);
 
-            var (propertyInfos, propertyInfosByIndex, propertyDiagnostics) = CreatePropertyInfos(
-                properties,
-                varName,
-                selectedConstructor,
-                context
-            );
+            var (propertyInfos, propertyInfosByIndex, propertyDiagnostics) =
+                CreatePropertyInfos(
+                    properties,
+                    varName,
+                    selectedConstructor,
+                    context,
+                    helperRegistry
+                );
 
-            var constructorInfo = selectedConstructor is null
-                ? null
-                : CreateConstructorInfo(selectedConstructor, properties, propertyInfosByIndex);
+            var constructorInfo =
+                selectedConstructor is null
+                    ? null
+                    : CreateConstructorInfo(selectedConstructor, properties, propertyInfosByIndex);
 
-            var modelClassInfo = new ModelClassInfo(
-                modelTypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-                varName,
-                new EquatableArray<PropertyInfo>(propertyInfos),
-                constructorInfo
-            );
+            var modelClassInfo =
+                new ModelClassInfo(
+                    modelTypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                    varName,
+                    new EquatableArray<PropertyInfo>(propertyInfos),
+                    constructorInfo
+                );
 
-            return (modelClassInfo, propertyDiagnostics);
+            // Extract helper methods from the registry
+            var helperMethods = helperRegistry.GetAllHelpers();
+
+            return (modelClassInfo, propertyDiagnostics, helperMethods);
         }
     }
 
     private static IPropertySymbol[] GetModelProperties(
-        ITypeSymbol modelTypeSymbol,
-        GeneratorContext context
+        ITypeSymbol modelTypeSymbol, GeneratorContext context
     )
     {
         if (modelTypeSymbol is not INamedTypeSymbol namedType)
         {
-            return modelTypeSymbol
-                .GetMembers()
+            return modelTypeSymbol.GetMembers()
                 .OfType<IPropertySymbol>()
                 .Where(p => IsMappableProperty(p, modelTypeSymbol))
                 .ToArray();
@@ -96,9 +97,7 @@ internal static class ModelClassInfoExtensions
         !property.IsStatic && !(declaringType.IsRecord && property.Name == "EqualityContract");
 
     private static string GetModelVarName(
-        ITypeSymbol modelTypeSymbol,
-        string? fromItemParameterName,
-        GeneratorContext context
+        ITypeSymbol modelTypeSymbol, string? fromItemParameterName, GeneratorContext context
     )
     {
         var varName = context.MapperOptions.KeyNamingConventionConverter(modelTypeSymbol.Name);
@@ -106,32 +105,26 @@ internal static class ModelClassInfoExtensions
     }
 
     private static DiagnosticResult<ConstructorSelectionResult?> SelectConstructorIfNeeded(
-        ITypeSymbol modelTypeSymbol,
-        IPropertySymbol[] properties,
-        GeneratorContext context
-    ) =>
-        context.HasFromItemMethod
-            ? ConstructorSelector.Select(modelTypeSymbol, properties, context)
-            : DiagnosticResult<ConstructorSelectionResult?>.Success(null);
+        ITypeSymbol modelTypeSymbol, IPropertySymbol[] properties, GeneratorContext context
+    ) => context.HasFromItemMethod
+        ? ConstructorSelector.Select(modelTypeSymbol, properties, context)
+        : DiagnosticResult<ConstructorSelectionResult?>.Success(null);
 
-    private static (
-        PropertyInfo[] PropertyInfos,
-        PropertyInfo?[] PropertyInfosByIndex,
-        DiagnosticInfo[] Diagnostics
-    ) CreatePropertyInfos(
-        IPropertySymbol[] properties,
-        string modelVarName,
-        ConstructorSelectionResult? selectedConstructor,
-        GeneratorContext context
-    )
+    private static ( PropertyInfo[] PropertyInfos, PropertyInfo?[] PropertyInfosByIndex,
+        DiagnosticInfo[] Diagnostics ) CreatePropertyInfos(
+            IPropertySymbol[] properties, string modelVarName,
+            ConstructorSelectionResult? selectedConstructor, GeneratorContext context,
+            HelperMethodRegistry helperRegistry
+        )
     {
-        var initMethodsByPropertyName = selectedConstructor is null
-            ? null
-            : selectedConstructor.PropertyModes.ToDictionary(
-                pm => pm.PropertyName,
-                pm => pm.Method,
-                StringComparer.Ordinal
-            );
+        var initMethodsByPropertyName =
+            selectedConstructor is null
+                ? null
+                : selectedConstructor.PropertyModes.ToDictionary(
+                    pm => pm.PropertyName,
+                    pm => pm.Method,
+                    StringComparer.Ordinal
+                );
 
         var propertyDiagnosticsList = new List<DiagnosticInfo>();
         var propertyInfosList = new List<PropertyInfo>(properties.Length);
@@ -143,19 +136,12 @@ internal static class ModelClassInfoExtensions
             var property = properties[i];
 
             var initMethod = InitializationMethod.InitSyntax;
-            if (
-                initMethodsByPropertyName is not null
-                && initMethodsByPropertyName.TryGetValue(property.Name, out var initMethod2)
-            )
+            if (initMethodsByPropertyName is not null &&
+                initMethodsByPropertyName.TryGetValue(property.Name, out var initMethod2))
                 initMethod = initMethod2;
 
-            var propertyInfoResult = PropertyInfo.Create(
-                property,
-                modelVarName,
-                i,
-                initMethod,
-                context
-            );
+            var propertyInfoResult =
+                PropertyInfo.Create(property, modelVarName, i, initMethod, context, helperRegistry);
 
             if (!propertyInfoResult.IsSuccess)
             {
@@ -167,24 +153,21 @@ internal static class ModelClassInfoExtensions
             propertyInfosByIndex[i] = propertyInfoResult.Value!;
         }
 
-        return (
-            propertyInfosList.ToArray(),
-            propertyInfosByIndex,
-            propertyDiagnosticsList.ToArray()
-        );
+        return (propertyInfosList.ToArray(), propertyInfosByIndex,
+            propertyDiagnosticsList.ToArray());
     }
 
     private static ConstructorInfo CreateConstructorInfo(
-        ConstructorSelectionResult selectedConstructor,
-        IPropertySymbol[] properties,
+        ConstructorSelectionResult selectedConstructor, IPropertySymbol[] properties,
         PropertyInfo?[] propertyInfosByIndex
     )
     {
         var propertyIndexBySymbol = CreatePropertyIndexBySymbol(properties);
 
-        var parameterInfosList = new List<ConstructorParameterInfo>(
-            selectedConstructor.Constructor.Constructor.Parameters.Length
-        );
+        var parameterInfosList =
+            new List<ConstructorParameterInfo>(
+                selectedConstructor.Constructor.Constructor.Parameters.Length
+            );
 
         foreach (var paramAnalysis in selectedConstructor.Constructor.Parameters)
         {
@@ -214,10 +197,8 @@ internal static class ModelClassInfoExtensions
         IPropertySymbol[] properties
     )
     {
-        var propertyIndexBySymbol = new Dictionary<IPropertySymbol, int>(
-            properties.Length,
-            SymbolEqualityComparer.Default
-        );
+        var propertyIndexBySymbol =
+            new Dictionary<IPropertySymbol, int>(properties.Length, SymbolEqualityComparer.Default);
 
         for (var i = 0; i < properties.Length; i++)
             propertyIndexBySymbol[properties[i]] = i;
@@ -230,8 +211,7 @@ internal static class ModelClassInfoExtensions
     ///     refer to valid property paths on the model type.
     /// </summary>
     private static DiagnosticInfo[] ValidateDotNotationPaths(
-        ITypeSymbol modelTypeSymbol,
-        GeneratorContext context
+        ITypeSymbol modelTypeSymbol, GeneratorContext context
     )
     {
         var diagnostics = new List<DiagnosticInfo>();
@@ -265,9 +245,7 @@ internal static class ModelClassInfoExtensions
     ///     Validates a dot-notation path against the model type hierarchy.
     /// </summary>
     private static DiagnosticInfo? ValidatePath(
-        string path,
-        ITypeSymbol rootType,
-        GeneratorContext context
+        string path, ITypeSymbol rootType, GeneratorContext context
     )
     {
         var segments = path.Split('.');
@@ -278,11 +256,12 @@ internal static class ModelClassInfoExtensions
             var segment = segments[i];
 
             // Find the property on the current type
-            var property = PropertySymbolLookup.FindPropertyByName(
-                currentType,
-                segment,
-                context.MapperOptions.IncludeBaseClassProperties
-            );
+            var property =
+                PropertySymbolLookup.FindPropertyByName(
+                    currentType,
+                    segment,
+                    context.MapperOptions.IncludeBaseClassProperties
+                );
 
             if (property == null)
             {
@@ -300,8 +279,10 @@ internal static class ModelClassInfoExtensions
             {
                 // Unwrap nullable if needed
                 var propertyType = property.Type;
-                if (propertyType is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } nullableType
-                    && nullableType.TypeArguments.Length == 1)
+                if (propertyType is INamedTypeSymbol
+                    {
+                        OriginalDefinition.SpecialType: SpecialType.System_Nullable_T,
+                    } nullableType && nullableType.TypeArguments.Length == 1)
                 {
                     propertyType = nullableType.TypeArguments[0];
                 }

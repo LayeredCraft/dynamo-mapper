@@ -22,15 +22,31 @@ internal static partial class OrderMapper
     [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
     internal static partial global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> ToItem(global::MyNamespace.Order source) =>
         new Dictionary<string, AttributeValue>(1)
-            .Set("address", new AttributeValue { M = new Dictionary<string, AttributeValue>().SetString("city", source.Address.City, false, true).SetString("line_1", source.Address.Line1, false, true) });
+            .Set("address", new AttributeValue { M = ToItem_Address(source.Address) });
 
     [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
     internal static partial global::MyNamespace.Order FromItem(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> item)
     {
         var order = new global::MyNamespace.Order
         {
-            Address = item.TryGetValue("address", out var addressAttr) && addressAttr.M is { } addressMap ? new global::MyNamespace.Address { City = addressMap.GetString("city", Requiredness.Optional), Line1 = addressMap.GetString("line_1", Requiredness.Optional), } : null,
+            Address = item.TryGetValue("address", out var addressAttr) && addressAttr.M is { } addressMap ? FromItem_Address(addressMap) : null,
         };
         return order;
     }
+
+    // Helper methods for nested object mapping
+
+    private static Dictionary<string, AttributeValue> ToItem_Address(global::MyNamespace.Address address) =>
+        new Dictionary<string, AttributeValue>(2)
+            .SetString("city", address.City, false, true)
+            .SetString("line_1", address.Line1, false, true);
+
+    private static global::MyNamespace.Address FromItem_Address(Dictionary<string, AttributeValue> map)
+    {
+        var address = new global::MyNamespace.Address();
+        if (map.TryGetString("city", out var var0, Requiredness.InferFromNullability)) address.City = var0!;
+        if (map.TryGetString("line_1", out var var1, Requiredness.InferFromNullability)) address.Line1 = var1!;
+        return address;
+    }
+
 }

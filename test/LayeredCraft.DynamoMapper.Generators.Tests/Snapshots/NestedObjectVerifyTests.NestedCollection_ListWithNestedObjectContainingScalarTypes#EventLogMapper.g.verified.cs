@@ -23,7 +23,7 @@ public static partial class EventLogMapper
     public static partial global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> ToItem(global::MyNamespace.EventLog source) =>
         new Dictionary<string, AttributeValue>(2)
             .SetString("id", source.Id, false, true)
-            .Set("entries", new AttributeValue { L = source.Entries.Select(x => new AttributeValue { M = new Dictionary<string, AttributeValue>().SetDateTime("timestamp", x.Timestamp, "O", false, true).SetString("message", x.Message, false, true).SetInt("severity", x.Severity, false, true).SetBool("isError", x.IsError, false, true) }).ToList() });
+            .Set("entries", new AttributeValue { L = source.Entries.Select(x => new AttributeValue { M = ToItem_LogEntry(x) }).ToList() });
 
     [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
     public static partial global::MyNamespace.EventLog FromItem(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> item)
@@ -31,8 +31,29 @@ public static partial class EventLogMapper
         var eventLog = new global::MyNamespace.EventLog
         {
             Id = item.GetString("id", Requiredness.InferFromNullability),
-            Entries = item.TryGetValue("entries", out var entriesAttr) && entriesAttr.L is { } entriesList ? entriesList.Select(av => new global::MyNamespace.LogEntry { Timestamp = av.M.GetDateTime("timestamp", format: "O", Requiredness.Optional), Message = av.M.GetString("message", Requiredness.Optional), Severity = av.M.GetInt("severity", Requiredness.Optional), IsError = av.M.GetBool("isError", Requiredness.Optional), }).ToList() : [],
+            Entries = item.TryGetValue("entries", out var entriesAttr) && entriesAttr.L is { } entriesList ? entriesList.Select(av => FromItem_LogEntry(av.M)).ToList() : [],
         };
         return eventLog;
     }
+
+    // Helper methods for nested object mapping
+
+    private static Dictionary<string, AttributeValue> ToItem_LogEntry(global::MyNamespace.LogEntry logentry) =>
+        new Dictionary<string, AttributeValue>(4)
+            .SetDateTime("timestamp", logentry.Timestamp, "O", false, true)
+            .SetString("message", logentry.Message, false, true)
+            .SetInt("severity", logentry.Severity, false, true)
+            .SetBool("isError", logentry.IsError, false, true);
+
+    private static global::MyNamespace.LogEntry FromItem_LogEntry(Dictionary<string, AttributeValue> map)
+    {
+        return new global::MyNamespace.LogEntry
+        {
+            Timestamp = map.GetDateTime("timestamp", format: "O", Requiredness.Optional),
+            Message = map.GetString("message", Requiredness.Optional),
+            Severity = map.GetInt("severity", Requiredness.Optional),
+            IsError = map.GetBool("isError", Requiredness.Optional),
+        };
+    }
+
 }

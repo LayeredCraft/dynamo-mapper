@@ -74,4 +74,13 @@ using Amazon.DynamoDBv2.Model;
         return {{ model_var_name }};
     }
     {{~ end ~}}
+{{~ # Helper methods for nested object mapping ~}}
+{{~ if helper_methods.size > 0 ~}}
+
+    // Helper methods for nested object mapping
+    {{~ for helper in helper_methods ~}}
+
+    {{ helper }}
+    {{~ end ~}}
+{{~ end ~}}
 }

@@ -18,6 +18,14 @@ dotnet add package DynamoMapper --prerelease
 
 This installs both the source generator and runtime packages.
 
+## Install the agent skill
+
+If you want an agent to use the DynamoMapper skill from this repository, install it with:
+
+```bash
+npx skills add https://github.com/LayeredCraft/dynamo-mapper --skill dynamo-mapper
+```
+
 ## Configure C# Version
 
 Ensure your project uses C# 11 or later in your `.csproj` file:

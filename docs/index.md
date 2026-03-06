@@ -73,6 +73,12 @@ See the [Quick Start Guide](getting-started/quick-start.md) for a complete tutor
 2. [Requirements](getting-started/requirements.md) - System requirements and dependencies
 3. [Quick Start](getting-started/quick-start.md) - Build your first mapper in 5 minutes
 
+For AI tooling, install the repo skill with:
+
+```bash
+npx skills add https://github.com/LayeredCraft/dynamo-mapper --skill dynamo-mapper
+```
+
 ## Documentation
 
 - **[Core Concepts](core-concepts/how-it-works.md)** - Understand how DynamoMapper works

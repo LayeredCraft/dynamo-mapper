@@ -29,6 +29,12 @@ Install the NuGet package:
 dotnet add package DynamoMapper --prerelease
 ```
 
+Install the DynamoMapper agent skill:
+
+```bash
+npx skills add https://github.com/LayeredCraft/dynamo-mapper --skill dynamo-mapper
+```
+
 Ensure your project uses C# 11 or later:
 
 ```xml
@@ -144,6 +150,12 @@ Key sections:
 - [Usage Guide](https://layeredcraft.github.io/dynamo-mapper/usage/basic-mapping/) - Detailed usage patterns
 - [Examples](https://layeredcraft.github.io/dynamo-mapper/examples/) - Real-world DynamoDB scenarios
 - [Roadmap](https://layeredcraft.github.io/dynamo-mapper/roadmap/phase-1/) - Phase 1 and Phase 2 plans
+
+For AI tooling, install the repo skill with:
+
+```bash
+npx skills add https://github.com/LayeredCraft/dynamo-mapper --skill dynamo-mapper
+```
 
 ## Contributing
 

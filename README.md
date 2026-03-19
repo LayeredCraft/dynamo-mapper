@@ -183,6 +183,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
   <tbody>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/j-d-ha"><img src="https://avatars.githubusercontent.com/u/61319894?v=4?s=100" width="100px;" alt="Jonas Ha"/><br /><sub><b>Jonas Ha</b></sub></a><br /><a href="https://github.com/LayeredCraft/dynamo-mapper/commits?author=j-d-ha" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/ncipollina"><img src="https://avatars.githubusercontent.com/u/1405469?v=4?s=100" width="100px;" alt="Nick Cipollina"/><br /><sub><b>Nick Cipollina</b></sub></a><br /><a href="https://github.com/LayeredCraft/dynamo-mapper/commits?author=ncipollina" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>

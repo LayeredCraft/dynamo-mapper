@@ -1,4 +1,4 @@
-namespace DynamoMapper.Runtime;
+namespace LayeredCraft.DynamoMapper.Runtime;
 
 /// <summary>Naming convention for mapping .NET property names to DynamoDB attribute names.</summary>
 public enum DynamoNamingConvention

@@ -15,7 +15,7 @@ extension methods. The example below is a real-world output.
 
 #nullable enable
 
-using DynamoMapper.Runtime;
+using LayeredCraft.DynamoMapper.Runtime;
 using System.Collections.Generic;
 using Amazon.DynamoDBv2.Model;
 
@@ -23,13 +23,13 @@ namespace Trivia.Manager.Shared.Models;
 
 internal static partial class DuplicateResultMapper
 {
-    [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "1.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("LayeredCraft.DynamoMapper", "1.0.0.0")]
     internal static partial global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> ToItem(global::Trivia.Manager.Shared.Models.DuplicateResult duplicateResult) =>
         new Dictionary<string, AttributeValue>(2)
             .SetString("id", duplicateResult.Id, false, true)
             .Set("score", ScoreToAttribute(duplicateResult));
 
-    [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "1.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("LayeredCraft.DynamoMapper", "1.0.0.0")]
     internal static partial global::Trivia.Manager.Shared.Models.DuplicateResult FromItem(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> item)
     {
         var duplicateResult = new global::Trivia.Manager.Shared.Models.DuplicateResult
@@ -43,7 +43,7 @@ internal static partial class DuplicateResultMapper
 ```
 
 Notes:
-- Generated code uses `SetX`/`GetX` helpers from `DynamoMapper.Runtime`.
+- Generated code uses `SetX`/`GetX` helpers from `LayeredCraft.DynamoMapper.Runtime`.
 - Class-level `[DynamoField]`/`[DynamoIgnore]` configuration influences argument values.
 
 ## Constructor-Based `FromItem`
@@ -55,7 +55,7 @@ See [Basic Mapping](../usage/basic-mapping.md#constructor-mapping-rules-fromitem
 constructor selection rules and gotchas.
 
 ```csharp
-[global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
+[global::System.CodeDom.Compiler.GeneratedCode("LayeredCraft.DynamoMapper", "REPLACED")]
 public static partial global::MyNamespace.Product FromItem(
     global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> item
 )

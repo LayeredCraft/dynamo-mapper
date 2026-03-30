@@ -1,4 +1,4 @@
-namespace DynamoMapper.Runtime;
+namespace LayeredCraft.DynamoMapper.Runtime;
 
 /// <summary>
 ///     Marks a static partial class as a DynamoDB mapper and specifies mapper-level

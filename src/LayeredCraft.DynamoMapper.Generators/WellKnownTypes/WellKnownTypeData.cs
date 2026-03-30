@@ -8,7 +8,7 @@
 
 // ReSharper disable InconsistentNaming
 
-namespace DynamoMapper.Generator.WellKnownTypes;
+namespace LayeredCraft.DynamoMapper.Generator.WellKnownTypes;
 
 internal static class WellKnownTypeData
 {
@@ -49,10 +49,10 @@ internal static class WellKnownTypeData
         System_Collections_Generic_IEnumerable_1,
         System_Collections_Generic_HashSet_1,
         System_Collections_Generic_ISet_1,
-        DynamoMapper_Runtime_DynamoMapperAttribute,
-        DynamoMapper_Runtime_DynamoFieldAttribute,
-        DynamoMapper_Runtime_DynamoIgnoreAttribute,
-        DynamoMapper_Runtime_DynamoMapperConstructorAttribute,
+        LayeredCraft_DynamoMapper_Runtime_DynamoMapperAttribute,
+        LayeredCraft_DynamoMapper_Runtime_DynamoFieldAttribute,
+        LayeredCraft_DynamoMapper_Runtime_DynamoIgnoreAttribute,
+        LayeredCraft_DynamoMapper_Runtime_DynamoMapperConstructorAttribute,
     }
 
     public static readonly string[] WellKnownTypeNames =
@@ -92,9 +92,9 @@ internal static class WellKnownTypeData
         "System.Collections.Generic.IEnumerable`1",
         "System.Collections.Generic.HashSet`1",
         "System.Collections.Generic.ISet`1",
-        "DynamoMapper.Runtime.DynamoMapperAttribute",
-        "DynamoMapper.Runtime.DynamoFieldAttribute",
-        "DynamoMapper.Runtime.DynamoIgnoreAttribute",
-        "DynamoMapper.Runtime.DynamoMapperConstructorAttribute",
+        "LayeredCraft.DynamoMapper.Runtime.DynamoMapperAttribute",
+        "LayeredCraft.DynamoMapper.Runtime.DynamoFieldAttribute",
+        "LayeredCraft.DynamoMapper.Runtime.DynamoIgnoreAttribute",
+        "LayeredCraft.DynamoMapper.Runtime.DynamoMapperConstructorAttribute",
     ];
 }

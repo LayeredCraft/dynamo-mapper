@@ -1,4 +1,4 @@
-namespace DynamoMapper.Runtime;
+namespace LayeredCraft.DynamoMapper.Runtime;
 
 /// <summary>Exception thrown when DynamoDB mapping operations fail.</summary>
 public class DynamoMappingException : Exception

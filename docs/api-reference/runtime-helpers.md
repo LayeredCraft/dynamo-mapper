@@ -5,7 +5,7 @@ The runtime package exposes extension methods on
 
 ## Core Value Helpers
 
-These methods live in `DynamoMapper.Runtime` and are used by the generator.
+These methods live in `LayeredCraft.DynamoMapper.Runtime` and are used by the generator.
 
 String:
 - `GetString`, `GetNullableString`

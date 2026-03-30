@@ -112,7 +112,7 @@ static partial void AfterFromItem(Dictionary<string, AttributeValue> item, ref T
 
 ```csharp
 using Amazon.DynamoDBv2.Model;
-using DynamoMapper.Runtime;
+using LayeredCraft.DynamoMapper.Runtime;
 
 [DynamoMapper(Convention = DynamoNamingConvention.CamelCase)]
 public static partial class ProductMapper

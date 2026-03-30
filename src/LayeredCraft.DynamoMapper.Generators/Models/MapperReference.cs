@@ -1,4 +1,4 @@
-namespace DynamoMapper.Generator.Models;
+namespace LayeredCraft.DynamoMapper.Generator.Models;
 
 /// <summary>
 ///     Reference to a mapper class that can map a specific model type.

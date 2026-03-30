@@ -1,9 +1,9 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using DynamoMapper.Generator.PropertyMapping.Models;
-using DynamoMapper.Runtime;
+using LayeredCraft.DynamoMapper.Generator.PropertyMapping.Models;
+using LayeredCraft.DynamoMapper.Runtime;
 
-namespace DynamoMapper.Generator.PropertyMapping;
+namespace LayeredCraft.DynamoMapper.Generator.PropertyMapping;
 
 /// <summary>
 ///     Builds property mapping specifications with complete method call information. Constructs

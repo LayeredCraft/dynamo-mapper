@@ -1,10 +1,10 @@
-using DynamoMapper.Generator.Models;
+using LayeredCraft.DynamoMapper.Generator.Models;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using WellKnownType = DynamoMapper.Generator.WellKnownTypes.WellKnownTypeData.WellKnownType;
+using WellKnownType = LayeredCraft.DynamoMapper.Generator.WellKnownTypes.WellKnownTypeData.WellKnownType;
 
-namespace DynamoMapper.Generator;
+namespace LayeredCraft.DynamoMapper.Generator;
 
 internal static class MapperSyntaxProvider
 {
@@ -63,7 +63,7 @@ internal static class MapperSyntaxProvider
                 attr.AttributeClass is not null
                 && wellKnownTypes.IsType(
                     attr.AttributeClass,
-                    WellKnownType.DynamoMapper_Runtime_DynamoMapperAttribute
+                    WellKnownType.LayeredCraft_DynamoMapper_Runtime_DynamoMapperAttribute
                 )
             )
             is not { } mapperAttribute
@@ -77,7 +77,7 @@ internal static class MapperSyntaxProvider
                 attr.AttributeClass is not null
                 && wellKnownTypes.IsType(
                     attr.AttributeClass,
-                    WellKnownType.DynamoMapper_Runtime_DynamoFieldAttribute
+                    WellKnownType.LayeredCraft_DynamoMapper_Runtime_DynamoFieldAttribute
                 )
             )
             .Select(attr => attr.PopulateOptions<DynamoFieldOptions>())
@@ -88,7 +88,7 @@ internal static class MapperSyntaxProvider
                 attr.AttributeClass is not null
                 && wellKnownTypes.IsType(
                     attr.AttributeClass,
-                    WellKnownType.DynamoMapper_Runtime_DynamoIgnoreAttribute
+                    WellKnownType.LayeredCraft_DynamoMapper_Runtime_DynamoIgnoreAttribute
                 )
             )
             .Select(attr => attr.PopulateOptions<DynamoIgnoreOptions>())

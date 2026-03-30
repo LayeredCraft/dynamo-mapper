@@ -1,6 +1,6 @@
-using DynamoMapper.Generator.PropertyMapping.Models;
+using LayeredCraft.DynamoMapper.Generator.PropertyMapping.Models;
 
-namespace DynamoMapper.Generator.Models;
+namespace LayeredCraft.DynamoMapper.Generator.Models;
 
 /// <summary>Represents a helper method that maps a nested type to/from AttributeValue dictionary.</summary>
 internal sealed record HelperMethodInfo(

@@ -10,7 +10,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis;
 
-namespace DynamoMapper.Generator.WellKnownTypes;
+namespace LayeredCraft.DynamoMapper.Generator.WellKnownTypes;
 
 internal class WellKnownTypes
 {

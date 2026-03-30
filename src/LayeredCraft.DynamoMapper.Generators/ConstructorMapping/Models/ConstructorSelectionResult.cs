@@ -1,6 +1,6 @@
 using LayeredCraft.SourceGeneratorTools.Types;
 
-namespace DynamoMapper.Generator.ConstructorMapping.Models;
+namespace LayeredCraft.DynamoMapper.Generator.ConstructorMapping.Models;
 
 /// <summary>
 ///     Represents the result of constructor selection, including how each property should be initialized.

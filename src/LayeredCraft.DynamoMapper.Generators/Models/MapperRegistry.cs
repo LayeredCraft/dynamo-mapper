@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 
-namespace DynamoMapper.Generator.Models;
+namespace LayeredCraft.DynamoMapper.Generator.Models;
 
 /// <summary>
 ///     Registry of all discovered mapper classes, keyed by the fully qualified name of the model type they map.

@@ -1,11 +1,11 @@
-using DynamoMapper.Generator.ConstructorMapping;
-using DynamoMapper.Generator.ConstructorMapping.Models;
-using DynamoMapper.Generator.Diagnostics;
-using DynamoMapper.Generator.PropertyMapping;
+using LayeredCraft.DynamoMapper.Generator.ConstructorMapping;
+using LayeredCraft.DynamoMapper.Generator.ConstructorMapping.Models;
+using LayeredCraft.DynamoMapper.Generator.Diagnostics;
+using LayeredCraft.DynamoMapper.Generator.PropertyMapping;
 using LayeredCraft.SourceGeneratorTools.Types;
 using Microsoft.CodeAnalysis;
 
-namespace DynamoMapper.Generator.Models;
+namespace LayeredCraft.DynamoMapper.Generator.Models;
 
 internal sealed record ModelClassInfo(
     string FullyQualifiedType,

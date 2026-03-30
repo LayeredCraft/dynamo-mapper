@@ -1,7 +1,7 @@
 using Amazon.DynamoDBv2.Model;
-using DynamoMapper.Runtime;
+using LayeredCraft.DynamoMapper.Runtime;
 
-namespace DynamoMapper.Nested;
+namespace LayeredCraft.DynamoMapper.Nested;
 
 public record Order
 {

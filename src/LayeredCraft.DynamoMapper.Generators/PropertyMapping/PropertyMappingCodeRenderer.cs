@@ -1,11 +1,11 @@
 using System.Diagnostics;
 using System.Text;
-using DynamoMapper.Generator.ConstructorMapping.Models;
-using DynamoMapper.Generator.Models;
-using DynamoMapper.Generator.PropertyMapping.Models;
+using LayeredCraft.DynamoMapper.Generator.ConstructorMapping.Models;
+using LayeredCraft.DynamoMapper.Generator.Models;
+using LayeredCraft.DynamoMapper.Generator.PropertyMapping.Models;
 using Microsoft.CodeAnalysis;
 
-namespace DynamoMapper.Generator.PropertyMapping;
+namespace LayeredCraft.DynamoMapper.Generator.PropertyMapping;
 
 /// <summary>
 ///     Renders property mapping specifications into PropertyInfo. Generates the final

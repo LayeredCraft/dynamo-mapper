@@ -1,6 +1,6 @@
 using Microsoft.CodeAnalysis;
 
-namespace DynamoMapper.Generator.PropertyMapping.Models;
+namespace LayeredCraft.DynamoMapper.Generator.PropertyMapping.Models;
 
 /// <summary>
 ///     Captures nullability information about a property type. Renamed to avoid conflict with

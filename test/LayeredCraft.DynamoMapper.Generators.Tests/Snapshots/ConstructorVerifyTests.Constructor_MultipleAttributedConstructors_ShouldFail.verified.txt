@@ -8,7 +8,7 @@
         Id: DM0103,
         Title: Multiple constructors marked with [DynamoMapperConstructor],
         MessageFormat: The type '{0}' has multiple constructors marked with [DynamoMapperConstructor]. Only one constructor can be marked with this attribute.,
-        Category: DynamoMapper.Usage,
+        Category: LayeredCraft.DynamoMapper.Usage,
         DefaultSeverity: Error,
         IsEnabledByDefault: true
       }

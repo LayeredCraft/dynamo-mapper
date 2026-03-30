@@ -1,10 +1,10 @@
-using DynamoMapper.Generator.Models;
+using LayeredCraft.DynamoMapper.Generator.Models;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using WellKnownType = DynamoMapper.Generator.WellKnownTypes.WellKnownTypeData.WellKnownType;
+using WellKnownType = LayeredCraft.DynamoMapper.Generator.WellKnownTypes.WellKnownTypeData.WellKnownType;
 
-namespace DynamoMapper.Generator;
+namespace LayeredCraft.DynamoMapper.Generator;
 
 /// <summary>
 ///     Lightweight extractor that collects basic mapper reference information
@@ -49,7 +49,7 @@ internal static class MapperReferenceExtractor
                 attr.AttributeClass is not null
                 && wellKnownTypes.IsType(
                     attr.AttributeClass,
-                    WellKnownType.DynamoMapper_Runtime_DynamoMapperAttribute
+                    WellKnownType.LayeredCraft_DynamoMapper_Runtime_DynamoMapperAttribute
                 )
             )
         )

@@ -1,4 +1,4 @@
-namespace DynamoMapper.Generator.PropertyMapping.Models;
+namespace LayeredCraft.DynamoMapper.Generator.PropertyMapping.Models;
 
 /// <summary>
 ///     Complete specification of how to map a property to/from DynamoDB. Contains all information

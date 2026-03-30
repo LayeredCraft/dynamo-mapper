@@ -1,8 +1,8 @@
 using System.Text;
-using DynamoMapper.Generator.Models;
-using DynamoMapper.Generator.PropertyMapping;
+using LayeredCraft.DynamoMapper.Generator.Models;
+using LayeredCraft.DynamoMapper.Generator.PropertyMapping;
 
-namespace DynamoMapper.Generator.Emitters;
+namespace LayeredCraft.DynamoMapper.Generator.Emitters;
 
 /// <summary>Generates helper method code for nested object mapping.</summary>
 internal static class HelperMethodEmitter

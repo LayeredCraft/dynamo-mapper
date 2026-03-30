@@ -10,7 +10,7 @@
 
 #nullable enable
 
-using DynamoMapper.Runtime;
+using LayeredCraft.DynamoMapper.Runtime;
 using System.Collections.Generic;
 using System.Linq;
 using Amazon.DynamoDBv2.Model;
@@ -19,13 +19,13 @@ namespace MyNamespace;
 
 public static partial class CatalogMapper
 {
-    [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
+    [global::System.CodeDom.Compiler.GeneratedCode("LayeredCraft.DynamoMapper", "REPLACED")]
     public static partial global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> ToItem(global::MyNamespace.Catalog source) =>
         new Dictionary<string, AttributeValue>(2)
             .SetString("id", source.Id, false, true)
             .Set("products", source.Products is null ? new AttributeValue { NULL = true } : new AttributeValue { M = source.Products?.ToDictionary(kvp => kvp.Key, kvp => new AttributeValue { M = global::MyNamespace.ProductMapper.ToItem(kvp.Value) }) });
 
-    [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
+    [global::System.CodeDom.Compiler.GeneratedCode("LayeredCraft.DynamoMapper", "REPLACED")]
     public static partial global::MyNamespace.Catalog FromItem(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> item)
     {
         var catalog = new global::MyNamespace.Catalog

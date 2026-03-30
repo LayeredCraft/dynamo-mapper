@@ -1,12 +1,12 @@
-using DynamoMapper.Generator.Diagnostics;
-using DynamoMapper.Generator.Models;
-using DynamoMapper.Generator.PropertyMapping.Models;
-using DynamoMapper.Generator.WellKnownTypes;
-using DynamoMapper.Runtime;
+using LayeredCraft.DynamoMapper.Generator.Diagnostics;
+using LayeredCraft.DynamoMapper.Generator.Models;
+using LayeredCraft.DynamoMapper.Generator.PropertyMapping.Models;
+using LayeredCraft.DynamoMapper.Generator.WellKnownTypes;
+using LayeredCraft.DynamoMapper.Runtime;
 using LayeredCraft.SourceGeneratorTools.Types;
 using Microsoft.CodeAnalysis;
 
-namespace DynamoMapper.Generator.PropertyMapping;
+namespace LayeredCraft.DynamoMapper.Generator.PropertyMapping;
 
 /// <summary>
 ///     Analyzes types to determine if they are nested objects and how they should be mapped.

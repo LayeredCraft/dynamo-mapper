@@ -1,5 +1,5 @@
 using Amazon.DynamoDBv2.Model;
-using DynamoMapper.Nested;
+using LayeredCraft.DynamoMapper.Nested;
 
 Console.WriteLine("=== DynamoMapper Nested Object Examples ===\n");
 

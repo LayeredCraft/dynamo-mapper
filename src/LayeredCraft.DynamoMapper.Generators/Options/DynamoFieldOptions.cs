@@ -1,6 +1,6 @@
-using DynamoMapper.Runtime;
+using LayeredCraft.DynamoMapper.Runtime;
 
-namespace DynamoMapper.Generator;
+namespace LayeredCraft.DynamoMapper.Generator;
 
 internal class DynamoFieldOptions
 {

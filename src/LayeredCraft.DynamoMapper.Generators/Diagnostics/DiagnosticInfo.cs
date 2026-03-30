@@ -1,7 +1,7 @@
-using DynamoMapper.Generator.Models;
+using LayeredCraft.DynamoMapper.Generator.Models;
 using Microsoft.CodeAnalysis;
 
-namespace DynamoMapper.Generator.Diagnostics;
+namespace LayeredCraft.DynamoMapper.Generator.Diagnostics;
 
 internal sealed record DiagnosticInfo(
     DiagnosticDescriptor DiagnosticDescriptor,

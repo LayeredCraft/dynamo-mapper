@@ -1,4 +1,4 @@
-namespace DynamoMapper.Runtime;
+namespace LayeredCraft.DynamoMapper.Runtime;
 
 /// <summary>
 ///     Marks which constructor the DynamoMapper generator should use when deserializing entities

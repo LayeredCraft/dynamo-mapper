@@ -1,7 +1,7 @@
-using DynamoMapper.Generator.Models;
+using LayeredCraft.DynamoMapper.Generator.Models;
 using LayeredCraft.SourceGeneratorTools.Types;
 
-namespace DynamoMapper.Generator.PropertyMapping.Models;
+namespace LayeredCraft.DynamoMapper.Generator.PropertyMapping.Models;
 
 /// <summary>
 ///     Base type for nested object mapping information. Used to determine how a nested object

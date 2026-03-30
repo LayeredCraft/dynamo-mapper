@@ -1,10 +1,10 @@
-using DynamoMapper.Generator.Diagnostics;
-using DynamoMapper.Generator.PropertyMapping.Models;
-using DynamoMapper.Runtime;
+using LayeredCraft.DynamoMapper.Generator.Diagnostics;
+using LayeredCraft.DynamoMapper.Generator.PropertyMapping.Models;
+using LayeredCraft.DynamoMapper.Runtime;
 using Microsoft.CodeAnalysis;
-using WellKnownType = DynamoMapper.Generator.WellKnownTypes.WellKnownTypeData.WellKnownType;
+using WellKnownType = LayeredCraft.DynamoMapper.Generator.WellKnownTypes.WellKnownTypeData.WellKnownType;
 
-namespace DynamoMapper.Generator.PropertyMapping;
+namespace LayeredCraft.DynamoMapper.Generator.PropertyMapping;
 
 /// <summary>
 /// Analyzes types to determine if they are collections and extracts collection metadata.

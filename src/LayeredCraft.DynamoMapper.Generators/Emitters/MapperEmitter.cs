@@ -1,9 +1,9 @@
 using System.Reflection;
-using DynamoMapper.Generator.Diagnostics;
-using DynamoMapper.Generator.Models;
+using LayeredCraft.DynamoMapper.Generator.Diagnostics;
+using LayeredCraft.DynamoMapper.Generator.Models;
 using Microsoft.CodeAnalysis;
 
-namespace DynamoMapper.Generator.Emitters;
+namespace LayeredCraft.DynamoMapper.Generator.Emitters;
 
 internal static class MapperEmitter
 {

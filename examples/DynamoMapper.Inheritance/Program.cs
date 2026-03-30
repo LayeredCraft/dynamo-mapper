@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using Amazon.DynamoDBv2.Model;
-using DynamoMapper.Runtime;
+using LayeredCraft.DynamoMapper.Runtime;
 
-namespace DynamoMapper.Inheritance;
+namespace LayeredCraft.DynamoMapper.Inheritance;
 
 [DynamoMapper]
 internal static partial class OrderMapper_Default

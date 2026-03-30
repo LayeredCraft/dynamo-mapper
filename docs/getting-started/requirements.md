@@ -17,8 +17,8 @@ DynamoMapper requires:
 
 DynamoMapper packages target:
 
-- **Runtime package** (`DynamoMapper.Runtime`): .NET Standard 2.0
-- **Generator package** (`DynamoMapper`): .NET Standard 2.0
+- **Runtime package** (`LayeredCraft.DynamoMapper.Runtime`): .NET Standard 2.0
+- **Generator package** (`LayeredCraft.DynamoMapper`): .NET Standard 2.0
 
 This means you can use DynamoMapper in projects targeting:
 

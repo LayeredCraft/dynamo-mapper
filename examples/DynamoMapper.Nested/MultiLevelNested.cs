@@ -1,7 +1,7 @@
 using Amazon.DynamoDBv2.Model;
-using DynamoMapper.Runtime;
+using LayeredCraft.DynamoMapper.Runtime;
 
-namespace DynamoMapper.Nested;
+namespace LayeredCraft.DynamoMapper.Nested;
 
 /// <summary>
 /// Example: Multi-level nested objects - Company -> Department -> Manager

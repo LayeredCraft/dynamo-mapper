@@ -1,6 +1,6 @@
-using DynamoMapper.Runtime;
+using LayeredCraft.DynamoMapper.Runtime;
 
-namespace DynamoMapper.Generator.PropertyMapping.Models;
+namespace LayeredCraft.DynamoMapper.Generator.PropertyMapping.Models;
 
 /// <summary>Defines the strategy for mapping a C# type to AttributeValue extension methods.</summary>
 /// <param name="TypeName">

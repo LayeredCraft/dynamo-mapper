@@ -17,7 +17,7 @@ The mapper itself remains the same:
 ```csharp
 using System.Collections.Generic;
 using Amazon.DynamoDBv2.Model;
-using DynamoMapper.Runtime;
+using LayeredCraft.DynamoMapper.Runtime;
 
 namespace MyApp.Data;
 
@@ -199,7 +199,7 @@ public record Person(string FirstName, string LastName, int Age);
 If your class has get-only properties, DynamoMapper can deserialize using a constructor:
 
 ```csharp
-using DynamoMapper.Runtime;
+using LayeredCraft.DynamoMapper.Runtime;
 
 public class Person
 {

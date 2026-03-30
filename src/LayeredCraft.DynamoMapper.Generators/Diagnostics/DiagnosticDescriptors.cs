@@ -1,10 +1,10 @@
 using Microsoft.CodeAnalysis;
 
-namespace DynamoMapper.Generator.Diagnostics;
+namespace LayeredCraft.DynamoMapper.Generator.Diagnostics;
 
 internal static class DiagnosticDescriptors
 {
-    private const string UsageCategory = "DynamoMapper.Usage";
+    private const string UsageCategory = "LayeredCraft.DynamoMapper.Usage";
 
     internal static readonly DiagnosticDescriptor CannotConvertFromAttributeValue =
         new(

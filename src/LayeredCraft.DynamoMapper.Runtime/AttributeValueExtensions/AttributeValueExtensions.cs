@@ -1,6 +1,6 @@
 using Amazon.DynamoDBv2.Model;
 
-namespace DynamoMapper.Runtime;
+namespace LayeredCraft.DynamoMapper.Runtime;
 
 /// <summary>Extension methods for <see cref="AttributeValue" /> null handling.</summary>
 public static class AttributeValueExtensions

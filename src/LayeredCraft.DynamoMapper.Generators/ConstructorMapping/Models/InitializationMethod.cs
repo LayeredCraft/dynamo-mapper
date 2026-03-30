@@ -1,4 +1,4 @@
-namespace DynamoMapper.Generator.ConstructorMapping.Models;
+namespace LayeredCraft.DynamoMapper.Generator.ConstructorMapping.Models;
 
 /// <summary>Specifies how a property should be initialized during object construction.</summary>
 internal enum InitializationMethod

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using Amazon.DynamoDBv2.Model;
-using DynamoMapper.Runtime;
+using LayeredCraft.DynamoMapper.Runtime;
 
 // Example enum definitions
 var exampleAttributes = new Dictionary<string, AttributeValue>

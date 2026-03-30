@@ -1,7 +1,7 @@
-using DynamoMapper.Generator.PropertyMapping.Models;
+using LayeredCraft.DynamoMapper.Generator.PropertyMapping.Models;
 using Microsoft.CodeAnalysis;
 
-namespace DynamoMapper.Generator.ConstructorMapping.Models;
+namespace LayeredCraft.DynamoMapper.Generator.ConstructorMapping.Models;
 
 /// <summary>
 ///     Represents the semantic analysis of a constructor parameter, including its matched property.

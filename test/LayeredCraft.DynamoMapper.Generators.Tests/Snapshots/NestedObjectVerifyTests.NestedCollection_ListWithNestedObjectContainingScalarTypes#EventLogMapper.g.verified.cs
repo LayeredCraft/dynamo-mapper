@@ -10,7 +10,7 @@
 
 #nullable enable
 
-using DynamoMapper.Runtime;
+using LayeredCraft.DynamoMapper.Runtime;
 using System.Collections.Generic;
 using System.Linq;
 using Amazon.DynamoDBv2.Model;
@@ -19,13 +19,13 @@ namespace MyNamespace;
 
 public static partial class EventLogMapper
 {
-    [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
+    [global::System.CodeDom.Compiler.GeneratedCode("LayeredCraft.DynamoMapper", "REPLACED")]
     public static partial global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> ToItem(global::MyNamespace.EventLog source) =>
         new Dictionary<string, AttributeValue>(2)
             .SetString("id", source.Id, false, true)
             .Set("entries", new AttributeValue { L = source.Entries.Select(x => new AttributeValue { M = ToItem_LogEntry(x) }).ToList() });
 
-    [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
+    [global::System.CodeDom.Compiler.GeneratedCode("LayeredCraft.DynamoMapper", "REPLACED")]
     public static partial global::MyNamespace.EventLog FromItem(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> item)
     {
         var eventLog = new global::MyNamespace.EventLog

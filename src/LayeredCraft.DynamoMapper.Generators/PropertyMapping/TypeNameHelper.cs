@@ -1,4 +1,4 @@
-namespace DynamoMapper.Generator.PropertyMapping;
+namespace LayeredCraft.DynamoMapper.Generator.PropertyMapping;
 
 /// <summary>Utility for extracting and sanitizing type names from fully-qualified type strings.</summary>
 internal static class TypeNameHelper

@@ -1,8 +1,8 @@
 using System.Text.RegularExpressions;
 using Amazon.DynamoDBv2.Model;
 using Basic.Reference.Assemblies;
-using DynamoMapper.Generator;
-using DynamoMapper.Runtime;
+using LayeredCraft.DynamoMapper.Generator;
+using LayeredCraft.DynamoMapper.Runtime;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 

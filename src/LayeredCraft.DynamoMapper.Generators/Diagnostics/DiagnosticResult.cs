@@ -1,9 +1,9 @@
-using DynamoMapper.Generator.Models;
+using LayeredCraft.DynamoMapper.Generator.Models;
 using Microsoft.CodeAnalysis;
 
 // ReSharper disable MemberCanBePrivate.Global
 
-namespace DynamoMapper.Generator.Diagnostics;
+namespace LayeredCraft.DynamoMapper.Generator.Diagnostics;
 
 internal class DiagnosticResult<T>
 {

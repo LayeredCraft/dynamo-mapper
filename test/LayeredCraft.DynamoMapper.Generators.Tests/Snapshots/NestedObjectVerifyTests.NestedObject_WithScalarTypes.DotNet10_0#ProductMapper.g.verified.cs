@@ -10,7 +10,7 @@
 
 #nullable enable
 
-using DynamoMapper.Runtime;
+using LayeredCraft.DynamoMapper.Runtime;
 using System.Collections.Generic;
 using System.Linq;
 using Amazon.DynamoDBv2.Model;

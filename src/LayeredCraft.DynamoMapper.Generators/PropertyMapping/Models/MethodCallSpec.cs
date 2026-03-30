@@ -1,4 +1,4 @@
-namespace DynamoMapper.Generator.PropertyMapping.Models;
+namespace LayeredCraft.DynamoMapper.Generator.PropertyMapping.Models;
 
 /// <summary>Specifies a method call with its name and arguments.</summary>
 /// <param name="MethodName">The method name (e.g., "GetString", "SetInt").</param>

@@ -1,4 +1,4 @@
-namespace DynamoMapper.Runtime;
+namespace LayeredCraft.DynamoMapper.Runtime;
 
 /// <summary>
 ///     Excludes a property from being mapped in one or both directions. Applied to mapper

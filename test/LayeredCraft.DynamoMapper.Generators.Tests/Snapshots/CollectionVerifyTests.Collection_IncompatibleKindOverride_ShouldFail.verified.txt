@@ -7,7 +7,7 @@
         Id: DM0005,
         Title: Incompatible DynamoKind override for collection,
         MessageFormat: The property '{0}' has Kind override '{1}' which is incompatible with the inferred collection kind '{2}',
-        Category: DynamoMapper.Usage,
+        Category: LayeredCraft.DynamoMapper.Usage,
         DefaultSeverity: Error,
         IsEnabledByDefault: true
       }

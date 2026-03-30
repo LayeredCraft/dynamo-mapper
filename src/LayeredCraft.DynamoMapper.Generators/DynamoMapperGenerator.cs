@@ -1,13 +1,13 @@
 using System.Collections.Immutable;
-using DynamoMapper.Generator.Diagnostics;
-using DynamoMapper.Generator.Emitters;
-using DynamoMapper.Generator.Models;
-using DynamoMapper.Runtime;
+using LayeredCraft.DynamoMapper.Generator.Diagnostics;
+using LayeredCraft.DynamoMapper.Generator.Emitters;
+using LayeredCraft.DynamoMapper.Generator.Models;
+using LayeredCraft.DynamoMapper.Runtime;
 using Microsoft.CodeAnalysis;
 
-namespace DynamoMapper.Generator;
+namespace LayeredCraft.DynamoMapper.Generator;
 
-/// <summary>Source code generator for DynamoMapper.</summary>
+/// <summary>Source code generator for LayeredCraft.DynamoMapper.</summary>
 [Generator]
 public class DynamoMapperGenerator : IIncrementalGenerator
 {

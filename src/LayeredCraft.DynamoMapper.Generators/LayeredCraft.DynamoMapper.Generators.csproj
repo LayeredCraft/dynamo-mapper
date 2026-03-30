@@ -6,7 +6,7 @@
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <IsPackable>true</IsPackable>
     <ImplicitUsings>true</ImplicitUsings>
-    <PackageId>DynamoMapper</PackageId>
+    <PackageId>LayeredCraft.DynamoMapper</PackageId>
     <AssemblyName>$(PackageId)</AssemblyName>
     <RootNamespace>$(PackageId)</RootNamespace>
     <Title>$(PackageId)</Title>

@@ -1,7 +1,7 @@
-using DynamoMapper.Runtime;
+using LayeredCraft.DynamoMapper.Runtime;
 using Humanizer;
 
-namespace DynamoMapper.Extensions;
+namespace LayeredCraft.DynamoMapper.Extensions;
 
 internal static class DynamoNamingConventionExtensions
 {

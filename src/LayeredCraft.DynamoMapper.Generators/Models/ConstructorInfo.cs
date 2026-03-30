@@ -1,6 +1,6 @@
 using LayeredCraft.SourceGeneratorTools.Types;
 
-namespace DynamoMapper.Generator.Models;
+namespace LayeredCraft.DynamoMapper.Generator.Models;
 
 /// <summary>
 ///     Information about a constructor to use for deserialization.

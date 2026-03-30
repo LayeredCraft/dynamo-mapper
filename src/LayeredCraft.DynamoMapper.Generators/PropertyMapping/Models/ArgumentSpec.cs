@@ -1,4 +1,4 @@
-namespace DynamoMapper.Generator.PropertyMapping.Models;
+namespace LayeredCraft.DynamoMapper.Generator.PropertyMapping.Models;
 
 /// <summary>Represents a single argument in a method call.</summary>
 /// <param name="Value">The argument value as a string (e.g., "\"key\"", "source.Name", "true").</param>

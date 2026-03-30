@@ -1,4 +1,4 @@
-using DynamoMapper.Runtime;
+using LayeredCraft.DynamoMapper.Runtime;
 
 // ReSharper disable MemberCanBePrivate.Global
 

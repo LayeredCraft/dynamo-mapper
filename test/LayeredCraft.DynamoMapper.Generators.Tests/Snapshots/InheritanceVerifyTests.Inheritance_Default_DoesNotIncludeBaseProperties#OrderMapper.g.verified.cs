@@ -10,7 +10,7 @@
 
 #nullable enable
 
-using DynamoMapper.Runtime;
+using LayeredCraft.DynamoMapper.Runtime;
 using System.Collections.Generic;
 using System.Linq;
 using Amazon.DynamoDBv2.Model;
@@ -19,12 +19,12 @@ namespace MyNamespace;
 
 internal static partial class OrderMapper
 {
-    [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
+    [global::System.CodeDom.Compiler.GeneratedCode("LayeredCraft.DynamoMapper", "REPLACED")]
     internal static partial global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> ToItem(global::MyNamespace.Order source) =>
         new Dictionary<string, AttributeValue>(1)
             .SetString("name", source.Name, false, true);
 
-    [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
+    [global::System.CodeDom.Compiler.GeneratedCode("LayeredCraft.DynamoMapper", "REPLACED")]
     internal static partial global::MyNamespace.Order FromItem(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> item)
     {
         var order = new global::MyNamespace.Order();

@@ -1,5 +1,5 @@
 using System.Globalization;
-using DynamoMapper.Runtime;
+using LayeredCraft.DynamoMapper.Runtime;
 
 // ReSharper disable UnusedMember.Global
 // ReSharper disable UnusedMethodReturnValue.Global

@@ -1,7 +1,7 @@
 using LayeredCraft.SourceGeneratorTools.Types;
 using Microsoft.CodeAnalysis;
 
-namespace DynamoMapper.Generator.ConstructorMapping.Models;
+namespace LayeredCraft.DynamoMapper.Generator.ConstructorMapping.Models;
 
 /// <summary>
 ///     Represents the semantic analysis of a constructor, including all its parameters.

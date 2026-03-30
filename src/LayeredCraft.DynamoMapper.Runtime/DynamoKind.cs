@@ -1,4 +1,4 @@
-namespace DynamoMapper.Runtime;
+namespace LayeredCraft.DynamoMapper.Runtime;
 
 // ReSharper disable InconsistentNaming
 /// <summary>DynamoDB AttributeValue kind/type identifiers.</summary>

@@ -1,7 +1,7 @@
-using DynamoMapper.Runtime;
+using LayeredCraft.DynamoMapper.Runtime;
 using Microsoft.CodeAnalysis;
 
-namespace DynamoMapper.Generator.PropertyMapping.Models;
+namespace LayeredCraft.DynamoMapper.Generator.PropertyMapping.Models;
 
 /// <summary>
 /// Represents metadata about a collection type property.

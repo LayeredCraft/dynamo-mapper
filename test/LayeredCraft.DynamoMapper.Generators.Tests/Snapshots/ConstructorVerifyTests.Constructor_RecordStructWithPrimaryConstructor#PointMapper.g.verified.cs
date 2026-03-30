@@ -10,7 +10,7 @@
 
 #nullable enable
 
-using DynamoMapper.Runtime;
+using LayeredCraft.DynamoMapper.Runtime;
 using System.Collections.Generic;
 using System.Linq;
 using Amazon.DynamoDBv2.Model;
@@ -19,14 +19,14 @@ namespace MyNamespace;
 
 public static partial class PointMapper
 {
-    [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
+    [global::System.CodeDom.Compiler.GeneratedCode("LayeredCraft.DynamoMapper", "REPLACED")]
     public static partial global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> ToItem(global::MyNamespace.Point source) =>
         new Dictionary<string, AttributeValue>(3)
             .SetInt("x", source.X, false, true)
             .SetInt("y", source.Y, false, true)
             .SetInt("z", source.Z, false, true);
 
-    [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
+    [global::System.CodeDom.Compiler.GeneratedCode("LayeredCraft.DynamoMapper", "REPLACED")]
     public static partial global::MyNamespace.Point FromItem(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> item)
     {
         var point = new global::MyNamespace.Point

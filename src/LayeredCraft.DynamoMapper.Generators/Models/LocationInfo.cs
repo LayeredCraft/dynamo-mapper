@@ -1,7 +1,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 
-namespace DynamoMapper.Generator.Models;
+namespace LayeredCraft.DynamoMapper.Generator.Models;
 
 internal sealed record LocationInfo(string FilePath, TextSpan TextSpan, LinePositionSpan LineSpan);
 

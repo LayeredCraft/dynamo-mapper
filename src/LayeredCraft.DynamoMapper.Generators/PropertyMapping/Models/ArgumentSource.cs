@@ -1,4 +1,4 @@
-namespace DynamoMapper.Generator.PropertyMapping.Models;
+namespace LayeredCraft.DynamoMapper.Generator.PropertyMapping.Models;
 
 /// <summary>
 ///     Indicates where an argument value originates from. Used for tracing and enabling future

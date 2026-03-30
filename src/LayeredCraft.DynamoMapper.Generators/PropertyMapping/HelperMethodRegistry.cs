@@ -1,7 +1,7 @@
-using DynamoMapper.Generator.Models;
-using DynamoMapper.Generator.PropertyMapping.Models;
+using LayeredCraft.DynamoMapper.Generator.Models;
+using LayeredCraft.DynamoMapper.Generator.PropertyMapping.Models;
 
-namespace DynamoMapper.Generator.PropertyMapping;
+namespace LayeredCraft.DynamoMapper.Generator.PropertyMapping;
 
 /// <summary>
 ///     Registry for tracking helper methods during mapper generation. Ensures that the same

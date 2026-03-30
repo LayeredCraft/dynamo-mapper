@@ -1,8 +1,8 @@
-using DynamoMapper.Generator.Diagnostics;
-using DynamoMapper.Generator.PropertyMapping.Models;
+using LayeredCraft.DynamoMapper.Generator.Diagnostics;
+using LayeredCraft.DynamoMapper.Generator.PropertyMapping.Models;
 using Microsoft.CodeAnalysis;
 
-namespace DynamoMapper.Generator.PropertyMapping;
+namespace LayeredCraft.DynamoMapper.Generator.PropertyMapping;
 
 /// <summary>
 ///     Performs pure Roslyn symbol analysis on property symbols. Extracts property information

@@ -10,7 +10,7 @@
 
 #nullable enable
 
-using DynamoMapper.Runtime;
+using LayeredCraft.DynamoMapper.Runtime;
 using System.Collections.Generic;
 using System.Linq;
 using Amazon.DynamoDBv2.Model;
@@ -19,13 +19,13 @@ namespace MyNamespace;
 
 internal static partial class ExampleEntityMapper
 {
-    [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
+    [global::System.CodeDom.Compiler.GeneratedCode("LayeredCraft.DynamoMapper", "REPLACED")]
     internal static partial global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> ToItem(global::MyNamespace.ExampleEntity source) =>
         new Dictionary<string, AttributeValue>(2)
             .SetString("string", source.String, false, false)
             .SetString("nullableString", source.NullableString, false, true);
 
-    [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
+    [global::System.CodeDom.Compiler.GeneratedCode("LayeredCraft.DynamoMapper", "REPLACED")]
     internal static partial global::MyNamespace.ExampleEntity FromItem(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> item)
     {
         var exampleEntity = new global::MyNamespace.ExampleEntity

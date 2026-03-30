@@ -1,4 +1,4 @@
-using DynamoMapper.Generator.Diagnostics;
+using LayeredCraft.DynamoMapper.Generator.Diagnostics;
 
 namespace System.Collections.Generic;
 

@@ -1,6 +1,6 @@
 using Microsoft.CodeAnalysis;
 
-namespace DynamoMapper.Generator.PropertyMapping.Models;
+namespace LayeredCraft.DynamoMapper.Generator.PropertyMapping.Models;
 
 /// <summary>
 ///     Represents semantic information that is common to both property symbols and parameter symbols.

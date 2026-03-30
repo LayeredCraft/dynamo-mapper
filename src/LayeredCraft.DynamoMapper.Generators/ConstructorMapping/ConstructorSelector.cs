@@ -1,12 +1,12 @@
-using DynamoMapper.Generator.ConstructorMapping.Models;
-using DynamoMapper.Generator.Diagnostics;
-using DynamoMapper.Generator.Models;
-using DynamoMapper.Generator.PropertyMapping;
+using LayeredCraft.DynamoMapper.Generator.ConstructorMapping.Models;
+using LayeredCraft.DynamoMapper.Generator.Diagnostics;
+using LayeredCraft.DynamoMapper.Generator.Models;
+using LayeredCraft.DynamoMapper.Generator.PropertyMapping;
 using LayeredCraft.SourceGeneratorTools.Types;
 using Microsoft.CodeAnalysis;
-using WellKnownType = DynamoMapper.Generator.WellKnownTypes.WellKnownTypeData.WellKnownType;
+using WellKnownType = LayeredCraft.DynamoMapper.Generator.WellKnownTypes.WellKnownTypeData.WellKnownType;
 
-namespace DynamoMapper.Generator.ConstructorMapping;
+namespace LayeredCraft.DynamoMapper.Generator.ConstructorMapping;
 
 /// <summary>
 ///     Centralized logic for selecting which constructor to use for deserialization.
@@ -95,7 +95,7 @@ internal static class ConstructorSelector
     )
     {
         var attributeType = context.WellKnownTypes.Get(
-            WellKnownType.DynamoMapper_Runtime_DynamoMapperConstructorAttribute
+            WellKnownType.LayeredCraft_DynamoMapper_Runtime_DynamoMapperConstructorAttribute
         );
 
         if (attributeType is null)

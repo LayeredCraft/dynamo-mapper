@@ -10,7 +10,7 @@
 
 #nullable enable
 
-using DynamoMapper.Runtime;
+using LayeredCraft.DynamoMapper.Runtime;
 using System.Collections.Generic;
 using System.Linq;
 using Amazon.DynamoDBv2.Model;
@@ -19,14 +19,14 @@ namespace MyNamespace;
 
 public static partial class Level1Mapper
 {
-    [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
+    [global::System.CodeDom.Compiler.GeneratedCode("LayeredCraft.DynamoMapper", "REPLACED")]
     public static partial global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> ToItem(global::MyNamespace.Level1 source) =>
         new Dictionary<string, AttributeValue>(3)
             .SetString("id", source.Id, false, true)
             .SetString("name", source.Name, false, true)
             .Set("level2Data", source.Level2Data is null ? new AttributeValue { NULL = true } : new AttributeValue { M = ToItem_Level2(source.Level2Data) });
 
-    [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
+    [global::System.CodeDom.Compiler.GeneratedCode("LayeredCraft.DynamoMapper", "REPLACED")]
     public static partial global::MyNamespace.Level1 FromItem(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> item)
     {
         var level1 = new global::MyNamespace.Level1

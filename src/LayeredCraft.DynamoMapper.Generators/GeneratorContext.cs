@@ -1,7 +1,7 @@
-using DynamoMapper.Generator.Models;
+using LayeredCraft.DynamoMapper.Generator.Models;
 using Microsoft.CodeAnalysis;
 
-namespace DynamoMapper.Generator;
+namespace LayeredCraft.DynamoMapper.Generator;
 
 internal class GeneratorContext
 {

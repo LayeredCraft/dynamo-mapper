@@ -3,7 +3,7 @@ using System.Reflection;
 using Humanizer;
 using Microsoft.CodeAnalysis;
 
-namespace DynamoMapper.Generator;
+namespace LayeredCraft.DynamoMapper.Generator;
 
 internal static class AttributeDataExtensions
 {

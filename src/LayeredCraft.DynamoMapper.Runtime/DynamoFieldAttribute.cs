@@ -1,4 +1,4 @@
-namespace DynamoMapper.Runtime;
+namespace LayeredCraft.DynamoMapper.Runtime;
 
 /// <summary>
 ///     Configures mapping behavior for a specific property/field on a mapper method. This

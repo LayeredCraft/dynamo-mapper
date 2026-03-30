@@ -1,6 +1,6 @@
 using Microsoft.CodeAnalysis;
 
-namespace DynamoMapper.Generator.PropertyMapping.Models;
+namespace LayeredCraft.DynamoMapper.Generator.PropertyMapping.Models;
 
 /// <summary>
 ///     Represents the semantic analysis of a property symbol. This is pure Roslyn symbol

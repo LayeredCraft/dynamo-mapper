@@ -1,4 +1,4 @@
-namespace DynamoMapper.Generator.ConstructorMapping.Models;
+namespace LayeredCraft.DynamoMapper.Generator.ConstructorMapping.Models;
 
 /// <summary>
 ///     Describes how a specific property should be initialized when using constructor-based instantiation.

@@ -1,6 +1,6 @@
-using DynamoMapper.Generator;
+using LayeredCraft.DynamoMapper.Generator;
 using Microsoft.CodeAnalysis.CSharp;
-using WellKnownType = DynamoMapper.Generator.WellKnownTypes.WellKnownTypeData.WellKnownType;
+using WellKnownType = LayeredCraft.DynamoMapper.Generator.WellKnownTypes.WellKnownTypeData.WellKnownType;
 
 namespace Microsoft.CodeAnalysis;
 

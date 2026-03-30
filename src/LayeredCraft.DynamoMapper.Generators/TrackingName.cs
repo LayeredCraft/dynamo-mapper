@@ -1,6 +1,6 @@
 // ReSharper disable InconsistentNaming
 
-namespace DynamoMapper.Generator;
+namespace LayeredCraft.DynamoMapper.Generator;
 
 internal static class TrackingName
 {

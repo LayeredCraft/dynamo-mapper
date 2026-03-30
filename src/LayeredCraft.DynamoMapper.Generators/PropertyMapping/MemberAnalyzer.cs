@@ -1,9 +1,9 @@
-using DynamoMapper.Generator.Diagnostics;
-using DynamoMapper.Generator.PropertyMapping.Models;
+using LayeredCraft.DynamoMapper.Generator.Diagnostics;
+using LayeredCraft.DynamoMapper.Generator.PropertyMapping.Models;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace DynamoMapper.Generator.PropertyMapping;
+namespace LayeredCraft.DynamoMapper.Generator.PropertyMapping;
 
 /// <summary>
 ///     Performs shared semantic analysis on property and parameter symbols. Extracts common information

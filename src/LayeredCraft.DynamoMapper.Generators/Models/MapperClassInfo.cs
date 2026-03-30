@@ -1,9 +1,9 @@
-using DynamoMapper.Generator.Diagnostics;
+using LayeredCraft.DynamoMapper.Generator.Diagnostics;
 using LayeredCraft.SourceGeneratorTools.Types;
 using Microsoft.CodeAnalysis;
-using WellKnownType = DynamoMapper.Generator.WellKnownTypes.WellKnownTypeData.WellKnownType;
+using WellKnownType = LayeredCraft.DynamoMapper.Generator.WellKnownTypes.WellKnownTypeData.WellKnownType;
 
-namespace DynamoMapper.Generator.Models;
+namespace LayeredCraft.DynamoMapper.Generator.Models;
 
 internal sealed record MapperClassInfo(
     string Name,

@@ -1,8 +1,8 @@
 using System.Collections.Immutable;
-using DynamoMapper.Generator.Models;
+using LayeredCraft.DynamoMapper.Generator.Models;
 using Microsoft.CodeAnalysis;
 
-namespace DynamoMapper.Generator.PropertyMapping;
+namespace LayeredCraft.DynamoMapper.Generator.PropertyMapping;
 
 /// <summary>
 ///     Context for nested object analysis, tracking ancestor types for cycle detection

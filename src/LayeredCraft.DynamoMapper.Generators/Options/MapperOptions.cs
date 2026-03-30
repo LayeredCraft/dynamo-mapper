@@ -1,7 +1,7 @@
-using DynamoMapper.Extensions;
-using DynamoMapper.Runtime;
+using LayeredCraft.DynamoMapper.Extensions;
+using LayeredCraft.DynamoMapper.Runtime;
 
-namespace DynamoMapper.Generator;
+namespace LayeredCraft.DynamoMapper.Generator;
 
 internal class MapperOptions
 {

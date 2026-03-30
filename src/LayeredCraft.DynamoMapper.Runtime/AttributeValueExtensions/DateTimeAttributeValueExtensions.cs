@@ -1,5 +1,5 @@
 using System.Globalization;
-using DynamoMapper.Runtime;
+using LayeredCraft.DynamoMapper.Runtime;
 
 namespace Amazon.DynamoDBv2.Model;
 

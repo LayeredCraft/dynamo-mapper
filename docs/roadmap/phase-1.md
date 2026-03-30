@@ -48,7 +48,7 @@ Phase 1 must provide:
    - Clear runtime exceptions for missing required fields.
 
 6. **Packaging**
-   - `DynamoMapper` (generator/analyzer) depends on `DynamoMapper.Runtime` (attributes + helpers).
+   - `DynamoMapper` (generator/analyzer) depends on `LayeredCraft.DynamoMapper.Runtime` (attributes + helpers).
 
 ---
 
@@ -58,9 +58,9 @@ Phase 1 must provide:
 #### 2.1.1 `DynamoMapper` (Generator Package)
 - Ships the incremental generator as an analyzer.
 - Provides no public runtime API beyond referencing runtime package.
-- Depends on `DynamoMapper.Runtime`.
+- Depends on `LayeredCraft.DynamoMapper.Runtime`.
 
-#### 2.1.2 `DynamoMapper.Runtime` (Runtime Package)
+#### 2.1.2 `LayeredCraft.DynamoMapper.Runtime` (Runtime Package)
 - Ships public attributes, runtime exception types, and helper APIs.
 - Ships `AttributeValue` extension helpers usable independently from generator.
 
@@ -826,7 +826,7 @@ Must recognize:
 
 ---
 
-## 14. Runtime Helpers (DynamoMapper.Runtime)
+## 14. Runtime Helpers (LayeredCraft.DynamoMapper.Runtime)
 
 ### 14.1 AttributeValue Extensions (Consumer-Facing)
 Provide extension methods similar to:
@@ -893,7 +893,7 @@ The README is intentionally brief and focused on first-use success. It should as
 **README.md must include:**
 - What is DynamoMapper?
 - Install instructions:
-  - `DynamoMapper` vs `DynamoMapper.Runtime`
+  - `DynamoMapper` vs `LayeredCraft.DynamoMapper.Runtime`
 - Quick start example
 - Configuration reference (attributes)
 - Supported types
@@ -908,7 +908,7 @@ GitHub Pages is the primary long-form documentation site for DynamoMapper and mu
 **GitHub Pages must include:**
 
 - Conceptual overview (why DynamoMapper exists)
-- Installation guide (`DynamoMapper` vs `DynamoMapper.Runtime`)
+- Installation guide (`DynamoMapper` vs `LayeredCraft.DynamoMapper.Runtime`)
 - Attribute reference (full API docs)
 - Naming conventions and defaults
 - Required vs optional behavior

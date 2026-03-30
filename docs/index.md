@@ -1,6 +1,8 @@
-# DynamoMapper
+# LayeredCraft.DynamoMapper
 
 **High-performance source generator for DynamoDB attribute mapping**
+
+> **Migrating from `DynamoMapper`?** This package (`LayeredCraft.DynamoMapper`) replaces the original `DynamoMapper` NuGet package. Update your using statements from `using LayeredCraft.DynamoMapper.Runtime;` to `using LayeredCraft.DynamoMapper.Runtime;`.
 
 ---
 
@@ -92,4 +94,4 @@ npx skills add https://github.com/LayeredCraft/dynamo-mapper --skill dynamo-mapp
 
 - **Documentation**: [https://layeredcraft.github.io/dynamo-mapper/](https://layeredcraft.github.io/dynamo-mapper/)
 - **GitHub**: [https://github.com/LayeredCraft/dynamo-mapper](https://github.com/LayeredCraft/dynamo-mapper)
-- **NuGet**: [https://www.nuget.org/packages/DynamoMapper/](https://www.nuget.org/packages/DynamoMapper/)
+- **NuGet**: [https://www.nuget.org/packages/LayeredCraft.DynamoMapper/](https://www.nuget.org/packages/LayeredCraft.DynamoMapper/)

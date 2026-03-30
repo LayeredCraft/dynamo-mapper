@@ -90,7 +90,7 @@ Marks which constructor DynamoMapper should use when generating `FromItem` for a
 This attribute is applied to the **model's constructor**, not the mapper class.
 
 ```csharp
-using DynamoMapper.Runtime;
+using LayeredCraft.DynamoMapper.Runtime;
 
 public class User
 {

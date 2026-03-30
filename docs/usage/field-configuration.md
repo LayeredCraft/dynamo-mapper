@@ -7,7 +7,7 @@ models.
 ## Basic Usage
 
 ```csharp
-using DynamoMapper.Runtime;
+using LayeredCraft.DynamoMapper.Runtime;
 
 [DynamoMapper]
 [DynamoField(nameof(Product.Name), AttributeName = "productName", Required = true)]

@@ -1,11 +1,13 @@
-# DynamoMapper
+# LayeredCraft.DynamoMapper
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 **High-performance source generator for DynamoDB attribute mapping**
 
-[![NuGet](https://img.shields.io/nuget/v/DynamoMapper.svg)](https://www.nuget.org/packages/DynamoMapper/)
+> **Migrating from `DynamoMapper`?** This package (`LayeredCraft.DynamoMapper`) is the successor to the original `DynamoMapper` NuGet package. Update your `using DynamoMapper.Runtime;` statements to `using LayeredCraft.DynamoMapper.Runtime;`.
+
+[![NuGet](https://img.shields.io/nuget/v/LayeredCraft.DynamoMapper.svg)](https://www.nuget.org/packages/LayeredCraft.DynamoMapper/)
 [![Build Status](https://github.com/LayeredCraft/dynamo-mapper/actions/workflows/build.yaml/badge.svg)](https://github.com/LayeredCraft/dynamo-mapper/actions/workflows/build.yaml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Documentation](https://img.shields.io/badge/docs-latest-blue)](https://layeredcraft.github.io/dynamo-mapper/)
@@ -29,7 +31,7 @@ DynamoMapper is a .NET incremental source generator that generates high-performa
 Install the NuGet package:
 
 ```bash
-dotnet add package DynamoMapper --prerelease
+dotnet add package LayeredCraft.DynamoMapper --prerelease
 ```
 
 Install the DynamoMapper agent skill:
@@ -66,7 +68,7 @@ public class Product
 ### 2. Create a mapper class
 
 ```csharp
-using DynamoMapper.Runtime;
+using LayeredCraft.DynamoMapper.Runtime;
 using Amazon.DynamoDBv2.Model;
 
 namespace MyApp.Data;

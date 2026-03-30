@@ -12,7 +12,7 @@ The `examples/DynamoMapper.Nested` project demonstrates:
 ```csharp
 using System.Collections.Generic;
 using Amazon.DynamoDBv2.Model;
-using DynamoMapper.Runtime;
+using LayeredCraft.DynamoMapper.Runtime;
 
 [DynamoMapper]
 public static partial class OrderMapper

@@ -1,6 +1,13 @@
 # Installation
 
-This guide walks you through installing DynamoMapper in your .NET project.
+This guide walks you through installing LayeredCraft.DynamoMapper in your .NET project.
+
+!!! note "Migrating from `DynamoMapper`"
+    `LayeredCraft.DynamoMapper` replaces the original `DynamoMapper` NuGet package. If you are upgrading:
+
+    1. Uninstall the old package: `dotnet remove package DynamoMapper`
+    2. Install the new package: `dotnet add package LayeredCraft.DynamoMapper --prerelease`
+    3. Update all `using LayeredCraft.DynamoMapper.Runtime;` statements to `using LayeredCraft.DynamoMapper.Runtime;`
 
 ## Prerequisites
 
@@ -13,7 +20,7 @@ This guide walks you through installing DynamoMapper in your .NET project.
 Add the DynamoMapper package to your project:
 
 ```bash
-dotnet add package DynamoMapper --prerelease
+dotnet add package LayeredCraft.DynamoMapper --prerelease
 ```
 
 This installs both the source generator and runtime packages.
@@ -43,7 +50,7 @@ Ensure your project uses C# 11 or later in your `.csproj` file:
 Create a simple test mapper to verify installation:
 
 ```csharp
-using DynamoMapper.Runtime;
+using LayeredCraft.DynamoMapper.Runtime;
 using Amazon.DynamoDBv2.Model;
 
 [DynamoMapper]

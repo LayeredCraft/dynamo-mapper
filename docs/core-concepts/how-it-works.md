@@ -129,7 +129,7 @@ DynamoMapper generates:
 
 #nullable enable
 
-using DynamoMapper.Runtime;
+using LayeredCraft.DynamoMapper.Runtime;
 using System.Collections.Generic;
 using Amazon.DynamoDBv2.Model;
 
@@ -137,14 +137,14 @@ namespace MyApp;
 
 public static partial class ProductMapper
 {
-    [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
+    [global::System.CodeDom.Compiler.GeneratedCode("LayeredCraft.DynamoMapper", "REPLACED")]
     public static partial global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> ToItem(global::MyApp.Product source) =>
         new Dictionary<string, AttributeValue>(3)
             .SetGuid("productId", source.ProductId, false, true)
             .SetString("name", source.Name, false, true)
             .SetDecimal("price", source.Price, false, true);
 
-    [global::System.CodeDom.Compiler.GeneratedCode("DynamoMapper", "REPLACED")]
+    [global::System.CodeDom.Compiler.GeneratedCode("LayeredCraft.DynamoMapper", "REPLACED")]
     public static partial global::MyApp.Product FromItem(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> item)
     {
         var product = new global::MyApp.Product

@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
+    <OutputType>Exe</OutputType>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
@@ -10,10 +11,7 @@
 
   <ItemGroup>
     <PackageReference Include="AWSSDK.DynamoDBv2"/>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Using Include="Xunit"/>
+    <PackageReference Include="Testcontainers.DynamoDb"/>
   </ItemGroup>
 
   <ItemGroup>
@@ -23,9 +21,18 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\LayeredCraft.DynamoMapper.Generators\LayeredCraft.DynamoMapper.Generators.csproj"/>
-    <ProjectReference Include="..\..\src\LayeredCraft.DynamoMapper.Runtime\LayeredCraft.DynamoMapper.Runtime.csproj"/>
+    <ProjectReference Include="..\..\src\LayeredCraft.DynamoMapper.Client\LayeredCraft.DynamoMapper.Client.csproj"/>
     <ProjectReference Include="..\LayeredCraft.DynamoMapper.TestKit\LayeredCraft.DynamoMapper.TestKit.csproj"/>
+    <ProjectReference
+      Include="..\..\src\LayeredCraft.DynamoMapper.Generators\LayeredCraft.DynamoMapper.Generators.csproj"
+      ReferenceOutputAssembly="false"
+      OutputItemType="Analyzer"
+    />
+    <ProjectReference
+      Include="..\..\src\LayeredCraft.DynamoMapper.Runtime\LayeredCraft.DynamoMapper.Runtime.csproj"
+      ReferenceOutputAssembly="true"
+      OutputItemType="Analyzer"
+    />
   </ItemGroup>
 
 </Project>

@@ -4,6 +4,7 @@
 
 - Do not tell users to decorate every domain-model property.
 - Do not require methods to be named exactly `ToItem` and `FromItem`.
+- Do not require mapper classes or mapper methods to be `static`.
 - Do not teach lifecycle hooks as currently implemented behavior.
 - Do not use the old property-level converter signatures from stale docs.
 - Do not assume every converter mistake becomes a DynamoMapper diagnostic.

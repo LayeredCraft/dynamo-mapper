@@ -13,16 +13,19 @@ public sealed class Order
 }
 
 [DynamoMapper]
-public static partial class OrderMapper
+public partial class OrderMapper
 {
-    public static partial Dictionary<string, AttributeValue> ToItem(Order source);
-    public static partial Order FromItem(Dictionary<string, AttributeValue> item);
+    public partial Dictionary<string, AttributeValue> ToItem(Order source);
+    public partial Order FromItem(Dictionary<string, AttributeValue> item);
 }
 ```
 
+`static` mapper classes are also supported if you prefer static access.
+
 ## Mapper rules
 
-- The mapper is a `static partial class` marked with `[DynamoMapper]`.
+- The mapper is a `partial class` marked with `[DynamoMapper]`.
+- Mapper classes and methods may be instance-based or `static`.
 - `To*` methods take one model parameter and return `Dictionary<string, AttributeValue>`.
 - `From*` methods take one `Dictionary<string, AttributeValue>` and return the model type.
 - One-way mappers are valid.

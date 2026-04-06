@@ -10,7 +10,8 @@ Use this skill when generating or explaining DynamoMapper code.
 ## Core truths
 
 - DynamoMapper is a C# incremental source generator for `T <-> Dictionary<string, AttributeValue>`.
-- Configure mapping on a `static partial` mapper class marked with `[DynamoMapper]`.
+- Configure mapping on a partial mapper class marked with `[DynamoMapper]`.
+- Mapper classes can be instance-based or `static`; both shapes are supported.
 - The generator recognizes unimplemented partial methods whose names start with `To` or `From`
   and use the expected model/dictionary signatures.
 - One-way mappers are valid: `To*` only or `From*` only.
@@ -41,6 +42,7 @@ Use this skill when generating or explaining DynamoMapper code.
 - Do not tell the user to decorate every POCO property; configuration belongs on the mapper class.
 - Do not assume methods must be named exactly `ToItem` and `FromItem`; the `To`/`From` prefix
   matters, but the generator also expects the recognized model/dictionary signatures.
+- Do not assume mappers must be `static`; non-static members are valid too.
 - Check `references/gotchas.md` before teaching hooks or custom converter signatures.
 - Do not assume every unsupported converter setup becomes a DynamoMapper diagnostic; some become normal C# compile errors.
 

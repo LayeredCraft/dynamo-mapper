@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AWSSDK.DynamoDBv2"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="xunit.runner.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\LayeredCraft.DynamoMapper.Generators\LayeredCraft.DynamoMapper.Generators.csproj"/>
+    <ProjectReference Include="..\..\src\LayeredCraft.DynamoMapper.Runtime\LayeredCraft.DynamoMapper.Runtime.csproj"/>
+    <ProjectReference Include="..\LayeredCraft.DynamoMapper.TestKit\LayeredCraft.DynamoMapper.TestKit.csproj"/>
+  </ItemGroup>
+
+</Project>

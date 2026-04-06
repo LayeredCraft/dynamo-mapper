@@ -82,6 +82,8 @@
   </Folder>
   <Folder Name="/test/">
     <File Path="test\Directory.Build.props" />
+    <Project
+      Path="test/LayeredCraft.DynamoMapper.Client.Tests/LayeredCraft.DynamoMapper.Client.Tests.csproj"/>
     <Project Path="test/LayeredCraft.DynamoMapper.Generators.Tests/LayeredCraft.DynamoMapper.Generators.Tests.csproj" />
     <Project Path="test/LayeredCraft.DynamoMapper.Runtime.Tests/LayeredCraft.DynamoMapper.Runtime.Tests.csproj" />
     <Project Path="test/LayeredCraft.DynamoMapper.TestKit/LayeredCraft.DynamoMapper.TestKit.csproj" />

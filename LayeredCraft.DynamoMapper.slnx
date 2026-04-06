@@ -76,6 +76,7 @@
     <File Path="taskfile.yaml" />
   </Folder>
   <Folder Name="/src/">
+    <Project Path="src/LayeredCraft.DynamoMapper.Client/LayeredCraft.DynamoMapper.Client.csproj"/>
     <Project Path="src/LayeredCraft.DynamoMapper.Generators/LayeredCraft.DynamoMapper.Generators.csproj" />
     <Project Path="src/LayeredCraft.DynamoMapper.Runtime/LayeredCraft.DynamoMapper.Runtime.csproj" />
   </Folder>

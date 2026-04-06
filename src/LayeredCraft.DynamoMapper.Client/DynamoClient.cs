@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
 
-namespace LayeredCraft.DynamoClient;
+namespace LayeredCraft.DynamoMapper.Client;
 
 public class DynamoClient
 {

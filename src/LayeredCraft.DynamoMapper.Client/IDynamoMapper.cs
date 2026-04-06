@@ -1,6 +1,6 @@
 using Amazon.DynamoDBv2.Model;
 
-namespace LayeredCraft.DynamoClient;
+namespace LayeredCraft.DynamoMapper.Client;
 
 /// <summary>Maps a DTO to and from a DynamoDB item representation.</summary>
 /// <typeparam name="TDto">The DTO type handled by the mapper.</typeparam>

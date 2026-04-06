@@ -26,12 +26,12 @@ public class DynamoClient
         throw new InvalidOperationException($"No mapper found for type {typeof(T)}");
     }
 
-    public T? GetItemAsync<T>(
+    public async Task<T?> GetItemAsync<T>(
         string tableName,
         Dictionary<string, AttributeValue> key,
         CancellationToken cancellationToken = default)
     {
-        var result = AmazonDynamoDb.GetItemAsync(tableName, key, cancellationToken);
-        return result is null ? default : GetMapper<T>().FromItem(result.Result.Item);
+        var result = await AmazonDynamoDb.GetItemAsync(tableName, key, cancellationToken);
+        return result.Item.Count == 0 ? default : GetMapper<T>().FromItem(result.Item);
     }
 }

@@ -2,6 +2,8 @@ using System.Collections.Immutable;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
 
+// ReSharper disable MemberCanBePrivate.Global
+
 namespace LayeredCraft.DynamoMapper.Client;
 
 /// <summary>

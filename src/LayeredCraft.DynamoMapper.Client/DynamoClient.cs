@@ -7,14 +7,15 @@ namespace LayeredCraft.DynamoMapper.Client;
 public class DynamoClient
 {
     private readonly ImmutableDictionary<Type, object> _mappers;
-    private readonly IAmazonDynamoDB _dynamoDbClient;
+
+    public IAmazonDynamoDB AmazonDynamoDb { get; }
 
     internal DynamoClient(ImmutableDictionary<Type, object> mappers, IAmazonDynamoDB dynamoDbClient)
     {
         ArgumentNullException.ThrowIfNull(dynamoDbClient);
 
         _mappers = mappers;
-        _dynamoDbClient = dynamoDbClient;
+        AmazonDynamoDb = dynamoDbClient;
     }
 
     public IDynamoMapper<T> GetMapper<T>()
@@ -30,7 +31,7 @@ public class DynamoClient
         Dictionary<string, AttributeValue> key,
         CancellationToken cancellationToken = default)
     {
-        var result = _dynamoDbClient.GetItemAsync(tableName, key, cancellationToken);
+        var result = AmazonDynamoDb.GetItemAsync(tableName, key, cancellationToken);
         return result is null ? default : GetMapper<T>().FromItem(result.Result.Item);
     }
 }

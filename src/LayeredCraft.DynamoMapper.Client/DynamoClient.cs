@@ -55,7 +55,9 @@ public class DynamoClient
         CancellationToken cancellationToken = default)
     {
         var result = await AmazonDynamoDb.GetItemAsync(tableName, key, cancellationToken);
-        return result.Item.Count == 0 ? default : GetMapper<T>().FromItem(result.Item);
+        return result.Item is null || result.Item.Count == 0
+            ? default
+            : GetMapper<T>().FromItem(result.Item);
     }
 
     /// <summary>Saves a mapped DTO to the specified table.</summary>

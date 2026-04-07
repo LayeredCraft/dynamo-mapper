@@ -23,7 +23,7 @@ public sealed class DynamoClientTests(DynamoDbFixture fixture) : IClassFixture<D
             CreateKey(expected.Pk, expected.Sk),
             TestContext.Current.CancellationToken);
 
-        item.Should().BeEquivalentTo(expected);
+        item.MappedItem.Should().BeEquivalentTo(expected);
     }
 
     [Fact]
@@ -64,6 +64,43 @@ public sealed class DynamoClientTests(DynamoDbFixture fixture) : IClassFixture<D
             TestContext.Current.CancellationToken);
 
         items.Should().BeEquivalentTo(TestDataSamples.UserProfiles);
+    }
+
+    [Fact]
+    public async Task ExecuteStatementAsync_UserProfile_ReturnsSeededProfiles()
+    {
+        var items = await _client.ExecuteStatementAsync<UserProfile>(
+            new ExecuteStatementRequest
+            {
+                Statement = $"""
+                             SELECT * FROM "{DynamoDbFixture.TableName}"
+                             WHERE entityType = ?
+                             """,
+                Parameters = [new AttributeValue { S = "UserProfile" }],
+            },
+            TestContext.Current.CancellationToken);
+
+        items.Should().BeEquivalentTo(TestDataSamples.UserProfiles);
+    }
+
+    [Fact]
+    public async Task ExecuteStatementAsync_RawResponse_ReturnsDynamoDbItems()
+    {
+        var response = await _client.ExecuteStatementAsync(
+            new ExecuteStatementRequest
+            {
+                Statement =
+                    $"SELECT * FROM \"{DynamoDbFixture.TableName}\" WHERE pk = ? AND sk = ?",
+                Parameters =
+                [
+                    new AttributeValue { S = TestDataSamples.UserProfiles[0].Pk },
+                    new AttributeValue { S = TestDataSamples.UserProfiles[0].Sk },
+                ],
+            },
+            TestContext.Current.CancellationToken);
+
+        response.Items.Should().ContainSingle();
+        response.Items[0]["entityType"].S.Should().Be("UserProfile");
     }
 
     [Fact]
@@ -114,7 +151,7 @@ public sealed class DynamoClientTests(DynamoDbFixture fixture) : IClassFixture<D
             CreateKey(item.Pk, item.Sk),
             TestContext.Current.CancellationToken);
 
-        deleted.Should().BeNull();
+        deleted.MappedItem.Should().BeNull();
     }
 
     [Fact]
@@ -180,7 +217,7 @@ public sealed class DynamoClientTests(DynamoDbFixture fixture) : IClassFixture<D
             CreateKey(expected.Pk, expected.Sk),
             TestContext.Current.CancellationToken);
 
-        item.Should().BeEquivalentTo(expected);
+        item.MappedItem.Should().BeEquivalentTo(expected);
     }
 
     [Fact]

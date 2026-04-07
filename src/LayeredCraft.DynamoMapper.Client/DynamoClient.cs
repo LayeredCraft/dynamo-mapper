@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
+using LayeredCraft.DynamoMapper.Client.Models;
 
 // ReSharper disable MemberCanBePrivate.Global
 
@@ -49,15 +50,17 @@ public class DynamoClient
     ///     A task that returns the mapped DTO when an item is found; otherwise,
     ///     <see langword="null" />.
     /// </returns>
-    public async Task<T?> GetItemAsync<T>(
+    public async Task<GetItemResponse<T>> GetItemAsync<T>(
         string tableName,
         Dictionary<string, AttributeValue> key,
         CancellationToken cancellationToken = default)
     {
         var result = await AmazonDynamoDb.GetItemAsync(tableName, key, cancellationToken);
-        return result.Item is null || result.Item.Count == 0
+        var mappedItem = result.Item is null || result.Item.Count == 0
             ? default
             : GetMapper<T>().FromItem(result.Item);
+
+        return new GetItemResponse<T>(result, mappedItem);
     }
 
     /// <summary>Saves a mapped DTO to the specified table.</summary>
@@ -126,6 +129,29 @@ public class DynamoClient
         CancellationToken cancellationToken = default)
     {
         var result = await AmazonDynamoDb.ScanAsync(request, cancellationToken);
+        var mapper = GetMapper<T>();
+        return result.Items.Select(mapper.FromItem).ToArray();
+    }
+
+    /// <summary>Executes a PartiQL statement against DynamoDB.</summary>
+    /// <param name="request">The PartiQL request to execute.</param>
+    /// <param name="cancellationToken">The cancellation token for the asynchronous operation.</param>
+    /// <returns>The raw DynamoDB response for the executed statement.</returns>
+    public Task<ExecuteStatementResponse> ExecuteStatementAsync(
+        ExecuteStatementRequest request,
+        CancellationToken cancellationToken = default)
+        => AmazonDynamoDb.ExecuteStatementAsync(request, cancellationToken);
+
+    /// <summary>Executes a PartiQL statement and maps each returned item to the specified DTO type.</summary>
+    /// <typeparam name="T">The DTO type to map the returned items to.</typeparam>
+    /// <param name="request">The PartiQL request to execute.</param>
+    /// <param name="cancellationToken">The cancellation token for the asynchronous operation.</param>
+    /// <returns>A task that returns the mapped statement results.</returns>
+    public async Task<IReadOnlyList<T>> ExecuteStatementAsync<T>(
+        ExecuteStatementRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await AmazonDynamoDb.ExecuteStatementAsync(request, cancellationToken);
         var mapper = GetMapper<T>();
         return result.Items.Select(mapper.FromItem).ToArray();
     }

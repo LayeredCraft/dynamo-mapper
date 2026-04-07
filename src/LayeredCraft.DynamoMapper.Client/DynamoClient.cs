@@ -135,15 +135,6 @@ public class DynamoClient
         return new ScanResponse<T>(result, mappedItems);
     }
 
-    /// <summary>Executes a PartiQL statement against DynamoDB.</summary>
-    /// <param name="request">The PartiQL request to execute.</param>
-    /// <param name="cancellationToken">The cancellation token for the asynchronous operation.</param>
-    /// <returns>The raw DynamoDB response for the executed statement.</returns>
-    public Task<ExecuteStatementResponse> ExecuteStatementAsync(
-        ExecuteStatementRequest request,
-        CancellationToken cancellationToken = default)
-        => AmazonDynamoDb.ExecuteStatementAsync(request, cancellationToken);
-
     /// <summary>Executes a PartiQL statement and maps each returned item to the specified DTO type.</summary>
     /// <typeparam name="T">The DTO type to map the returned items to.</typeparam>
     /// <param name="request">The PartiQL request to execute.</param>

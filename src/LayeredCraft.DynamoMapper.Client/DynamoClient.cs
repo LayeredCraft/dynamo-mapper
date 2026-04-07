@@ -69,7 +69,7 @@ public class DynamoClient
     /// <param name="item">The DTO instance to map and save.</param>
     /// <param name="cancellationToken">The cancellation token for the asynchronous operation.</param>
     /// <returns>A task that completes when the item has been written.</returns>
-    public Task PutItemAsync<T>(
+    public Task<PutItemResponse> PutItemAsync<T>(
         string tableName,
         T item,
         CancellationToken cancellationToken = default)
@@ -83,7 +83,7 @@ public class DynamoClient
     /// <param name="key">The primary key of the item to delete.</param>
     /// <param name="cancellationToken">The cancellation token for the asynchronous operation.</param>
     /// <returns>A task that completes when the delete request has finished.</returns>
-    public Task DeleteItemAsync(
+    public Task<DeleteItemResponse> DeleteItemAsync(
         string tableName,
         Dictionary<string, AttributeValue> key,
         CancellationToken cancellationToken = default)
@@ -97,26 +97,24 @@ public class DynamoClient
     ///     A task that returns the mapped DTO when the request returns attributes; otherwise,
     ///     <see langword="null" />.
     /// </returns>
-    public async Task<T?> UpdateItemAsync<T>(
+    public async Task<UpdateItemResponse> UpdateItemAsync(
         UpdateItemRequest request,
         CancellationToken cancellationToken = default)
-    {
-        var result = await AmazonDynamoDb.UpdateItemAsync(request, cancellationToken);
-        return result.Attributes.Count == 0 ? default : GetMapper<T>().FromItem(result.Attributes);
-    }
+        => await AmazonDynamoDb.UpdateItemAsync(request, cancellationToken);
 
     /// <summary>Executes a query request and maps each returned item to the specified DTO type.</summary>
     /// <typeparam name="T">The DTO type to map the query results to.</typeparam>
     /// <param name="request">The query request to execute.</param>
     /// <param name="cancellationToken">The cancellation token for the asynchronous operation.</param>
     /// <returns>A task that returns the mapped query results.</returns>
-    public async Task<IReadOnlyList<T>> QueryAsync<T>(
+    public async Task<QueryResponse<T>> QueryAsync<T>(
         QueryRequest request,
         CancellationToken cancellationToken = default)
     {
         var result = await AmazonDynamoDb.QueryAsync(request, cancellationToken);
         var mapper = GetMapper<T>();
-        return result.Items.Select(mapper.FromItem).ToArray();
+        var mappedItems = result.Items.Select(mapper.FromItem).ToList();
+        return new QueryResponse<T>(result, mappedItems);
     }
 
     /// <summary>Executes a scan request and maps each returned item to the specified DTO type.</summary>

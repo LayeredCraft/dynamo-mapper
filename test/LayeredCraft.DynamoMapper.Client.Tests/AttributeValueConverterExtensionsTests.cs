@@ -1,6 +1,5 @@
 using System.Globalization;
 using Amazon.DynamoDBv2.Model;
-using LayeredCraft.DynamoMapper.Runtime;
 
 namespace LayeredCraft.DynamoMapper.Client.Tests;
 
@@ -11,8 +10,7 @@ public sealed class AttributeValueConverterExtensionsTests
     {
         var attribute = "hello".ToAttributeValue();
 
-        attribute.S.Should().Be("hello");
-        attribute.NULL.Should().NotBeTrue();
+        attribute.Should().BeEquivalentTo(StringAttribute("hello"));
     }
 
     [Fact]
@@ -22,7 +20,7 @@ public sealed class AttributeValueConverterExtensionsTests
 
         var attribute = value.ToAttributeValue();
 
-        AssertNullAttribute(attribute);
+        attribute.Should().BeEquivalentTo(NullAttribute());
     }
 
     [Fact]
@@ -30,8 +28,7 @@ public sealed class AttributeValueConverterExtensionsTests
     {
         var attribute = true.ToAttributeValue();
 
-        attribute.BOOL.Should().BeTrue();
-        attribute.NULL.Should().NotBeTrue();
+        attribute.Should().BeEquivalentTo(BoolAttribute(true));
     }
 
     [Fact]
@@ -43,9 +40,8 @@ public sealed class AttributeValueConverterExtensionsTests
         var attribute = value.ToAttributeValue();
         var nullAttribute = nullValue.ToAttributeValue();
 
-        attribute.BOOL.Should().BeFalse();
-        attribute.NULL.Should().NotBeTrue();
-        AssertNullAttribute(nullAttribute);
+        attribute.Should().BeEquivalentTo(BoolAttribute(false));
+        nullAttribute.Should().BeEquivalentTo(NullAttribute());
     }
 
     [Fact]
@@ -55,7 +51,7 @@ public sealed class AttributeValueConverterExtensionsTests
 
         var attribute = 12345.ToAttributeValue("N0");
 
-        attribute.N.Should().Be("12,345");
+        attribute.Should().BeEquivalentTo(NumberAttribute("12,345"));
     }
 
     [Fact]
@@ -67,8 +63,8 @@ public sealed class AttributeValueConverterExtensionsTests
         var attribute = value.ToAttributeValue("X");
         var nullAttribute = nullValue.ToAttributeValue();
 
-        attribute.N.Should().Be("FF");
-        AssertNullAttribute(nullAttribute);
+        attribute.Should().BeEquivalentTo(NumberAttribute("FF"));
+        nullAttribute.Should().BeEquivalentTo(NullAttribute());
     }
 
     [Fact]
@@ -78,7 +74,7 @@ public sealed class AttributeValueConverterExtensionsTests
 
         var attribute = 123456789L.ToAttributeValue("N0");
 
-        attribute.N.Should().Be("123,456,789");
+        attribute.Should().BeEquivalentTo(NumberAttribute("123,456,789"));
     }
 
     [Fact]
@@ -90,8 +86,8 @@ public sealed class AttributeValueConverterExtensionsTests
         var attribute = value.ToAttributeValue("X");
         var nullAttribute = nullValue.ToAttributeValue();
 
-        attribute.N.Should().Be("FFF");
-        AssertNullAttribute(nullAttribute);
+        attribute.Should().BeEquivalentTo(NumberAttribute("FFF"));
+        nullAttribute.Should().BeEquivalentTo(NullAttribute());
     }
 
     [Fact]
@@ -101,7 +97,7 @@ public sealed class AttributeValueConverterExtensionsTests
 
         var attribute = 12.5f.ToAttributeValue();
 
-        attribute.N.Should().Be("12.5");
+        attribute.Should().BeEquivalentTo(NumberAttribute("12.5"));
     }
 
     [Fact]
@@ -113,8 +109,8 @@ public sealed class AttributeValueConverterExtensionsTests
         var attribute = value.ToAttributeValue("0.00");
         var nullAttribute = nullValue.ToAttributeValue();
 
-        attribute.N.Should().Be("12.50");
-        AssertNullAttribute(nullAttribute);
+        attribute.Should().BeEquivalentTo(NumberAttribute("12.50"));
+        nullAttribute.Should().BeEquivalentTo(NullAttribute());
     }
 
     [Fact]
@@ -124,7 +120,7 @@ public sealed class AttributeValueConverterExtensionsTests
 
         var attribute = 1234.5d.ToAttributeValue();
 
-        attribute.N.Should().Be("1234.5");
+        attribute.Should().BeEquivalentTo(NumberAttribute("1234.5"));
     }
 
     [Fact]
@@ -136,8 +132,8 @@ public sealed class AttributeValueConverterExtensionsTests
         var attribute = value.ToAttributeValue("0.000");
         var nullAttribute = nullValue.ToAttributeValue();
 
-        attribute.N.Should().Be("1234.500");
-        AssertNullAttribute(nullAttribute);
+        attribute.Should().BeEquivalentTo(NumberAttribute("1234.500"));
+        nullAttribute.Should().BeEquivalentTo(NullAttribute());
     }
 
     [Fact]
@@ -147,7 +143,7 @@ public sealed class AttributeValueConverterExtensionsTests
 
         var attribute = 1234.5m.ToAttributeValue();
 
-        attribute.N.Should().Be("1234.5");
+        attribute.Should().BeEquivalentTo(NumberAttribute("1234.5"));
     }
 
     [Fact]
@@ -159,8 +155,8 @@ public sealed class AttributeValueConverterExtensionsTests
         var attribute = value.ToAttributeValue("0.000");
         var nullAttribute = nullValue.ToAttributeValue();
 
-        attribute.N.Should().Be("1234.500");
-        AssertNullAttribute(nullAttribute);
+        attribute.Should().BeEquivalentTo(NumberAttribute("1234.500"));
+        nullAttribute.Should().BeEquivalentTo(NullAttribute());
     }
 
     [Fact]
@@ -170,7 +166,7 @@ public sealed class AttributeValueConverterExtensionsTests
 
         var attribute = value.ToAttributeValue();
 
-        attribute.S.Should().Be("00112233-4455-6677-8899-aabbccddeeff");
+        attribute.Should().BeEquivalentTo(StringAttribute("00112233-4455-6677-8899-aabbccddeeff"));
     }
 
     [Fact]
@@ -182,8 +178,8 @@ public sealed class AttributeValueConverterExtensionsTests
         var attribute = value.ToAttributeValue("N");
         var nullAttribute = nullValue.ToAttributeValue();
 
-        attribute.S.Should().Be("00112233445566778899aabbccddeeff");
-        AssertNullAttribute(nullAttribute);
+        attribute.Should().BeEquivalentTo(StringAttribute("00112233445566778899aabbccddeeff"));
+        nullAttribute.Should().BeEquivalentTo(NullAttribute());
     }
 
     [Fact]
@@ -193,7 +189,9 @@ public sealed class AttributeValueConverterExtensionsTests
 
         var attribute = value.ToAttributeValue();
 
-        attribute.S.Should().Be(value.ToString("o", CultureInfo.InvariantCulture));
+        attribute
+            .Should()
+            .BeEquivalentTo(StringAttribute(value.ToString("o", CultureInfo.InvariantCulture)));
     }
 
     [Fact]
@@ -205,8 +203,8 @@ public sealed class AttributeValueConverterExtensionsTests
         var attribute = value.ToAttributeValue("yyyyMMdd");
         var nullAttribute = nullValue.ToAttributeValue();
 
-        attribute.S.Should().Be("20250407");
-        AssertNullAttribute(nullAttribute);
+        attribute.Should().BeEquivalentTo(StringAttribute("20250407"));
+        nullAttribute.Should().BeEquivalentTo(NullAttribute());
     }
 
     [Fact]
@@ -216,7 +214,9 @@ public sealed class AttributeValueConverterExtensionsTests
 
         var attribute = value.ToAttributeValue();
 
-        attribute.S.Should().Be(value.ToString("o", CultureInfo.InvariantCulture));
+        attribute
+            .Should()
+            .BeEquivalentTo(StringAttribute(value.ToString("o", CultureInfo.InvariantCulture)));
     }
 
     [Fact]
@@ -228,8 +228,8 @@ public sealed class AttributeValueConverterExtensionsTests
         var attribute = value.ToAttributeValue("yyyy-MM-dd zzz");
         var nullAttribute = nullValue.ToAttributeValue();
 
-        attribute.S.Should().Be("2025-04-07 +00:00");
-        AssertNullAttribute(nullAttribute);
+        attribute.Should().BeEquivalentTo(StringAttribute("2025-04-07 +00:00"));
+        nullAttribute.Should().BeEquivalentTo(NullAttribute());
     }
 
     [Fact]
@@ -239,7 +239,9 @@ public sealed class AttributeValueConverterExtensionsTests
 
         var attribute = value.ToAttributeValue();
 
-        attribute.S.Should().Be(value.ToString("c", CultureInfo.InvariantCulture));
+        attribute
+            .Should()
+            .BeEquivalentTo(StringAttribute(value.ToString("c", CultureInfo.InvariantCulture)));
     }
 
     [Fact]
@@ -252,17 +254,20 @@ public sealed class AttributeValueConverterExtensionsTests
         var attribute = value.ToAttributeValue("g");
         var nullAttribute = nullValue.ToAttributeValue();
 
-        attribute.S.Should().Be(value.Value.ToString("g", CultureInfo.InvariantCulture));
-        AssertNullAttribute(nullAttribute);
+        attribute
+            .Should()
+            .BeEquivalentTo(
+                StringAttribute(value.Value.ToString("g", CultureInfo.InvariantCulture)));
+        nullAttribute.Should().BeEquivalentTo(NullAttribute());
     }
 
-    private static void AssertNullAttribute(AttributeValue attribute)
-    {
-        attribute.NULL.Should().BeTrue();
-        attribute.S.Should().BeNull();
-        attribute.N.Should().BeNull();
-        attribute.BOOL.Should().BeNull();
-    }
+    private static AttributeValue StringAttribute(string value) => new() { S = value };
+
+    private static AttributeValue NumberAttribute(string value) => new() { N = value };
+
+    private static AttributeValue BoolAttribute(bool value) => new() { BOOL = value };
+
+    private static AttributeValue NullAttribute() => new() { NULL = true };
 
     private sealed class CultureScope : IDisposable
     {

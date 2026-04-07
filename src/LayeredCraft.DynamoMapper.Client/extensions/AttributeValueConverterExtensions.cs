@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using Amazon.DynamoDBv2.Model;
 
-namespace LayeredCraft.DynamoMapper.Runtime;
+namespace System;
 
 /// <summary>
 ///     Convenience extensions for converting common scalar values to

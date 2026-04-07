@@ -1,5 +1,6 @@
 using Amazon.DynamoDBv2.Model;
 using LayeredCraft.DynamoMapper.Client.DependencyInjection;
+using LayeredCraft.DynamoMapper.Runtime;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LayeredCraft.DynamoMapper.Client.Tests;
@@ -38,8 +39,8 @@ public sealed class DynamoClientTests(DynamoDbFixture fixture) : IClassFixture<D
                 KeyConditionExpression = "pk = :pk AND begins_with(sk, :skPrefix)",
                 ExpressionAttributeValues = new Dictionary<string, AttributeValue>
                 {
-                    [":pk"] = new() { S = expected.Pk },
-                    [":skPrefix"] = new() { S = "PROJECT#" },
+                    [":pk"] = expected.Pk.ToAttributeValue(),
+                    [":skPrefix"] = "PROJECT#".ToAttributeValue(),
                 },
             },
             TestContext.Current.CancellationToken);
@@ -58,7 +59,7 @@ public sealed class DynamoClientTests(DynamoDbFixture fixture) : IClassFixture<D
                 ExpressionAttributeValues =
                     new Dictionary<string, AttributeValue>
                     {
-                        [":entityType"] = new() { S = "UserProfile" },
+                        [":entityType"] = "UserProfile".ToAttributeValue(),
                     },
             },
             TestContext.Current.CancellationToken);
@@ -76,7 +77,7 @@ public sealed class DynamoClientTests(DynamoDbFixture fixture) : IClassFixture<D
                              SELECT * FROM "{DynamoDbFixture.TableName}"
                              WHERE entityType = ?
                              """,
-                Parameters = [new AttributeValue { S = "UserProfile" }],
+                Parameters = ["UserProfile".ToAttributeValue()],
             },
             TestContext.Current.CancellationToken);
 
@@ -89,12 +90,14 @@ public sealed class DynamoClientTests(DynamoDbFixture fixture) : IClassFixture<D
         var response = await _client.ExecuteStatementAsync(
             new ExecuteStatementRequest
             {
-                Statement =
-                    $"SELECT * FROM \"{DynamoDbFixture.TableName}\" WHERE pk = ? AND sk = ?",
+                Statement = $"""
+                             SELECT * FROM "{DynamoDbFixture.TableName}"
+                             WHERE pk = ? AND sk = ?
+                             """,
                 Parameters =
                 [
-                    new AttributeValue { S = TestDataSamples.UserProfiles[0].Pk },
-                    new AttributeValue { S = TestDataSamples.UserProfiles[0].Sk },
+                    TestDataSamples.UserProfiles[0].Pk.ToAttributeValue(),
+                    TestDataSamples.UserProfiles[0].Sk.ToAttributeValue(),
                 ],
             },
             TestContext.Current.CancellationToken);
@@ -185,8 +188,8 @@ public sealed class DynamoClientTests(DynamoDbFixture fixture) : IClassFixture<D
                 UpdateExpression = "SET notes = :notes, completed = :completed",
                 ExpressionAttributeValues = new Dictionary<string, AttributeValue>
                 {
-                    [":notes"] = new() { S = "Updated by integration test." },
-                    [":completed"] = new() { BOOL = false },
+                    [":notes"] = "Updated by integration test.".ToAttributeValue(),
+                    [":completed"] = false.ToAttributeValue(),
                 },
                 ReturnValues = "ALL_NEW",
             },
@@ -244,8 +247,8 @@ public sealed class DynamoClientTests(DynamoDbFixture fixture) : IClassFixture<D
                 KeyConditionExpression = "pk = :pk AND begins_with(sk, :skPrefix)",
                 ExpressionAttributeValues = new Dictionary<string, AttributeValue>
                 {
-                    [":pk"] = new() { S = expected.Pk },
-                    [":skPrefix"] = new() { S = "PROJECT#" },
+                    [":pk"] = expected.Pk.ToAttributeValue(),
+                    [":skPrefix"] = "PROJECT#".ToAttributeValue(),
                 },
             },
             TestContext.Current.CancellationToken);
@@ -254,5 +257,5 @@ public sealed class DynamoClientTests(DynamoDbFixture fixture) : IClassFixture<D
     }
 
     private static Dictionary<string, AttributeValue> CreateKey(string pk, string sk)
-        => new() { ["pk"] = new AttributeValue { S = pk }, ["sk"] = new AttributeValue { S = sk } };
+        => new() { ["pk"] = pk.ToAttributeValue(), ["sk"] = sk.ToAttributeValue() };
 }

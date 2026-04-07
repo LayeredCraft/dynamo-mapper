@@ -12,5 +12,8 @@
         ]
       }
     ]
+  },
+  "env": {
+    "DOTSETTINGS_FILE": "LayeredCraft.DynamoMapper.sln.DotSettings"
   }
 }

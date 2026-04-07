@@ -54,7 +54,7 @@ def csharp(cwd: str, eddited_input: str) -> None:
             "cleanupcode",
             "--profile=Built-in: Reformat Code",
             f"--include={eddited_input}",
-            f"--settings={DOTSETTINGS_FILE_NAME}",
+            f"--settings={os.getenv('DOTSETTINGS_FILE')}",
         ],
         cwd=cwd,
         capture_output=True,

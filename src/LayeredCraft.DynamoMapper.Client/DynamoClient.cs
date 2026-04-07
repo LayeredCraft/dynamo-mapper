@@ -97,10 +97,13 @@ public class DynamoClient
     ///     A task that returns the mapped DTO when the request returns attributes; otherwise,
     ///     <see langword="null" />.
     /// </returns>
-    public async Task<UpdateItemResponse> UpdateItemAsync(
+    public async Task<T?> UpdateItemAsync<T>(
         UpdateItemRequest request,
         CancellationToken cancellationToken = default)
-        => await AmazonDynamoDb.UpdateItemAsync(request, cancellationToken);
+    {
+        var result = await AmazonDynamoDb.UpdateItemAsync(request, cancellationToken);
+        return result.Attributes.Count == 0 ? default : GetMapper<T>().FromItem(result.Attributes);
+    }
 
     /// <summary>Executes a query request and maps each returned item to the specified DTO type.</summary>
     /// <typeparam name="T">The DTO type to map the query results to.</typeparam>
@@ -122,13 +125,14 @@ public class DynamoClient
     /// <param name="request">The scan request to execute.</param>
     /// <param name="cancellationToken">The cancellation token for the asynchronous operation.</param>
     /// <returns>A task that returns the mapped scan results.</returns>
-    public async Task<IReadOnlyList<T>> ScanAsync<T>(
+    public async Task<ScanResponse<T>> ScanAsync<T>(
         ScanRequest request,
         CancellationToken cancellationToken = default)
     {
         var result = await AmazonDynamoDb.ScanAsync(request, cancellationToken);
         var mapper = GetMapper<T>();
-        return result.Items.Select(mapper.FromItem).ToArray();
+        var mappedItems = result.Items.Select(mapper.FromItem).ToList();
+        return new ScanResponse<T>(result, mappedItems);
     }
 
     /// <summary>Executes a PartiQL statement against DynamoDB.</summary>
@@ -145,12 +149,13 @@ public class DynamoClient
     /// <param name="request">The PartiQL request to execute.</param>
     /// <param name="cancellationToken">The cancellation token for the asynchronous operation.</param>
     /// <returns>A task that returns the mapped statement results.</returns>
-    public async Task<IReadOnlyList<T>> ExecuteStatementAsync<T>(
+    public async Task<ExecuteStatementResponse<T>> ExecuteStatementAsync<T>(
         ExecuteStatementRequest request,
         CancellationToken cancellationToken = default)
     {
         var result = await AmazonDynamoDb.ExecuteStatementAsync(request, cancellationToken);
         var mapper = GetMapper<T>();
-        return result.Items.Select(mapper.FromItem).ToArray();
+        var mappedItems = result.Items.Select(mapper.FromItem).ToList();
+        return new ExecuteStatementResponse<T>(result, mappedItems);
     }
 }

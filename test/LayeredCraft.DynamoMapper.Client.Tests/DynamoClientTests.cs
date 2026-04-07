@@ -31,7 +31,7 @@ public sealed class DynamoClientTests(DynamoDbFixture fixture) : IClassFixture<D
     {
         var expected = TestDataSamples.ProjectRecords[0];
 
-        var items = await _client.QueryAsync<ProjectRecord>(
+        var response = await _client.QueryAsync<ProjectRecord>(
             new QueryRequest
             {
                 TableName = DynamoDbFixture.TableName,
@@ -44,13 +44,13 @@ public sealed class DynamoClientTests(DynamoDbFixture fixture) : IClassFixture<D
             },
             TestContext.Current.CancellationToken);
 
-        items.Should().ContainEquivalentOf(expected);
+        response.MappedItems.Should().ContainEquivalentOf(expected);
     }
 
     [Fact]
     public async Task ScanAsync_UserProfile_ReturnsSeededProfiles()
     {
-        var items = await _client.ScanAsync<UserProfile>(
+        var response = await _client.ScanAsync<UserProfile>(
             new ScanRequest
             {
                 TableName = DynamoDbFixture.TableName,
@@ -63,13 +63,13 @@ public sealed class DynamoClientTests(DynamoDbFixture fixture) : IClassFixture<D
             },
             TestContext.Current.CancellationToken);
 
-        items.Should().BeEquivalentTo(TestDataSamples.UserProfiles);
+        response.MappedItems.Should().BeEquivalentTo(TestDataSamples.UserProfiles);
     }
 
     [Fact]
     public async Task ExecuteStatementAsync_UserProfile_ReturnsSeededProfiles()
     {
-        var items = await _client.ExecuteStatementAsync<UserProfile>(
+        var response = await _client.ExecuteStatementAsync<UserProfile>(
             new ExecuteStatementRequest
             {
                 Statement = $"""
@@ -80,7 +80,7 @@ public sealed class DynamoClientTests(DynamoDbFixture fixture) : IClassFixture<D
             },
             TestContext.Current.CancellationToken);
 
-        items.Should().BeEquivalentTo(TestDataSamples.UserProfiles);
+        response.MappedItems.Should().BeEquivalentTo(TestDataSamples.UserProfiles);
     }
 
     [Fact]
@@ -139,7 +139,7 @@ public sealed class DynamoClientTests(DynamoDbFixture fixture) : IClassFixture<D
             CreateKey(item.Pk, item.Sk),
             TestContext.Current.CancellationToken);
 
-        persisted.Should().BeEquivalentTo(item);
+        persisted.MappedItem.Should().BeEquivalentTo(item);
 
         await _client.DeleteItemAsync(
             DynamoDbFixture.TableName,
@@ -237,7 +237,7 @@ public sealed class DynamoClientTests(DynamoDbFixture fixture) : IClassFixture<D
         var client = serviceProvider.GetRequiredService<DynamoClient>();
         var expected = TestDataSamples.ProjectRecords[1];
 
-        var items = await client.QueryAsync<ProjectRecord>(
+        var response = await client.QueryAsync<ProjectRecord>(
             new QueryRequest
             {
                 TableName = DynamoDbFixture.TableName,
@@ -250,7 +250,7 @@ public sealed class DynamoClientTests(DynamoDbFixture fixture) : IClassFixture<D
             },
             TestContext.Current.CancellationToken);
 
-        items.Should().ContainEquivalentOf(expected);
+        response.MappedItems.Should().ContainEquivalentOf(expected);
     }
 
     private static Dictionary<string, AttributeValue> CreateKey(string pk, string sk)

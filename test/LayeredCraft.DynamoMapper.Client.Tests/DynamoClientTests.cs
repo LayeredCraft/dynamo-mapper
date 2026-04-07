@@ -1,11 +1,13 @@
 using Amazon.DynamoDBv2.Model;
+using LayeredCraft.DynamoMapper.Client.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LayeredCraft.DynamoMapper.Client.Tests;
 
 public sealed class DynamoClientTests(DynamoDbFixture fixture) : IClassFixture<DynamoDbFixture>
 {
     private readonly DynamoClient _client = new DynamoClientBuilder()
-        .WithAmazonDynamoDB(fixture.Client)
+        .WithAmazonDynamoDb(fixture.Client)
         .WithMapper<UserProfile, UserProfileMapper>()
         .WithMapper<ProjectRecord, ProjectRecordMapper>()
         .WithMapper<TaskRecord, TaskRecordMapper>()
@@ -154,6 +156,64 @@ public sealed class DynamoClientTests(DynamoDbFixture fixture) : IClassFixture<D
             TestContext.Current.CancellationToken);
 
         updated.Should().BeEquivalentTo(expected);
+    }
+
+    [Fact]
+    public async Task AddDynamoClient_ResolvesWorkingClient()
+    {
+        var services = new ServiceCollection();
+        services.AddSingleton(fixture.Client);
+
+        services.AddDynamoClient(builder =>
+        {
+            builder.AddMapper<UserProfile, UserProfileMapper>();
+            builder.AddMapper<ProjectRecord, ProjectRecordMapper>();
+            builder.AddMapper<TaskRecord, TaskRecordMapper>();
+        });
+
+        await using var serviceProvider = services.BuildServiceProvider();
+        var client = serviceProvider.GetRequiredService<DynamoClient>();
+        var expected = TestDataSamples.UserProfiles[1];
+
+        var item = await client.GetItemAsync<UserProfile>(
+            DynamoDbFixture.TableName,
+            CreateKey(expected.Pk, expected.Sk),
+            TestContext.Current.CancellationToken);
+
+        item.Should().BeEquivalentTo(expected);
+    }
+
+    [Fact]
+    public async Task AddDynamoClient_WithAmazonDynamoDbOverride_ResolvesWorkingClient()
+    {
+        var services = new ServiceCollection();
+
+        services.AddDynamoClient(builder =>
+        {
+            builder.WithAmazonDynamoDb(fixture.Client);
+            builder.AddMapper<UserProfile, UserProfileMapper>();
+            builder.AddMapper<ProjectRecord, ProjectRecordMapper>();
+            builder.AddMapper<TaskRecord, TaskRecordMapper>();
+        });
+
+        await using var serviceProvider = services.BuildServiceProvider();
+        var client = serviceProvider.GetRequiredService<DynamoClient>();
+        var expected = TestDataSamples.ProjectRecords[1];
+
+        var items = await client.QueryAsync<ProjectRecord>(
+            new QueryRequest
+            {
+                TableName = DynamoDbFixture.TableName,
+                KeyConditionExpression = "pk = :pk AND begins_with(sk, :skPrefix)",
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                {
+                    [":pk"] = new() { S = expected.Pk },
+                    [":skPrefix"] = new() { S = "PROJECT#" },
+                },
+            },
+            TestContext.Current.CancellationToken);
+
+        items.Should().ContainEquivalentOf(expected);
     }
 
     private static Dictionary<string, AttributeValue> CreateKey(string pk, string sk)

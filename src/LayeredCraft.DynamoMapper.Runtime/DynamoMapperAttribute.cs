@@ -39,13 +39,13 @@ public sealed class DynamoMapperAttribute : Attribute
 
     /// <summary>Gets or sets whether to omit null nullable values from the DynamoDB item.</summary>
     /// <remarks>
-    ///     <para>Default is <c>false</c>.</para>
+    ///     <para>Default is <c>true</c>.</para>
     ///     <para>
     ///         Applies to null nullable values at any depth, including nested object and nested
     ///         collection properties.
     ///     </para>
     /// </remarks>
-    public bool OmitNullValues { get; set; } = false;
+    public bool OmitNullValues { get; set; } = true;
 
     /// <summary>Gets or sets whether to omit null values via the legacy string-named option.</summary>
     /// <remarks>

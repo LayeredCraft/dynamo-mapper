@@ -204,8 +204,12 @@ internal static class PropertyMappingSpecBuilder
 
     internal static bool
         GetEffectiveOmitNullSetting(bool? fieldOverride, GeneratorContext context) =>
-        fieldOverride ?? (context.MapperOptions.OmitNullValues ||
-            context.MapperOptions.OmitNullStrings);
+        fieldOverride ?? GetEffectiveMapperOmitNullSetting(context);
+
+    internal static bool GetEffectiveMapperOmitNullSetting(GeneratorContext context) =>
+        context.MapperOptions.OmitNullValuesSpecified
+            ? context.MapperOptions.OmitNullValues
+            : context.MapperOptions.OmitNullStrings;
 
     /// <summary>
     ///     Builds a property mapping spec when custom ToMethod or FromMethod is specified. Custom

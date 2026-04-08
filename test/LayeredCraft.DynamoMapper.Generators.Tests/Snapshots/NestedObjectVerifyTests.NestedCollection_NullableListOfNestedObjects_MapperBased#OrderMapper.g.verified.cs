@@ -23,7 +23,7 @@ public static partial class OrderMapper
     public static partial global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> ToItem(global::MyNamespace.Order source) =>
         new Dictionary<string, AttributeValue>(2)
             .SetString("id", source.Id, false, true)
-            .Set("items", source.Items is null ? new AttributeValue { NULL = true } : new AttributeValue { L = source.Items?.Select(x => new AttributeValue { M = global::MyNamespace.LineItemMapper.ToItem(x) }).ToList() });
+            .SetIfNotNull("items", source.Items, value => new AttributeValue { L = value.Select(x => new AttributeValue { M = global::MyNamespace.LineItemMapper.ToItem(x) }).ToList() });
 
     [global::System.CodeDom.Compiler.GeneratedCode("LayeredCraft.DynamoMapper", "REPLACED")]
     public static partial global::MyNamespace.Order FromItem(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> item)

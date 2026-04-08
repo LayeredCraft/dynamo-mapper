@@ -3,11 +3,11 @@ namespace LayeredCraft.DynamoMapper.Generators.Tests;
 public class SimpleVerifyTests
 {
     [Fact]
-    public async Task Simple_HelloWorld() =>
-        await GeneratorTestHelpers.Verify(
-            new VerifyTestOptions
-            {
-                SourceCode = """
+    public async Task Simple_HelloWorld() => await GeneratorTestHelpers.Verify(
+        new VerifyTestOptions
+        {
+            SourceCode =
+                """
                 using System.Collections.Generic;
                 using Amazon.DynamoDBv2.Model;
                 using LayeredCraft.DynamoMapper.Runtime;
@@ -27,16 +27,16 @@ public class SimpleVerifyTests
                     public string Name { get; set; }
                 }
                 """,
-            },
-            TestContext.Current.CancellationToken
-        );
+        },
+        TestContext.Current.CancellationToken
+    );
 
     [Fact]
-    public async Task Simple_HelloWorld_ExtensionMethod() =>
-        await GeneratorTestHelpers.Verify(
-            new VerifyTestOptions
-            {
-                SourceCode = """
+    public async Task Simple_HelloWorld_ExtensionMethod() => await GeneratorTestHelpers.Verify(
+        new VerifyTestOptions
+        {
+            SourceCode =
+                """
                 using System.Collections.Generic;
                 using Amazon.DynamoDBv2.Model;
                 using LayeredCraft.DynamoMapper.Runtime;
@@ -56,16 +56,16 @@ public class SimpleVerifyTests
                     public string Name { get; set; }
                 }
                 """,
-            },
-            TestContext.Current.CancellationToken
-        );
+        },
+        TestContext.Current.CancellationToken
+    );
 
     [Fact]
-    public async Task Simple_Record() =>
-        await GeneratorTestHelpers.Verify(
-            new VerifyTestOptions
-            {
-                SourceCode = """
+    public async Task Simple_Record() => await GeneratorTestHelpers.Verify(
+        new VerifyTestOptions
+        {
+            SourceCode =
+                """
                 using System.Collections.Generic;
                 using Amazon.DynamoDBv2.Model;
                 using LayeredCraft.DynamoMapper.Runtime;
@@ -85,16 +85,16 @@ public class SimpleVerifyTests
                     public string Name { get; set; }
                 }
                 """,
-            },
-            TestContext.Current.CancellationToken
-        );
+        },
+        TestContext.Current.CancellationToken
+    );
 
     [Fact]
-    public async Task Simple_EmptyModel() =>
-        await GeneratorTestHelpers.Verify(
-            new VerifyTestOptions
-            {
-                SourceCode = """
+    public async Task Simple_EmptyModel() => await GeneratorTestHelpers.Verify(
+        new VerifyTestOptions
+        {
+            SourceCode =
+                """
                 using System.Collections.Generic;
                 using Amazon.DynamoDBv2.Model;
                 using LayeredCraft.DynamoMapper.Runtime;
@@ -113,16 +113,16 @@ public class SimpleVerifyTests
                 {
                 }
                 """,
-            },
-            TestContext.Current.CancellationToken
-        );
+        },
+        TestContext.Current.CancellationToken
+    );
 
     [Fact]
-    public async Task Simple_AllHelperTypes() =>
-        await GeneratorTestHelpers.Verify(
-            new VerifyTestOptions
-            {
-                SourceCode = """
+    public async Task Simple_AllHelperTypes() => await GeneratorTestHelpers.Verify(
+        new VerifyTestOptions
+        {
+            SourceCode =
+                """
                 using System;
                 using System.Collections.Generic;
                 using Amazon.DynamoDBv2.Model;
@@ -173,16 +173,16 @@ public class SimpleVerifyTests
                     Cancelled,
                 }
                 """,
-            },
-            TestContext.Current.CancellationToken
-        );
+        },
+        TestContext.Current.CancellationToken
+    );
 
     [Fact]
-    public async Task Simple_AllHelperTypes_Optional() =>
-        await GeneratorTestHelpers.Verify(
-            new VerifyTestOptions
-            {
-                SourceCode = """
+    public async Task Simple_AllHelperTypes_Optional() => await GeneratorTestHelpers.Verify(
+        new VerifyTestOptions
+        {
+            SourceCode =
+                """
                 using System;
                 using System.Collections.Generic;
                 using Amazon.DynamoDBv2.Model;
@@ -233,16 +233,16 @@ public class SimpleVerifyTests
                     Cancelled,
                 }
                 """,
-            },
-            TestContext.Current.CancellationToken
-        );
+        },
+        TestContext.Current.CancellationToken
+    );
 
     [Fact]
-    public async Task Simple_InitProperty() =>
-        await GeneratorTestHelpers.Verify(
-            new VerifyTestOptions
-            {
-                SourceCode = """
+    public async Task Simple_InitProperty() => await GeneratorTestHelpers.Verify(
+        new VerifyTestOptions
+        {
+            SourceCode =
+                """
                 using System.Collections.Generic;
                 using Amazon.DynamoDBv2.Model;
                 using LayeredCraft.DynamoMapper.Runtime;
@@ -262,16 +262,16 @@ public class SimpleVerifyTests
                     public string Name { get; init; }
                 }
                 """,
-            },
-            TestContext.Current.CancellationToken
-        );
+        },
+        TestContext.Current.CancellationToken
+    );
 
     [Fact]
-    public async Task Simple_NoSetter() =>
-        await GeneratorTestHelpers.Verify(
-            new VerifyTestOptions
-            {
-                SourceCode = """
+    public async Task Simple_NoSetter() => await GeneratorTestHelpers.Verify(
+        new VerifyTestOptions
+        {
+            SourceCode =
+                """
                 using System.Collections.Generic;
                 using Amazon.DynamoDBv2.Model;
                 using LayeredCraft.DynamoMapper.Runtime;
@@ -291,16 +291,16 @@ public class SimpleVerifyTests
                     public string Name { get; }
                 }
                 """,
-            },
-            TestContext.Current.CancellationToken
-        );
+        },
+        TestContext.Current.CancellationToken
+    );
 
     [Fact]
-    public async Task Simple_MethodNamePrefixWorks() =>
-        await GeneratorTestHelpers.Verify(
-            new VerifyTestOptions
-            {
-                SourceCode = """
+    public async Task Simple_MethodNamePrefixWorks() => await GeneratorTestHelpers.Verify(
+        new VerifyTestOptions
+        {
+            SourceCode =
+                """
                 using System.Collections.Generic;
                 using Amazon.DynamoDBv2.Model;
                 using LayeredCraft.DynamoMapper.Runtime;
@@ -320,16 +320,16 @@ public class SimpleVerifyTests
                     public string Name { get; set; }
                 }
                 """,
-            },
-            TestContext.Current.CancellationToken
-        );
+        },
+        TestContext.Current.CancellationToken
+    );
 
     [Fact]
-    public async Task Simple_AllOptionsSetToNonDefaultValues() =>
-        await GeneratorTestHelpers.Verify(
-            new VerifyTestOptions
-            {
-                SourceCode = """
+    public async Task Simple_AllOptionsSetToNonDefaultValues() => await GeneratorTestHelpers.Verify(
+        new VerifyTestOptions
+        {
+            SourceCode =
+                """
                 using System;
                 using System.Collections.Generic;
                 using Amazon.DynamoDBv2.Model;
@@ -387,16 +387,16 @@ public class SimpleVerifyTests
                     Cancelled,
                 }
                 """,
-            },
-            TestContext.Current.CancellationToken
-        );
+        },
+        TestContext.Current.CancellationToken
+    );
 
     [Fact]
-    public async Task Simple_PropertiesWithNoSetter() =>
-        await GeneratorTestHelpers.Verify(
-            new VerifyTestOptions
-            {
-                SourceCode = """
+    public async Task Simple_PropertiesWithNoSetter() => await GeneratorTestHelpers.Verify(
+        new VerifyTestOptions
+        {
+            SourceCode =
+                """
                 using System.Collections.Generic;
                 using Amazon.DynamoDBv2.Model;
                 using LayeredCraft.DynamoMapper.Runtime;
@@ -418,16 +418,16 @@ public class SimpleVerifyTests
                     public string ExpressionProperty => "ExpressionProperty";
                 }
                 """,
-            },
-            TestContext.Current.CancellationToken
-        );
+        },
+        TestContext.Current.CancellationToken
+    );
 
     [Fact]
-    public async Task Simple_NoToMethod() =>
-        await GeneratorTestHelpers.Verify(
-            new VerifyTestOptions
-            {
-                SourceCode = """
+    public async Task Simple_NoToMethod() => await GeneratorTestHelpers.Verify(
+        new VerifyTestOptions
+        {
+            SourceCode =
+                """
                 using System;
                 using System.Collections.Generic;
                 using Amazon.DynamoDBv2.Model;
@@ -447,41 +447,42 @@ public class SimpleVerifyTests
                     public Type ShouldNotBeMapped => typeof(MyDto);
                 }
                 """,
-            },
-            TestContext.Current.CancellationToken
-        );
+        },
+        TestContext.Current.CancellationToken
+    );
 
     [Fact]
     public async Task Simple_OverrideOnlyOnFromMethod_NoToMethod() =>
         await GeneratorTestHelpers.Verify(
             new VerifyTestOptions
             {
-                SourceCode = """
-                using System;
-                using System.Collections.Generic;
-                using Amazon.DynamoDBv2.Model;
-                using LayeredCraft.DynamoMapper.Runtime;
+                SourceCode =
+                    """
+                    using System;
+                    using System.Collections.Generic;
+                    using Amazon.DynamoDBv2.Model;
+                    using LayeredCraft.DynamoMapper.Runtime;
 
-                namespace MyNamespace;
+                    namespace MyNamespace;
 
-                [DynamoMapper]
-                [DynamoField(nameof(MyDto.ShouldNotBeMapped), FromMethod = nameof(GetType))]
-                public static partial class ExampleMyDtoMapper
-                {
-                    public static partial MyDto FromItem(Dictionary<string, AttributeValue> item);
-
-                    public static Type GetType(Dictionary<string, AttributeValue> item)
+                    [DynamoMapper]
+                    [DynamoField(nameof(MyDto.ShouldNotBeMapped), FromMethod = nameof(GetType))]
+                    public static partial class ExampleMyDtoMapper
                     {
-                        return typeof(MyDto);
-                    }
-                }
+                        public static partial MyDto FromItem(Dictionary<string, AttributeValue> item);
 
-                public class MyDto
-                {
-                    public required string Name { get; set; }
-                    public Type ShouldNotBeMapped { get; set; }
-                }
-                """,
+                        public static Type GetType(Dictionary<string, AttributeValue> item)
+                        {
+                            return typeof(MyDto);
+                        }
+                    }
+
+                    public class MyDto
+                    {
+                        public required string Name { get; set; }
+                        public Type ShouldNotBeMapped { get; set; }
+                    }
+                    """,
             },
             TestContext.Current.CancellationToken
         );
@@ -491,42 +492,43 @@ public class SimpleVerifyTests
         await GeneratorTestHelpers.Verify(
             new VerifyTestOptions
             {
-                SourceCode = """
-                using System;
-                using System.Collections.Generic;
-                using Amazon.DynamoDBv2.Model;
-                using LayeredCraft.DynamoMapper.Runtime;
+                SourceCode =
+                    """
+                    using System;
+                    using System.Collections.Generic;
+                    using Amazon.DynamoDBv2.Model;
+                    using LayeredCraft.DynamoMapper.Runtime;
 
-                namespace MyNamespace;
+                    namespace MyNamespace;
 
-                [DynamoMapper]
-                [DynamoField(nameof(MyDto.ShouldNotBeMapped), ToMethod = nameof(SetType))]
-                public static partial class ExampleMyDtoMapper
-                {
-                    public static partial Dictionary<string, AttributeValue> ToItem(MyDto source);
-
-                    public static AttributeValue SetType(MyDto source)
+                    [DynamoMapper]
+                    [DynamoField(nameof(MyDto.ShouldNotBeMapped), ToMethod = nameof(SetType))]
+                    public static partial class ExampleMyDtoMapper
                     {
-                        return new AttributeValue();
-                    }
-                }
+                        public static partial Dictionary<string, AttributeValue> ToItem(MyDto source);
 
-                public class MyDto
-                {
-                    public required string Name { get; set; }
-                    public Type ShouldNotBeMapped { get; set; }
-                }
-                """,
+                        public static AttributeValue SetType(MyDto source)
+                        {
+                            return new AttributeValue();
+                        }
+                    }
+
+                    public class MyDto
+                    {
+                        public required string Name { get; set; }
+                        public Type ShouldNotBeMapped { get; set; }
+                    }
+                    """,
             },
             TestContext.Current.CancellationToken
         );
 
     [Fact]
-    public async Task Simple_DefaultValues() =>
-        await GeneratorTestHelpers.Verify(
-            new VerifyTestOptions
-            {
-                SourceCode = """
+    public async Task Simple_DefaultValues() => await GeneratorTestHelpers.Verify(
+        new VerifyTestOptions
+        {
+            SourceCode =
+                """
                 using System;
                 using System.Collections.Generic;
                 using Amazon.DynamoDBv2.Model;
@@ -550,6 +552,36 @@ public class SimpleVerifyTests
                     public string FullName => $"{FirstName} {LastName}";
                 }
                 """,
+        },
+        TestContext.Current.CancellationToken
+    );
+
+    [Fact]
+    public async Task Simple_ExplicitOmitNullValuesFalse_PreservesNullsForNullableHelpers() =>
+        await GeneratorTestHelpers.Verify(
+            new VerifyTestOptions
+            {
+                SourceCode =
+                    """
+                    using System.Collections.Generic;
+                    using Amazon.DynamoDBv2.Model;
+                    using LayeredCraft.DynamoMapper.Runtime;
+
+                    namespace MyNamespace;
+
+                    [DynamoMapper(OmitNullValues = false)]
+                    public static partial class ExampleEntityMapper
+                    {
+                        public static partial Dictionary<string, AttributeValue> ToItem(ExampleEntity source);
+
+                        public static partial ExampleEntity FromItem(Dictionary<string, AttributeValue> item);
+                    }
+
+                    public class ExampleEntity
+                    {
+                        public bool? NullableBool { get; set; }
+                    }
+                    """,
             },
             TestContext.Current.CancellationToken
         );

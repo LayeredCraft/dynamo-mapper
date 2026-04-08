@@ -969,7 +969,7 @@ internal static class PropertyMappingCodeRenderer
 
     private static bool GetEffectiveNestedOmitNullSetting(
         bool? fieldOverride, GeneratorContext context
-    ) => fieldOverride ?? context.MapperOptions.OmitNullValues;
+    ) => fieldOverride ?? PropertyMappingSpecBuilder.GetEffectiveMapperOmitNullSetting(context);
 
     /// <summary>
     ///     Renders the FromItem code for a nested collection (init-style assignment).

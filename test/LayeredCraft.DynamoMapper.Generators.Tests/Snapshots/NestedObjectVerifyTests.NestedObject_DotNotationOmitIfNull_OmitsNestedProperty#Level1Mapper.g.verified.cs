@@ -23,7 +23,7 @@ public static partial class Level1Mapper
     public static partial global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> ToItem(global::MyNamespace.Level1 source) =>
         new Dictionary<string, AttributeValue>(2)
             .SetString("id", source.Id, false, true)
-            .Set("level2Data", source.Level2Data is null ? new AttributeValue { NULL = true } : new AttributeValue { M = ToItem_Level2(source.Level2Data) });
+            .SetIfNotNull("level2Data", source.Level2Data, value => new AttributeValue { M = ToItem_Level2(value) });
 
     [global::System.CodeDom.Compiler.GeneratedCode("LayeredCraft.DynamoMapper", "REPLACED")]
     public static partial global::MyNamespace.Level1 FromItem(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> item)

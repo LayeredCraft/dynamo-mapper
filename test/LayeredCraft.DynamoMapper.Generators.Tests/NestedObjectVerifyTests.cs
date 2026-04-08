@@ -113,6 +113,43 @@ public class NestedObjectVerifyTests
         );
 
     [Fact]
+    public async Task NestedObject_NullableInline_OmitNullValuesFalse() =>
+        await GeneratorTestHelpers.Verify(
+            new VerifyTestOptions
+            {
+                SourceCode =
+                    """
+                    using System.Collections.Generic;
+                    using Amazon.DynamoDBv2.Model;
+                    using LayeredCraft.DynamoMapper.Runtime;
+
+                    namespace MyNamespace;
+
+                    [DynamoMapper(OmitNullValues = false)]
+                    public static partial class OrderMapper
+                    {
+                        public static partial Dictionary<string, AttributeValue> ToItem(Order source);
+
+                        public static partial Order FromItem(Dictionary<string, AttributeValue> item);
+                    }
+
+                    public class Order
+                    {
+                        public string Id { get; set; }
+                        public Address? BillingAddress { get; set; }
+                    }
+
+                    public class Address
+                    {
+                        public string Line1 { get; set; }
+                        public string City { get; set; }
+                    }
+                    """,
+            },
+            TestContext.Current.CancellationToken
+        );
+
+    [Fact]
     public async Task NestedObject_NullableMapperBased() => await GeneratorTestHelpers.Verify(
         new VerifyTestOptions
         {

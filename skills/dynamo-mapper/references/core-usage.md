@@ -32,7 +32,8 @@ public static partial class OrderMapper
 - names default to camelCase
 - requiredness defaults to nullability inference
 - base-class properties are excluded by default
-- null strings are omitted by default
+- `OmitNullValues` defaults to `false`
+- deprecated `OmitNullStrings` still affects helper-backed nullable scalars and collections
 - empty strings are kept by default
 - format defaults are `DateTime = O`, `TimeSpan = c`, `Enum = G`, `Guid = D`
 
@@ -57,12 +58,14 @@ Use `[DynamoIgnore(memberName)]` to skip one or both directions.
 Dot notation works for nested members like `"ShippingAddress.Line1"` and for collection element
 members like `"Contacts.VerifiedAt"` (where `Contacts` is `List<CustomerContact>`).
 
+`OmitIfNull` applies at any depth, including nested object and nested collection properties.
+
 ## Constructors
 
 - Put `[DynamoMapperConstructor]` on the model constructor, not the mapper.
 - If exactly one constructor is marked, it wins.
 - Otherwise DynamoMapper prefers a usable parameterless/property-init path and falls back to the
-  constructor with the most parameters.
+    constructor with the most parameters.
 - Constructor parameters match .NET property names, not DynamoDB attribute names.
 
 ## Nested mapping
@@ -76,8 +79,11 @@ Supported nested shapes include:
 Selection order for a nested member:
 
 1. dot-notation override
-2. nested mapper
-3. inline helper generation
+1. nested mapper
+1. inline helper generation
+
+Use `OmitNullValues` for mapper-level null omission that should also affect nested object and
+nested collection containers. Treat `OmitNullStrings` as legacy compatibility.
 
 ## Custom conversion
 

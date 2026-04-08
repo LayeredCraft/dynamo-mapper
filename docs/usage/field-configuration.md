@@ -35,8 +35,11 @@ public static partial class OrderMapper
 ```
 
 Notes:
+
 - Dot-notation overrides force inline mapping for the nested path.
 - Invalid paths emit `DM0008`.
+- `OmitIfNull` works on nested object and nested collection properties too, so paths like
+  `"Customer.Profile"` or `"Customer.Addresses"` can omit null containers during `ToItem`.
 
 ### Collection Element Members
 
@@ -75,13 +78,13 @@ Notes:
 
 ## Supported Options
 
-| Option | Description |
-| --- | --- |
-| `AttributeName` | Overrides the DynamoDB attribute name. |
-| `Required` | Controls requiredness during `FromItem`. |
-| `Kind` | Forces a specific `DynamoKind`. |
-| `OmitIfNull` | Omits null values during `ToItem`. |
-| `OmitIfEmptyString` | Omits empty strings during `ToItem`. |
-| `ToMethod` | Uses a custom method to serialize a value. |
-| `FromMethod` | Uses a custom method to deserialize a value. |
-| `Format` | Overrides default format for date/time/enum conversions. |
+| Option              | Description                                                                                  |
+|---------------------|----------------------------------------------------------------------------------------------|
+| `AttributeName`     | Overrides the DynamoDB attribute name.                                                       |
+| `Required`          | Controls requiredness during `FromItem`.                                                     |
+| `Kind`              | Forces a specific `DynamoKind`.                                                              |
+| `OmitIfNull`        | Omits null values during `ToItem`, including nested object and nested collection properties. |
+| `OmitIfEmptyString` | Omits empty strings during `ToItem`.                                                         |
+| `ToMethod`          | Uses a custom method to serialize a value.                                                   |
+| `FromMethod`        | Uses a custom method to deserialize a value.                                                 |
+| `Format`            | Overrides default format for date/time/enum conversions.                                     |

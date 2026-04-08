@@ -37,5 +37,19 @@ public static class AttributeValueExtensions
 
             return attributes;
         }
+
+        /// <summary>
+        ///     Sets an <see cref="AttributeValue" /> in the attribute dictionary when the source value is
+        ///     not <c>null</c>.
+        /// </summary>
+        public Dictionary<string, AttributeValue> SetIfNotNull<T>(
+            string key, T? value, Func<T, AttributeValue> valueFactory
+        ) where T : class
+        {
+            if (value is not null)
+                attributes[key] = valueFactory(value);
+
+            return attributes;
+        }
     }
 }

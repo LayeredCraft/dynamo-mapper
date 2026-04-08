@@ -16,6 +16,8 @@
 - nested objects are not supported inside sets
 - constructor parameter matching uses .NET property names, not attribute names
 - empty sets are omitted because DynamoDB does not allow them
+- `OmitNullStrings` is legacy and misnamed; prefer `OmitNullValues` for mapper-level null omission,
+    especially for nested object and nested collection containers
 
 ## Stale-doc corrections
 

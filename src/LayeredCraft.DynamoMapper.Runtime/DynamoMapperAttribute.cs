@@ -37,8 +37,25 @@ public sealed class DynamoMapperAttribute : Attribute
     /// </remarks>
     public bool IncludeBaseClassProperties { get; set; } = false;
 
-    /// <summary>Gets or sets whether to omit null string values from the DynamoDB item.</summary>
-    /// <remarks>Default is <c>true</c>.</remarks>
+    /// <summary>Gets or sets whether to omit null nullable values from the DynamoDB item.</summary>
+    /// <remarks>
+    ///     <para>Default is <c>true</c>.</para>
+    ///     <para>
+    ///         Applies to null nullable values at any depth, including nested object and nested
+    ///         collection properties.
+    ///     </para>
+    /// </remarks>
+    public bool OmitNullValues { get; set; } = true;
+
+    /// <summary>Gets or sets whether to omit null values via the legacy string-named option.</summary>
+    /// <remarks>
+    ///     <para>Default is <c>true</c>.</para>
+    ///     <para>
+    ///         This option is deprecated and retained for compatibility. Use
+    ///         <see cref="OmitNullValues" /> for the preferred mapper-level null omission behavior.
+    ///     </para>
+    /// </remarks>
+    [Obsolete("OmitNullStrings is deprecated. Use OmitNullValues for mapper-level null omission.")]
     public bool OmitNullStrings { get; set; } = true;
 
     /// <summary>Gets or sets whether to omit empty string values from the DynamoDB item.</summary>

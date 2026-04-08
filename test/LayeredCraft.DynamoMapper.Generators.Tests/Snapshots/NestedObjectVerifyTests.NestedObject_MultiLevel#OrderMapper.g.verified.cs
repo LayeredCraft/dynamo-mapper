@@ -41,7 +41,7 @@ public static partial class OrderMapper
     private static Dictionary<string, AttributeValue> ToItem_Customer(global::MyNamespace.Customer customer) =>
         new Dictionary<string, AttributeValue>(2)
             .SetString("name", customer.Name, false, true)
-            .Set("address", customer.Address is null ? new AttributeValue { NULL = true } : new AttributeValue { M = ToItem_Address(customer.Address) });
+            .SetIfNotNull("address", customer.Address, value => new AttributeValue { M = ToItem_Address(value) });
 
     private static global::MyNamespace.Customer FromItem_Customer(Dictionary<string, AttributeValue> map)
     {

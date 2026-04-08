@@ -1,5 +1,8 @@
 version: '3'
 
+dotenv:
+  - .env
+
 tasks:
   format:
     desc: Reformat the solution
@@ -44,7 +47,16 @@ tasks:
       - echo "📦 Packing Packages"
       - dotnet pack --configuration Release --no-build --output ./nupkg
       - echo "✅ Packed"
-
+  
+  publish:
+    desc: Publish the package to a package registry
+    silent: true
+    deps: [ pack ]
+    cmds:
+      - echo "🚀 Publishing"
+      - dotnet nuget push ./nupkg/*.nupkg --source https://api.nuget.org/v3/index.json --api-key $NUGET_API_KEY_LOCAL --skip-duplicate
+      - echo "✨ Published"
+  
   pack-local:
     desc: Package and publish to local NuGet source for use in other solutions
     silent: true

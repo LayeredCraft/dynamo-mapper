@@ -21,9 +21,8 @@ public static partial class Level1Mapper
 {
     [global::System.CodeDom.Compiler.GeneratedCode("LayeredCraft.DynamoMapper", "REPLACED")]
     public static partial global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> ToItem(global::MyNamespace.Level1 source) =>
-        new Dictionary<string, AttributeValue>(3)
+        new Dictionary<string, AttributeValue>(2)
             .SetString("id", source.Id, false, true)
-            .SetString("name", source.Name, false, true)
             .SetIfNotNull("level2Data", source.Level2Data, value => new AttributeValue { M = ToItem_Level2(value) });
 
     [global::System.CodeDom.Compiler.GeneratedCode("LayeredCraft.DynamoMapper", "REPLACED")]
@@ -34,16 +33,14 @@ public static partial class Level1Mapper
             Level2Data = item.TryGetValue("level2Data", out var level2dataAttr) && level2dataAttr.M is { } level2dataMap ? FromItem_Level2(level2dataMap) : null,
         };
         if (item.TryGetString("id", out var var0, Requiredness.InferFromNullability)) level1.Id = var0!;
-        if (item.TryGetString("name", out var var1, Requiredness.InferFromNullability)) level1.Name = var1!;
         return level1;
     }
 
     // Helper methods for nested object mapping
 
     private static Dictionary<string, AttributeValue> ToItem_Level2(global::MyNamespace.Level2 level2) =>
-        new Dictionary<string, AttributeValue>(3)
+        new Dictionary<string, AttributeValue>(2)
             .SetString("id", level2.Id, false, true)
-            .SetString("description", level2.Description, false, true)
             .SetIfNotNull("level3Data", level2.Level3Data, value => new AttributeValue { M = ToItem_Level3(value) });
 
     private static global::MyNamespace.Level2 FromItem_Level2(Dictionary<string, AttributeValue> map)
@@ -53,44 +50,19 @@ public static partial class Level1Mapper
             Level3Data = map.TryGetValue("level3Data", out var map_level3dataAttr) && map_level3dataAttr.M is { } map_level3data ? FromItem_Level3(map_level3data) : null,
         };
         if (map.TryGetString("id", out var var0, Requiredness.InferFromNullability)) level2.Id = var0!;
-        if (map.TryGetString("description", out var var1, Requiredness.InferFromNullability)) level2.Description = var1!;
         return level2;
     }
 
 
     private static Dictionary<string, AttributeValue> ToItem_Level3(global::MyNamespace.Level3 level3) =>
-        new Dictionary<string, AttributeValue>(3)
-            .SetString("id", level3.Id, false, true)
-            .SetInt("value", level3.Value, false, true)
-            .SetIfNotNull("level4Data", level3.Level4Data, value => new AttributeValue { M = ToItem_Level4(value) });
+        new Dictionary<string, AttributeValue>(1)
+            .SetString("id", level3.Id, false, true);
 
     private static global::MyNamespace.Level3 FromItem_Level3(Dictionary<string, AttributeValue> map)
     {
-        var level3 = new global::MyNamespace.Level3
-        {
-            Value = map.GetInt("value", Requiredness.Optional),
-            Level4Data = map.TryGetValue("level4Data", out var map_level4dataAttr) && map_level4dataAttr.M is { } map_level4data ? FromItem_Level4(map_level4data) : null,
-        };
+        var level3 = new global::MyNamespace.Level3();
         if (map.TryGetString("id", out var var0, Requiredness.InferFromNullability)) level3.Id = var0!;
         return level3;
-    }
-
-
-    private static Dictionary<string, AttributeValue> ToItem_Level4(global::MyNamespace.Level4 level4) =>
-        new Dictionary<string, AttributeValue>(3)
-            .SetString("id", level4.Id, false, true)
-            .SetBool("isActive", level4.IsActive, false, true)
-            .SetDecimal("price", level4.Price, false, true);
-
-    private static global::MyNamespace.Level4 FromItem_Level4(Dictionary<string, AttributeValue> map)
-    {
-        var level4 = new global::MyNamespace.Level4
-        {
-            IsActive = map.GetBool("isActive", Requiredness.Optional),
-            Price = map.GetDecimal("price", Requiredness.Optional),
-        };
-        if (map.TryGetString("id", out var var0, Requiredness.InferFromNullability)) level4.Id = var0!;
-        return level4;
     }
 
 }

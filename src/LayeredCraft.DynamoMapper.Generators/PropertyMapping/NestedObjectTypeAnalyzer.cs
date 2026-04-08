@@ -15,6 +15,52 @@ namespace LayeredCraft.DynamoMapper.Generator.PropertyMapping;
 internal static class NestedObjectTypeAnalyzer
 {
     /// <summary>
+    ///     Analyzes a collection element type to determine if it's a nested object and how it should
+    ///     be mapped. Unlike <see cref="Analyze" />, this method does not append a property name to the
+    ///     context path, so that the caller can pre-set the correct path prefix (e.g. "Contacts") and have
+    ///     field overrides like "Contacts.VerifiedAt" resolve correctly.
+    /// </summary>
+    /// <param name="type">The element type to analyze.</param>
+    /// <param name="nestedContext">
+    ///     The nested analysis context, with CurrentPath already set to the
+    ///     collection property's path.
+    /// </param>
+    internal static DiagnosticResult<NestedMappingInfo?> AnalyzeElementType(
+        ITypeSymbol type, NestedAnalysisContext nestedContext
+    )
+    {
+        nestedContext.Context.ThrowIfCancellationRequested();
+
+        if (!IsNestedObjectType(type, nestedContext.Context))
+            return DiagnosticResult<NestedMappingInfo?>.Success(null);
+
+        if (nestedContext.WouldCreateCycle(type))
+            return DiagnosticResult<NestedMappingInfo?>.Failure(
+                DiagnosticDescriptors.CycleDetectedInNestedType,
+                type.Locations.FirstOrDefault()?.CreateLocationInfo(),
+                "element",
+                type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
+            );
+
+        if (nestedContext.HasOverridesForCurrentPath())
+            return AnalyzeForInline(type, nestedContext);
+
+        if (nestedContext.Registry.TryGetMapper(type, out var mapperReference) &&
+            mapperReference != null)
+        {
+            var requiresTo = nestedContext.Context.HasToItemMethod;
+            var requiresFrom = nestedContext.Context.HasFromItemMethod;
+            if ((!requiresTo || mapperReference.HasToItemMethod) &&
+                (!requiresFrom || mapperReference.HasFromItemMethod))
+                return DiagnosticResult<NestedMappingInfo?>.Success(
+                    new MapperBasedNesting(mapperReference)
+                );
+        }
+
+        return AnalyzeForInline(type, nestedContext);
+    }
+
+    /// <summary>
     ///     Analyzes a type to determine if it's a nested object and how it should be mapped.
     /// </summary>
     /// <param name="type">The type to analyze.</param>
@@ -135,14 +181,13 @@ internal static class NestedObjectTypeAnalyzer
     /// </summary>
     private static IPropertySymbol[] GetMappableProperties(
         INamedTypeSymbol type, GeneratorContext context
-    ) =>
-        PropertySymbolLookup.GetProperties(
-            type,
-            context.MapperOptions.IncludeBaseClassProperties,
-            static (p, declaringType) =>
-                !p.IsStatic && !p.IsIndexer && (p.GetMethod != null || p.SetMethod != null) &&
-                !(declaringType.IsRecord && p.Name == "EqualityContract")
-        );
+    ) => PropertySymbolLookup.GetProperties(
+        type,
+        context.MapperOptions.IncludeBaseClassProperties,
+        static (p, declaringType) =>
+            !p.IsStatic && !p.IsIndexer && (p.GetMethod != null || p.SetMethod != null) &&
+            !(declaringType.IsRecord && p.Name == "EqualityContract")
+    );
 
     /// <summary>
     ///     Analyzes a type for inline code generation, recursively building property specs.
@@ -225,10 +270,12 @@ internal static class NestedObjectTypeAnalyzer
                 CollectionTypeAnalyzer.Analyze(underlyingType, nestedContext.Context);
             if (collectionInfo != null)
             {
+                // Include the collection property's name in the context path so that
+                // element-level overrides (e.g. "Contacts.VerifiedAt") resolve correctly.
                 var validation =
                     CollectionTypeAnalyzer.ValidateElementType(
                         collectionInfo.ElementType,
-                        contextWithAncestor
+                        contextWithAncestor.WithPath(property.Name)
                     );
 
                 if (validation.Error is not null)

@@ -3,7 +3,8 @@ using LayeredCraft.DynamoMapper.Generator.Models;
 using LayeredCraft.DynamoMapper.Generator.PropertyMapping.Models;
 using LayeredCraft.DynamoMapper.Runtime;
 using Microsoft.CodeAnalysis;
-using WellKnownType = LayeredCraft.DynamoMapper.Generator.WellKnownTypes.WellKnownTypeData.WellKnownType;
+using WellKnownType =
+    LayeredCraft.DynamoMapper.Generator.WellKnownTypes.WellKnownTypeData.WellKnownType;
 
 namespace LayeredCraft.DynamoMapper.Generator.PropertyMapping;
 
@@ -21,8 +22,7 @@ internal static class TypeMappingStrategyResolver
     ///     types.
     /// </returns>
     internal static DiagnosticResult<TypeMappingStrategy?> Resolve(
-        PropertyAnalysis analysis,
-        GeneratorContext context
+        PropertyAnalysis analysis, GeneratorContext context
     )
     {
         context.ThrowIfCancellationRequested();
@@ -34,14 +34,12 @@ internal static class TypeMappingStrategyResolver
         // Skip validation if property won't be used in any generated methods
         // Also skip if a custom method is provided for that direction (no auto-mapping needed)
         var willBeUsedInToItem =
-            context.HasToItemMethod
-            && analysis.HasGetter
-            && analysis.FieldOptions?.ToMethod == null;
+            context.HasToItemMethod && analysis.HasGetter &&
+            analysis.FieldOptions?.ToMethod == null;
 
         var willBeUsedInFromItem =
-            context.HasFromItemMethod
-            && analysis.HasSetter
-            && analysis.FieldOptions?.FromMethod == null;
+            context.HasFromItemMethod && analysis.HasSetter &&
+            analysis.FieldOptions?.FromMethod == null;
 
         if (!willBeUsedInToItem && !willBeUsedInFromItem)
             return DiagnosticResult<TypeMappingStrategy?>.Success(null);
@@ -55,10 +53,8 @@ internal static class TypeMappingStrategyResolver
                 ignoreOptions.Ignore is IgnoreMapping.All or IgnoreMapping.ToModel;
 
             // If property should be ignored in all relevant directions, skip mapping
-            if (
-                (!willBeUsedInToItem || shouldIgnoreToItem)
-                && (!willBeUsedInFromItem || shouldIgnoreFromItem)
-            )
+            if ((!willBeUsedInToItem || shouldIgnoreToItem) &&
+                (!willBeUsedInFromItem || shouldIgnoreFromItem))
                 return DiagnosticResult<TypeMappingStrategy?>.Success(null);
         }
 
@@ -76,11 +72,13 @@ internal static class TypeMappingStrategyResolver
         {
             nestedContext = nestedContext.WithAncestor(context.RootModelType);
         }
-        var nestedResult = NestedObjectTypeAnalyzer.Analyze(
-            analysis.UnderlyingType,
-            analysis.PropertyName,
-            nestedContext
-        );
+
+        var nestedResult =
+            NestedObjectTypeAnalyzer.Analyze(
+                analysis.UnderlyingType,
+                analysis.PropertyName,
+                nestedContext
+            );
 
         if (!nestedResult.IsSuccess)
         {
@@ -93,85 +91,92 @@ internal static class TypeMappingStrategyResolver
         }
 
         // Resolve the base type mapping strategy (existing logic unchanged)
-        var strategyResult = analysis.UnderlyingType switch
-        {
-            { SpecialType: SpecialType.System_String } => CreateStrategy(
-                "String",
-                analysis.Nullability
-            ),
-            { SpecialType: SpecialType.System_Boolean } => CreateStrategy(
-                "Bool",
-                analysis.Nullability
-            ),
-            { SpecialType: SpecialType.System_Int32 } => CreateStrategy(
-                "Int",
-                analysis.Nullability
-            ),
-            { SpecialType: SpecialType.System_Int64 } => CreateStrategy(
-                "Long",
-                analysis.Nullability
-            ),
-            { SpecialType: SpecialType.System_Single } => CreateStrategy(
-                "Float",
-                analysis.Nullability
-            ),
-            { SpecialType: SpecialType.System_Double } => CreateStrategy(
-                "Double",
-                analysis.Nullability
-            ),
-            { SpecialType: SpecialType.System_Decimal } => CreateStrategy(
-                "Decimal",
-                analysis.Nullability
-            ),
-            { SpecialType: SpecialType.System_DateTime } => CreateStrategy(
-                "DateTime",
-                analysis.Nullability,
-                fromArg: $"\"{analysis.FieldOptions?.Format ?? context.MapperOptions.DateTimeFormat}\"",
-                toArg: $"\"{analysis.FieldOptions?.Format ?? context.MapperOptions.DateTimeFormat}\""
-            ),
-            INamedTypeSymbol t
-                when t.IsAssignableTo(WellKnownType.System_DateTimeOffset, context) =>
-                CreateStrategy(
-                    "DateTimeOffset",
-                    analysis.Nullability,
-                    fromArg: $"\"{analysis.FieldOptions?.Format ?? context.MapperOptions.DateTimeFormat}\"",
-                    toArg: $"\"{analysis.FieldOptions?.Format ?? context.MapperOptions.DateTimeFormat}\""
+        var strategyResult =
+            analysis.UnderlyingType switch
+            {
+                { SpecialType: SpecialType.System_String } => CreateStrategy(
+                    "String",
+                    analysis.Nullability
                 ),
-            INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_Guid, context) =>
-                CreateStrategy(
-                    "Guid",
-                    analysis.Nullability,
-                    fromArg: $"\"{analysis.FieldOptions?.Format ?? context.MapperOptions.GuidFormat}\"",
-                    toArg: $"\"{analysis.FieldOptions?.Format ?? context.MapperOptions.GuidFormat}\""
+                { SpecialType: SpecialType.System_Boolean } => CreateStrategy(
+                    "Bool",
+                    analysis.Nullability
                 ),
-            INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_TimeSpan, context) =>
-                CreateStrategy(
-                    "TimeSpan",
-                    analysis.Nullability,
-                    fromArg: $"\"{analysis.FieldOptions?.Format ?? context.MapperOptions.TimeSpanFormat}\"",
-                    toArg: $"\"{analysis.FieldOptions?.Format ?? context.MapperOptions.TimeSpanFormat}\""
+                { SpecialType: SpecialType.System_Int32 } => CreateStrategy(
+                    "Int",
+                    analysis.Nullability
                 ),
-            INamedTypeSymbol { TypeKind: TypeKind.Enum } enumType => CreateEnumStrategy(
-                enumType,
-                analysis,
-                context
-            ),
-            _ => DiagnosticResult<TypeMappingStrategy>.Failure(
-                DiagnosticDescriptors.CannotConvertFromAttributeValue,
-                analysis.PropertyType.Locations.FirstOrDefault()?.CreateLocationInfo(),
-                analysis.PropertyName,
-                analysis.PropertyType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
-            ),
-        };
+                { SpecialType: SpecialType.System_Int64 } => CreateStrategy(
+                    "Long",
+                    analysis.Nullability
+                ),
+                { SpecialType: SpecialType.System_Single } => CreateStrategy(
+                    "Float",
+                    analysis.Nullability
+                ),
+                { SpecialType: SpecialType.System_Double } => CreateStrategy(
+                    "Double",
+                    analysis.Nullability
+                ),
+                { SpecialType: SpecialType.System_Decimal } => CreateStrategy(
+                    "Decimal",
+                    analysis.Nullability
+                ),
+                { SpecialType: SpecialType.System_DateTime } => CreateStrategy(
+                    "DateTime",
+                    analysis.Nullability,
+                    fromArg:
+                    $"\"{analysis.FieldOptions?.Format ?? context.MapperOptions.DateTimeFormat}\"",
+                    toArg:
+                    $"\"{analysis.FieldOptions?.Format ?? context.MapperOptions.DateTimeFormat}\""
+                ),
+                INamedTypeSymbol t when
+                    t.IsAssignableTo(WellKnownType.System_DateTimeOffset, context) =>
+                    CreateStrategy(
+                        "DateTimeOffset",
+                        analysis.Nullability,
+                        fromArg:
+                        $"\"{analysis.FieldOptions?.Format ?? context.MapperOptions.DateTimeFormat}\"",
+                        toArg:
+                        $"\"{analysis.FieldOptions?.Format ?? context.MapperOptions.DateTimeFormat}\""
+                    ),
+                INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_Guid, context) =>
+                    CreateStrategy(
+                        "Guid",
+                        analysis.Nullability,
+                        fromArg:
+                        $"\"{analysis.FieldOptions?.Format ?? context.MapperOptions.GuidFormat}\"",
+                        toArg:
+                        $"\"{analysis.FieldOptions?.Format ?? context.MapperOptions.GuidFormat}\""
+                    ),
+                INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_TimeSpan, context) =>
+                    CreateStrategy(
+                        "TimeSpan",
+                        analysis.Nullability,
+                        fromArg:
+                        $"\"{analysis.FieldOptions?.Format ?? context.MapperOptions.TimeSpanFormat}\"",
+                        toArg:
+                        $"\"{analysis.FieldOptions?.Format ?? context.MapperOptions.TimeSpanFormat}\""
+                    ),
+                INamedTypeSymbol { TypeKind: TypeKind.Enum } enumType => CreateEnumStrategy(
+                    enumType,
+                    analysis,
+                    context
+                ),
+                _ => DiagnosticResult<TypeMappingStrategy>.Failure(
+                    DiagnosticDescriptors.CannotConvertFromAttributeValue,
+                    analysis.PropertyType.Locations.FirstOrDefault()?.CreateLocationInfo(),
+                    analysis.PropertyName,
+                    analysis.PropertyType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
+                ),
+            };
 
         // If type resolution succeeded and Kind override exists, augment the strategy
-        return strategyResult.Bind<TypeMappingStrategy?>(strategy =>
-            analysis.FieldOptions?.Kind is { } kind
-                ? strategy with
-                {
-                    KindOverride = kind,
-                }
-                : strategy
+        return strategyResult.Bind<TypeMappingStrategy?>(
+            strategy =>
+                analysis.FieldOptions?.Kind is { } kind
+                    ? strategy with { KindOverride = kind }
+                    : strategy
         );
     }
 
@@ -182,11 +187,8 @@ internal static class TypeMappingStrategyResolver
     /// <param name="fromArg">Optional argument for FromItem method (e.g., format string).</param>
     /// <param name="toArg">Optional argument for ToItem method (e.g., format string).</param>
     private static TypeMappingStrategy CreateStrategy(
-        string typeName,
-        PropertyNullabilityInfo nullability,
-        string genericArg = "",
-        string? fromArg = null,
-        string? toArg = null
+        string typeName, PropertyNullabilityInfo nullability, string genericArg = "",
+        string? fromArg = null, string? toArg = null
     )
     {
         var nullableModifier = nullability.IsNullableType ? "Nullable" : string.Empty;
@@ -202,9 +204,7 @@ internal static class TypeMappingStrategyResolver
     ///     values and format strings.
     /// </summary>
     private static DiagnosticResult<TypeMappingStrategy> CreateEnumStrategy(
-        INamedTypeSymbol enumType,
-        PropertyAnalysis analysis,
-        GeneratorContext context
+        INamedTypeSymbol enumType, PropertyAnalysis analysis, GeneratorContext context
     )
     {
         var enumName = enumType.QualifiedName;
@@ -217,9 +217,10 @@ internal static class TypeMappingStrategyResolver
 
         // Non-nullable enums need a default value in FromItem
         // Nullable enums don't need a default value (they can be null)
-        string[] fromArgs = analysis.Nullability.IsNullableType
-            ? [enumFormat]
-            : [$"{enumName}.{enumType.MemberNames.First()}", enumFormat];
+        string[] fromArgs =
+            analysis.Nullability.IsNullableType
+                ? [enumFormat]
+                : [$"{enumName}.{enumType.MemberNames.First()}", enumFormat];
 
         string[] toArgs = [enumFormat];
 
@@ -230,16 +231,23 @@ internal static class TypeMappingStrategyResolver
     ///     Creates a type mapping strategy for collection types (lists, maps, sets).
     /// </summary>
     private static DiagnosticResult<TypeMappingStrategy?> CreateCollectionStrategy(
-        CollectionInfo collectionInfo,
-        PropertyAnalysis analysis,
-        GeneratorContext context
+        CollectionInfo collectionInfo, PropertyAnalysis analysis, GeneratorContext context
     )
     {
-        // Validate element type - can be primitive or nested object
-        var elementValidation = CollectionTypeAnalyzer.ValidateElementType(
-            collectionInfo.ElementType,
-            context
-        );
+        // Validate element type - can be primitive or nested object.
+        // Build a context with the collection property's path prefix so that
+        // dot-notation overrides like "Contacts.VerifiedAt" are found when the
+        // element type's properties are resolved.
+        var elementNestedContext =
+            NestedAnalysisContext.Create(context, context.MapperRegistry)
+                .WithPath(analysis.PropertyName);
+        if (context.RootModelType is not null)
+            elementNestedContext = elementNestedContext.WithAncestor(context.RootModelType);
+        var elementValidation =
+            CollectionTypeAnalyzer.ValidateElementType(
+                collectionInfo.ElementType,
+                elementNestedContext
+            );
 
         if (elementValidation.Error is not null)
             return DiagnosticResult<TypeMappingStrategy?>.Failure(elementValidation.Error);
@@ -257,10 +265,8 @@ internal static class TypeMappingStrategyResolver
         var elementNestedMapping = elementValidation.NestedMapping;
 
         // For maps, validate key type is string
-        if (
-            collectionInfo.Category == CollectionCategory.Map
-            && collectionInfo.KeyType?.SpecialType != SpecialType.System_String
-        )
+        if (collectionInfo.Category == CollectionCategory.Map &&
+            collectionInfo.KeyType?.SpecialType != SpecialType.System_String)
         {
             return DiagnosticResult<TypeMappingStrategy?>.Failure(
                 DiagnosticDescriptors.DictionaryKeyMustBeString,
@@ -284,14 +290,15 @@ internal static class TypeMappingStrategyResolver
         // Validate Kind override compatibility if present
         if (analysis.FieldOptions?.Kind is { } kindOverride)
         {
-            var isCompatible = (collectionInfo.Category, kindOverride) switch
-            {
-                (CollectionCategory.List, DynamoKind.L) => true,
-                (CollectionCategory.Map, DynamoKind.M) => true,
-                (CollectionCategory.Set, DynamoKind.SS or DynamoKind.NS or DynamoKind.BS) =>
-                    kindOverride == collectionInfo.TargetKind,
-                _ => false,
-            };
+            var isCompatible =
+                (collectionInfo.Category, kindOverride) switch
+                {
+                    (CollectionCategory.List, DynamoKind.L) => true,
+                    (CollectionCategory.Map, DynamoKind.M) => true,
+                    (CollectionCategory.Set, DynamoKind.SS or DynamoKind.NS or DynamoKind.BS) =>
+                        kindOverride == collectionInfo.TargetKind,
+                    _ => false,
+                };
 
             if (!isCompatible)
             {
@@ -308,34 +315,31 @@ internal static class TypeMappingStrategyResolver
         // If element type is a nested object, use special handling
         if (elementNestedMapping is not null)
         {
-            return CreateNestedCollectionStrategy(
-                collectionInfo,
-                elementNestedMapping,
-                analysis
-            );
+            return CreateNestedCollectionStrategy(collectionInfo, elementNestedMapping, analysis);
         }
 
         // Determine TypeName and GenericArgument for method name resolution
-        var (typeName, genericArg) = collectionInfo.Category switch
-        {
-            CollectionCategory.List => (
-                "List",
-                $"<{collectionInfo.ElementType.ToDisplayString()}>"
-            ),
-            CollectionCategory.Map => ("Map", $"<{collectionInfo.ElementType.ToDisplayString()}>"),
-            CollectionCategory.Set => collectionInfo.TargetKind switch
+        var (typeName, genericArg) =
+            collectionInfo.Category switch
             {
-                DynamoKind.SS => ("StringSet", ""),
-                DynamoKind.NS => ("NumberSet", $"<{collectionInfo.ElementType.ToDisplayString()}>"),
-                DynamoKind.BS => ("BinarySet", ""),
+                CollectionCategory.List => ("List",
+                    $"<{collectionInfo.ElementType.ToDisplayString()}>"),
+                CollectionCategory.Map => ("Map",
+                    $"<{collectionInfo.ElementType.ToDisplayString()}>"),
+                CollectionCategory.Set => collectionInfo.TargetKind switch
+                {
+                    DynamoKind.SS => ("StringSet", ""),
+                    DynamoKind.NS => ("NumberSet",
+                        $"<{collectionInfo.ElementType.ToDisplayString()}>"),
+                    DynamoKind.BS => ("BinarySet", ""),
+                    _ => throw new InvalidOperationException(
+                        $"Unexpected set kind: {collectionInfo.TargetKind}"
+                    ),
+                },
                 _ => throw new InvalidOperationException(
-                    $"Unexpected set kind: {collectionInfo.TargetKind}"
+                    $"Unexpected category: {collectionInfo.Category}"
                 ),
-            },
-            _ => throw new InvalidOperationException(
-                $"Unexpected category: {collectionInfo.Category}"
-            ),
-        };
+            };
 
         // Build strategy - collections are nullable at collection level, not element level
         var strategy = CreateStrategy(typeName, analysis.Nullability, genericArg);
@@ -351,31 +355,34 @@ internal static class TypeMappingStrategyResolver
     ///     Creates a type mapping strategy for collections of nested objects.
     /// </summary>
     private static DiagnosticResult<TypeMappingStrategy?> CreateNestedCollectionStrategy(
-        CollectionInfo collectionInfo,
-        NestedMappingInfo elementNestedMapping,
+        CollectionInfo collectionInfo, NestedMappingInfo elementNestedMapping,
         PropertyAnalysis analysis
     )
     {
         var nullableModifier = analysis.Nullability.IsNullableType ? "Nullable" : "";
 
         // Use special type names for nested collections
-        var typeName = collectionInfo.Category switch
-        {
-            CollectionCategory.List => "NestedList",
-            CollectionCategory.Map => "NestedMap",
-            _ => throw new InvalidOperationException($"Unexpected category for nested collection: {collectionInfo.Category}")
-        };
+        var typeName =
+            collectionInfo.Category switch
+            {
+                CollectionCategory.List => "NestedList",
+                CollectionCategory.Map => "NestedMap",
+                _ => throw new InvalidOperationException(
+                    $"Unexpected category for nested collection: {collectionInfo.Category}"
+                ),
+            };
 
-        var strategy = new TypeMappingStrategy(
-            TypeName: typeName,
-            GenericArgument: $"<{collectionInfo.ElementType.ToDisplayString()}>",
-            NullableModifier: nullableModifier,
-            FromTypeSpecificArgs: [],
-            ToTypeSpecificArgs: [],
-            KindOverride: collectionInfo.TargetKind,
-            NestedMapping: elementNestedMapping,
-            CollectionInfo: collectionInfo with { ElementNestedMapping = elementNestedMapping }
-        );
+        var strategy =
+            new TypeMappingStrategy(
+                typeName,
+                $"<{collectionInfo.ElementType.ToDisplayString()}>",
+                nullableModifier,
+                [],
+                [],
+                collectionInfo.TargetKind,
+                elementNestedMapping,
+                collectionInfo with { ElementNestedMapping = elementNestedMapping }
+            );
 
         return DiagnosticResult<TypeMappingStrategy?>.Success(strategy);
     }
@@ -384,23 +391,23 @@ internal static class TypeMappingStrategyResolver
     ///     Creates a type mapping strategy for nested object types.
     /// </summary>
     private static DiagnosticResult<TypeMappingStrategy?> CreateNestedObjectStrategy(
-        NestedMappingInfo nestedMapping,
-        PropertyAnalysis analysis
+        NestedMappingInfo nestedMapping, PropertyAnalysis analysis
     )
     {
         var nullableModifier = analysis.Nullability.IsNullableType ? "Nullable" : "";
 
         // NestedObject is a special type name that signals code generation
         // to use nested object handling rather than scalar Get/Set methods
-        var strategy = new TypeMappingStrategy(
-            TypeName: "NestedObject",
-            GenericArgument: "",
-            NullableModifier: nullableModifier,
-            FromTypeSpecificArgs: [],
-            ToTypeSpecificArgs: [],
-            KindOverride: DynamoKind.M, // Nested objects are always DynamoDB maps
-            NestedMapping: nestedMapping
-        );
+        var strategy =
+            new TypeMappingStrategy(
+                "NestedObject",
+                "",
+                nullableModifier,
+                [],
+                [],
+                DynamoKind.M, // Nested objects are always DynamoDB maps
+                nestedMapping
+            );
 
         return DiagnosticResult<TypeMappingStrategy?>.Success(strategy);
     }

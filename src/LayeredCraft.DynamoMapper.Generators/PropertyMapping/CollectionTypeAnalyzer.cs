@@ -2,7 +2,8 @@ using LayeredCraft.DynamoMapper.Generator.Diagnostics;
 using LayeredCraft.DynamoMapper.Generator.PropertyMapping.Models;
 using LayeredCraft.DynamoMapper.Runtime;
 using Microsoft.CodeAnalysis;
-using WellKnownType = LayeredCraft.DynamoMapper.Generator.WellKnownTypes.WellKnownTypeData.WellKnownType;
+using WellKnownType =
+    LayeredCraft.DynamoMapper.Generator.WellKnownTypes.WellKnownTypeData.WellKnownType;
 
 namespace LayeredCraft.DynamoMapper.Generator.PropertyMapping;
 
@@ -16,6 +17,7 @@ internal static class CollectionTypeAnalyzer
         NestedMappingInfo? NestedMapping,
         DiagnosticInfo? Error
     );
+
     /// <summary>
     /// Analyzes a type to determine if it's a collection type and returns metadata about it.
     /// </summary>
@@ -44,8 +46,10 @@ internal static class CollectionTypeAnalyzer
             return null;
 
         // Check for Dictionary<TKey, TValue> or IDictionary<TKey, TValue>
-        var dictionaryType = context.WellKnownTypes.Get(WellKnownType.System_Collections_Generic_Dictionary_2);
-        var iDictionaryType = context.WellKnownTypes.Get(WellKnownType.System_Collections_Generic_IDictionary_2);
+        var dictionaryType =
+            context.WellKnownTypes.Get(WellKnownType.System_Collections_Generic_Dictionary_2);
+        var iDictionaryType =
+            context.WellKnownTypes.Get(WellKnownType.System_Collections_Generic_IDictionary_2);
 
         if (IsOrImplements(namedType, dictionaryType) || IsOrImplements(namedType, iDictionaryType))
         {
@@ -66,7 +70,8 @@ internal static class CollectionTypeAnalyzer
         }
 
         // Check for HashSet<T> or ISet<T>
-        var hashSetType = context.WellKnownTypes.Get(WellKnownType.System_Collections_Generic_HashSet_1);
+        var hashSetType =
+            context.WellKnownTypes.Get(WellKnownType.System_Collections_Generic_HashSet_1);
         var iSetType = context.WellKnownTypes.Get(WellKnownType.System_Collections_Generic_ISet_1);
 
         if (IsOrImplements(namedType, hashSetType) || IsOrImplements(namedType, iSetType))
@@ -92,14 +97,16 @@ internal static class CollectionTypeAnalyzer
 
         // Check for List<T>, IList<T>, ICollection<T>, or IEnumerable<T>
         var listType = context.WellKnownTypes.Get(WellKnownType.System_Collections_Generic_List_1);
-        var iListType = context.WellKnownTypes.Get(WellKnownType.System_Collections_Generic_IList_1);
-        var iCollectionType = context.WellKnownTypes.Get(WellKnownType.System_Collections_Generic_ICollection_1);
-        var iEnumerableType = context.WellKnownTypes.Get(WellKnownType.System_Collections_Generic_IEnumerable_1);
+        var iListType =
+            context.WellKnownTypes.Get(WellKnownType.System_Collections_Generic_IList_1);
+        var iCollectionType =
+            context.WellKnownTypes.Get(WellKnownType.System_Collections_Generic_ICollection_1);
+        var iEnumerableType =
+            context.WellKnownTypes.Get(WellKnownType.System_Collections_Generic_IEnumerable_1);
 
-        if (IsOrImplements(namedType, listType)
-            || IsOrImplements(namedType, iListType)
-            || IsOrImplements(namedType, iCollectionType)
-            || IsOrImplements(namedType, iEnumerableType))
+        if (IsOrImplements(namedType, listType) || IsOrImplements(namedType, iListType) ||
+            IsOrImplements(namedType, iCollectionType) ||
+            IsOrImplements(namedType, iEnumerableType))
         {
             // Extract element type: List<T>
             if (namedType.TypeArguments.Length == 1)
@@ -141,8 +148,7 @@ internal static class CollectionTypeAnalyzer
     /// <param name="context">The generator context.</param>
     /// <returns>A tuple of (isValid, nestedMappingInfo). nestedMappingInfo is null for primitives.</returns>
     internal static ElementTypeValidationResult ValidateElementType(
-        ITypeSymbol elementType,
-        GeneratorContext context
+        ITypeSymbol elementType, GeneratorContext context
     )
     {
         var nestedContext = NestedAnalysisContext.Create(context, context.MapperRegistry);
@@ -161,16 +167,17 @@ internal static class CollectionTypeAnalyzer
     /// <param name="nestedContext">The nested analysis context to preserve ancestor tracking.</param>
     /// <returns>A tuple of (isValid, nestedMappingInfo). nestedMappingInfo is null for primitives.</returns>
     internal static ElementTypeValidationResult ValidateElementType(
-        ITypeSymbol elementType,
-        NestedAnalysisContext nestedContext
+        ITypeSymbol elementType, NestedAnalysisContext nestedContext
     )
     {
         var context = nestedContext.Context;
 
         // Unwrap Nullable<T> - nullable elements are allowed
         var underlyingType = elementType;
-        if (elementType is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } nullableType
-            && nullableType.TypeArguments.Length == 1)
+        if (elementType is INamedTypeSymbol
+            {
+                OriginalDefinition.SpecialType: SpecialType.System_Nullable_T,
+            } nullableType && nullableType.TypeArguments.Length == 1)
         {
             underlyingType = nullableType.TypeArguments[0];
         }
@@ -200,7 +207,8 @@ internal static class CollectionTypeAnalyzer
                 return new ElementTypeValidationResult(true, null, null);
 
             // DateTimeOffset
-            var dateTimeOffsetType = context.WellKnownTypes.Get(WellKnownType.System_DateTimeOffset);
+            var dateTimeOffsetType =
+                context.WellKnownTypes.Get(WellKnownType.System_DateTimeOffset);
             if (SymbolEqualityComparer.Default.Equals(namedType, dateTimeOffsetType))
                 return new ElementTypeValidationResult(true, null, null);
 
@@ -215,8 +223,8 @@ internal static class CollectionTypeAnalyzer
         }
 
         // Check for byte[] (valid for BS - Binary Set)
-        if (underlyingType is IArrayTypeSymbol arrayType
-            && arrayType.ElementType.SpecialType == SpecialType.System_Byte)
+        if (underlyingType is IArrayTypeSymbol arrayType &&
+            arrayType.ElementType.SpecialType == SpecialType.System_Byte)
         {
             return new ElementTypeValidationResult(true, null, null);
         }
@@ -225,12 +233,10 @@ internal static class CollectionTypeAnalyzer
         if (Analyze(underlyingType, context) is not null)
             return new ElementTypeValidationResult(false, null, null);
 
-        // Try to analyze as a nested object
-        var nestedResult = NestedObjectTypeAnalyzer.Analyze(
-            underlyingType,
-            "element", // property name doesn't matter for element type analysis
-            nestedContext
-        );
+        // Try to analyze as a nested object. Use AnalyzeElementType instead of Analyze so the
+        // caller-supplied path prefix is not further modified by a dummy property name.
+        var nestedResult =
+            NestedObjectTypeAnalyzer.AnalyzeElementType(underlyingType, nestedContext);
 
         if (!nestedResult.IsSuccess)
             return new ElementTypeValidationResult(false, null, nestedResult.Error);
@@ -254,8 +260,10 @@ internal static class CollectionTypeAnalyzer
     {
         // Unwrap Nullable<T> if present
         var underlyingType = elementType;
-        if (elementType is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } nullableType
-            && nullableType.TypeArguments.Length == 1)
+        if (elementType is INamedTypeSymbol
+            {
+                OriginalDefinition.SpecialType: SpecialType.System_Nullable_T,
+            } nullableType && nullableType.TypeArguments.Length == 1)
         {
             underlyingType = nullableType.TypeArguments[0];
         }
@@ -278,8 +286,8 @@ internal static class CollectionTypeAnalyzer
         }
 
         // byte[] → BS
-        if (underlyingType is IArrayTypeSymbol arrayType
-            && arrayType.ElementType.SpecialType == SpecialType.System_Byte)
+        if (underlyingType is IArrayTypeSymbol arrayType &&
+            arrayType.ElementType.SpecialType == SpecialType.System_Byte)
         {
             return DynamoKind.BS;
         }
@@ -291,7 +299,9 @@ internal static class CollectionTypeAnalyzer
     /// <summary>
     /// Checks if a type matches or implements a generic type definition.
     /// </summary>
-    private static bool IsOrImplements(INamedTypeSymbol type, INamedTypeSymbol? genericTypeDefinition)
+    private static bool IsOrImplements(
+        INamedTypeSymbol type, INamedTypeSymbol? genericTypeDefinition
+    )
     {
         if (genericTypeDefinition == null)
             return false;
@@ -301,7 +311,8 @@ internal static class CollectionTypeAnalyzer
             return true;
 
         // Check if any interface matches
-        return type.AllInterfaces.Any(i =>
-            SymbolEqualityComparer.Default.Equals(i.OriginalDefinition, genericTypeDefinition));
+        return type.AllInterfaces.Any(
+            i => SymbolEqualityComparer.Default.Equals(i.OriginalDefinition, genericTypeDefinition)
+        );
     }
 }

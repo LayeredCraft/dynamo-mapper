@@ -9,7 +9,9 @@
 - `DM0005` incompatible `DynamoKind` -> remove the override or use a compatible kind
 - `DM0006` nested cycle -> break the cycle, ignore a back-reference, or custom-convert one side
 - `DM0007` unsupported nested member -> fix or ignore that nested member
-- `DM0008` invalid dot path -> fix the path, or include base properties if inheritance is involved
+- `DM0008` invalid dot path -> fix the path; paths can traverse nested objects and collection
+  element types (`"Items.ProductId"` targets `ProductId` on the element of `Items`); include base
+  properties if inheritance is involved
 - `DM0009` helper rendering limit -> likely generator issue
 - `DM0101` no mapper methods found -> add a valid `To*` or `From*` method
 - `DM0102` mismatched model types -> make both directions use the same model type

@@ -76,6 +76,43 @@ public class NestedObjectVerifyTests
     );
 
     [Fact]
+    public async Task NestedObject_NullableInline_OmitNullValues() =>
+        await GeneratorTestHelpers.Verify(
+            new VerifyTestOptions
+            {
+                SourceCode =
+                    """
+                    using System.Collections.Generic;
+                    using Amazon.DynamoDBv2.Model;
+                    using LayeredCraft.DynamoMapper.Runtime;
+
+                    namespace MyNamespace;
+
+                    [DynamoMapper(OmitNullValues = true)]
+                    public static partial class OrderMapper
+                    {
+                        public static partial Dictionary<string, AttributeValue> ToItem(Order source);
+
+                        public static partial Order FromItem(Dictionary<string, AttributeValue> item);
+                    }
+
+                    public class Order
+                    {
+                        public string Id { get; set; }
+                        public Address? BillingAddress { get; set; }
+                    }
+
+                    public class Address
+                    {
+                        public string Line1 { get; set; }
+                        public string City { get; set; }
+                    }
+                    """,
+            },
+            TestContext.Current.CancellationToken
+        );
+
+    [Fact]
     public async Task NestedObject_NullableMapperBased() => await GeneratorTestHelpers.Verify(
         new VerifyTestOptions
         {
@@ -688,6 +725,94 @@ public class NestedObjectVerifyTests
                     {
                         public string ProductId { get; set; }
                         public int Quantity { get; set; }
+                    }
+                    """,
+            },
+            TestContext.Current.CancellationToken
+        );
+
+    [Fact]
+    public async Task NestedCollection_NullableListOfNestedObjects_MapperBased_OmitNullValues() =>
+        await GeneratorTestHelpers.Verify(
+            new VerifyTestOptions
+            {
+                SourceCode =
+                    """
+                    using System.Collections.Generic;
+                    using Amazon.DynamoDBv2.Model;
+                    using LayeredCraft.DynamoMapper.Runtime;
+
+                    namespace MyNamespace;
+
+                    [DynamoMapper]
+                    public static partial class LineItemMapper
+                    {
+                        public static partial Dictionary<string, AttributeValue> ToItem(LineItem source);
+
+                        public static partial LineItem FromItem(Dictionary<string, AttributeValue> item);
+                    }
+
+                    [DynamoMapper(OmitNullValues = true)]
+                    public static partial class OrderMapper
+                    {
+                        public static partial Dictionary<string, AttributeValue> ToItem(Order source);
+
+                        public static partial Order FromItem(Dictionary<string, AttributeValue> item);
+                    }
+
+                    public class Order
+                    {
+                        public string Id { get; set; }
+                        public List<LineItem>? Items { get; set; }
+                    }
+
+                    public class LineItem
+                    {
+                        public string ProductId { get; set; }
+                        public int Quantity { get; set; }
+                    }
+                    """,
+            },
+            TestContext.Current.CancellationToken
+        );
+
+    [Fact]
+    public async Task NestedObject_DotNotationOmitIfNull_OmitsNestedProperty() =>
+        await GeneratorTestHelpers.Verify(
+            new VerifyTestOptions
+            {
+                SourceCode =
+                    """
+                    using System.Collections.Generic;
+                    using Amazon.DynamoDBv2.Model;
+                    using LayeredCraft.DynamoMapper.Runtime;
+
+                    namespace MyNamespace;
+
+                    [DynamoMapper]
+                    [DynamoField("Level2Data.Level3Data", OmitIfNull = true)]
+                    public static partial class Level1Mapper
+                    {
+                        public static partial Dictionary<string, AttributeValue> ToItem(Level1 source);
+
+                        public static partial Level1 FromItem(Dictionary<string, AttributeValue> item);
+                    }
+
+                    public class Level1
+                    {
+                        public string Id { get; set; } = string.Empty;
+                        public Level2? Level2Data { get; set; }
+                    }
+
+                    public class Level2
+                    {
+                        public string Id { get; set; } = string.Empty;
+                        public Level3? Level3Data { get; set; }
+                    }
+
+                    public class Level3
+                    {
+                        public string Id { get; set; } = string.Empty;
                     }
                     """,
             },

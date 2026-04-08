@@ -12,8 +12,8 @@ DynamoMapper is an incremental source generator that produces high-performance, 
 DynamoMapper is built on three fundamental principles:
 
 1. **Domain Stays Clean** - Your domain models remain free of persistence attributes
-2. **Compile-Time Safety** - All mapping code is generated and validated at compile time
-3. **DynamoDB-Focused** - Single-purpose library for DynamoDB attribute mapping
+1. **Compile-Time Safety** - All mapping code is generated and validated at compile time
+1. **DynamoDB-Focused** - Single-purpose library for DynamoDB attribute mapping
 
 ## Mapping Scope
 
@@ -50,24 +50,28 @@ DynamoMapper uses .NET's `IIncrementalGenerator` API to analyze your code at com
 ### The Generation Pipeline
 
 1. **Discovery Phase**
-   - Locate classes marked with `[DynamoMapper]`
-   - Find partial mapping methods (`ToItem`, `FromItem`)
-   - Collect configuration attributes
 
-2. **Analysis Phase**
-   - Resolve target entity types
-   - Analyze properties (public, readable, writable)
-   - Apply naming conventions
-   - Validate converters and hooks
+- Locate classes marked with `[DynamoMapper]`
+- Find partial mapping methods (`ToItem`, `FromItem`)
+- Collect configuration attributes
 
-3. **Code Generation Phase**
-   - Generate `ToItem` implementation
-   - Generate `FromItem` implementation
-   - Emit diagnostics for configuration errors
+1. **Analysis Phase**
 
-4. **Compilation Phase**
-   - Generated code is compiled with your project
-   - No runtime dependencies beyond AWS SDK types
+- Resolve target entity types
+- Analyze properties (public, readable, writable)
+- Apply naming conventions
+- Validate converters and hooks
+
+1. **Code Generation Phase**
+
+- Generate `ToItem` implementation
+- Generate `FromItem` implementation
+- Emit diagnostics for configuration errors
+
+1. **Compilation Phase**
+
+- Generated code is compiled with your project
+- No runtime dependencies beyond AWS SDK types
 
 ## Mapper Anatomy
 
@@ -189,9 +193,12 @@ DynamoMapper uses a layered configuration model:
 ```csharp
 [DynamoMapper(
     Convention = DynamoNamingConvention.CamelCase,
-    OmitNullStrings = true,
+    OmitNullValues = true,
     DateTimeFormat = "O")]
 ```
+
+`OmitNullStrings` is still supported as a deprecated legacy option for helper-backed null omission,
+but `OmitNullValues` is the preferred mapper-level setting.
 
 ### 2. Property-Level Overrides
 
@@ -241,16 +248,16 @@ static partial void AfterToItem(Product source, Dictionary<string, AttributeValu
 
 DynamoMapper natively supports:
 
-| .NET Type | DynamoDB Type | Notes |
-|-----------|---------------|-------|
-| `string` | S (String) | |
-| `int`, `long`, `decimal`, `double` | N (Number) | Culture-invariant |
-| `bool` | BOOL | |
-| `Guid` | S | ToString/Parse |
-| `DateTime`, `DateTimeOffset`, `TimeSpan` | S | ISO-8601 / constant format |
-| `enum` | S | String name |
-| Nullable variants | S/N/BOOL | Null checks generated |
-| Collections | L/M/SS/NS/BS | Lists, maps, and sets of supported element types |
+| .NET Type                                | DynamoDB Type | Notes                                            |
+|------------------------------------------|---------------|--------------------------------------------------|
+| `string`                                 | S (String)    |                                                  |
+| `int`, `long`, `decimal`, `double`       | N (Number)    | Culture-invariant                                |
+| `bool`                                   | BOOL          |                                                  |
+| `Guid`                                   | S             | ToString/Parse                                   |
+| `DateTime`, `DateTimeOffset`, `TimeSpan` | S             | ISO-8601 / constant format                       |
+| `enum`                                   | S             | String name                                      |
+| Nullable variants                        | S/N/BOOL      | Null checks generated                            |
+| Collections                              | L/M/SS/NS/BS  | Lists, maps, and sets of supported element types |
 
 ### Custom Types
 
@@ -321,6 +328,7 @@ static partial void AfterFromItem(Dictionary<string, AttributeValue> item, ref P
 ```
 
 **Common use cases:**
+
 - PK/SK composition for single-table design
 - Record type discrimination
 - TTL attributes
@@ -332,9 +340,9 @@ static partial void AfterFromItem(Dictionary<string, AttributeValue> item, ref P
 DynamoMapper uses hooks instead of a general mapping pipeline because:
 
 1. **Focused scope** - Only two mapping directions, not arbitrary transformations
-2. **Zero overhead** - Unimplemented hooks compile away completely
-3. **Type safety** - Statically bound, no reflection
-4. **DynamoDB patterns** - Designed specifically for single-table design
+1. **Zero overhead** - Unimplemented hooks compile away completely
+1. **Type safety** - Statically bound, no reflection
+1. **DynamoDB patterns** - Designed specifically for single-table design
 
 ## Diagnostics
 
@@ -370,11 +378,11 @@ error DM0201: Static conversion method 'ToStatus' not found on mapper 'OrderMapp
 
 ### Benchmarks (Typical)
 
-| Operation | Time | Allocations |
-|-----------|------|-------------|
-| ToItem (5 properties) | ~50ns | 1 (dictionary) |
-| FromItem (5 properties) | ~100ns | 1 (entity) |
-| With hooks | +5-10ns | 0 additional |
+| Operation               | Time    | Allocations    |
+|-------------------------|---------|----------------|
+| ToItem (5 properties)   | ~50ns   | 1 (dictionary) |
+| FromItem (5 properties) | ~100ns  | 1 (entity)     |
+| With hooks              | +5-10ns | 0 additional   |
 
 ## Design Constraints
 
@@ -388,6 +396,7 @@ mapper.Configure(x => x.Property("Name").Ignore());
 ```
 
 **Why:** Compile-time configuration enables:
+
 - Zero reflection
 - Faster runtime performance
 - Compile-time validation
@@ -437,6 +446,7 @@ public static partial class ProductMapper
 ```
 
 **Key points:**
+
 - DSL is **optional** - attributes remain fully supported
 - DSL is **compile-time only** - no runtime evaluation
 - DSL and attributes can coexist - DSL takes precedence
@@ -444,9 +454,9 @@ public static partial class ProductMapper
 ## Best Practices
 
 1. **Use default conventions** - Override only when necessary
-2. **Keep domain clean** - No DynamoDB concerns in domain models
-3. **Use hooks for DynamoDB patterns** - PK/SK, TTL, record types
-4. **Use static methods for conversions** - Simple, co-located, explicit
+1. **Keep domain clean** - No DynamoDB concerns in domain models
+1. **Use hooks for DynamoDB patterns** - PK/SK, TTL, record types
+1. **Use static methods for conversions** - Simple, co-located, explicit
 
 ## See Also
 

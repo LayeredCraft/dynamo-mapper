@@ -13,6 +13,7 @@ internal class MapperOptions
     internal string EnumFormat { get; set; } = "G";
     internal string GuidFormat { get; set; } = "D";
     internal bool OmitEmptyStrings { get; set; } = false;
+    internal bool OmitNullValues { get; set; } = false;
     internal bool OmitNullStrings { get; set; } = true;
 
     internal string ToMethodParameterName { get; set; } = "source";

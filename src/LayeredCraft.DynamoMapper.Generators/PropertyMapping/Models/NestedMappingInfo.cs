@@ -41,6 +41,8 @@ internal sealed record NestedInlineInfo(
 /// <param name="PropertyName">The C# property name.</param>
 /// <param name="DynamoKey">The DynamoDB attribute name.</param>
 /// <param name="Strategy">The type mapping strategy for this property (can itself be nested).</param>
+/// <param name="OmitIfNull">Optional null omission override for this nested property.</param>
+/// <param name="OmitIfEmptyString">Optional empty-string omission override for this nested property.</param>
 /// <param name="Nullability">Nullability information from property analysis.</param>
 /// <param name="HasGetter">Whether the property has an accessible getter.</param>
 /// <param name="HasSetter">Whether the property has an accessible setter.</param>
@@ -52,6 +54,8 @@ internal sealed record NestedPropertySpec(
     string PropertyName,
     string DynamoKey,
     TypeMappingStrategy? Strategy,
+    bool? OmitIfNull,
+    bool? OmitIfEmptyString,
     PropertyNullabilityInfo Nullability,
     bool HasGetter,
     bool HasSetter,

@@ -296,13 +296,16 @@ internal static class PropertyMappingCodeRenderer
                 spec,
                 paramName,
                 isNullable,
-                mapperBased.Mapper
+                mapperBased.Mapper,
+                analysis.FieldOptions?.OmitIfNull,
+                context
             ),
             InlineNesting inline => RenderInlineToAssignment(
                 spec,
                 paramName,
                 isNullable,
                 inline.Info,
+                analysis.FieldOptions?.OmitIfNull,
                 context,
                 helperRegistry
             ),
@@ -317,15 +320,18 @@ internal static class PropertyMappingCodeRenderer
     ///     Output: .Set("key", source.Prop is null ? new AttributeValue { NULL = true } : new AttributeValue { M = MapperName.ToItem(source.Prop) })
     /// </summary>
     private static string RenderMapperBasedToAssignment(
-        PropertyMappingSpec spec, string paramName, bool isNullable, MapperReference mapper
+        PropertyMappingSpec spec, string paramName, bool isNullable, MapperReference mapper,
+        bool? omitIfNull, GeneratorContext context
     )
     {
         var propAccess = $"{paramName}.{spec.PropertyName}";
+        var omitNull = GetEffectiveNestedOmitNullSetting(omitIfNull, context);
 
         if (isNullable)
         {
-            return
-                $".Set(\"{spec.Key}\", {propAccess} is null ? new AttributeValue {{ NULL = true }} : new AttributeValue {{ M = {mapper.MapperFullyQualifiedName}.ToItem({propAccess}) }})";
+            return omitNull
+                ? $".SetIfNotNull(\"{spec.Key}\", {propAccess}, value => new AttributeValue {{ M = {mapper.MapperFullyQualifiedName}.ToItem(value) }})"
+                : $".Set(\"{spec.Key}\", {propAccess} is null ? new AttributeValue {{ NULL = true }} : new AttributeValue {{ M = {mapper.MapperFullyQualifiedName}.ToItem({propAccess}) }})";
         }
 
         return
@@ -338,10 +344,11 @@ internal static class PropertyMappingCodeRenderer
     /// </summary>
     private static string RenderInlineToAssignment(
         PropertyMappingSpec spec, string paramName, bool isNullable, NestedInlineInfo inlineInfo,
-        GeneratorContext context, HelperMethodRegistry helperRegistry
+        bool? omitIfNull, GeneratorContext context, HelperMethodRegistry helperRegistry
     )
     {
         var propAccess = $"{paramName}.{spec.PropertyName}";
+        var omitNull = GetEffectiveNestedOmitNullSetting(omitIfNull, context);
 
         // Register the helper method and get its name
         var helperMethodName =
@@ -352,8 +359,9 @@ internal static class PropertyMappingCodeRenderer
 
         if (isNullable)
         {
-            return
-                $".Set(\"{spec.Key}\", {propAccess} is null ? new AttributeValue {{ NULL = true }} : new AttributeValue {{ M = {helperMethodName}({propAccess}) }})";
+            return omitNull
+                ? $".SetIfNotNull(\"{spec.Key}\", {propAccess}, value => new AttributeValue {{ M = {helperMethodName}(value) }})"
+                : $".Set(\"{spec.Key}\", {propAccess} is null ? new AttributeValue {{ NULL = true }} : new AttributeValue {{ M = {helperMethodName}({propAccess}) }})";
         }
 
         return
@@ -395,6 +403,7 @@ internal static class PropertyMappingCodeRenderer
         if (prop.NestedMapping is not null)
         {
             var nestedSourcePrefix = $"{sourcePrefix}.{prop.PropertyName}";
+            var omitNull = GetEffectiveNestedOmitNullSetting(prop.OmitIfNull, context);
 
             string nestedCode;
             if (prop.NestedMapping is MapperBasedNesting mapperBased)
@@ -417,8 +426,9 @@ internal static class PropertyMappingCodeRenderer
                 throw new InvalidOperationException("Unknown nested mapping type");
             }
 
-            return
-                $".Set(\"{prop.DynamoKey}\", {nestedSourcePrefix} is null ? new AttributeValue {{ NULL = true }} : {nestedCode})";
+            return omitNull
+                ? $".SetIfNotNull(\"{prop.DynamoKey}\", {nestedSourcePrefix}, value => {nestedCode.Replace(nestedSourcePrefix, "value")})"
+                : $".Set(\"{prop.DynamoKey}\", {nestedSourcePrefix} is null ? new AttributeValue {{ NULL = true }} : {nestedCode})";
         }
 
         if (prop.Strategy is not null && prop.HasGetter)
@@ -432,8 +442,11 @@ internal static class PropertyMappingCodeRenderer
                     ? ", " + string.Join(", ", prop.Strategy.ToTypeSpecificArgs)
                     : "";
 
-            var omitEmpty = context.MapperOptions.OmitEmptyStrings.ToString().ToLowerInvariant();
-            var omitNull = context.MapperOptions.OmitNullStrings.ToString().ToLowerInvariant();
+            var omitEmpty =
+                (prop.OmitIfEmptyString ?? context.MapperOptions.OmitEmptyStrings).ToString()
+                .ToLowerInvariant();
+            var omitNull =
+                GetEffectiveOmitNullSetting(prop.OmitIfNull, context).ToString().ToLowerInvariant();
 
             return
                 $".{setMethod}{genericArg}(\"{prop.DynamoKey}\", {propValue}{typeArgs}, {omitEmpty}, {omitNull})";
@@ -861,6 +874,7 @@ internal static class PropertyMappingCodeRenderer
                 spec,
                 propAccess,
                 isNullable,
+                analysis.FieldOptions?.OmitIfNull,
                 elementMapping,
                 collectionInfo,
                 context,
@@ -870,6 +884,7 @@ internal static class PropertyMappingCodeRenderer
                 spec,
                 propAccess,
                 isNullable,
+                analysis.FieldOptions?.OmitIfNull,
                 elementMapping,
                 context,
                 helperRegistry
@@ -885,7 +900,7 @@ internal static class PropertyMappingCodeRenderer
     ///     Output: .Set("key", source.Prop?.Select(x => new AttributeValue { M = ... }).ToList())
     /// </summary>
     private static string RenderNestedListToAssignment(
-        PropertyMappingSpec spec, string propAccess, bool isNullable,
+        PropertyMappingSpec spec, string propAccess, bool isNullable, bool? omitIfNull,
         NestedMappingInfo elementMapping, CollectionInfo collectionInfo, GeneratorContext context,
         HelperMethodRegistry helperRegistry
     )
@@ -902,11 +917,13 @@ internal static class PropertyMappingCodeRenderer
 
         var selectExpr =
             $"{propAccess}{(isNullable ? "?" : "")}.Select(x => {elementConverter}).ToList()";
+        var omitNull = GetEffectiveNestedOmitNullSetting(omitIfNull, context);
 
         if (isNullable)
         {
-            return
-                $".Set(\"{spec.Key}\", {propAccess} is null ? new AttributeValue {{ NULL = true }} : new AttributeValue {{ L = {selectExpr} }})";
+            return omitNull
+                ? $".SetIfNotNull(\"{spec.Key}\", {propAccess}, value => new AttributeValue {{ L = value.Select(x => {elementConverter}).ToList() }})"
+                : $".Set(\"{spec.Key}\", {propAccess} is null ? new AttributeValue {{ NULL = true }} : new AttributeValue {{ L = {selectExpr} }})";
         }
 
         return $".Set(\"{spec.Key}\", new AttributeValue {{ L = {selectExpr} }})";
@@ -917,7 +934,7 @@ internal static class PropertyMappingCodeRenderer
     ///     Output: .Set("key", source.Prop?.ToDictionary(kvp => kvp.Key, kvp => new AttributeValue { M = ... }))
     /// </summary>
     private static string RenderNestedMapToAssignment(
-        PropertyMappingSpec spec, string propAccess, bool isNullable,
+        PropertyMappingSpec spec, string propAccess, bool isNullable, bool? omitIfNull,
         NestedMappingInfo elementMapping, GeneratorContext context,
         HelperMethodRegistry helperRegistry
     )
@@ -934,15 +951,25 @@ internal static class PropertyMappingCodeRenderer
 
         var toDictExpr =
             $"{propAccess}{(isNullable ? "?" : "")}.ToDictionary(kvp => kvp.Key, kvp => {valueConverter})";
+        var omitNull = GetEffectiveNestedOmitNullSetting(omitIfNull, context);
 
         if (isNullable)
         {
-            return
-                $".Set(\"{spec.Key}\", {propAccess} is null ? new AttributeValue {{ NULL = true }} : new AttributeValue {{ M = {toDictExpr} }})";
+            return omitNull
+                ? $".SetIfNotNull(\"{spec.Key}\", {propAccess}, value => new AttributeValue {{ M = value.ToDictionary(kvp => kvp.Key, kvp => {valueConverter}) }})"
+                : $".Set(\"{spec.Key}\", {propAccess} is null ? new AttributeValue {{ NULL = true }} : new AttributeValue {{ M = {toDictExpr} }})";
         }
 
         return $".Set(\"{spec.Key}\", new AttributeValue {{ M = {toDictExpr} }})";
     }
+
+    private static bool GetEffectiveOmitNullSetting(
+        bool? analysisFieldOverride, GeneratorContext context
+    ) => PropertyMappingSpecBuilder.GetEffectiveOmitNullSetting(analysisFieldOverride, context);
+
+    private static bool GetEffectiveNestedOmitNullSetting(
+        bool? fieldOverride, GeneratorContext context
+    ) => fieldOverride ?? context.MapperOptions.OmitNullValues;
 
     /// <summary>
     ///     Renders the FromItem code for a nested collection (init-style assignment).

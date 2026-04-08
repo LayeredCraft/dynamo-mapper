@@ -11,7 +11,7 @@ Marks a static partial class as a mapper and sets defaults.
     Convention = DynamoNamingConvention.CamelCase,
     DefaultRequiredness = Requiredness.InferFromNullability,
     IncludeBaseClassProperties = false,
-    OmitNullStrings = true,
+    OmitNullValues = true,
     OmitEmptyStrings = false,
     DateTimeFormat = "O",
     EnumFormat = "G")]
@@ -27,7 +27,9 @@ Properties:
 - `Convention` - key naming convention
 - `DefaultRequiredness` - default requiredness
 - `IncludeBaseClassProperties` - include properties declared on base classes (opt-in)
-- `OmitNullStrings` - omit null string attributes
+- `OmitNullValues` - omit null values, including nested object and nested collection properties
+- `OmitNullStrings` - deprecated legacy option kept for compatibility with helper-backed null
+  omission
 - `OmitEmptyStrings` - omit empty string attributes
 - `DateTimeFormat` - `DateTime`/`DateTimeOffset` format
 - `TimeSpanFormat` - `TimeSpan` format
@@ -40,6 +42,8 @@ Notes:
   nested inline objects.
 - If a derived type declares a property with the same name as an inherited property, the derived
   property wins.
+- Prefer `OmitNullValues` for mapper-level null omission. `OmitNullStrings` remains available only
+  as a legacy compatibility option.
 
 ## DynamoFieldAttribute
 
@@ -57,11 +61,12 @@ public static partial class OrderMapper
 ```
 
 Properties:
+
 - `MemberName` (ctor) - target member name
 - `AttributeName` - DynamoDB attribute name override
 - `Required` - requiredness override
 - `Kind` - DynamoDB `DynamoKind` override
-- `OmitIfNull` - omit when null
+- `OmitIfNull` - omit when null, including nested object and nested collection properties
 - `OmitIfEmptyString` - omit when empty string
 - `ToMethod` / `FromMethod` - static conversion methods on the mapper class
 
@@ -80,6 +85,7 @@ public static partial class OrderMapper
 ```
 
 Properties:
+
 - `MemberName` (ctor) - target member name
 - `Ignore` - `IgnoreMapping.All`, `IgnoreMapping.FromModel`, or `IgnoreMapping.ToModel`
 

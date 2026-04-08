@@ -597,6 +597,29 @@ public class AttributeValueExtensionsCollectionTests
         Assert.Equal(original, result);
     }
 
+    [Fact]
+    public void Map_RoundTrip_WithStreams()
+    {
+        // Arrange
+        var attributes = new Dictionary<string, AttributeValue>();
+        var original =
+            new Dictionary<string, Stream>
+            {
+                ["thumbnail"] = new MemoryStream(new byte[] { 1, 2, 3 }),
+                ["full"] = new MemoryStream(new byte[] { 4, 5, 6 }),
+            };
+
+        // Act
+        attributes.SetMap("payloads", original);
+        var result = attributes.GetMap<Stream>("payloads");
+
+        // Assert
+        Assert.Equal(original.Keys.OrderBy(key => key), result.Keys.OrderBy(key => key));
+        Assert.All(result.Values, value => Assert.IsType<MemoryStream>(value));
+        Assert.Equal(new byte[] { 1, 2, 3 }, ((MemoryStream)result["thumbnail"]).ToArray());
+        Assert.Equal(new byte[] { 4, 5, 6 }, ((MemoryStream)result["full"]).ToArray());
+    }
+
     // ==================== STRING SET TESTS ====================
 
     [Fact]

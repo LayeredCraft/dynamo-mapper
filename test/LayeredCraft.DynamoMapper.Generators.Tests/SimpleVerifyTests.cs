@@ -267,6 +267,65 @@ public class SimpleVerifyTests
     );
 
     [Fact]
+    public async Task Simple_ScalarBinaryByteArray() => await GeneratorTestHelpers.Verify(
+        new VerifyTestOptions
+        {
+            SourceCode =
+                """
+                using System.Collections.Generic;
+                using Amazon.DynamoDBv2.Model;
+                using LayeredCraft.DynamoMapper.Runtime;
+
+                namespace MyNamespace;
+
+                [DynamoMapper]
+                public static partial class ExampleEntityMapper
+                {
+                    public static partial Dictionary<string, AttributeValue> ToItem(ExampleEntity source);
+
+                    public static partial ExampleEntity FromItem(Dictionary<string, AttributeValue> item);
+                }
+
+                public class ExampleEntity
+                {
+                    public byte[] Payload { get; set; } = [];
+                }
+                """,
+        },
+        TestContext.Current.CancellationToken
+    );
+
+    [Fact]
+    public async Task Simple_ScalarBinaryStream() => await GeneratorTestHelpers.Verify(
+        new VerifyTestOptions
+        {
+            SourceCode =
+                """
+                using System.Collections.Generic;
+                using System.IO;
+                using Amazon.DynamoDBv2.Model;
+                using LayeredCraft.DynamoMapper.Runtime;
+
+                namespace MyNamespace;
+
+                [DynamoMapper]
+                public static partial class ExampleEntityMapper
+                {
+                    public static partial Dictionary<string, AttributeValue> ToItem(ExampleEntity source);
+
+                    public static partial ExampleEntity FromItem(Dictionary<string, AttributeValue> item);
+                }
+
+                public class ExampleEntity
+                {
+                    public Stream Payload { get; set; } = Stream.Null;
+                }
+                """,
+        },
+        TestContext.Current.CancellationToken
+    );
+
+    [Fact]
     public async Task Simple_NoSetter() => await GeneratorTestHelpers.Verify(
         new VerifyTestOptions
         {

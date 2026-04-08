@@ -38,6 +38,41 @@ Notes:
 - Dot-notation overrides force inline mapping for the nested path.
 - Invalid paths emit `DM0008`.
 
+### Collection Element Members
+
+The same dot-notation syntax works when the intermediate segment is a collection (`List<T>`, `T[]`,
+`Dictionary<string, T>`, etc.). The path traverses into the **element type** of the collection:
+
+```csharp
+[DynamoMapper]
+[DynamoField("Contacts.VerifiedAt", Format = "yyyy-MM-dd")]
+[DynamoField("Contacts.Name", AttributeName = "contact_name")]
+public static partial class CustomerMapper
+{
+    public static partial Dictionary<string, AttributeValue> ToItem(Customer source);
+    public static partial Customer FromItem(Dictionary<string, AttributeValue> item);
+}
+
+public class Customer
+{
+    public string Id { get; set; }
+    public List<CustomerContact> Contacts { get; set; }
+}
+
+public class CustomerContact
+{
+    public string Name { get; set; }
+    public DateTime VerifiedAt { get; set; }
+}
+```
+
+Notes:
+
+- The override applies to every element in the collection — there is no per-index syntax.
+- An invalid property name on the element type still emits `DM0008`.
+- Dictionary value types are also supported: `"ProductMap.CreatedAt"` targets `CreatedAt` on
+  the value type of `Dictionary<string, OrderItem>`.
+
 ## Supported Options
 
 | Option | Description |

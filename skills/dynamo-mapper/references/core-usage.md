@@ -54,7 +54,8 @@ Use `[DynamoIgnore(memberName)]` to skip one or both directions.
 - `FromModel` skips model -> item
 - `ToModel` skips item -> model
 
-Dot notation works for nested members like `"ShippingAddress.Line1"`.
+Dot notation works for nested members like `"ShippingAddress.Line1"` and for collection element
+members like `"Contacts.VerifiedAt"` (where `Contacts` is `List<CustomerContact>`).
 
 ## Constructors
 

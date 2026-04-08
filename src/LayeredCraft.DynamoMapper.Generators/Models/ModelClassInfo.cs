@@ -287,6 +287,11 @@ internal static class ModelClassInfoExtensions
                     propertyType = nullableType.TypeArguments[0];
                 }
 
+                // Unwrap collection element type — dot-notation can target element members
+                var collectionInfo = CollectionTypeAnalyzer.Analyze(propertyType, context);
+                if (collectionInfo is not null)
+                    propertyType = collectionInfo.ElementType;
+
                 currentType = propertyType;
             }
         }

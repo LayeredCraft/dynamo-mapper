@@ -438,3 +438,5 @@ Thumbs.db
 **/*.DotSettings.user
 /.claude/do_not_commit/
 /nupkg/
+
+**/.env

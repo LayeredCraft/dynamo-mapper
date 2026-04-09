@@ -122,6 +122,43 @@ public class CollectionVerifyTests
         TestContext.Current.CancellationToken
     );
 
+    [Fact]
+    public async Task Collection_FormattedScalarShapes() => await GeneratorTestHelpers.Verify(
+        new VerifyTestOptions
+        {
+            SourceCode =
+                """
+                using System;
+                using System.Collections.Generic;
+                using Amazon.DynamoDBv2.Model;
+                using LayeredCraft.DynamoMapper.Runtime;
+
+                namespace MyNamespace;
+
+                public enum Status
+                {
+                    Draft = 1,
+                    Published = 2,
+                }
+
+                [DynamoMapper(GuidFormat = "N", TimeSpanFormat = "G", EnumFormat = "D")]
+                public static partial class ExampleEntityMapper
+                {
+                    public static partial Dictionary<string, AttributeValue> ToItem(Entity source);
+                    public static partial Entity FromItem(Dictionary<string, AttributeValue> item);
+                }
+
+                public class Entity
+                {
+                    public List<Guid> GuidList { get; set; } = new();
+                    public Dictionary<string, TimeSpan> Durations { get; set; } = new();
+                    public HashSet<Status> Statuses { get; set; } = new();
+                }
+                """,
+        },
+        TestContext.Current.CancellationToken
+    );
+
     // ==================== DICTIONARY TESTS ====================
 
     [Fact]

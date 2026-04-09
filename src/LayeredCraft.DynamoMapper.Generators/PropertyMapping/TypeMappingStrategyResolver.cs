@@ -355,8 +355,17 @@ internal static class TypeMappingStrategyResolver
                 ),
             };
 
-        // Build strategy - collections are nullable at collection level, not element level
-        var strategy = CreateStrategy(typeName, analysis.Nullability, genericArg);
+        var (fromArgs, toArgs) =
+            GetCollectionElementTypeSpecificArgs(collectionInfo.ElementType, analysis, context);
+
+        var strategy =
+            new TypeMappingStrategy(
+                typeName,
+                genericArg,
+                analysis.Nullability.IsNullableType ? "Nullable" : string.Empty,
+                fromArgs,
+                toArgs
+            );
 
         // Apply Kind override if present (or use inferred kind)
         return strategy with
@@ -425,5 +434,52 @@ internal static class TypeMappingStrategyResolver
             );
 
         return DiagnosticResult<TypeMappingStrategy?>.Success(strategy);
+    }
+
+    private static (string[] FromArgs, string[] ToArgs) GetCollectionElementTypeSpecificArgs(
+        ITypeSymbol elementType, PropertyAnalysis analysis, GeneratorContext context
+    )
+    {
+        var underlyingType = UnwrapNullable(elementType);
+
+        return underlyingType switch
+        {
+            { SpecialType: SpecialType.System_DateTime } => CreateCollectionFormatArgs(
+                analysis.FieldOptions?.Format ?? context.MapperOptions.DateTimeFormat
+            ),
+            INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_DateTimeOffset, context)
+                => CreateCollectionFormatArgs(
+                    analysis.FieldOptions?.Format ?? context.MapperOptions.DateTimeFormat
+                ),
+            INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_Guid, context) =>
+                CreateCollectionFormatArgs(
+                    analysis.FieldOptions?.Format ?? context.MapperOptions.GuidFormat
+                ),
+            INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_TimeSpan, context) =>
+                CreateCollectionFormatArgs(
+                    analysis.FieldOptions?.Format ?? context.MapperOptions.TimeSpanFormat
+                ),
+            INamedTypeSymbol { TypeKind: TypeKind.Enum } => CreateCollectionFormatArgs(
+                analysis.FieldOptions?.Format ?? context.MapperOptions.EnumFormat
+            ),
+            _ => ([], []),
+        };
+    }
+
+    private static (string[] FromArgs, string[] ToArgs) CreateCollectionFormatArgs(string format)
+    {
+        var arg = $"\"{format}\"";
+        return ([arg], [arg]);
+    }
+
+    private static ITypeSymbol UnwrapNullable(ITypeSymbol type)
+    {
+        if (type is INamedTypeSymbol
+            {
+                OriginalDefinition.SpecialType: SpecialType.System_Nullable_T,
+            } nullableType && nullableType.TypeArguments.Length == 1)
+            return nullableType.TypeArguments[0];
+
+        return type;
     }
 }

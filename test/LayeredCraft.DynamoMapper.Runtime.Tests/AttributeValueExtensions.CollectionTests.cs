@@ -1,3 +1,4 @@
+using System.Globalization;
 using Amazon.DynamoDBv2.Model;
 
 namespace LayeredCraft.DynamoMapper.Runtime.Tests;
@@ -442,6 +443,27 @@ public class AttributeValueExtensionsCollectionTests
         Assert.Equal(original[1], result[1]);
     }
 
+    [Fact]
+    public void List_RoundTrip_WithGuidFormat()
+    {
+        var attributes = new Dictionary<string, AttributeValue>();
+        var original =
+            new List<Guid>
+            {
+                Guid.Parse("12121212-3434-5656-7878-909090909090"),
+                Guid.Parse("21212121-4343-6565-8787-010101010101"),
+            };
+
+        attributes.SetList("ids", original, "N");
+        var result = attributes.GetList<Guid>("ids", "N");
+
+        Assert.Equal(
+            original.Select(value => value.ToString("N")),
+            attributes["ids"].L.Select(value => value.S)
+        );
+        Assert.Equal(original, result);
+    }
+
     // ==================== MAP TESTS ====================
 
     [Fact]
@@ -618,6 +640,30 @@ public class AttributeValueExtensionsCollectionTests
         Assert.All(result.Values, value => Assert.IsType<MemoryStream>(value));
         Assert.Equal(new byte[] { 1, 2, 3 }, ((MemoryStream)result["thumbnail"]).ToArray());
         Assert.Equal(new byte[] { 4, 5, 6 }, ((MemoryStream)result["full"]).ToArray());
+    }
+
+    [Fact]
+    public void Map_RoundTrip_WithTimeSpanFormat()
+    {
+        var attributes = new Dictionary<string, AttributeValue>();
+        var original =
+            new Dictionary<string, TimeSpan>
+            {
+                ["short"] = TimeSpan.Parse("1:02:03.004", CultureInfo.InvariantCulture),
+                ["long"] = TimeSpan.Parse("2:03:04:05.006", CultureInfo.InvariantCulture),
+            };
+
+        attributes.SetMap("durations", original, "G");
+        var result = attributes.GetMap<TimeSpan>("durations", "G");
+
+        Assert.Equal(
+            original.ToDictionary(
+                pair => pair.Key,
+                pair => pair.Value.ToString("G", CultureInfo.InvariantCulture)
+            ),
+            attributes["durations"].M.ToDictionary(pair => pair.Key, pair => pair.Value.S)
+        );
+        Assert.Equal(original, result);
     }
 
     // ==================== STRING SET TESTS ====================

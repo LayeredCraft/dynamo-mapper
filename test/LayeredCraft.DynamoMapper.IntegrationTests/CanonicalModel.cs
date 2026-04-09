@@ -140,3 +140,30 @@ public static partial class CanonicalBinaryStreamScalarModelMapper
         Dictionary<string, AttributeValue> item
     );
 }
+
+public enum CanonicalFormattedStatus
+{
+    Draft = 1,
+    Published = 2,
+}
+
+public sealed class CanonicalFormattedCollectionModel
+{
+    public List<Guid> RelatedIds { get; set; } = [];
+
+    public Dictionary<string, TimeSpan> DurationsByName { get; set; } = [];
+
+    public HashSet<CanonicalFormattedStatus> Statuses { get; set; } = [];
+}
+
+[DynamoMapper(GuidFormat = "N", TimeSpanFormat = "G", EnumFormat = "D")]
+public static partial class CanonicalFormattedCollectionModelMapper
+{
+    public static partial Dictionary<string, AttributeValue> ToItem(
+        CanonicalFormattedCollectionModel source
+    );
+
+    public static partial CanonicalFormattedCollectionModel FromItem(
+        Dictionary<string, AttributeValue> item
+    );
+}

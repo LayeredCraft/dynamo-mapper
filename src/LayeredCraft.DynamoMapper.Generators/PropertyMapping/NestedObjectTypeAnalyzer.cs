@@ -304,7 +304,13 @@ internal static class NestedObjectTypeAnalyzer
                 }
 
                 // Create collection strategy (simplified for nested objects)
-                var collectionStrategy = CreateCollectionStrategy(collectionInfo, propertyType);
+                var collectionStrategy =
+                    CreateCollectionStrategy(
+                        collectionInfo,
+                        propertyType,
+                        fieldOptions,
+                        nestedContext.Context
+                    );
                 propertySpecs.Add(
                     new NestedPropertySpec(
                         property.Name,
@@ -532,7 +538,8 @@ internal static class NestedObjectTypeAnalyzer
     ///     Creates a collection type mapping strategy.
     /// </summary>
     private static TypeMappingStrategy CreateCollectionStrategy(
-        CollectionInfo collectionInfo, ITypeSymbol originalType
+        CollectionInfo collectionInfo, ITypeSymbol originalType, DynamoFieldOptions? fieldOptions,
+        GeneratorContext context
     )
     {
         var isNullable = originalType.NullableAnnotation == NullableAnnotation.Annotated;
@@ -560,14 +567,59 @@ internal static class NestedObjectTypeAnalyzer
                 ),
             };
 
+        var (fromArgs, toArgs) =
+            GetCollectionElementTypeSpecificArgs(collectionInfo.ElementType, fieldOptions, context);
+
         return new TypeMappingStrategy(
             typeName,
             genericArg,
             nullableModifier,
-            [],
-            [],
+            fromArgs,
+            toArgs,
             KindOverride: collectionInfo.TargetKind
         );
+    }
+
+    private static (string[] FromArgs, string[] ToArgs) GetCollectionElementTypeSpecificArgs(
+        ITypeSymbol elementType, DynamoFieldOptions? fieldOptions, GeneratorContext context
+    )
+    {
+        var underlyingType = UnwrapNullable(elementType);
+
+        return underlyingType switch
+        {
+            { SpecialType: SpecialType.System_DateTime } => CreateCollectionFormatArgs(
+                fieldOptions?.Format ?? context.MapperOptions.DateTimeFormat
+            ),
+            INamedTypeSymbol t when context.WellKnownTypes.IsType(
+                t,
+                WellKnownTypeData.WellKnownType.System_DateTimeOffset
+            ) => CreateCollectionFormatArgs(
+                fieldOptions?.Format ?? context.MapperOptions.DateTimeFormat
+            ),
+            INamedTypeSymbol t when context.WellKnownTypes.IsType(
+                t,
+                WellKnownTypeData.WellKnownType.System_Guid
+            ) => CreateCollectionFormatArgs(
+                fieldOptions?.Format ?? context.MapperOptions.GuidFormat
+            ),
+            INamedTypeSymbol t when context.WellKnownTypes.IsType(
+                t,
+                WellKnownTypeData.WellKnownType.System_TimeSpan
+            ) => CreateCollectionFormatArgs(
+                fieldOptions?.Format ?? context.MapperOptions.TimeSpanFormat
+            ),
+            INamedTypeSymbol { TypeKind: TypeKind.Enum } => CreateCollectionFormatArgs(
+                fieldOptions?.Format ?? context.MapperOptions.EnumFormat
+            ),
+            _ => ([], []),
+        };
+    }
+
+    private static (string[] FromArgs, string[] ToArgs) CreateCollectionFormatArgs(string format)
+    {
+        var arg = $"\"{format}\"";
+        return ([arg], [arg]);
     }
 
     /// <summary>

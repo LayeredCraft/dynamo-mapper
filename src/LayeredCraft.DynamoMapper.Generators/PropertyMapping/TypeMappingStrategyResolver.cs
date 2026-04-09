@@ -362,6 +362,7 @@ internal static class TypeMappingStrategyResolver
         return strategy with
         {
             KindOverride = analysis.FieldOptions?.Kind ?? collectionInfo.TargetKind,
+            CollectionInfo = collectionInfo,
         };
     }
 

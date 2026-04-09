@@ -40,7 +40,7 @@ internal static class CollectionTypeAnalyzer
                 ElementType: elementType,
                 TargetKind: DynamoKind.L,
                 KeyType: null,
-                IsArray: true
+                CollectionReadMaterialization.Array
             );
         }
 
@@ -66,8 +66,7 @@ internal static class CollectionTypeAnalyzer
                     Category: CollectionCategory.Map,
                     ElementType: valueType,
                     TargetKind: DynamoKind.M,
-                    KeyType: keyType,
-                    IsArray: false
+                    keyType
                 );
             }
         }
@@ -92,9 +91,17 @@ internal static class CollectionTypeAnalyzer
                         ElementType: elementType,
                         TargetKind: setKind.Value,
                         KeyType: null,
-                        IsArray: false
+                        CollectionReadMaterialization.HashSet
                     );
                 }
+
+                return new CollectionInfo(
+                    CollectionCategory.List,
+                    elementType,
+                    DynamoKind.L,
+                    null,
+                    CollectionReadMaterialization.HashSet
+                );
             }
         }
 
@@ -120,8 +127,7 @@ internal static class CollectionTypeAnalyzer
                     Category: CollectionCategory.List,
                     ElementType: elementType,
                     TargetKind: DynamoKind.L,
-                    KeyType: null,
-                    IsArray: false
+                    null
                 );
             }
         }

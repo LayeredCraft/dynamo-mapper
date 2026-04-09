@@ -16,8 +16,9 @@ namespace LayeredCraft.DynamoMapper.Generator.PropertyMapping.Models;
 /// <param name="KeyType">
 ///     For map types only, the key type (must be string).
 /// </param>
-/// <param name="IsArray">
-///     True if the original property type is an array (T[]), false otherwise.
+/// <param name="ReadMaterialization">
+///     Describes any additional CLR-shape materialization required after deserializing the
+///     DynamoDB representation.
 /// </param>
 /// <param name="ElementNestedMapping">
 ///     For collections of nested objects, contains the nested mapping info for the element type.
@@ -28,9 +29,20 @@ internal sealed record CollectionInfo(
     ITypeSymbol ElementType,
     DynamoKind TargetKind,
     ITypeSymbol? KeyType = null,
-    bool IsArray = false,
+    CollectionReadMaterialization ReadMaterialization = CollectionReadMaterialization.None,
     NestedMappingInfo? ElementNestedMapping = null
 );
+
+/// <summary>
+///     Describes how a deserialized collection result should be materialized back into the
+///     declared CLR shape.
+/// </summary>
+internal enum CollectionReadMaterialization
+{
+    None,
+    Array,
+    HashSet,
+}
 
 /// <summary>
 /// Categorizes collection types by their DynamoDB mapping behavior.

@@ -248,16 +248,20 @@ static partial void AfterToItem(Product source, Dictionary<string, AttributeValu
 
 DynamoMapper natively supports:
 
-| .NET Type                                | DynamoDB Type | Notes                                            |
-|------------------------------------------|---------------|--------------------------------------------------|
-| `string`                                 | S (String)    |                                                  |
-| `int`, `long`, `decimal`, `double`       | N (Number)    | Culture-invariant                                |
-| `bool`                                   | BOOL          |                                                  |
-| `Guid`                                   | S             | ToString/Parse                                   |
-| `DateTime`, `DateTimeOffset`, `TimeSpan` | S             | ISO-8601 / constant format                       |
-| `enum`                                   | S             | String name                                      |
-| Nullable variants                        | S/N/BOOL      | Null checks generated                            |
-| Collections                              | L/M/SS/NS/BS  | Lists, maps, and sets of supported element types |
+| .NET Type                                | DynamoDB Type | Notes                                |
+|------------------------------------------|---------------|--------------------------------------|
+| `string`                                 | S (String)    |                                      |
+| `int`, `long`, `decimal`, `double`       | N (Number)    | Culture-invariant                    |
+| `bool`                                   | BOOL          |                                      |
+| `Guid`                                   | S             | ToString/Parse                       |
+| `DateTime`, `DateTimeOffset`, `TimeSpan` | S             | ISO-8601 / constant format           |
+| `enum`                                   | S             | String name                          |
+| Nullable variants                        | S/N/BOOL      | Null checks generated                |
+| Collections                              | L/M/SS/NS/BS  | Lists, maps, and set-like CLR shapes |
+
+Set-like CLR collections use DynamoDB native set types (`SS`, `NS`, `BS`) when the element type
+supports them. Other supported set element types, such as `Guid`, `DateTimeOffset`, `TimeSpan`,
+and enums, are stored as `L` and materialized back into the declared CLR set shape during reads.
 
 ### Custom Types
 

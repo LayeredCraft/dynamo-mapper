@@ -283,6 +283,44 @@ public class NestedObjectVerifyTests
         );
 
     [Fact]
+    public async Task NestedObject_WithBinaryAndStreamScalarMembers() =>
+        await GeneratorTestHelpers.Verify(
+            new VerifyTestOptions
+            {
+                SourceCode =
+                    """
+                    using System.Collections.Generic;
+                    using System.IO;
+                    using Amazon.DynamoDBv2.Model;
+                    using LayeredCraft.DynamoMapper.Runtime;
+
+                    namespace MyNamespace;
+
+                    [DynamoMapper]
+                    public static partial class OrderMapper
+                    {
+                        public static partial Dictionary<string, AttributeValue> ToItem(Order source);
+
+                        public static partial Order FromItem(Dictionary<string, AttributeValue> item);
+                    }
+
+                    public class Order
+                    {
+                        public string Id { get; set; }
+                        public Attachment Payload { get; set; }
+                    }
+
+                    public class Attachment
+                    {
+                        public byte[] Checksum { get; set; } = [];
+                        public Stream Content { get; set; } = Stream.Null;
+                    }
+                    """,
+            },
+            TestContext.Current.CancellationToken
+        );
+
+    [Fact]
     public async Task NestedObject_MultiLevel() => await GeneratorTestHelpers.Verify(
         new VerifyTestOptions
         {

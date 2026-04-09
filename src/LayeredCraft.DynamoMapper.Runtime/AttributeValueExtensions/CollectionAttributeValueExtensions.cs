@@ -32,8 +32,7 @@ public static class CollectionAttributeValueExtensions
         /// </param>
         /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
         public bool TryGetList<T>(
-            string key,
-            out List<T> value,
+            string key, out List<T> value,
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.L
         )
@@ -46,8 +45,9 @@ public static class CollectionAttributeValueExtensions
                 return true;
 
             var list = attributeValue!.L ?? [];
-            value = list.Select(Dictionary<string, AttributeValue>.ConvertFromAttributeValue<T>)
-                .ToList();
+            value =
+                list.Select(Dictionary<string, AttributeValue>.ConvertFromAttributeValue<T>)
+                    .ToList();
             return true;
         }
 
@@ -63,8 +63,7 @@ public static class CollectionAttributeValueExtensions
         ///     DynamoDB NULL value.
         /// </returns>
         public List<T> GetList<T>(
-            string key,
-            Requiredness requiredness = Requiredness.InferFromNullability,
+            string key, Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.L
         ) => attributes.TryGetList<T>(key, out var value, requiredness, kind) ? value : [];
 
@@ -81,8 +80,7 @@ public static class CollectionAttributeValueExtensions
         /// </param>
         /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
         public bool TryGetNullableList<T>(
-            string key,
-            out List<T>? value,
+            string key, out List<T>? value,
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.L
         )
@@ -95,8 +93,9 @@ public static class CollectionAttributeValueExtensions
                 return true;
 
             var list = attributeValue!.L ?? [];
-            value = list.Select(Dictionary<string, AttributeValue>.ConvertFromAttributeValue<T>)
-                .ToList();
+            value =
+                list.Select(Dictionary<string, AttributeValue>.ConvertFromAttributeValue<T>)
+                    .ToList();
             return true;
         }
 
@@ -112,19 +111,16 @@ public static class CollectionAttributeValueExtensions
         ///     the key is missing or the attribute has a DynamoDB NULL value.
         /// </returns>
         public List<T>? GetNullableList<T>(
-            string key,
-            Requiredness requiredness = Requiredness.InferFromNullability,
+            string key, Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.L
-        ) =>
-            attributes.TryGetNullableList<T>(key, out var value, requiredness, kind) ? value : null;
+        ) => attributes.TryGetNullableList<T>(key, out var value, requiredness, kind)
+            ? value
+            : null;
 
         /// <summary>Sets a list in the attribute dictionary.</summary>
         public Dictionary<string, AttributeValue> SetList<T>(
-            string key,
-            IEnumerable<T>? value,
-            bool omitEmptyStrings = false,
-            bool omitNullStrings = true,
-            DynamoKind kind = DynamoKind.L
+            string key, IEnumerable<T>? value, bool omitEmptyStrings = false,
+            bool omitNullStrings = true, DynamoKind kind = DynamoKind.L
         )
         {
             if (value is null && omitNullStrings)
@@ -136,9 +132,8 @@ public static class CollectionAttributeValueExtensions
                 return attributes;
             }
 
-            var list = value
-                .Select(Dictionary<string, AttributeValue>.ConvertToAttributeValue)
-                .ToList();
+            var list =
+                value.Select(Dictionary<string, AttributeValue>.ConvertToAttributeValue).ToList();
 
             // Empty lists ARE allowed in DynamoDB - respect omitEmptyStrings flag
             if (list.Count == 0 && omitEmptyStrings)
@@ -163,8 +158,7 @@ public static class CollectionAttributeValueExtensions
         /// </param>
         /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
         public bool TryGetMap<T>(
-            string key,
-            out Dictionary<string, T> value,
+            string key, out Dictionary<string, T> value,
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.M
         )
@@ -177,10 +171,12 @@ public static class CollectionAttributeValueExtensions
                 return true;
 
             var map = attributeValue!.M ?? new Dictionary<string, AttributeValue>();
-            value = map.ToDictionary(
-                kvp => kvp.Key,
-                kvp => Dictionary<string, AttributeValue>.ConvertFromAttributeValue<T>(kvp.Value)
-            );
+            value =
+                map.ToDictionary(
+                    kvp => kvp.Key,
+                    kvp =>
+                        Dictionary<string, AttributeValue>.ConvertFromAttributeValue<T>(kvp.Value)
+                );
             return true;
         }
 
@@ -196,13 +192,11 @@ public static class CollectionAttributeValueExtensions
         ///     DynamoDB NULL value.
         /// </returns>
         public Dictionary<string, T> GetMap<T>(
-            string key,
-            Requiredness requiredness = Requiredness.InferFromNullability,
+            string key, Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.M
-        ) =>
-            attributes.TryGetMap<T>(key, out var value, requiredness, kind)
-                ? value
-                : new Dictionary<string, T>();
+        ) => attributes.TryGetMap<T>(key, out var value, requiredness, kind)
+            ? value
+            : new Dictionary<string, T>();
 
         /// <summary>Tries to get a nullable map from the attribute dictionary.</summary>
         /// <param name="key">The attribute key to retrieve.</param>
@@ -217,8 +211,7 @@ public static class CollectionAttributeValueExtensions
         /// </param>
         /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
         public bool TryGetNullableMap<T>(
-            string key,
-            out Dictionary<string, T>? value,
+            string key, out Dictionary<string, T>? value,
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.M
         )
@@ -231,10 +224,12 @@ public static class CollectionAttributeValueExtensions
                 return true;
 
             var map = attributeValue!.M ?? new Dictionary<string, AttributeValue>();
-            value = map.ToDictionary(
-                kvp => kvp.Key,
-                kvp => Dictionary<string, AttributeValue>.ConvertFromAttributeValue<T>(kvp.Value)
-            );
+            value =
+                map.ToDictionary(
+                    kvp => kvp.Key,
+                    kvp =>
+                        Dictionary<string, AttributeValue>.ConvertFromAttributeValue<T>(kvp.Value)
+                );
             return true;
         }
 
@@ -250,18 +245,14 @@ public static class CollectionAttributeValueExtensions
         ///     the key is missing or the attribute has a DynamoDB NULL value.
         /// </returns>
         public Dictionary<string, T>? GetNullableMap<T>(
-            string key,
-            Requiredness requiredness = Requiredness.InferFromNullability,
+            string key, Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.M
         ) => attributes.TryGetNullableMap<T>(key, out var value, requiredness, kind) ? value : null;
 
         /// <summary>Sets a map in the attribute dictionary.</summary>
         public Dictionary<string, AttributeValue> SetMap<T>(
-            string key,
-            IDictionary<string, T>? value,
-            bool omitEmptyStrings = false,
-            bool omitNullStrings = true,
-            DynamoKind kind = DynamoKind.M
+            string key, IDictionary<string, T>? value, bool omitEmptyStrings = false,
+            bool omitNullStrings = true, DynamoKind kind = DynamoKind.M
         )
         {
             if (value is null && omitNullStrings)
@@ -273,10 +264,11 @@ public static class CollectionAttributeValueExtensions
                 return attributes;
             }
 
-            var map = value.ToDictionary(
-                kvp => kvp.Key,
-                kvp => Dictionary<string, AttributeValue>.ConvertToAttributeValue(kvp.Value)
-            );
+            var map =
+                value.ToDictionary(
+                    kvp => kvp.Key,
+                    kvp => Dictionary<string, AttributeValue>.ConvertToAttributeValue(kvp.Value)
+                );
 
             // Empty maps ARE allowed in DynamoDB - respect omitEmptyStrings flag
             if (map.Count == 0 && omitEmptyStrings)
@@ -301,8 +293,7 @@ public static class CollectionAttributeValueExtensions
         /// </param>
         /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
         public bool TryGetStringSet(
-            string key,
-            out HashSet<string> value,
+            string key, out HashSet<string> value,
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.SS
         )
@@ -331,8 +322,7 @@ public static class CollectionAttributeValueExtensions
         ///     has a DynamoDB NULL value.
         /// </returns>
         public HashSet<string> GetStringSet(
-            string key,
-            Requiredness requiredness = Requiredness.InferFromNullability,
+            string key, Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.SS
         ) => attributes.TryGetStringSet(key, out var value, requiredness, kind) ? value : [];
 
@@ -349,8 +339,7 @@ public static class CollectionAttributeValueExtensions
         /// </param>
         /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
         public bool TryGetNullableStringSet(
-            string key,
-            out HashSet<string>? value,
+            string key, out HashSet<string>? value,
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.SS
         )
@@ -379,21 +368,16 @@ public static class CollectionAttributeValueExtensions
         ///     the key is missing or the attribute has a DynamoDB NULL value.
         /// </returns>
         public HashSet<string>? GetNullableStringSet(
-            string key,
-            Requiredness requiredness = Requiredness.InferFromNullability,
+            string key, Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.SS
-        ) =>
-            attributes.TryGetNullableStringSet(key, out var value, requiredness, kind)
-                ? value
-                : null;
+        ) => attributes.TryGetNullableStringSet(key, out var value, requiredness, kind)
+            ? value
+            : null;
 
         /// <summary>Sets a string set in the attribute dictionary.</summary>
         public Dictionary<string, AttributeValue> SetStringSet(
-            string key,
-            IEnumerable<string>? value,
-            bool omitEmptyStrings = false,
-            bool omitNullStrings = true,
-            DynamoKind kind = DynamoKind.SS
+            string key, IEnumerable<string>? value, bool omitEmptyStrings = false,
+            bool omitNullStrings = true, DynamoKind kind = DynamoKind.SS
         )
         {
             if (value is null && omitNullStrings)
@@ -425,12 +409,10 @@ public static class CollectionAttributeValueExtensions
         /// </param>
         /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
         public bool TryGetNumberSet<T>(
-            string key,
-            out HashSet<T> value,
+            string key, out HashSet<T> value,
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.NS
-        )
-            where T : struct
+        ) where T : struct
         {
             value = [];
             if (!attributes.TryGetValue(key, requiredness, out var attributeValue))
@@ -456,12 +438,11 @@ public static class CollectionAttributeValueExtensions
         ///     has a DynamoDB NULL value.
         /// </returns>
         public HashSet<T> GetNumberSet<T>(
-            string key,
-            Requiredness requiredness = Requiredness.InferFromNullability,
+            string key, Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.NS
-        )
-            where T : struct =>
-            attributes.TryGetNumberSet<T>(key, out var value, requiredness, kind) ? value : [];
+        ) where T : struct => attributes.TryGetNumberSet<T>(key, out var value, requiredness, kind)
+            ? value
+            : [];
 
         /// <summary>Tries to get a nullable number set from the attribute dictionary.</summary>
         /// <param name="key">The attribute key to retrieve.</param>
@@ -476,12 +457,10 @@ public static class CollectionAttributeValueExtensions
         /// </param>
         /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
         public bool TryGetNullableNumberSet<T>(
-            string key,
-            out HashSet<T>? value,
+            string key, out HashSet<T>? value,
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.NS
-        )
-            where T : struct
+        ) where T : struct
         {
             value = null;
             if (!attributes.TryGetNullableValue(key, requiredness, out var attributeValue))
@@ -507,31 +486,26 @@ public static class CollectionAttributeValueExtensions
         ///     the key is missing or the attribute has a DynamoDB NULL value.
         /// </returns>
         public HashSet<T>? GetNullableNumberSet<T>(
-            string key,
-            Requiredness requiredness = Requiredness.InferFromNullability,
+            string key, Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.NS
-        )
-            where T : struct =>
+        ) where T : struct =>
             attributes.TryGetNullableNumberSet<T>(key, out var value, requiredness, kind)
                 ? value
                 : null;
 
         /// <summary>Sets a number set in the attribute dictionary.</summary>
         public Dictionary<string, AttributeValue> SetNumberSet<T>(
-            string key,
-            IEnumerable<T>? value,
-            bool omitEmptyStrings = false,
-            bool omitNullStrings = true,
-            DynamoKind kind = DynamoKind.NS
-        )
-            where T : struct
+            string key, IEnumerable<T>? value, bool omitEmptyStrings = false,
+            bool omitNullStrings = true, DynamoKind kind = DynamoKind.NS
+        ) where T : struct
         {
             if (value is null && omitNullStrings)
                 return attributes;
 
             var set =
-                value?.Distinct().Select(Dictionary<string, AttributeValue>.FormatNumber).ToList()
-                ?? [];
+                value?.Distinct()
+                    .Select(Dictionary<string, AttributeValue>.FormatNumber)
+                    .ToList() ?? [];
 
             // DynamoDB does NOT allow empty sets - always omit
             if (set.Count == 0)
@@ -556,8 +530,7 @@ public static class CollectionAttributeValueExtensions
         /// </param>
         /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
         public bool TryGetBinarySet(
-            string key,
-            out HashSet<byte[]> value,
+            string key, out HashSet<byte[]> value,
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.BS
         )
@@ -570,10 +543,11 @@ public static class CollectionAttributeValueExtensions
                 return true;
 
             var bs = attributeValue!.BS ?? [];
-            value = new HashSet<byte[]>(
-                bs.Select(stream => stream.ToArray()),
-                ByteArrayComparer.Instance
-            );
+            value =
+                new HashSet<byte[]>(
+                    bs.Select(stream => stream.ToArray()),
+                    ByteArrayComparer.Instance
+                );
             return true;
         }
 
@@ -589,13 +563,11 @@ public static class CollectionAttributeValueExtensions
         ///     has a DynamoDB NULL value.
         /// </returns>
         public HashSet<byte[]> GetBinarySet(
-            string key,
-            Requiredness requiredness = Requiredness.InferFromNullability,
+            string key, Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.BS
-        ) =>
-            attributes.TryGetBinarySet(key, out var value, requiredness, kind)
-                ? value
-                : new HashSet<byte[]>(ByteArrayComparer.Instance);
+        ) => attributes.TryGetBinarySet(key, out var value, requiredness, kind)
+            ? value
+            : new HashSet<byte[]>(ByteArrayComparer.Instance);
 
         /// <summary>Tries to get a nullable binary set from the attribute dictionary.</summary>
         /// <param name="key">The attribute key to retrieve.</param>
@@ -610,8 +582,7 @@ public static class CollectionAttributeValueExtensions
         /// </param>
         /// <returns><c>true</c> when the key exists and the value is retrieved; otherwise <c>false</c>.</returns>
         public bool TryGetNullableBinarySet(
-            string key,
-            out HashSet<byte[]>? value,
+            string key, out HashSet<byte[]>? value,
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.BS
         )
@@ -624,10 +595,11 @@ public static class CollectionAttributeValueExtensions
                 return true;
 
             var bs = attributeValue!.BS ?? [];
-            value = new HashSet<byte[]>(
-                bs.Select(stream => stream.ToArray()),
-                ByteArrayComparer.Instance
-            );
+            value =
+                new HashSet<byte[]>(
+                    bs.Select(stream => stream.ToArray()),
+                    ByteArrayComparer.Instance
+                );
             return true;
         }
 
@@ -643,33 +615,26 @@ public static class CollectionAttributeValueExtensions
         ///     the key is missing or the attribute has a DynamoDB NULL value.
         /// </returns>
         public HashSet<byte[]>? GetNullableBinarySet(
-            string key,
-            Requiredness requiredness = Requiredness.InferFromNullability,
+            string key, Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.BS
-        ) =>
-            attributes.TryGetNullableBinarySet(key, out var value, requiredness, kind)
-                ? value
-                : null;
+        ) => attributes.TryGetNullableBinarySet(key, out var value, requiredness, kind)
+            ? value
+            : null;
 
         /// <summary>Sets a binary set in the attribute dictionary.</summary>
         public Dictionary<string, AttributeValue> SetBinarySet(
-            string key,
-            IEnumerable<byte[]>? value,
-            bool omitEmptyStrings = false,
-            bool omitNullStrings = true,
-            DynamoKind kind = DynamoKind.BS
+            string key, IEnumerable<byte[]>? value, bool omitEmptyStrings = false,
+            bool omitNullStrings = true, DynamoKind kind = DynamoKind.BS
         )
         {
             if (value is null && omitNullStrings)
                 return attributes;
 
             var set =
-                value
-                    ?.Where(bytes => bytes is not null)
+                value?.Where(bytes => bytes is not null)
                     .Distinct(ByteArrayComparer.Instance)
                     .Select(bytes => new MemoryStream(bytes!))
-                    .ToList()
-                ?? new List<MemoryStream>();
+                    .ToList() ?? new List<MemoryStream>();
 
             // DynamoDB does NOT allow empty sets - always omit
             if (set.Count == 0)
@@ -706,47 +671,61 @@ public static class CollectionAttributeValueExtensions
 
             // Numeric types
             if (underlyingType == typeof(int))
-                return (T)
-                    (object)int.Parse(av.GetString(DynamoKind.N), CultureInfo.InvariantCulture);
+                return (T)(object)int.Parse(
+                    av.GetString(DynamoKind.N),
+                    CultureInfo.InvariantCulture
+                );
             if (underlyingType == typeof(long))
-                return (T)
-                    (object)long.Parse(av.GetString(DynamoKind.N), CultureInfo.InvariantCulture);
+                return (T)(object)long.Parse(
+                    av.GetString(DynamoKind.N),
+                    CultureInfo.InvariantCulture
+                );
             if (underlyingType == typeof(float))
-                return (T)
-                    (object)float.Parse(av.GetString(DynamoKind.N), CultureInfo.InvariantCulture);
+                return (T)(object)float.Parse(
+                    av.GetString(DynamoKind.N),
+                    CultureInfo.InvariantCulture
+                );
             if (underlyingType == typeof(double))
-                return (T)
-                    (object)double.Parse(av.GetString(DynamoKind.N), CultureInfo.InvariantCulture);
+                return (T)(object)double.Parse(
+                    av.GetString(DynamoKind.N),
+                    CultureInfo.InvariantCulture
+                );
             if (underlyingType == typeof(decimal))
-                return (T)
-                    (object)decimal.Parse(av.GetString(DynamoKind.N), CultureInfo.InvariantCulture);
+                return (T)(object)decimal.Parse(
+                    av.GetString(DynamoKind.N),
+                    CultureInfo.InvariantCulture
+                );
             if (underlyingType == typeof(byte))
-                return (T)
-                    (object)byte.Parse(av.GetString(DynamoKind.N), CultureInfo.InvariantCulture);
+                return (T)(object)byte.Parse(
+                    av.GetString(DynamoKind.N),
+                    CultureInfo.InvariantCulture
+                );
             if (underlyingType == typeof(short))
-                return (T)
-                    (object)short.Parse(av.GetString(DynamoKind.N), CultureInfo.InvariantCulture);
+                return (T)(object)short.Parse(
+                    av.GetString(DynamoKind.N),
+                    CultureInfo.InvariantCulture
+                );
 
             // DateTime
             if (underlyingType == typeof(DateTime))
-                return (T)
-                    (object)
-                        DateTime.Parse(av.GetString(DynamoKind.S), CultureInfo.InvariantCulture);
+                return (T)(object)DateTime.Parse(
+                    av.GetString(DynamoKind.S),
+                    CultureInfo.InvariantCulture
+                );
 
             // DateTimeOffset
             if (underlyingType == typeof(DateTimeOffset))
-                return (T)
-                    (object)
-                        DateTimeOffset.Parse(
-                            av.GetString(DynamoKind.S),
-                            CultureInfo.InvariantCulture
-                        );
+                return (T)(object)DateTimeOffset.Parse(
+                    av.GetString(DynamoKind.S),
+                    CultureInfo.InvariantCulture
+                );
 
             // TimeSpan
             if (underlyingType == typeof(TimeSpan))
-                return (T)
-                    (object)
-                        TimeSpan.Parse(av.GetString(DynamoKind.S), CultureInfo.InvariantCulture);
+                return (T)(object)TimeSpan.Parse(
+                    av.GetString(DynamoKind.S),
+                    CultureInfo.InvariantCulture
+                );
 
             // Guid
             if (underlyingType == typeof(Guid))
@@ -759,6 +738,20 @@ public static class CollectionAttributeValueExtensions
             // byte[]
             if (underlyingType == typeof(byte[]))
                 return (T)(object)(av.B?.ToArray() ?? []);
+
+            // MemoryStream
+            if (underlyingType == typeof(MemoryStream))
+                return (T)(object)BinaryAttributeValueExtensions.CreateBinaryMemoryStream(
+                    av,
+                    DynamoKind.B
+                );
+
+            // Stream
+            if (underlyingType == typeof(Stream))
+                return (T)(object)BinaryAttributeValueExtensions.CreateBinaryMemoryStream(
+                    av,
+                    DynamoKind.B
+                );
 
             throw new NotSupportedException(
                 $"Type {typeof(T)} is not supported as a collection element"
@@ -788,50 +781,40 @@ public static class CollectionAttributeValueExtensions
 
             // Numeric types
             if (underlyingType == typeof(int))
-                return ((int)(object)value)
-                    .ToString(CultureInfo.InvariantCulture)
+                return ((int)(object)value).ToString(CultureInfo.InvariantCulture)
                     .ToAttributeValue(DynamoKind.N);
             if (underlyingType == typeof(long))
-                return ((long)(object)value)
-                    .ToString(CultureInfo.InvariantCulture)
+                return ((long)(object)value).ToString(CultureInfo.InvariantCulture)
                     .ToAttributeValue(DynamoKind.N);
             if (underlyingType == typeof(float))
-                return ((float)(object)value)
-                    .ToString(CultureInfo.InvariantCulture)
+                return ((float)(object)value).ToString(CultureInfo.InvariantCulture)
                     .ToAttributeValue(DynamoKind.N);
             if (underlyingType == typeof(double))
-                return ((double)(object)value)
-                    .ToString(CultureInfo.InvariantCulture)
+                return ((double)(object)value).ToString(CultureInfo.InvariantCulture)
                     .ToAttributeValue(DynamoKind.N);
             if (underlyingType == typeof(decimal))
-                return ((decimal)(object)value)
-                    .ToString(CultureInfo.InvariantCulture)
+                return ((decimal)(object)value).ToString(CultureInfo.InvariantCulture)
                     .ToAttributeValue(DynamoKind.N);
             if (underlyingType == typeof(byte))
-                return ((byte)(object)value)
-                    .ToString(CultureInfo.InvariantCulture)
+                return ((byte)(object)value).ToString(CultureInfo.InvariantCulture)
                     .ToAttributeValue(DynamoKind.N);
             if (underlyingType == typeof(short))
-                return ((short)(object)value)
-                    .ToString(CultureInfo.InvariantCulture)
+                return ((short)(object)value).ToString(CultureInfo.InvariantCulture)
                     .ToAttributeValue(DynamoKind.N);
 
             // DateTime
             if (underlyingType == typeof(DateTime))
-                return ((DateTime)(object)value)
-                    .ToString("O", CultureInfo.InvariantCulture)
+                return ((DateTime)(object)value).ToString("O", CultureInfo.InvariantCulture)
                     .ToAttributeValue(DynamoKind.S);
 
             // DateTimeOffset
             if (underlyingType == typeof(DateTimeOffset))
-                return ((DateTimeOffset)(object)value)
-                    .ToString("O", CultureInfo.InvariantCulture)
+                return ((DateTimeOffset)(object)value).ToString("O", CultureInfo.InvariantCulture)
                     .ToAttributeValue(DynamoKind.S);
 
             // TimeSpan
             if (underlyingType == typeof(TimeSpan))
-                return ((TimeSpan)(object)value)
-                    .ToString("c", CultureInfo.InvariantCulture)
+                return ((TimeSpan)(object)value).ToString("c", CultureInfo.InvariantCulture)
                     .ToAttributeValue(DynamoKind.S);
 
             // Guid
@@ -840,7 +823,24 @@ public static class CollectionAttributeValueExtensions
 
             // byte[]
             if (underlyingType == typeof(byte[]))
-                return new AttributeValue { B = new MemoryStream((byte[])(object)value) };
+                return BinaryAttributeValueExtensions.ToBinaryAttributeValue(
+                    (byte[])(object)value,
+                    DynamoKind.B
+                );
+
+            // MemoryStream
+            if (underlyingType == typeof(MemoryStream))
+                return BinaryAttributeValueExtensions.ToBinaryAttributeValue(
+                    (MemoryStream)(object)value,
+                    DynamoKind.B
+                );
+
+            // Stream
+            if (underlyingType == typeof(Stream))
+                return BinaryAttributeValueExtensions.ToBinaryAttributeValue(
+                    (Stream)(object)value,
+                    DynamoKind.B
+                );
 
             // Enum
             return underlyingType.IsEnum
@@ -854,8 +854,7 @@ public static class CollectionAttributeValueExtensions
         /// Parses a number from DynamoDB's string representation.
         /// Uses InvariantCulture for culture-safe parsing.
         /// </summary>
-        private static T ParseNumber<T>(string s)
-            where T : struct
+        private static T ParseNumber<T>(string s) where T : struct
         {
             if (typeof(T) == typeof(int))
                 return (T)(object)int.Parse(s, CultureInfo.InvariantCulture);
@@ -879,8 +878,7 @@ public static class CollectionAttributeValueExtensions
         /// Formats a number for DynamoDB's string representation.
         /// Uses InvariantCulture for culture-safe formatting.
         /// </summary>
-        private static string FormatNumber<T>(T value)
-            where T : struct
+        private static string FormatNumber<T>(T value) where T : struct
         {
             return value switch
             {

@@ -172,6 +172,9 @@ internal static class NestedObjectTypeAnalyzer
             return true;
         if (wellKnown.IsType(type, WellKnownTypeData.WellKnownType.System_Guid))
             return true;
+        var streamType = wellKnown.Get(WellKnownTypeData.WellKnownType.System_IO_Stream);
+        if (streamType is not null && type.IsAssignableTo(streamType, context))
+            return true;
 
         return false;
     }
@@ -478,6 +481,18 @@ internal static class NestedObjectTypeAnalyzer
                 [$"\"{fieldOptions?.Format ?? context.MapperOptions.TimeSpanFormat}\""],
                 [$"\"{fieldOptions?.Format ?? context.MapperOptions.TimeSpanFormat}\""]
             ),
+            IArrayTypeSymbol { ElementType.SpecialType: SpecialType.System_Byte } =>
+                new TypeMappingStrategy("Binary", "", nullableModifier, [], []),
+            INamedTypeSymbol t when
+                context.WellKnownTypes.Get(WellKnownTypeData.WellKnownType.System_IO_Stream) is
+                    { } streamType &&
+                t.IsAssignableTo(streamType, context) => new TypeMappingStrategy(
+                    "Stream",
+                    "",
+                    nullableModifier,
+                    [],
+                    []
+                ),
             INamedTypeSymbol { TypeKind: TypeKind.Enum } enumType => CreateEnumStrategy(
                 enumType,
                 isNullable,

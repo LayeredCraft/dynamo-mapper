@@ -65,6 +65,20 @@ internal static class TypeMappingStrategyResolver
             return CreateCollectionStrategy(collectionInfo, analysis, context);
         }
 
+        if (analysis.UnderlyingType is IArrayTypeSymbol
+            {
+                ElementType.SpecialType: SpecialType.System_Byte,
+            })
+            return DiagnosticResult<TypeMappingStrategy?>.Success(
+                CreateStrategy("Binary", analysis.Nullability)
+            );
+
+        if (analysis.UnderlyingType is INamedTypeSymbol namedType &&
+            namedType.IsAssignableTo(WellKnownType.System_IO_Stream, context))
+            return DiagnosticResult<TypeMappingStrategy?>.Success(
+                CreateStrategy("Stream", analysis.Nullability)
+            );
+
         // Try nested object analysis before scalar type resolution
         // Include the root model type in the ancestor chain to detect self-referencing cycles
         var nestedContext = NestedAnalysisContext.Create(context, context.MapperRegistry);

@@ -31,6 +31,9 @@ internal static class CollectionTypeAnalyzer
         // Check for arrays first
         if (type is IArrayTypeSymbol arrayType)
         {
+            if (arrayType.ElementType.SpecialType == SpecialType.System_Byte)
+                return null;
+
             var elementType = arrayType.ElementType;
             return new CollectionInfo(
                 Category: CollectionCategory.List,
@@ -219,6 +222,10 @@ internal static class CollectionTypeAnalyzer
 
             // Enums
             if (namedType.TypeKind == TypeKind.Enum)
+                return new ElementTypeValidationResult(true, null, null);
+
+            var streamType = context.WellKnownTypes.Get(WellKnownType.System_IO_Stream);
+            if (streamType is not null && namedType.IsAssignableTo(streamType, context))
                 return new ElementTypeValidationResult(true, null, null);
         }
 

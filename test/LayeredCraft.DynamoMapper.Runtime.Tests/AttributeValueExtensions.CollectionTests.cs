@@ -1,5 +1,4 @@
 using Amazon.DynamoDBv2.Model;
-using LayeredCraft.DynamoMapper.Runtime;
 
 namespace LayeredCraft.DynamoMapper.Runtime.Tests;
 
@@ -25,10 +24,8 @@ public class AttributeValueExtensionsCollectionTests
     public void GetList_ReturnsEmptyList_WhenValueIsNull()
     {
         // Arrange
-        var attributes = new Dictionary<string, AttributeValue>
-        {
-            ["tags"] = new() { NULL = true },
-        };
+        var attributes =
+            new Dictionary<string, AttributeValue> { ["tags"] = new() { NULL = true } };
 
         // Act
         var result = attributes.GetList<string>("tags");
@@ -42,10 +39,11 @@ public class AttributeValueExtensionsCollectionTests
     public void GetList_ReturnsEmptyList_WhenListIsEmpty()
     {
         // Arrange
-        var attributes = new Dictionary<string, AttributeValue>
-        {
-            ["tags"] = new() { L = new List<AttributeValue>() },
-        };
+        var attributes =
+            new Dictionary<string, AttributeValue>
+            {
+                ["tags"] = new() { L = new List<AttributeValue>() },
+            };
 
         // Act
         var result = attributes.GetList<string>("tags");
@@ -59,18 +57,21 @@ public class AttributeValueExtensionsCollectionTests
     public void GetList_ReturnsListOfStrings_WhenListContainsValues()
     {
         // Arrange
-        var attributes = new Dictionary<string, AttributeValue>
-        {
-            ["tags"] = new()
+        var attributes =
+            new Dictionary<string, AttributeValue>
             {
-                L = new List<AttributeValue>
-                {
-                    new() { S = "tag1" },
-                    new() { S = "tag2" },
-                    new() { S = "tag3" },
-                },
-            },
-        };
+                ["tags"] =
+                    new()
+                    {
+                        L =
+                            new List<AttributeValue>
+                            {
+                                new() { S = "tag1" },
+                                new() { S = "tag2" },
+                                new() { S = "tag3" },
+                            },
+                    },
+            };
 
         // Act
         var result = attributes.GetList<string>("tags");
@@ -86,18 +87,21 @@ public class AttributeValueExtensionsCollectionTests
     public void GetList_ReturnsListOfInts_WhenListContainsNumbers()
     {
         // Arrange
-        var attributes = new Dictionary<string, AttributeValue>
-        {
-            ["scores"] = new()
+        var attributes =
+            new Dictionary<string, AttributeValue>
             {
-                L = new List<AttributeValue>
-                {
-                    new() { N = "100" },
-                    new() { N = "200" },
-                    new() { N = "300" },
-                },
-            },
-        };
+                ["scores"] =
+                    new()
+                    {
+                        L =
+                            new List<AttributeValue>
+                            {
+                                new() { N = "100" },
+                                new() { N = "200" },
+                                new() { N = "300" },
+                            },
+                    },
+            };
 
         // Act
         var result = attributes.GetList<int>("scores");
@@ -113,17 +117,20 @@ public class AttributeValueExtensionsCollectionTests
     public void GetList_ReturnsListOfBinary_WhenListContainsBinaryValues()
     {
         // Arrange
-        var attributes = new Dictionary<string, AttributeValue>
-        {
-            ["payloads"] = new()
+        var attributes =
+            new Dictionary<string, AttributeValue>
             {
-                L = new List<AttributeValue>
-                {
-                    new() { B = new MemoryStream(new byte[] { 1, 2, 3 }) },
-                    new() { B = new MemoryStream(new byte[] { 4, 5, 6 }) },
-                },
-            },
-        };
+                ["payloads"] =
+                    new()
+                    {
+                        L =
+                            new List<AttributeValue>
+                            {
+                                new() { B = new MemoryStream(new byte[] { 1, 2, 3 }) },
+                                new() { B = new MemoryStream(new byte[] { 4, 5, 6 }) },
+                            },
+                    },
+            };
 
         // Act
         var result = attributes.GetList<byte[]>("payloads");
@@ -138,18 +145,21 @@ public class AttributeValueExtensionsCollectionTests
     public void GetList_HandlesNullableElements_WithNullValues()
     {
         // Arrange
-        var attributes = new Dictionary<string, AttributeValue>
-        {
-            ["scores"] = new()
+        var attributes =
+            new Dictionary<string, AttributeValue>
             {
-                L = new List<AttributeValue>
-                {
-                    new() { N = "100" },
-                    new() { NULL = true },
-                    new() { N = "300" },
-                },
-            },
-        };
+                ["scores"] =
+                    new()
+                    {
+                        L =
+                            new List<AttributeValue>
+                            {
+                                new() { N = "100" },
+                                new() { NULL = true },
+                                new() { N = "300" },
+                            },
+                    },
+            };
 
         // Act
         var result = attributes.GetList<int?>("scores");
@@ -178,10 +188,8 @@ public class AttributeValueExtensionsCollectionTests
     public void GetNullableList_ReturnsNull_WhenValueIsNull()
     {
         // Arrange
-        var attributes = new Dictionary<string, AttributeValue>
-        {
-            ["tags"] = new() { NULL = true },
-        };
+        var attributes =
+            new Dictionary<string, AttributeValue> { ["tags"] = new() { NULL = true } };
 
         // Act
         var result = attributes.GetNullableList<string>("tags");
@@ -264,6 +272,109 @@ public class AttributeValueExtensionsCollectionTests
 
         // Assert
         Assert.False(attributes.ContainsKey("tags"));
+    }
+
+    [Fact]
+    public void GetList_ReturnsMemoryStreams_WhenListContainsBinaryValues()
+    {
+        // Arrange
+        var attributes =
+            new Dictionary<string, AttributeValue>
+            {
+                ["payloads"] =
+                    new()
+                    {
+                        L =
+                            new List<AttributeValue>
+                            {
+                                new() { B = new MemoryStream(new byte[] { 1, 2, 3 }) },
+                                new() { B = new MemoryStream(new byte[] { 4, 5, 6 }) },
+                            },
+                    },
+            };
+
+        // Act
+        var result = attributes.GetList<MemoryStream>("payloads");
+
+        // Assert
+        Assert.Equal(2, result.Count);
+        Assert.Equal(new byte[] { 1, 2, 3 }, result[0].ToArray());
+        Assert.Equal(new byte[] { 4, 5, 6 }, result[1].ToArray());
+    }
+
+    [Fact]
+    public void SetList_SetsBinaryValues_WhenListContainsMemoryStreams()
+    {
+        // Arrange
+        var attributes = new Dictionary<string, AttributeValue>();
+        var payloads =
+            new List<MemoryStream> { new(new byte[] { 1, 2, 3 }), new(new byte[] { 4, 5, 6 }) };
+
+        // Act
+        attributes.SetList("payloads", payloads);
+
+        // Assert
+        Assert.True(attributes.ContainsKey("payloads"));
+        Assert.NotNull(attributes["payloads"].L);
+        Assert.Equal(2, attributes["payloads"].L.Count);
+        Assert.Equal(new byte[] { 1, 2, 3 }, attributes["payloads"].L[0].B!.ToArray());
+        Assert.Equal(new byte[] { 4, 5, 6 }, attributes["payloads"].L[1].B!.ToArray());
+    }
+
+    [Fact]
+    public void GetList_ReturnsStreams_WhenListContainsBinaryValues()
+    {
+        // Arrange
+        var attributes =
+            new Dictionary<string, AttributeValue>
+            {
+                ["payloads"] =
+                    new()
+                    {
+                        L =
+                            new List<AttributeValue>
+                            {
+                                new() { B = new MemoryStream(new byte[] { 7, 8, 9 }) },
+                                new()
+                                {
+                                    B = new MemoryStream(new byte[] { 10, 11, 12 }),
+                                },
+                            },
+                    },
+            };
+
+        // Act
+        var result = attributes.GetList<Stream>("payloads");
+
+        // Assert
+        Assert.Equal(2, result.Count);
+        Assert.IsType<MemoryStream>(result[0]);
+        Assert.IsType<MemoryStream>(result[1]);
+        Assert.Equal(new byte[] { 7, 8, 9 }, ((MemoryStream)result[0]).ToArray());
+        Assert.Equal(new byte[] { 10, 11, 12 }, ((MemoryStream)result[1]).ToArray());
+    }
+
+    [Fact]
+    public void SetList_SetsBinaryValues_WhenListContainsStreams()
+    {
+        // Arrange
+        var attributes = new Dictionary<string, AttributeValue>();
+        var payloads =
+            new List<Stream>
+            {
+                new MemoryStream(new byte[] { 7, 8, 9 }),
+                new MemoryStream(new byte[] { 10, 11, 12 }),
+            };
+
+        // Act
+        attributes.SetList("payloads", payloads);
+
+        // Assert
+        Assert.True(attributes.ContainsKey("payloads"));
+        Assert.NotNull(attributes["payloads"].L);
+        Assert.Equal(2, attributes["payloads"].L.Count);
+        Assert.Equal(new byte[] { 7, 8, 9 }, attributes["payloads"].L[0].B!.ToArray());
+        Assert.Equal(new byte[] { 10, 11, 12 }, attributes["payloads"].L[1].B!.ToArray());
     }
 
     [Fact]
@@ -351,10 +462,8 @@ public class AttributeValueExtensionsCollectionTests
     public void GetMap_ReturnsEmptyDictionary_WhenValueIsNull()
     {
         // Arrange
-        var attributes = new Dictionary<string, AttributeValue>
-        {
-            ["metadata"] = new() { NULL = true },
-        };
+        var attributes =
+            new Dictionary<string, AttributeValue> { ["metadata"] = new() { NULL = true } };
 
         // Act
         var result = attributes.GetMap<int>("metadata");
@@ -368,17 +477,20 @@ public class AttributeValueExtensionsCollectionTests
     public void GetMap_ReturnsDictionary_WhenMapContainsValues()
     {
         // Arrange
-        var attributes = new Dictionary<string, AttributeValue>
-        {
-            ["metadata"] = new()
+        var attributes =
+            new Dictionary<string, AttributeValue>
             {
-                M = new Dictionary<string, AttributeValue>
-                {
-                    ["count"] = new() { N = "42" },
-                    ["version"] = new() { N = "2" },
-                },
-            },
-        };
+                ["metadata"] =
+                    new()
+                    {
+                        M =
+                            new Dictionary<string, AttributeValue>
+                            {
+                                ["count"] = new() { N = "42" },
+                                ["version"] = new() { N = "2" },
+                            },
+                    },
+            };
 
         // Act
         var result = attributes.GetMap<int>("metadata");
@@ -455,12 +567,8 @@ public class AttributeValueExtensionsCollectionTests
     {
         // Arrange
         var attributes = new Dictionary<string, AttributeValue>();
-        var original = new Dictionary<string, int>
-        {
-            ["count"] = 42,
-            ["version"] = 2,
-            ["retries"] = 3,
-        };
+        var original =
+            new Dictionary<string, int> { ["count"] = 42, ["version"] = 2, ["retries"] = 3 };
 
         // Act
         attributes.SetMap("metadata", original);
@@ -475,12 +583,11 @@ public class AttributeValueExtensionsCollectionTests
     {
         // Arrange
         var attributes = new Dictionary<string, AttributeValue>();
-        var original = new Dictionary<string, string>
-        {
-            ["name"] = "John",
-            ["city"] = "Seattle",
-            ["country"] = "USA",
-        };
+        var original =
+            new Dictionary<string, string>
+            {
+                ["name"] = "John", ["city"] = "Seattle", ["country"] = "USA",
+            };
 
         // Act
         attributes.SetMap("attrs", original);
@@ -488,6 +595,29 @@ public class AttributeValueExtensionsCollectionTests
 
         // Assert
         Assert.Equal(original, result);
+    }
+
+    [Fact]
+    public void Map_RoundTrip_WithStreams()
+    {
+        // Arrange
+        var attributes = new Dictionary<string, AttributeValue>();
+        var original =
+            new Dictionary<string, Stream>
+            {
+                ["thumbnail"] = new MemoryStream(new byte[] { 1, 2, 3 }),
+                ["full"] = new MemoryStream(new byte[] { 4, 5, 6 }),
+            };
+
+        // Act
+        attributes.SetMap("payloads", original);
+        var result = attributes.GetMap<Stream>("payloads");
+
+        // Assert
+        Assert.Equal(original.Keys.OrderBy(key => key), result.Keys.OrderBy(key => key));
+        Assert.All(result.Values, value => Assert.IsType<MemoryStream>(value));
+        Assert.Equal(new byte[] { 1, 2, 3 }, ((MemoryStream)result["thumbnail"]).ToArray());
+        Assert.Equal(new byte[] { 4, 5, 6 }, ((MemoryStream)result["full"]).ToArray());
     }
 
     // ==================== STRING SET TESTS ====================
@@ -510,10 +640,8 @@ public class AttributeValueExtensionsCollectionTests
     public void GetStringSet_ReturnsEmptySet_WhenValueIsNull()
     {
         // Arrange
-        var attributes = new Dictionary<string, AttributeValue>
-        {
-            ["categories"] = new() { NULL = true },
-        };
+        var attributes =
+            new Dictionary<string, AttributeValue> { ["categories"] = new() { NULL = true } };
 
         // Act
         var result = attributes.GetStringSet("categories");
@@ -527,13 +655,12 @@ public class AttributeValueExtensionsCollectionTests
     public void GetStringSet_ReturnsHashSet_WhenSetContainsValues()
     {
         // Arrange
-        var attributes = new Dictionary<string, AttributeValue>
-        {
-            ["categories"] = new()
+        var attributes =
+            new Dictionary<string, AttributeValue>
             {
-                SS = new List<string> { "electronics", "computers", "laptops" },
-            },
-        };
+                ["categories"] =
+                    new() { SS = new List<string> { "electronics", "computers", "laptops" } },
+            };
 
         // Act
         var result = attributes.GetStringSet("categories");
@@ -655,13 +782,23 @@ public class AttributeValueExtensionsCollectionTests
     public void GetNumberSet_ReturnsHashSet_WhenSetContainsInts()
     {
         // Arrange
-        var attributes = new Dictionary<string, AttributeValue>
-        {
-            ["numbers"] = new()
+        var attributes =
+            new Dictionary<string, AttributeValue>
             {
-                NS = new List<string> { "1", "2", "3", "5", "8" },
-            },
-        };
+                ["numbers"] =
+                new()
+                {
+                    NS =
+                        new List<string>
+                        {
+                            "1",
+                            "2",
+                            "3",
+                            "5",
+                            "8",
+                        },
+                },
+            };
 
         // Act
         var result = attributes.GetNumberSet<int>("numbers");
@@ -679,13 +816,11 @@ public class AttributeValueExtensionsCollectionTests
     public void GetNumberSet_ReturnsHashSet_WhenSetContainsDoubles()
     {
         // Arrange
-        var attributes = new Dictionary<string, AttributeValue>
-        {
-            ["prices"] = new()
+        var attributes =
+            new Dictionary<string, AttributeValue>
             {
-                NS = new List<string> { "19.99", "29.99", "39.99" },
-            },
-        };
+                ["prices"] = new() { NS = new List<string> { "19.99", "29.99", "39.99" } },
+            };
 
         // Act
         var result = attributes.GetNumberSet<double>("prices");
@@ -702,7 +837,15 @@ public class AttributeValueExtensionsCollectionTests
     {
         // Arrange
         var attributes = new Dictionary<string, AttributeValue>();
-        var numbers = new List<int> { 1, 2, 3, 5, 8 };
+        var numbers =
+            new List<int>
+            {
+                1,
+                2,
+                3,
+                5,
+                8,
+            };
 
         // Act
         attributes.SetNumberSet("numbers", numbers);
@@ -718,7 +861,16 @@ public class AttributeValueExtensionsCollectionTests
     {
         // Arrange
         var attributes = new Dictionary<string, AttributeValue>();
-        var numbers = new List<int> { 1, 2, 3, 2, 5, 1 };
+        var numbers =
+            new List<int>
+            {
+                1,
+                2,
+                3,
+                2,
+                5,
+                1,
+            };
 
         // Act
         attributes.SetNumberSet("numbers", numbers);
@@ -747,7 +899,16 @@ public class AttributeValueExtensionsCollectionTests
     {
         // Arrange
         var attributes = new Dictionary<string, AttributeValue>();
-        var original = new HashSet<int> { 1, 2, 3, 5, 8, 13 };
+        var original =
+            new HashSet<int>
+            {
+                1,
+                2,
+                3,
+                5,
+                8,
+                13,
+            };
 
         // Act
         attributes.SetNumberSet("numbers", original);
@@ -792,10 +953,8 @@ public class AttributeValueExtensionsCollectionTests
     public void GetBinarySet_ReturnsEmptySet_WhenValueIsNull()
     {
         // Arrange
-        var attributes = new Dictionary<string, AttributeValue>
-        {
-            ["payloads"] = new() { NULL = true },
-        };
+        var attributes =
+            new Dictionary<string, AttributeValue> { ["payloads"] = new() { NULL = true } };
 
         // Act
         var result = attributes.GetBinarySet("payloads");
@@ -809,17 +968,20 @@ public class AttributeValueExtensionsCollectionTests
     public void GetBinarySet_ReturnsHashSet_WhenSetContainsValues()
     {
         // Arrange
-        var attributes = new Dictionary<string, AttributeValue>
-        {
-            ["payloads"] = new()
+        var attributes =
+            new Dictionary<string, AttributeValue>
             {
-                BS = new List<MemoryStream>
-                {
-                    new(new byte[] { 1, 2, 3 }),
-                    new(new byte[] { 4, 5, 6 }),
-                },
-            },
-        };
+                ["payloads"] =
+                    new()
+                    {
+                        BS =
+                            new List<MemoryStream>
+                            {
+                                new(new byte[] { 1, 2, 3 }),
+                                new(new byte[] { 4, 5, 6 }),
+                            },
+                    },
+            };
 
         // Act
         var result = attributes.GetBinarySet("payloads");
@@ -834,10 +996,8 @@ public class AttributeValueExtensionsCollectionTests
     public void GetNullableBinarySet_ReturnsNull_WhenValueIsNull()
     {
         // Arrange
-        var attributes = new Dictionary<string, AttributeValue>
-        {
-            ["payloads"] = new() { NULL = true },
-        };
+        var attributes =
+            new Dictionary<string, AttributeValue> { ["payloads"] = new() { NULL = true } };
 
         // Act
         var result = attributes.GetNullableBinarySet("payloads");
@@ -897,16 +1057,14 @@ public class AttributeValueExtensionsCollectionTests
         // Arrange
         var attributes = new Dictionary<string, AttributeValue>();
         var original = new List<byte[]> { new byte[] { 7, 8, 9 }, new byte[] { 10, 11, 12 } };
-        var expected = original
-            .Select(bytes => string.Join(",", bytes))
-            .ToHashSet(StringComparer.Ordinal);
+        var expected =
+            original.Select(bytes => string.Join(",", bytes)).ToHashSet(StringComparer.Ordinal);
 
         // Act
         attributes.SetBinarySet("payloads", original);
         var result = attributes.GetBinarySet("payloads");
-        var actual = result
-            .Select(bytes => string.Join(",", bytes))
-            .ToHashSet(StringComparer.Ordinal);
+        var actual =
+            result.Select(bytes => string.Join(",", bytes)).ToHashSet(StringComparer.Ordinal);
 
         // Assert
         Assert.Equal(expected, actual);
@@ -921,8 +1079,7 @@ public class AttributeValueExtensionsCollectionTests
         var attributes = new Dictionary<string, AttributeValue>();
 
         // Act
-        attributes
-            .SetList("tags", new List<string> { "tag1", "tag2" })
+        attributes.SetList("tags", new List<string> { "tag1", "tag2" })
             .SetMap("metadata", new Dictionary<string, int> { ["count"] = 42 })
             .SetStringSet("categories", new List<string> { "cat1", "cat2" })
             .SetNumberSet("numbers", new List<int> { 1, 2, 3 })

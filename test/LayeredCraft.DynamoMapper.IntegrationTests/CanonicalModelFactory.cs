@@ -24,7 +24,33 @@ internal static class CanonicalModelFactory
         Tags = ["alpha", "beta", "gamma"],
         Scores = [7, 8, 9],
         Aliases = ["first", "second"],
+        RelatedIds =
+        [
+            Guid.Parse("12121212-3434-5656-7878-909090909090"),
+            Guid.Parse("21212121-4343-6565-8787-010101010101"),
+        ],
+        LegacyIds =
+        [
+            Guid.Parse("31313131-4545-6767-8989-121212121212"),
+            Guid.Parse("41414141-5656-7878-9090-232323232323"),
+        ],
+        AlternateIds =
+        [
+            Guid.Parse("51515151-6767-8989-0101-343434343434"),
+            Guid.Parse("61616161-7878-9090-1212-454545454545"),
+        ],
+        UniqueIds =
+        [
+            Guid.Parse("91919191-0101-2323-4545-787878787878"),
+            Guid.Parse("a1a1a1a1-b2b2-c3c3-d4d4-e5e5e5e5e5e5"),
+        ],
         PriceByMarket = new Dictionary<string, decimal> { ["us"] = 12.34m, ["eu"] = 56.78m },
+        ContactIdsByRole =
+            new Dictionary<string, Guid>
+            {
+                ["owner"] = Guid.Parse("71717171-8989-0101-2323-565656565656"),
+                ["backup"] = Guid.Parse("81818181-9090-1212-3434-676767676767"),
+            },
         Labels = ["new", "sale"],
         ImportanceCodes = [10, 20],
         PayloadVersions = [new byte[] { 0, 1, 2 }, new byte[] { 3, 4, 5 }],
@@ -129,6 +155,42 @@ internal static class CanonicalModelFactory
                         new AttributeValue { S = "second" },
                     ],
                 },
+            ["relatedIds"] =
+                new()
+                {
+                    L =
+                    [
+                        new AttributeValue { S = "12121212-3434-5656-7878-909090909090" },
+                        new AttributeValue { S = "21212121-4343-6565-8787-010101010101" },
+                    ],
+                },
+            ["legacyIds"] =
+                new()
+                {
+                    L =
+                    [
+                        new AttributeValue { S = "31313131-4545-6767-8989-121212121212" },
+                        new AttributeValue { S = "41414141-5656-7878-9090-232323232323" },
+                    ],
+                },
+            ["alternateIds"] =
+                new()
+                {
+                    L =
+                    [
+                        new AttributeValue { S = "51515151-6767-8989-0101-343434343434" },
+                        new AttributeValue { S = "61616161-7878-9090-1212-454545454545" },
+                    ],
+                },
+            ["uniqueIds"] =
+                new()
+                {
+                    L =
+                    [
+                        new AttributeValue { S = "91919191-0101-2323-4545-787878787878" },
+                        new AttributeValue { S = "a1a1a1a1-b2b2-c3c3-d4d4-e5e5e5e5e5e5" },
+                    ],
+                },
             ["priceByMarket"] =
                 new()
                 {
@@ -137,6 +199,18 @@ internal static class CanonicalModelFactory
                         {
                             ["us"] = new() { N = "12.34" },
                             ["eu"] = new() { N = "56.78" },
+                        },
+                },
+            ["contactIdsByRole"] =
+                new()
+                {
+                    M =
+                        new Dictionary<string, AttributeValue>
+                        {
+                            ["owner"] =
+                                new() { S = "71717171-8989-0101-2323-565656565656" },
+                            ["backup"] =
+                                new() { S = "81818181-9090-1212-3434-676767676767" },
                         },
                 },
             ["labels"] = new() { SS = ["new", "sale"] },

@@ -35,6 +35,13 @@ public static class CollectionAttributeValueExtensions
             string key, out List<T> value,
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.L
+        ) => attributes.TryGetList(key, out value, null, requiredness, kind);
+
+        /// <summary>Tries to get a list of elements from the attribute dictionary using an exact format.</summary>
+        public bool TryGetList<T>(
+            string key, out List<T> value, string? format,
+            Requiredness requiredness = Requiredness.InferFromNullability,
+            DynamoKind kind = DynamoKind.L
         )
         {
             value = [];
@@ -46,7 +53,13 @@ public static class CollectionAttributeValueExtensions
 
             var list = attributeValue!.L ?? [];
             value =
-                list.Select(Dictionary<string, AttributeValue>.ConvertFromAttributeValue<T>)
+                list.Select(
+                        av =>
+                            Dictionary<string, AttributeValue>.ConvertFromAttributeValue<T>(
+                                av,
+                                format
+                            )
+                    )
                     .ToList();
             return true;
         }
@@ -67,6 +80,13 @@ public static class CollectionAttributeValueExtensions
             DynamoKind kind = DynamoKind.L
         ) => attributes.TryGetList<T>(key, out var value, requiredness, kind) ? value : [];
 
+        /// <summary>Gets a list of elements from the attribute dictionary using an exact format.</summary>
+        public List<T> GetList<T>(
+            string key, string? format,
+            Requiredness requiredness = Requiredness.InferFromNullability,
+            DynamoKind kind = DynamoKind.L
+        ) => attributes.TryGetList<T>(key, out var value, format, requiredness, kind) ? value : [];
+
         /// <summary>Tries to get a nullable list of elements from the attribute dictionary.</summary>
         /// <param name="key">The attribute key to retrieve.</param>
         /// <param name="value">The nullable list value when found.</param>
@@ -83,6 +103,16 @@ public static class CollectionAttributeValueExtensions
             string key, out List<T>? value,
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.L
+        ) => attributes.TryGetNullableList(key, out value, null, requiredness, kind);
+
+        /// <summary>
+        ///     Tries to get a nullable list of elements from the attribute dictionary using an exact
+        ///     format.
+        /// </summary>
+        public bool TryGetNullableList<T>(
+            string key, out List<T>? value, string? format,
+            Requiredness requiredness = Requiredness.InferFromNullability,
+            DynamoKind kind = DynamoKind.L
         )
         {
             value = null;
@@ -94,7 +124,13 @@ public static class CollectionAttributeValueExtensions
 
             var list = attributeValue!.L ?? [];
             value =
-                list.Select(Dictionary<string, AttributeValue>.ConvertFromAttributeValue<T>)
+                list.Select(
+                        av =>
+                            Dictionary<string, AttributeValue>.ConvertFromAttributeValue<T>(
+                                av,
+                                format
+                            )
+                    )
                     .ToList();
             return true;
         }
@@ -117,9 +153,24 @@ public static class CollectionAttributeValueExtensions
             ? value
             : null;
 
+        /// <summary>Gets a nullable list from the attribute dictionary using an exact format.</summary>
+        public List<T>? GetNullableList<T>(
+            string key, string? format,
+            Requiredness requiredness = Requiredness.InferFromNullability,
+            DynamoKind kind = DynamoKind.L
+        ) => attributes.TryGetNullableList<T>(key, out var value, format, requiredness, kind)
+            ? value
+            : null;
+
         /// <summary>Sets a list in the attribute dictionary.</summary>
         public Dictionary<string, AttributeValue> SetList<T>(
             string key, IEnumerable<T>? value, bool omitEmptyStrings = false,
+            bool omitNullStrings = true, DynamoKind kind = DynamoKind.L
+        ) => attributes.SetList(key, value, null, omitEmptyStrings, omitNullStrings, kind);
+
+        /// <summary>Sets a list in the attribute dictionary using an exact element format.</summary>
+        public Dictionary<string, AttributeValue> SetList<T>(
+            string key, IEnumerable<T>? value, string? format, bool omitEmptyStrings = false,
             bool omitNullStrings = true, DynamoKind kind = DynamoKind.L
         )
         {
@@ -133,7 +184,14 @@ public static class CollectionAttributeValueExtensions
             }
 
             var list =
-                value.Select(Dictionary<string, AttributeValue>.ConvertToAttributeValue).ToList();
+                value.Select(
+                        element =>
+                            Dictionary<string, AttributeValue>.ConvertToAttributeValue(
+                                element,
+                                format
+                            )
+                    )
+                    .ToList();
 
             // Empty lists ARE allowed in DynamoDB - respect omitEmptyStrings flag
             if (list.Count == 0 && omitEmptyStrings)
@@ -161,6 +219,13 @@ public static class CollectionAttributeValueExtensions
             string key, out Dictionary<string, T> value,
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.M
+        ) => attributes.TryGetMap(key, out value, null, requiredness, kind);
+
+        /// <summary>Tries to get a map from the attribute dictionary using an exact element format.</summary>
+        public bool TryGetMap<T>(
+            string key, out Dictionary<string, T> value, string? format,
+            Requiredness requiredness = Requiredness.InferFromNullability,
+            DynamoKind kind = DynamoKind.M
         )
         {
             value = new Dictionary<string, T>();
@@ -175,7 +240,10 @@ public static class CollectionAttributeValueExtensions
                 map.ToDictionary(
                     kvp => kvp.Key,
                     kvp =>
-                        Dictionary<string, AttributeValue>.ConvertFromAttributeValue<T>(kvp.Value)
+                        Dictionary<string, AttributeValue>.ConvertFromAttributeValue<T>(
+                            kvp.Value,
+                            format
+                        )
                 );
             return true;
         }
@@ -198,6 +266,15 @@ public static class CollectionAttributeValueExtensions
             ? value
             : new Dictionary<string, T>();
 
+        /// <summary>Gets a map from the attribute dictionary using an exact element format.</summary>
+        public Dictionary<string, T> GetMap<T>(
+            string key, string? format,
+            Requiredness requiredness = Requiredness.InferFromNullability,
+            DynamoKind kind = DynamoKind.M
+        ) => attributes.TryGetMap<T>(key, out var value, format, requiredness, kind)
+            ? value
+            : new Dictionary<string, T>();
+
         /// <summary>Tries to get a nullable map from the attribute dictionary.</summary>
         /// <param name="key">The attribute key to retrieve.</param>
         /// <param name="value">The nullable map value when found.</param>
@@ -214,6 +291,13 @@ public static class CollectionAttributeValueExtensions
             string key, out Dictionary<string, T>? value,
             Requiredness requiredness = Requiredness.InferFromNullability,
             DynamoKind kind = DynamoKind.M
+        ) => attributes.TryGetNullableMap(key, out value, null, requiredness, kind);
+
+        /// <summary>Tries to get a nullable map from the attribute dictionary using an exact element format.</summary>
+        public bool TryGetNullableMap<T>(
+            string key, out Dictionary<string, T>? value, string? format,
+            Requiredness requiredness = Requiredness.InferFromNullability,
+            DynamoKind kind = DynamoKind.M
         )
         {
             value = null;
@@ -228,7 +312,10 @@ public static class CollectionAttributeValueExtensions
                 map.ToDictionary(
                     kvp => kvp.Key,
                     kvp =>
-                        Dictionary<string, AttributeValue>.ConvertFromAttributeValue<T>(kvp.Value)
+                        Dictionary<string, AttributeValue>.ConvertFromAttributeValue<T>(
+                            kvp.Value,
+                            format
+                        )
                 );
             return true;
         }
@@ -249,10 +336,26 @@ public static class CollectionAttributeValueExtensions
             DynamoKind kind = DynamoKind.M
         ) => attributes.TryGetNullableMap<T>(key, out var value, requiredness, kind) ? value : null;
 
+        /// <summary>Gets a nullable map from the attribute dictionary using an exact element format.</summary>
+        public Dictionary<string, T>? GetNullableMap<T>(
+            string key, string? format,
+            Requiredness requiredness = Requiredness.InferFromNullability,
+            DynamoKind kind = DynamoKind.M
+        ) => attributes.TryGetNullableMap<T>(key, out var value, format, requiredness, kind)
+            ? value
+            : null;
+
         /// <summary>Sets a map in the attribute dictionary.</summary>
         public Dictionary<string, AttributeValue> SetMap<T>(
             string key, IDictionary<string, T>? value, bool omitEmptyStrings = false,
             bool omitNullStrings = true, DynamoKind kind = DynamoKind.M
+        ) => attributes.SetMap(key, value, null, omitEmptyStrings, omitNullStrings, kind);
+
+        /// <summary>Sets a map in the attribute dictionary using an exact element format.</summary>
+        public Dictionary<string, AttributeValue> SetMap<T>(
+            string key, IDictionary<string, T>? value, string? format,
+            bool omitEmptyStrings = false, bool omitNullStrings = true,
+            DynamoKind kind = DynamoKind.M
         )
         {
             if (value is null && omitNullStrings)
@@ -267,7 +370,11 @@ public static class CollectionAttributeValueExtensions
             var map =
                 value.ToDictionary(
                     kvp => kvp.Key,
-                    kvp => Dictionary<string, AttributeValue>.ConvertToAttributeValue(kvp.Value)
+                    kvp =>
+                        Dictionary<string, AttributeValue>.ConvertToAttributeValue(
+                            kvp.Value,
+                            format
+                        )
                 );
 
             // Empty maps ARE allowed in DynamoDB - respect omitEmptyStrings flag
@@ -650,7 +757,7 @@ public static class CollectionAttributeValueExtensions
         /// Converts an AttributeValue to a strongly-typed value.
         /// Handles NULL AttributeValues for nullable elements.
         /// </summary>
-        private static T ConvertFromAttributeValue<T>(AttributeValue av)
+        private static T ConvertFromAttributeValue<T>(AttributeValue av, string? format = null)
         {
             // Handle NULL AttributeValues (for nullable elements in collections)
             if (av.NULL is true)
@@ -708,28 +815,41 @@ public static class CollectionAttributeValueExtensions
 
             // DateTime
             if (underlyingType == typeof(DateTime))
-                return (T)(object)DateTime.Parse(
-                    av.GetString(DynamoKind.S),
-                    CultureInfo.InvariantCulture
-                );
+                return (T)(object)(format is null
+                    ? DateTime.Parse(av.GetString(DynamoKind.S), CultureInfo.InvariantCulture)
+                    : DateTime.ParseExact(
+                        av.GetString(DynamoKind.S),
+                        format,
+                        CultureInfo.InvariantCulture,
+                        DateTimeStyles.RoundtripKind
+                    ));
 
             // DateTimeOffset
             if (underlyingType == typeof(DateTimeOffset))
-                return (T)(object)DateTimeOffset.Parse(
-                    av.GetString(DynamoKind.S),
-                    CultureInfo.InvariantCulture
-                );
+                return (T)(object)(format is null
+                    ? DateTimeOffset.Parse(av.GetString(DynamoKind.S), CultureInfo.InvariantCulture)
+                    : DateTimeOffset.ParseExact(
+                        av.GetString(DynamoKind.S),
+                        format,
+                        CultureInfo.InvariantCulture,
+                        DateTimeStyles.RoundtripKind
+                    ));
 
             // TimeSpan
             if (underlyingType == typeof(TimeSpan))
-                return (T)(object)TimeSpan.Parse(
-                    av.GetString(DynamoKind.S),
-                    CultureInfo.InvariantCulture
-                );
+                return (T)(object)(format is null
+                    ? TimeSpan.Parse(av.GetString(DynamoKind.S), CultureInfo.InvariantCulture)
+                    : TimeSpan.ParseExact(
+                        av.GetString(DynamoKind.S),
+                        format,
+                        CultureInfo.InvariantCulture
+                    ));
 
             // Guid
             if (underlyingType == typeof(Guid))
-                return (T)(object)Guid.Parse(av.GetString(DynamoKind.S));
+                return (T)(object)(format is null
+                    ? Guid.Parse(av.GetString(DynamoKind.S))
+                    : Guid.ParseExact(av.GetString(DynamoKind.S), format));
 
             // Enum
             if (underlyingType.IsEnum)
@@ -762,7 +882,7 @@ public static class CollectionAttributeValueExtensions
         /// Converts a strongly-typed value to an AttributeValue.
         /// Handles null values by creating NULL AttributeValues.
         /// </summary>
-        private static AttributeValue ConvertToAttributeValue<T>(T? value)
+        private static AttributeValue ConvertToAttributeValue<T>(T? value, string? format = null)
         {
             // Handle null values (for nullable elements in collections)
             if (value is null)
@@ -804,22 +924,31 @@ public static class CollectionAttributeValueExtensions
 
             // DateTime
             if (underlyingType == typeof(DateTime))
-                return ((DateTime)(object)value).ToString("O", CultureInfo.InvariantCulture)
+                return ((DateTime)(object)value).ToString(
+                        format ?? "O",
+                        CultureInfo.InvariantCulture
+                    )
                     .ToAttributeValue(DynamoKind.S);
 
             // DateTimeOffset
             if (underlyingType == typeof(DateTimeOffset))
-                return ((DateTimeOffset)(object)value).ToString("O", CultureInfo.InvariantCulture)
+                return ((DateTimeOffset)(object)value).ToString(
+                        format ?? "O",
+                        CultureInfo.InvariantCulture
+                    )
                     .ToAttributeValue(DynamoKind.S);
 
             // TimeSpan
             if (underlyingType == typeof(TimeSpan))
-                return ((TimeSpan)(object)value).ToString("c", CultureInfo.InvariantCulture)
+                return ((TimeSpan)(object)value).ToString(
+                        format ?? "c",
+                        CultureInfo.InvariantCulture
+                    )
                     .ToAttributeValue(DynamoKind.S);
 
             // Guid
             if (underlyingType == typeof(Guid))
-                return ((Guid)(object)value).ToString().ToAttributeValue(DynamoKind.S);
+                return ((Guid)(object)value).ToString(format ?? "D").ToAttributeValue(DynamoKind.S);
 
             // byte[]
             if (underlyingType == typeof(byte[]))
@@ -844,7 +973,9 @@ public static class CollectionAttributeValueExtensions
 
             // Enum
             return underlyingType.IsEnum
-                ? (value.ToString() ?? string.Empty).ToAttributeValue(DynamoKind.S)
+                ? (((Enum)(object)value).ToString(format) ?? string.Empty).ToAttributeValue(
+                    DynamoKind.S
+                )
                 : throw new NotSupportedException(
                     $"Type {typeof(T)} is not supported as a collection element"
                 );

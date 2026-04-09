@@ -18,6 +18,8 @@ Supported root collection shapes:
 Important note:
 
 - `byte[]` is supported as a byte collection, not as a special binary scalar type
+- set-like CLR shapes preserve their declared shape on round-trip, but DynamoDB storage depends on
+  the element type
 
 ## Supported collection elements
 
@@ -33,6 +35,10 @@ Set families:
 - string -> `SS`
 - numeric -> `NS`
 - `byte[]` -> `BS`
+
+When a set-like CLR collection uses another supported element type such as `Guid`,
+`DateTimeOffset`, `TimeSpan`, or enums, DynamoMapper stores it as `L` and materializes it back
+into the declared CLR set shape on read.
 
 ## Nested shapes
 

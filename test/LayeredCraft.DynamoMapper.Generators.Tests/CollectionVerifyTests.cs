@@ -3,11 +3,11 @@ namespace LayeredCraft.DynamoMapper.Generators.Tests;
 public class CollectionVerifyTests
 {
     [Fact]
-    public async Task Collection_ListOfString() =>
-        await GeneratorTestHelpers.Verify(
-            new VerifyTestOptions
-            {
-                SourceCode = """
+    public async Task Collection_ListOfString() => await GeneratorTestHelpers.Verify(
+        new VerifyTestOptions
+        {
+            SourceCode =
+                """
                 using System;
                 using System.Collections.Generic;
                 using Amazon.DynamoDBv2.Model;
@@ -27,16 +27,16 @@ public class CollectionVerifyTests
                     public List<string> Tags { get; set; } = new();
                 }
                 """,
-            },
-            TestContext.Current.CancellationToken
-        );
+        },
+        TestContext.Current.CancellationToken
+    );
 
     [Fact]
-    public async Task Collection_ArrayOfString() =>
-        await GeneratorTestHelpers.Verify(
-            new VerifyTestOptions
-            {
-                SourceCode = """
+    public async Task Collection_ArrayOfString() => await GeneratorTestHelpers.Verify(
+        new VerifyTestOptions
+        {
+            SourceCode =
+                """
                 using System;
                 using System.Collections.Generic;
                 using Amazon.DynamoDBv2.Model;
@@ -56,16 +56,16 @@ public class CollectionVerifyTests
                     public string[] Tags { get; set; } = Array.Empty<string>();
                 }
                 """,
-            },
-            TestContext.Current.CancellationToken
-        );
+        },
+        TestContext.Current.CancellationToken
+    );
 
     [Fact]
-    public async Task Collection_ListOfInt() =>
-        await GeneratorTestHelpers.Verify(
-            new VerifyTestOptions
-            {
-                SourceCode = """
+    public async Task Collection_ListOfInt() => await GeneratorTestHelpers.Verify(
+        new VerifyTestOptions
+        {
+            SourceCode =
+                """
                 using System;
                 using System.Collections.Generic;
                 using Amazon.DynamoDBv2.Model;
@@ -85,18 +85,88 @@ public class CollectionVerifyTests
                     public List<int> Scores { get; set; } = new();
                 }
                 """,
-            },
-            TestContext.Current.CancellationToken
-        );
+        },
+        TestContext.Current.CancellationToken
+    );
+
+    [Fact]
+    public async Task Collection_GuidShapes() => await GeneratorTestHelpers.Verify(
+        new VerifyTestOptions
+        {
+            SourceCode =
+                """
+                using System;
+                using System.Collections.Generic;
+                using Amazon.DynamoDBv2.Model;
+                using LayeredCraft.DynamoMapper.Runtime;
+
+                namespace MyNamespace;
+
+                [DynamoMapper]
+                public static partial class ExampleEntityMapper
+                {
+                    public static partial Dictionary<string, AttributeValue> ToItem(Entity source);
+                    public static partial Entity FromItem(Dictionary<string, AttributeValue> item);
+                }
+
+                public class Entity
+                {
+                    public List<Guid> GuidList { get; set; } = new();
+                    public Guid[] GuidArray { get; set; } = Array.Empty<Guid>();
+                    public Dictionary<string, Guid> GuidMap { get; set; } = new();
+                    public IEnumerable<Guid> GuidSequence { get; set; } = Array.Empty<Guid>();
+                    public HashSet<Guid> GuidSet { get; set; } = new();
+                }
+                """,
+        },
+        TestContext.Current.CancellationToken
+    );
+
+    [Fact]
+    public async Task Collection_FormattedScalarShapes() => await GeneratorTestHelpers.Verify(
+        new VerifyTestOptions
+        {
+            SourceCode =
+                """
+                using System;
+                using System.Collections.Generic;
+                using Amazon.DynamoDBv2.Model;
+                using LayeredCraft.DynamoMapper.Runtime;
+
+                namespace MyNamespace;
+
+                public enum Status
+                {
+                    Draft = 1,
+                    Published = 2,
+                }
+
+                [DynamoMapper(GuidFormat = "N", TimeSpanFormat = "G", EnumFormat = "D")]
+                public static partial class ExampleEntityMapper
+                {
+                    public static partial Dictionary<string, AttributeValue> ToItem(Entity source);
+                    public static partial Entity FromItem(Dictionary<string, AttributeValue> item);
+                }
+
+                public class Entity
+                {
+                    public List<Guid> GuidList { get; set; } = new();
+                    public Dictionary<string, TimeSpan> Durations { get; set; } = new();
+                    public HashSet<Status> Statuses { get; set; } = new();
+                }
+                """,
+        },
+        TestContext.Current.CancellationToken
+    );
 
     // ==================== DICTIONARY TESTS ====================
 
     [Fact]
-    public async Task Collection_DictionaryStringToInt() =>
-        await GeneratorTestHelpers.Verify(
-            new VerifyTestOptions
-            {
-                SourceCode = """
+    public async Task Collection_DictionaryStringToInt() => await GeneratorTestHelpers.Verify(
+        new VerifyTestOptions
+        {
+            SourceCode =
+                """
                 using System;
                 using System.Collections.Generic;
                 using Amazon.DynamoDBv2.Model;
@@ -116,16 +186,16 @@ public class CollectionVerifyTests
                     public Dictionary<string, int> Metadata { get; set; } = new();
                 }
                 """,
-            },
-            TestContext.Current.CancellationToken
-        );
+        },
+        TestContext.Current.CancellationToken
+    );
 
     [Fact]
-    public async Task Collection_DictionaryStringToString() =>
-        await GeneratorTestHelpers.Verify(
-            new VerifyTestOptions
-            {
-                SourceCode = """
+    public async Task Collection_DictionaryStringToString() => await GeneratorTestHelpers.Verify(
+        new VerifyTestOptions
+        {
+            SourceCode =
+                """
                 using System;
                 using System.Collections.Generic;
                 using Amazon.DynamoDBv2.Model;
@@ -145,18 +215,18 @@ public class CollectionVerifyTests
                     public Dictionary<string, string> Attributes { get; set; } = new();
                 }
                 """,
-            },
-            TestContext.Current.CancellationToken
-        );
+        },
+        TestContext.Current.CancellationToken
+    );
 
     // ==================== SET TESTS ====================
 
     [Fact]
-    public async Task Collection_HashSetOfString() =>
-        await GeneratorTestHelpers.Verify(
-            new VerifyTestOptions
-            {
-                SourceCode = """
+    public async Task Collection_HashSetOfString() => await GeneratorTestHelpers.Verify(
+        new VerifyTestOptions
+        {
+            SourceCode =
+                """
                 using System;
                 using System.Collections.Generic;
                 using Amazon.DynamoDBv2.Model;
@@ -176,16 +246,16 @@ public class CollectionVerifyTests
                     public HashSet<string> Categories { get; set; } = new();
                 }
                 """,
-            },
-            TestContext.Current.CancellationToken
-        );
+        },
+        TestContext.Current.CancellationToken
+    );
 
     [Fact]
-    public async Task Collection_HashSetOfInt() =>
-        await GeneratorTestHelpers.Verify(
-            new VerifyTestOptions
-            {
-                SourceCode = """
+    public async Task Collection_HashSetOfInt() => await GeneratorTestHelpers.Verify(
+        new VerifyTestOptions
+        {
+            SourceCode =
+                """
                 using System;
                 using System.Collections.Generic;
                 using Amazon.DynamoDBv2.Model;
@@ -205,16 +275,16 @@ public class CollectionVerifyTests
                     public HashSet<int> Numbers { get; set; } = new();
                 }
                 """,
-            },
-            TestContext.Current.CancellationToken
-        );
+        },
+        TestContext.Current.CancellationToken
+    );
 
     [Fact]
-    public async Task Collection_HashSetOfByteArray() =>
-        await GeneratorTestHelpers.Verify(
-            new VerifyTestOptions
-            {
-                SourceCode = """
+    public async Task Collection_HashSetOfByteArray() => await GeneratorTestHelpers.Verify(
+        new VerifyTestOptions
+        {
+            SourceCode =
+                """
                 using System;
                 using System.Collections.Generic;
                 using Amazon.DynamoDBv2.Model;
@@ -234,18 +304,18 @@ public class CollectionVerifyTests
                     public HashSet<byte[]> Payloads { get; set; } = new();
                 }
                 """,
-            },
-            TestContext.Current.CancellationToken
-        );
+        },
+        TestContext.Current.CancellationToken
+    );
 
     // ==================== INTERFACE TESTS ====================
 
     [Fact]
-    public async Task Collection_IEnumerableOfString() =>
-        await GeneratorTestHelpers.Verify(
-            new VerifyTestOptions
-            {
-                SourceCode = """
+    public async Task Collection_IEnumerableOfString() => await GeneratorTestHelpers.Verify(
+        new VerifyTestOptions
+        {
+            SourceCode =
+                """
                 using System;
                 using System.Collections.Generic;
                 using Amazon.DynamoDBv2.Model;
@@ -265,9 +335,9 @@ public class CollectionVerifyTests
                     public IEnumerable<string> Items { get; set; } = new List<string>();
                 }
                 """,
-            },
-            TestContext.Current.CancellationToken
-        );
+        },
+        TestContext.Current.CancellationToken
+    );
 
     // ==================== NEGATIVE TESTS ====================
 
@@ -276,26 +346,27 @@ public class CollectionVerifyTests
         await GeneratorTestHelpers.VerifyFailure(
             new VerifyTestOptions
             {
-                SourceCode = """
-                using System;
-                using System.Collections.Generic;
-                using Amazon.DynamoDBv2.Model;
-                using LayeredCraft.DynamoMapper.Runtime;
+                SourceCode =
+                    """
+                    using System;
+                    using System.Collections.Generic;
+                    using Amazon.DynamoDBv2.Model;
+                    using LayeredCraft.DynamoMapper.Runtime;
 
-                namespace MyNamespace;
+                    namespace MyNamespace;
 
-                [DynamoMapper]
-                public static partial class ExampleEntityMapper
-                {
-                    public static partial Dictionary<string, AttributeValue> ToItem(Entity source);
-                    public static partial Entity FromItem(Dictionary<string, AttributeValue> item);
-                }
+                    [DynamoMapper]
+                    public static partial class ExampleEntityMapper
+                    {
+                        public static partial Dictionary<string, AttributeValue> ToItem(Entity source);
+                        public static partial Entity FromItem(Dictionary<string, AttributeValue> item);
+                    }
 
-                public class Entity
-                {
-                    public List<List<string>> NestedList { get; set; } = new();
-                }
-                """,
+                    public class Entity
+                    {
+                        public List<List<string>> NestedList { get; set; } = new();
+                    }
+                    """,
                 ExpectedDiagnosticId = "DM0003",
             },
             TestContext.Current.CancellationToken
@@ -306,31 +377,32 @@ public class CollectionVerifyTests
         await GeneratorTestHelpers.Verify(
             new VerifyTestOptions
             {
-                SourceCode = """
-                using System;
-                using System.Collections.Generic;
-                using Amazon.DynamoDBv2.Model;
-                using LayeredCraft.DynamoMapper.Runtime;
+                SourceCode =
+                    """
+                    using System;
+                    using System.Collections.Generic;
+                    using Amazon.DynamoDBv2.Model;
+                    using LayeredCraft.DynamoMapper.Runtime;
 
-                namespace MyNamespace;
+                    namespace MyNamespace;
 
-                [DynamoMapper]
-                public static partial class ExampleEntityMapper
-                {
-                    public static partial Dictionary<string, AttributeValue> ToItem(Entity source);
-                    public static partial Entity FromItem(Dictionary<string, AttributeValue> item);
-                }
+                    [DynamoMapper]
+                    public static partial class ExampleEntityMapper
+                    {
+                        public static partial Dictionary<string, AttributeValue> ToItem(Entity source);
+                        public static partial Entity FromItem(Dictionary<string, AttributeValue> item);
+                    }
 
-                public class Entity
-                {
-                    public List<CustomClass> Items { get; set; } = new();
-                }
+                    public class Entity
+                    {
+                        public List<CustomClass> Items { get; set; } = new();
+                    }
 
-                public class CustomClass
-                {
-                    public string Name { get; set; }
-                }
-                """,
+                    public class CustomClass
+                    {
+                        public string Name { get; set; }
+                    }
+                    """,
             },
             TestContext.Current.CancellationToken
         );
@@ -340,26 +412,27 @@ public class CollectionVerifyTests
         await GeneratorTestHelpers.VerifyFailure(
             new VerifyTestOptions
             {
-                SourceCode = """
-                using System;
-                using System.Collections.Generic;
-                using Amazon.DynamoDBv2.Model;
-                using LayeredCraft.DynamoMapper.Runtime;
+                SourceCode =
+                    """
+                    using System;
+                    using System.Collections.Generic;
+                    using Amazon.DynamoDBv2.Model;
+                    using LayeredCraft.DynamoMapper.Runtime;
 
-                namespace MyNamespace;
+                    namespace MyNamespace;
 
-                [DynamoMapper]
-                public static partial class ExampleEntityMapper
-                {
-                    public static partial Dictionary<string, AttributeValue> ToItem(Entity source);
-                    public static partial Entity FromItem(Dictionary<string, AttributeValue> item);
-                }
+                    [DynamoMapper]
+                    public static partial class ExampleEntityMapper
+                    {
+                        public static partial Dictionary<string, AttributeValue> ToItem(Entity source);
+                        public static partial Entity FromItem(Dictionary<string, AttributeValue> item);
+                    }
 
-                public class Entity
-                {
-                    public Dictionary<int, string> InvalidDict { get; set; } = new();
-                }
-                """,
+                    public class Entity
+                    {
+                        public Dictionary<int, string> InvalidDict { get; set; } = new();
+                    }
+                    """,
                 ExpectedDiagnosticId = "DM0004",
             },
             TestContext.Current.CancellationToken
@@ -370,27 +443,28 @@ public class CollectionVerifyTests
         await GeneratorTestHelpers.VerifyFailure(
             new VerifyTestOptions
             {
-                SourceCode = """
-                using System;
-                using System.Collections.Generic;
-                using Amazon.DynamoDBv2.Model;
-                using LayeredCraft.DynamoMapper.Runtime;
+                SourceCode =
+                    """
+                    using System;
+                    using System.Collections.Generic;
+                    using Amazon.DynamoDBv2.Model;
+                    using LayeredCraft.DynamoMapper.Runtime;
 
-                namespace MyNamespace;
+                    namespace MyNamespace;
 
-                [DynamoMapper]
-                [DynamoField(nameof(Entity.Numbers), Kind = DynamoKind.S)]
-                public static partial class ExampleEntityMapper
-                {
-                    public static partial Dictionary<string, AttributeValue> ToItem(Entity source);
-                    public static partial Entity FromItem(Dictionary<string, AttributeValue> item);
-                }
+                    [DynamoMapper]
+                    [DynamoField(nameof(Entity.Numbers), Kind = DynamoKind.S)]
+                    public static partial class ExampleEntityMapper
+                    {
+                        public static partial Dictionary<string, AttributeValue> ToItem(Entity source);
+                        public static partial Entity FromItem(Dictionary<string, AttributeValue> item);
+                    }
 
-                public class Entity
-                {
-                    public List<int> Numbers { get; set; } = new();
-                }
-                """,
+                    public class Entity
+                    {
+                        public List<int> Numbers { get; set; } = new();
+                    }
+                    """,
                 ExpectedDiagnosticId = "DM0005",
             },
             TestContext.Current.CancellationToken

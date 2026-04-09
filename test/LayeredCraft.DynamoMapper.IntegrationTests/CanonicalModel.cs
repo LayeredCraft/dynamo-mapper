@@ -76,7 +76,17 @@ public sealed class CanonicalIntegrationModel
 
     public IEnumerable<string> Aliases { get; set; } = [];
 
+    public List<Guid> RelatedIds { get; set; } = [];
+
+    public Guid[] LegacyIds { get; set; } = [];
+
+    public IEnumerable<Guid> AlternateIds { get; set; } = [];
+
+    public HashSet<Guid> UniqueIds { get; set; } = [];
+
     public Dictionary<string, decimal> PriceByMarket { get; set; } = [];
+
+    public Dictionary<string, Guid> ContactIdsByRole { get; set; } = [];
 
     public HashSet<string> Labels { get; set; } = [];
 
@@ -127,6 +137,33 @@ public static partial class CanonicalBinaryStreamScalarModelMapper
     );
 
     public static partial CanonicalBinaryStreamScalarModel FromItem(
+        Dictionary<string, AttributeValue> item
+    );
+}
+
+public enum CanonicalFormattedStatus
+{
+    Draft = 1,
+    Published = 2,
+}
+
+public sealed class CanonicalFormattedCollectionModel
+{
+    public List<Guid> RelatedIds { get; set; } = [];
+
+    public Dictionary<string, TimeSpan> DurationsByName { get; set; } = [];
+
+    public HashSet<CanonicalFormattedStatus> Statuses { get; set; } = [];
+}
+
+[DynamoMapper(GuidFormat = "N", TimeSpanFormat = "G", EnumFormat = "D")]
+public static partial class CanonicalFormattedCollectionModelMapper
+{
+    public static partial Dictionary<string, AttributeValue> ToItem(
+        CanonicalFormattedCollectionModel source
+    );
+
+    public static partial CanonicalFormattedCollectionModel FromItem(
         Dictionary<string, AttributeValue> item
     );
 }

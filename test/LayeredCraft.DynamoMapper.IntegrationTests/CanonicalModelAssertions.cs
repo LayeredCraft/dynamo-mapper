@@ -27,7 +27,12 @@ internal static class CanonicalModelAssertions
         actual.Tags.Should().Equal(expected.Tags);
         actual.Scores.Should().Equal(expected.Scores);
         actual.Aliases.Should().Equal(expected.Aliases);
+        actual.RelatedIds.Should().Equal(expected.RelatedIds);
+        actual.LegacyIds.Should().Equal(expected.LegacyIds);
+        actual.AlternateIds.Should().Equal(expected.AlternateIds);
+        actual.UniqueIds.Should().BeEquivalentTo(expected.UniqueIds);
         actual.PriceByMarket.Should().Equal(expected.PriceByMarket);
+        actual.ContactIdsByRole.Should().Equal(expected.ContactIdsByRole);
         actual.Labels.Should().BeEquivalentTo(expected.Labels);
         actual.ImportanceCodes.Should().BeEquivalentTo(expected.ImportanceCodes);
 
@@ -79,7 +84,12 @@ internal static class CanonicalModelAssertions
                 "tags",
                 "scores",
                 "aliases",
+                "relatedIds",
+                "legacyIds",
+                "alternateIds",
+                "uniqueIds",
                 "priceByMarket",
+                "contactIdsByRole",
                 "labels",
                 "importanceCodes",
                 "payloadVersions",
@@ -109,9 +119,30 @@ internal static class CanonicalModelAssertions
         item["tags"].L.Select(value => value.S).Should().Equal("alpha", "beta", "gamma");
         item["scores"].L.Select(value => value.N).Should().Equal("7", "8", "9");
         item["aliases"].L.Select(value => value.S).Should().Equal("first", "second");
+        item["relatedIds"]
+            .L.Select(value => value.S)
+            .Should()
+            .Equal("12121212-3434-5656-7878-909090909090", "21212121-4343-6565-8787-010101010101");
+        item["legacyIds"]
+            .L.Select(value => value.S)
+            .Should()
+            .Equal("31313131-4545-6767-8989-121212121212", "41414141-5656-7878-9090-232323232323");
+        item["alternateIds"]
+            .L.Select(value => value.S)
+            .Should()
+            .Equal("51515151-6767-8989-0101-343434343434", "61616161-7878-9090-1212-454545454545");
+        item["uniqueIds"]
+            .L.Select(value => value.S)
+            .Should()
+            .BeEquivalentTo(
+                "91919191-0101-2323-4545-787878787878",
+                "a1a1a1a1-b2b2-c3c3-d4d4-e5e5e5e5e5e5"
+            );
 
         item["priceByMarket"].M["us"].N.Should().Be("12.34");
         item["priceByMarket"].M["eu"].N.Should().Be("56.78");
+        item["contactIdsByRole"].M["owner"].S.Should().Be("71717171-8989-0101-2323-565656565656");
+        item["contactIdsByRole"].M["backup"].S.Should().Be("81818181-9090-1212-3434-676767676767");
 
         item["labels"].SS.Should().BeEquivalentTo("new", "sale");
         item["importanceCodes"].NS.Should().BeEquivalentTo("10", "20");

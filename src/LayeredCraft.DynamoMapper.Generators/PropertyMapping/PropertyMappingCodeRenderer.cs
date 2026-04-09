@@ -173,12 +173,14 @@ internal static class PropertyMappingCodeRenderer
                 ? $"{spec.FromItemMethod.MethodName}({args})" // Custom: MethodName(item)
                 : $"{context.MapperOptions.FromMethodParameterName}.{spec.FromItemMethod.MethodName}{spec.TypeStrategy!.GenericArgument}({args})"; // Standard: item.GetXxx<T>(args)
 
-        // For array properties, append .ToArray() to convert the List to an array
-        // GetList returns List<T>, but if the property is T[], we need to convert it
-        var isArrayProperty = analysis.PropertyType.TypeKind == TypeKind.Array;
-        if (isArrayProperty && !spec.FromItemMethod.IsCustomMethod)
+        if (!spec.FromItemMethod.IsCustomMethod)
         {
-            methodCall += ".ToArray()";
+            methodCall =
+                ApplyReadMaterialization(
+                    methodCall,
+                    spec.TypeStrategy?.CollectionInfo,
+                    analysis.Nullability.IsNullableType
+                );
         }
 
         return $"{spec.PropertyName} = {methodCall},";
@@ -212,14 +214,17 @@ internal static class PropertyMappingCodeRenderer
         var methodCall =
             $"Try{spec.FromItemMethod.MethodName}{spec.TypeStrategy!.GenericArgument}({args})";
 
-        // For array properties, append .ToArray() to convert the List to an array
-        // GetList returns List<T>, but if the property is T[], we need to convert it
-        var isArrayProperty = analysis.PropertyType.TypeKind == TypeKind.Array;
-        var toArray =
-            isArrayProperty && !spec.FromItemMethod.IsCustomMethod ? ".ToArray()" : string.Empty;
+        var materializedVar =
+            spec.FromItemMethod.IsCustomMethod
+                ? $"var{index}!"
+                : ApplyReadMaterialization(
+                    $"var{index}!",
+                    spec.TypeStrategy?.CollectionInfo,
+                    analysis.Nullability.IsNullableType
+                );
 
         return
-            $"if ({context.MapperOptions.FromMethodParameterName}.{methodCall}) {modelVarName}.{spec.PropertyName} = var{index}!{toArray};";
+            $"if ({context.MapperOptions.FromMethodParameterName}.{methodCall}) {modelVarName}.{spec.PropertyName} = {materializedVar};";
     }
 
     /// <summary>
@@ -266,14 +271,56 @@ internal static class PropertyMappingCodeRenderer
                 ? $"{spec.FromItemMethod.MethodName}({args})" // Custom: MethodName(item)
                 : $"{context.MapperOptions.FromMethodParameterName}.{spec.FromItemMethod.MethodName}{spec.TypeStrategy!.GenericArgument}({args})"; // Standard: item.GetXxx<T>(args)
 
-        // For array properties, append .ToArray() to convert the List to an array
-        var isArrayProperty = analysis.PropertyType.TypeKind == TypeKind.Array;
-        if (isArrayProperty && !spec.FromItemMethod.IsCustomMethod)
+        if (!spec.FromItemMethod.IsCustomMethod)
         {
-            methodCall += ".ToArray()";
+            methodCall =
+                ApplyReadMaterialization(
+                    methodCall,
+                    spec.TypeStrategy?.CollectionInfo,
+                    analysis.Nullability.IsNullableType
+                );
         }
 
         return methodCall;
+    }
+
+    private static string ApplyReadMaterialization(
+        string expression, CollectionInfo? collectionInfo, bool isNullableType
+    )
+    {
+        if (collectionInfo is null)
+            return expression;
+
+        return collectionInfo.ReadMaterialization switch
+        {
+            CollectionReadMaterialization.None => expression,
+            CollectionReadMaterialization.Array => isNullableType
+                ? $"{expression}?.ToArray()"
+                : $"{expression}.ToArray()",
+            CollectionReadMaterialization.HashSet =>
+                collectionInfo.Category == CollectionCategory.List
+                    ? MaterializeHashSet(
+                        expression,
+                        collectionInfo.ElementType.QualifiedName,
+                        isNullableType
+                    )
+                    : expression,
+            _ => throw new InvalidOperationException(
+                $"Unexpected read materialization: {collectionInfo.ReadMaterialization}"
+            ),
+        };
+    }
+
+    private static string MaterializeHashSet(
+        string expression, string elementTypeName, bool isNullableType
+    )
+    {
+        var constructorExpression =
+            $"new global::System.Collections.Generic.HashSet<{elementTypeName}>({expression})";
+
+        return isNullableType
+            ? $"{expression} is null ? null : {constructorExpression}"
+            : constructorExpression;
     }
 
     #region Nested Object Rendering
@@ -1056,11 +1103,10 @@ internal static class PropertyMappingCodeRenderer
 
         var selectExpr = $"{varName}List.Select(av => {elementConverter}).ToList()";
 
-        // For arrays, add .ToArray()
-        var toArray = collectionInfo.IsArray ? ".ToArray()" : "";
+        var materializedValue = ApplyReadMaterialization(selectExpr, collectionInfo, false);
 
         return
-            $"{spec.PropertyName} = {itemParam}.TryGetValue(\"{spec.Key}\", out var {varName}Attr) && {varName}Attr.L is {{ }} {varName}List ? {selectExpr}{toArray} : {fallback},";
+            $"{spec.PropertyName} = {itemParam}.TryGetValue(\"{spec.Key}\", out var {varName}Attr) && {varName}Attr.L is {{ }} {varName}List ? {materializedValue} : {fallback},";
     }
 
     /// <summary>
@@ -1149,11 +1195,10 @@ internal static class PropertyMappingCodeRenderer
 
         var selectExpr = $"{varName}List.Select(av => {elementConverter}).ToList()";
 
-        // For arrays, add .ToArray()
-        var toArray = collectionInfo.IsArray ? ".ToArray()" : "";
+        var materializedValue = ApplyReadMaterialization(selectExpr, collectionInfo, false);
 
         return
-            $"if ({itemParam}.TryGetValue(\"{spec.Key}\", out var {varName}Attr) && {varName}Attr.L is {{ }} {varName}List) {modelVarName}.{spec.PropertyName} = {selectExpr}{toArray};";
+            $"if ({itemParam}.TryGetValue(\"{spec.Key}\", out var {varName}Attr) && {varName}Attr.L is {{ }} {varName}List) {modelVarName}.{spec.PropertyName} = {materializedValue};";
     }
 
     /// <summary>

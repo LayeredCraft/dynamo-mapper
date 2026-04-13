@@ -1,0 +1,18 @@
+{
+  Diagnostics: [
+    {
+      Location: Program.cs: (11,24)-(11,36),
+      Message: The method 'BeforeToItem' does not match the expected hook signature for 'BeforeToItem',
+      Severity: Warning,
+      WarningLevel: 1,
+      Descriptor: {
+        Id: DM0401,
+        Title: Hook signature doesn't match expected format,
+        MessageFormat: The method '{0}' does not match the expected hook signature for '{1}',
+        Category: LayeredCraft.DynamoMapper.Usage,
+        DefaultSeverity: Warning,
+        IsEnabledByDefault: true
+      }
+    }
+  ]
+}

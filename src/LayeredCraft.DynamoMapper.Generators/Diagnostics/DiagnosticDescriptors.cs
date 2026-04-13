@@ -6,6 +6,11 @@ internal static class DiagnosticDescriptors
 {
     private const string UsageCategory = "LayeredCraft.DynamoMapper.Usage";
 
+    // Diagnostic ID ranges:
+    // DM000x: Property and type mapping diagnostics
+    // DM010x: Mapper and model-shape diagnostics
+    // DM040x: Hook declaration diagnostics
+
     internal static readonly DiagnosticDescriptor CannotConvertFromAttributeValue =
         new(
             "DM0001",
@@ -113,6 +118,36 @@ internal static class DiagnosticDescriptors
             "Mapper '{0}' exceeded the maximum of {1} helper-method rendering iterations. This indicates a bug in the DynamoMapper source generator — please file an issue.",
             UsageCategory,
             DiagnosticSeverity.Error,
+            true
+        );
+
+    internal static readonly DiagnosticDescriptor InvalidHookSignature =
+        new(
+            "DM0401",
+            "Hook signature doesn't match expected format",
+            "The method '{0}' does not match the expected hook signature for '{1}'",
+            UsageCategory,
+            DiagnosticSeverity.Warning,
+            true
+        );
+
+    internal static readonly DiagnosticDescriptor HookNotStatic =
+        new(
+            "DM0402",
+            "Hook method is not static",
+            "The hook method '{0}' must be declared as static",
+            UsageCategory,
+            DiagnosticSeverity.Warning,
+            true
+        );
+
+    internal static readonly DiagnosticDescriptor HookParameterTypeMismatch =
+        new(
+            "DM0403",
+            "Hook parameter types don't match entity type",
+            "The hook method '{0}' parameter types must match the entity type '{1}'",
+            UsageCategory,
+            DiagnosticSeverity.Warning,
             true
         );
 }

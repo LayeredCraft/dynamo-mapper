@@ -93,6 +93,28 @@ Use mapper-class static methods through `[DynamoField(ToMethod = ..., FromMethod
 - stale docs describe the wrong converter signatures
 - bad converter wiring may fail as normal C# compile errors instead of DynamoMapper diagnostics
 
+## Lifecycle hooks
+
+Hooks are optional extension points on the mapper class for pre/post mapping logic.
+
+- `BeforeToItem(T source, Dictionary<string, AttributeValue> item)`
+- `AfterToItem(T source, Dictionary<string, AttributeValue> item)`
+- `BeforeFromItem(Dictionary<string, AttributeValue> item)`
+- `AfterFromItem(Dictionary<string, AttributeValue> item, ref T entity)`
+
+Rules:
+
+- hooks must be `static partial void`
+- hook names are exact (`BeforeToItem`, `AfterToItem`, `BeforeFromItem`, `AfterFromItem`)
+- hooks can be declared/implemented in another part of the same partial mapper class
+- one-way mappers only emit hooks for the generated direction
+- no `To*` hooks means `To*` can stay expression-bodied
+
+Order:
+
+- `To*`: create item -> `BeforeToItem` -> property mapping -> `AfterToItem` -> return item
+- `From*`: `BeforeFromItem` -> property mapping/object construction -> `AfterFromItem` -> return
+
 ## Requiredness and defaults
 
 - missing required root scalar values throw at runtime
@@ -104,4 +126,4 @@ Use mapper-class static methods through `[DynamoField(ToMethod = ..., FromMethod
 - Put configuration on the mapper, not the POCO.
 - Use `[DynamoField]` before inventing extra mapping layers.
 - Use `[DynamoMapperConstructor]` when constructor choice is ambiguous.
-- Do not recommend lifecycle hooks as current behavior.
+- Use lifecycle hooks for DynamoDB-specific concerns such as PK/SK composition, TTL, and metadata.

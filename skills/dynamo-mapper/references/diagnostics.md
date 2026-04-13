@@ -16,6 +16,15 @@
 - `DM0101` no mapper methods found -> add a valid `To*` or `From*` method
 - `DM0102` mismatched model types -> make both directions use the same model type
 - `DM0103` multiple constructor attributes -> leave only one `[DynamoMapperConstructor]`
+- `DM0401` invalid hook signature -> use exact hook name/signature and `void` return type
+- `DM0402` hook not static -> declare hook as `static`
+- `DM0403` hook parameter type mismatch -> use the mapper model type `T` and expected dictionary/ref
+
+## Hook diagnostics (all warnings)
+
+- `DM0401` covers wrong parameter count, wrong `ref` usage, non-void return type, or non-partial hook
+- `DM0402` is emitted when a hook method is not static
+- `DM0403` is emitted when hook parameter types do not match mapper model type/dictionary shape
 
 ## Important non-diagnostic failure mode
 

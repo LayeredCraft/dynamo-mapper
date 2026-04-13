@@ -39,7 +39,7 @@ using Amazon.DynamoDBv2.Model;
     }
     {{~ else ~}}
     {{ mapper_class.to_item_signature }} =>
-        new Dictionary<string, AttributeValue>({{ dictionary_capacity }}){{ if dictionary_capacity == 0 }};{{ end }}
+        new Dictionary<string, AttributeValue>({{ dictionary_capacity }}){{ if to_assignments.size == 0 }};{{ end }}
             {{~ for assignment in to_assignments ~}}
             {{ assignment }}{{ if for.last }};{{ end }}
             {{~ end ~}}

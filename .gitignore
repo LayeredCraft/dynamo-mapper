@@ -422,8 +422,6 @@ FodyWeavers.xsd
 
 .idea
 
-.config
-
 # macOS
 .DS_Store
 .DS_Store?

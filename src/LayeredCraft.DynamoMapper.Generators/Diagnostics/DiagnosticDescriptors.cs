@@ -6,6 +6,11 @@ internal static class DiagnosticDescriptors
 {
     private const string UsageCategory = "LayeredCraft.DynamoMapper.Usage";
 
+    // Diagnostic ID ranges:
+    // DM000x: Property and type mapping diagnostics
+    // DM010x: Mapper and model-shape diagnostics
+    // DM040x: Hook declaration diagnostics
+
     internal static readonly DiagnosticDescriptor CannotConvertFromAttributeValue =
         new(
             "DM0001",

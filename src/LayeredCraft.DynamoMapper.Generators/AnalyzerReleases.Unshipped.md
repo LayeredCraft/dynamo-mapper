@@ -16,3 +16,11 @@ DM0009 | LayeredCraft.DynamoMapper.Usage | Error | DynamoMapper.Usage | Error | 
 DM0101 | LayeredCraft.DynamoMapper.Usage | Error | DynamoMapper.Usage | Error | Category changed
 DM0102 | LayeredCraft.DynamoMapper.Usage | Error | DynamoMapper.Usage | Error | Category changed
 DM0103 | LayeredCraft.DynamoMapper.Usage | Error | DynamoMapper.Usage | Error | Category changed
+
+### New Rules
+
+Rule ID | Category | Severity | Notes
+--------|----------|----------|------
+DM0401 | LayeredCraft.DynamoMapper.Usage | Warning | Hook signature doesn't match expected format
+DM0402 | LayeredCraft.DynamoMapper.Usage | Warning | Hook method is not static
+DM0403 | LayeredCraft.DynamoMapper.Usage | Warning | Hook parameter types don't match entity type

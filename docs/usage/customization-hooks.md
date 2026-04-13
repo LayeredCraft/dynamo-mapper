@@ -501,14 +501,29 @@ Hooks execute in a deterministic, predictable order:
 
 ### Zero-Cost Abstraction
 
-Unimplemented hooks compile away completely:
+The generator only emits hook calls when it detects a hook declaration in your mapper class. When no hooks are declared, `ToItem` is generated as a compact expression body with no overhead:
 
 ```csharp
-// If no hooks are implemented:
+// Generated when no hooks are declared:
 public static partial Dictionary<string, AttributeValue> ToItem(Product source) =>
     new Dictionary<string, AttributeValue>(1)
         .SetGuid("productId", source.ProductId, false, true);
 ```
+
+When a hook is declared (even without an implementation), the generator switches to block-body form and emits the call:
+
+```csharp
+// Generated when AfterToItem is declared:
+public static partial Dictionary<string, AttributeValue> ToItem(Product source)
+{
+    var item = new Dictionary<string, AttributeValue>(1);
+    item.SetGuid("productId", source.ProductId, false, true);
+    AfterToItem(source, item);
+    return item;
+}
+```
+
+If you declare a hook but never implement it, C# `partial void` semantics remove the call at compile time — zero runtime overhead.
 
 ### No Reflection
 
@@ -520,34 +535,9 @@ Generated code reuses the same item dictionary instance across hook calls.
 
 ## DSL Integration (Phase 2)
 
-In Phase 2, hooks can be configured via DSL (though partial methods remain the recommended approach):
+> **Not yet implemented.** DSL-based hook configuration is planned for Phase 2.
 
-```csharp
-[DynamoMapper]
-public static partial class OrderMapper
-{
-    public static partial Dictionary<string, AttributeValue> ToItem(Order source);
-    public static partial Order FromItem(Dictionary<string, AttributeValue> item);
-
-    static partial void Configure(DynamoMapBuilder<Order> map)
-    {
-        map.BeforeToItem((source, item) =>
-        {
-            // Limited DSL hook support
-            item.SetString("pk", $"CUSTOMER#{source.CustomerId}");
-        });
-    }
-
-    // Partial method hooks are still supported and recommended for complex logic
-    static partial void AfterToItem(Order source, Dictionary<string, AttributeValue> item)
-    {
-        item.SetString("sk", $"ORDER#{source.OrderId}");
-        item.SetString("recordType", "Order");
-    }
-}
-```
-
-Note: DSL hooks have limited expression support. Partial method hooks are more powerful and flexible.
+In Phase 2, hooks will also be configurable via a fluent DSL. Partial method hooks will remain the recommended approach for complex logic.
 
 ## Best Practices
 
@@ -616,8 +606,22 @@ Note: DSL hooks have limited expression support. Partial method hooks are more p
 The generator validates hook signatures and emits diagnostics for common errors:
 
 - **DM0401**: Hook signature doesn't match expected format
+  ```csharp
+  // Wrong: too many parameters
+  static partial void AfterToItem(Product source, Dictionary<string, AttributeValue> item, string extra);
+  ```
+
 - **DM0402**: Hook method is not static
+  ```csharp
+  // Wrong: missing static
+  partial void AfterToItem(Product source, Dictionary<string, AttributeValue> item);
+  ```
+
 - **DM0403**: Hook parameter types don't match entity type
+  ```csharp
+  // Wrong: first parameter is string, not Product
+  static partial void AfterToItem(string source, Dictionary<string, AttributeValue> item);
+  ```
 
 ## See Also
 

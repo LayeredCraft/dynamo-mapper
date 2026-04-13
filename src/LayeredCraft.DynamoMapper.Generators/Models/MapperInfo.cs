@@ -13,6 +13,8 @@ internal sealed record MapperInfo(
     HelperMethodRegistry? HelperRegistry
 )
 {
+    // Context and HelperRegistry are intentionally excluded from equality because they are
+    // runtime pipeline artifacts and not stable value inputs for incremental generation.
     public bool Equals(MapperInfo? other) => other is not null &&
         MapperClass == other.MapperClass && ModelClass == other.ModelClass &&
         Diagnostics == other.Diagnostics;
@@ -35,7 +37,7 @@ internal static class MapperInfoExtensions
             if (!mapperResult.IsSuccess)
                 return MapperInfo.CreateWithDiagnostics([mapperResult.Error!], context);
 
-            var (mapperClassInfo, modelTypeSymbol) = mapperResult.Value;
+            var (mapperClassInfo, modelTypeSymbol, mapperDiagnostics) = mapperResult.Value;
 
             // Set method context flags so property validation knows which methods exist
             context.HasToItemMethod = mapperClassInfo.ToItemSignature != null;
@@ -62,7 +64,7 @@ internal static class MapperInfoExtensions
             return new MapperInfo(
                 updatedMapperClassInfo,
                 modelClassInfo,
-                diagnosticInfos.ToEquatableArray(),
+                mapperDiagnostics.Concat(diagnosticInfos).ToEquatableArray(),
                 context,
                 helperRegistry
             );

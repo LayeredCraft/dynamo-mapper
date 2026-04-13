@@ -12,8 +12,13 @@ internal sealed record MapperClassInfo(
     string? ToItemSignature,
     string? FromItemSignature,
     string? FromItemParameterName,
+    string? ToItemParameterName,
     LocationInfo? Location,
-    EquatableArray<HelperMethodInfo> HelperMethods
+    EquatableArray<HelperMethodInfo> HelperMethods,
+    bool HasBeforeToItem,
+    bool HasAfterToItem,
+    bool HasBeforeFromItem,
+    bool HasAfterFromItem
 );
 
 internal static class MapperClassInfoExtensions
@@ -68,9 +73,16 @@ internal static class MapperClassInfoExtensions
 
                         var fromItemParameterName =
                             fromItemMethod?.Parameters.FirstOrDefault()?.Name;
+                        var toItemParameterName =
+                            toItemMethod?.Parameters.FirstOrDefault()?.Name;
+
+                        var hasBeforeToItem   = IsHookPresent(methods, "BeforeToItem",   2);
+                        var hasAfterToItem    = IsHookPresent(methods, "AfterToItem",    2);
+                        var hasBeforeFromItem = IsHookPresent(methods, "BeforeFromItem", 1);
+                        var hasAfterFromItem  = IsHookPresent(methods, "AfterFromItem",  2);
 
                         return DiagnosticResult<(MapperClassInfo, ITypeSymbol)>.Success(
-                            (new MapperClassInfo(classSymbol.Name, namespaceStatement, classSignature, toItemSignature, fromItemSignature, fromItemParameterName, context.TargetNode.CreateLocationInfo(), new EquatableArray<HelperMethodInfo>()),
+                            (new MapperClassInfo(classSymbol.Name, namespaceStatement, classSignature, toItemSignature, fromItemSignature, fromItemParameterName, toItemParameterName, context.TargetNode.CreateLocationInfo(), new EquatableArray<HelperMethodInfo>(), hasBeforeToItem, hasAfterToItem, hasBeforeFromItem, hasAfterFromItem),
                                 modelType)
                         );
                     }
@@ -165,4 +177,13 @@ internal static class MapperClassInfoExtensions
         return
             $"{accessibility} {modifiers}partial {returnType} {method.Name}({extensionMethod}{parameterType} {parameterName})";
     }
+
+    private static bool IsHookPresent(IMethodSymbol[] methods, string name, int paramCount) =>
+        methods.Any(m =>
+            m.Name == name &&
+            m.IsStatic &&
+            m.ReturnsVoid &&
+            m.Parameters.Length == paramCount &&
+            (m.IsPartialDefinition || m.PartialDefinitionPart != null)
+        );
 }

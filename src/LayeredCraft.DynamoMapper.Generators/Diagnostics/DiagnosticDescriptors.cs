@@ -115,4 +115,34 @@ internal static class DiagnosticDescriptors
             DiagnosticSeverity.Error,
             true
         );
+
+    internal static readonly DiagnosticDescriptor InvalidHookSignature =
+        new(
+            "DM0401",
+            "Hook signature doesn't match expected format",
+            "The method '{0}' does not match the expected hook signature for '{1}'",
+            UsageCategory,
+            DiagnosticSeverity.Warning,
+            true
+        );
+
+    internal static readonly DiagnosticDescriptor HookNotStatic =
+        new(
+            "DM0402",
+            "Hook method is not static",
+            "The hook method '{0}' must be declared as static",
+            UsageCategory,
+            DiagnosticSeverity.Warning,
+            true
+        );
+
+    internal static readonly DiagnosticDescriptor HookParameterTypeMismatch =
+        new(
+            "DM0403",
+            "Hook parameter types don't match entity type",
+            "The hook method '{0}' parameter types must match the entity type '{1}'",
+            UsageCategory,
+            DiagnosticSeverity.Warning,
+            true
+        );
 }

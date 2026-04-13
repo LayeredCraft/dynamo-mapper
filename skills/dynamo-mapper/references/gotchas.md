@@ -4,7 +4,7 @@
 
 - Do not tell users to decorate every domain-model property.
 - Do not require methods to be named exactly `ToItem` and `FromItem`.
-- Do not teach lifecycle hooks as currently implemented behavior.
+- Do not invent lifecycle hook signatures from memory.
 - Do not use the old property-level converter signatures from stale docs.
 - Do not assume every converter mistake becomes a DynamoMapper diagnostic.
 
@@ -22,7 +22,7 @@
 ## Stale-doc corrections
 
 - nested mapping is supported
-- hook docs are stale for current behavior
+- lifecycle hooks are implemented with strict signature validation
 - static converter docs are stale on signatures and constraints
 - some prose docs mention diagnostics that do not exist
 
@@ -30,5 +30,5 @@
 
 - prefer simple mapper classes
 - prefer supported scalar and collection shapes
-- avoid promising hook behavior
+- use the exact four hook names and signatures when hooks are needed
 - avoid inventing converter signatures from memory

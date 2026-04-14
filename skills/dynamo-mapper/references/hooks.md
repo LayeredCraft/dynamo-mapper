@@ -24,13 +24,26 @@ Where `T` is the mapper model type.
 - `To*`: create dictionary -> `BeforeToItem` -> map members -> `AfterToItem` -> return
 - `From*`: `BeforeFromItem` -> map/construct model -> `AfterFromItem` -> return
 
+## Partial vs non-partial
+
+Hooks do **not** need to be `partial`. Both of these are valid:
+
+```csharp
+// partial declaration (zero-cost if no implementation — compiler elides call)
+static partial void AfterToItem(Product source, Dictionary<string, AttributeValue> item);
+
+// regular static method — must have a body
+static void AfterToItem(Product source, Dictionary<string, AttributeValue> item) { ... }
+```
+
+The generator detects hooks by name and signature alone.
+
 ## Validation diagnostics
 
 - `DM0401` invalid hook signature
   - wrong parameter count
   - wrong `ref` usage (`AfterFromItem` must use `ref` on entity)
   - non-void return type
-  - non-partial hook method
 - `DM0402` hook is not static
 - `DM0403` hook parameter types do not match mapper model/dictionary requirements
 

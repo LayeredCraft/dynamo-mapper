@@ -1086,6 +1086,67 @@ public class NestedObjectVerifyTests
             TestContext.Current.CancellationToken
         );
 
+    [Fact]
+    public async Task NestedObject_FourLevelDeepNesting() => await GeneratorTestHelpers.Verify(
+        new VerifyTestOptions
+        {
+            SourceCode =
+                """
+                using System.Collections.Generic;
+                using Amazon.DynamoDBv2.Model;
+                using LayeredCraft.DynamoMapper.Runtime;
+
+                namespace MyNamespace;
+
+                [DynamoMapper]
+                public static partial class OrgMapper
+                {
+                    public static partial Dictionary<string, AttributeValue> ToItem(Org source);
+
+                    public static partial Org FromItem(Dictionary<string, AttributeValue> item);
+                }
+
+                // Level 0 — root
+                public class Org
+                {
+                    public string OrgId { get; set; }
+                    public Division Division { get; set; }
+                }
+
+                // Level 1 — owned type on root
+                public class Division
+                {
+                    public string Name { get; set; }
+                    public List<Department> Departments { get; set; }
+                }
+
+                // Level 2 — complex list element inside owned type
+                public class Department
+                {
+                    public string Code { get; set; }
+                    public Manager HeadManager { get; set; }
+                    public List<Employee> Employees { get; set; }
+                }
+
+                // Level 3a — owned type inside a list element
+                public class Manager
+                {
+                    public string FullName { get; set; }
+                    public string Email { get; set; }
+                }
+
+                // Level 3b — complex list element inside a list element
+                public class Employee
+                {
+                    public string EmployeeId { get; set; }
+                    public string Name { get; set; }
+                    public List<string> Tags { get; set; }
+                }
+                """,
+        },
+        TestContext.Current.CancellationToken
+    );
+
     // ==================== DIAGNOSTIC TESTS ====================
 
     [Fact]

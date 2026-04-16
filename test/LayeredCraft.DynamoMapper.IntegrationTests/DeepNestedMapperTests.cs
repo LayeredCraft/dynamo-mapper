@@ -149,3 +149,115 @@ public class DeepNestedMapperTests
         actual.Profile.Orders.Should().BeEmpty();
     }
 }
+
+public class FourLevelOrgMapperTests
+{
+    private static FourLevelOrg CreateModel() => new()
+    {
+        OrgId = "org-001",
+        Division =
+            new FourLevelDivision
+            {
+                Name = "Engineering",
+                Departments =
+                [
+                    new FourLevelDepartment
+                    {
+                        Code = "PLAT",
+                        HeadManager =
+                            new FourLevelManager
+                            {
+                                FullName = "Alice Smith",
+                                Email = "alice@example.com",
+                            },
+                        Employees =
+                        [
+                            new FourLevelEmployee
+                            {
+                                EmployeeId = "E001",
+                                Name = "Bob",
+                                Tags = ["backend", "senior"],
+                            },
+                            new FourLevelEmployee
+                            {
+                                EmployeeId = "E002",
+                                Name = "Carol",
+                                Tags = ["frontend"],
+                            },
+                        ],
+                    },
+                    new FourLevelDepartment
+                    {
+                        Code = "DATA",
+                        HeadManager =
+                            new FourLevelManager
+                            {
+                                FullName = "Dave Jones",
+                                Email = "dave@example.com",
+                            },
+                        Employees =
+                        [
+                            new FourLevelEmployee
+                            {
+                                EmployeeId = "E003",
+                                Name = "Eve",
+                                Tags = ["ml", "python"],
+                            },
+                        ],
+                    },
+                ],
+            },
+    };
+
+    [Fact]
+    public void FourLevel_RoundTrip_PreservesAllValues()
+    {
+        var expected = CreateModel();
+
+        var item = FourLevelOrgMapper.ToItem(expected);
+        var actual = FourLevelOrgMapper.FromItem(item);
+
+        actual.OrgId.Should().Be(expected.OrgId);
+        actual.Division.Name.Should().Be(expected.Division.Name);
+        actual.Division.Departments.Should().HaveCount(expected.Division.Departments.Count);
+
+        for (var i = 0; i < expected.Division.Departments.Count; i++)
+        {
+            var expDept = expected.Division.Departments[i];
+            var actDept = actual.Division.Departments[i];
+
+            actDept.Code.Should().Be(expDept.Code);
+            actDept.HeadManager.FullName.Should().Be(expDept.HeadManager.FullName);
+            actDept.HeadManager.Email.Should().Be(expDept.HeadManager.Email);
+
+            actDept.Employees.Should().HaveCount(expDept.Employees.Count);
+            for (var j = 0; j < expDept.Employees.Count; j++)
+            {
+                actDept.Employees[j].EmployeeId.Should().Be(expDept.Employees[j].EmployeeId);
+                actDept.Employees[j].Name.Should().Be(expDept.Employees[j].Name);
+                actDept.Employees[j].Tags.Should().Equal(expDept.Employees[j].Tags);
+            }
+        }
+    }
+
+    [Fact]
+    public void FourLevel_ToItem_ProducesCorrectAttributeShape()
+    {
+        var model = CreateModel();
+
+        var item = FourLevelOrgMapper.ToItem(model);
+
+        item["orgId"].S.Should().Be("org-001");
+        item["division"].M["name"].S.Should().Be("Engineering");
+
+        var depts = item["division"].M["departments"].L;
+        depts.Should().HaveCount(2);
+
+        var platDept = depts[0].M;
+        platDept["code"].S.Should().Be("PLAT");
+        platDept["headManager"].M["fullName"].S.Should().Be("Alice Smith");
+        platDept["employees"].L.Should().HaveCount(2);
+        platDept["employees"].L[0].M["employeeId"].S.Should().Be("E001");
+        platDept["employees"].L[0].M["tags"].L[0].S.Should().Be("backend");
+    }
+}

@@ -66,10 +66,16 @@ internal static class HelperMethodEmitter
         );
         sb.AppendLine("{");
 
-        // Determine rendering path from structured data, without an intermediate string
+        // Determine rendering path from structured data, without an intermediate string.
+        // Nested objects (NestedMapping != null) and nested collections
+        // (Strategy.CollectionInfo.ElementNestedMapping != null) always go through the
+        // init-assignment path — there is no TryGet* runtime method for them.
         var hasPostConstructionProperties =
             helper.InlineInfo.Properties.Any(
-                p => !p.IsRequired && !p.IsInitOnly && p.HasDefaultValue && p.HasSetter
+                p =>
+                    !p.IsRequired && !p.IsInitOnly && p.HasDefaultValue && p.HasSetter &&
+                    p.NestedMapping is null &&
+                    p.Strategy?.CollectionInfo?.ElementNestedMapping is null
             );
 
         if (!hasPostConstructionProperties)

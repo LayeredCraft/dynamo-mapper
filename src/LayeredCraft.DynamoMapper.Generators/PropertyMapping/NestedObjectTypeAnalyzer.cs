@@ -303,13 +303,16 @@ internal static class NestedObjectTypeAnalyzer
                     continue;
                 }
 
-                // Create collection strategy (simplified for nested objects)
+                // Create collection strategy — pass NestedMapping through so that
+                // List<ComplexType> inside a helper method emits a NestedList strategy
+                // (not a plain List strategy that would call SetList<ComplexType> at runtime).
                 var collectionStrategy =
                     CreateCollectionStrategy(
                         collectionInfo,
                         propertyType,
                         fieldOptions,
-                        nestedContext.Context
+                        nestedContext.Context,
+                        validation.NestedMapping
                     );
                 propertySpecs.Add(
                     new NestedPropertySpec(
@@ -536,14 +539,43 @@ internal static class NestedObjectTypeAnalyzer
 
     /// <summary>
     ///     Creates a collection type mapping strategy.
+    ///     When <paramref name="elementNestedMapping"/> is non-null the element type is a complex
+    ///     object, so a "NestedList" / "NestedMap" strategy is returned instead of the plain scalar
+    ///     variant — preventing helper methods from calling SetList/GetList on complex types.
     /// </summary>
     private static TypeMappingStrategy CreateCollectionStrategy(
         CollectionInfo collectionInfo, ITypeSymbol originalType, DynamoFieldOptions? fieldOptions,
-        GeneratorContext context
+        GeneratorContext context, NestedMappingInfo? elementNestedMapping = null
     )
     {
         var isNullable = originalType.NullableAnnotation == NullableAnnotation.Annotated;
         var nullableModifier = isNullable ? "Nullable" : "";
+
+        // When the element type is a complex object, mirror TypeMappingStrategyResolver's
+        // CreateNestedCollectionStrategy so the renderers emit the correct Select(x => ...) code.
+        if (elementNestedMapping is not null)
+        {
+            var nestedTypeName =
+                collectionInfo.Category switch
+                {
+                    CollectionCategory.List => "NestedList",
+                    CollectionCategory.Map => "NestedMap",
+                    _ => throw new InvalidOperationException(
+                        $"Unexpected category for nested collection: {collectionInfo.Category}"
+                    ),
+                };
+
+            return new TypeMappingStrategy(
+                nestedTypeName,
+                $"<{collectionInfo.ElementType.ToDisplayString()}>",
+                nullableModifier,
+                [],
+                [],
+                collectionInfo.TargetKind,
+                elementNestedMapping,
+                collectionInfo with { ElementNestedMapping = elementNestedMapping }
+            );
+        }
 
         var (typeName, genericArg) =
             collectionInfo.Category switch

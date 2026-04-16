@@ -976,6 +976,116 @@ public class NestedObjectVerifyTests
             TestContext.Current.CancellationToken
         );
 
+    [Fact]
+    public async Task NestedObject_OwnedTypeContainingListOfComplexObjects() =>
+        await GeneratorTestHelpers.Verify(
+            new VerifyTestOptions
+            {
+                SourceCode =
+                    """
+                    using System.Collections.Generic;
+                    using Amazon.DynamoDBv2.Model;
+                    using LayeredCraft.DynamoMapper.Runtime;
+
+                    namespace MyNamespace;
+
+                    [DynamoMapper]
+                    public static partial class UserMapper
+                    {
+                        public static partial Dictionary<string, AttributeValue> ToItem(User source);
+
+                        public static partial User FromItem(Dictionary<string, AttributeValue> item);
+                    }
+
+                    public class User
+                    {
+                        public string Id { get; set; }
+                        public string Name { get; set; }
+                        public Order CurrentOrder { get; set; }
+                    }
+
+                    public class Order
+                    {
+                        public string OrderId { get; set; }
+                        public decimal Total { get; set; }
+                        public List<OrderItem> Items { get; set; }
+                    }
+
+                    public class OrderItem
+                    {
+                        public string ProductId { get; set; }
+                        public int Quantity { get; set; }
+                        public decimal UnitPrice { get; set; }
+                    }
+                    """,
+            },
+            TestContext.Current.CancellationToken
+        );
+
+    [Fact]
+    public async Task NestedObject_DeepNestedObjectWithListContainingNestedObjects() =>
+        await GeneratorTestHelpers.Verify(
+            new VerifyTestOptions
+            {
+                SourceCode =
+                    """
+                    using System.Collections.Generic;
+                    using Amazon.DynamoDBv2.Model;
+                    using LayeredCraft.DynamoMapper.Runtime;
+
+                    namespace MyNamespace;
+
+                    [DynamoMapper]
+                    public static partial class AccountMapper
+                    {
+                        public static partial Dictionary<string, AttributeValue> ToItem(Account source);
+
+                        public static partial Account FromItem(Dictionary<string, AttributeValue> item);
+                    }
+
+                    // Root
+                    public class Account
+                    {
+                        public string AccountId { get; set; }
+                        public UserProfile Profile { get; set; }
+                    }
+
+                    // Level 1 owned type — has both a scalar list and a list of complex objects
+                    public class UserProfile
+                    {
+                        public string DisplayName { get; set; }
+                        public List<string> Roles { get; set; }
+                        public List<PurchaseOrder> Orders { get; set; }
+                    }
+
+                    // Level 2 element type — itself has an owned complex type and a list of complex objects
+                    public class PurchaseOrder
+                    {
+                        public string OrderId { get; set; }
+                        public ShippingAddress Destination { get; set; }
+                        public List<LineItem> Lines { get; set; }
+                    }
+
+                    // Level 3 owned type inside a list element
+                    public class ShippingAddress
+                    {
+                        public string Street { get; set; }
+                        public string City { get; set; }
+                        public string PostalCode { get; set; }
+                    }
+
+                    // Level 3 list element type inside a list element
+                    public class LineItem
+                    {
+                        public string Sku { get; set; }
+                        public int Qty { get; set; }
+                        public decimal Price { get; set; }
+                    }
+                    """,
+            },
+            TestContext.Current.CancellationToken
+        );
+
     // ==================== DIAGNOSTIC TESTS ====================
 
     [Fact]

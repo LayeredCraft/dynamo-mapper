@@ -478,6 +478,56 @@ internal static class PropertyMappingCodeRenderer
                 : $".Set(\"{prop.DynamoKey}\", {nestedSourcePrefix} is null ? new AttributeValue {{ NULL = true }} : {nestedCode})";
         }
 
+        // Nested collection inside a helper method (e.g. List<Order> on an owned type).
+        // Strategy.TypeName will be "NestedList" or "NestedMap" — must NOT call SetList/SetMap.
+        if (prop.Strategy?.CollectionInfo?.ElementNestedMapping is { } nestedElemMapping &&
+            prop.HasGetter)
+        {
+            var collectionInfo = prop.Strategy.CollectionInfo!;
+            var propAccess = $"{sourcePrefix}.{prop.PropertyName}";
+            var isNullable = prop.Nullability.IsNullableType;
+            var omitNull = GetEffectiveNestedOmitNullSetting(prop.OmitIfNull, context);
+
+            if (collectionInfo.Category == CollectionCategory.List)
+            {
+                var elementConverter =
+                    nestedElemMapping switch
+                    {
+                        MapperBasedNesting mb =>
+                            $"new AttributeValue {{ M = {mb.Mapper.MapperFullyQualifiedName}.ToItem(x) }}",
+                        InlineNesting inline =>
+                            $"new AttributeValue {{ M = {helperRegistry.GetOrRegisterToItemHelper(inline.Info.ModelFullyQualifiedType, inline.Info)}(x) }}",
+                        _ => throw new InvalidOperationException("Unknown nested mapping type"),
+                    };
+                var selectExpr =
+                    $"{propAccess}{(isNullable ? "?" : "")}.Select(x => {elementConverter}).ToList()";
+                if (isNullable)
+                    return omitNull
+                        ? $".SetIfNotNull(\"{prop.DynamoKey}\", {propAccess}, value => new AttributeValue {{ L = value.Select(x => {elementConverter}).ToList() }})"
+                        : $".Set(\"{prop.DynamoKey}\", {propAccess} is null ? new AttributeValue {{ NULL = true }} : new AttributeValue {{ L = {selectExpr} }})";
+                return $".Set(\"{prop.DynamoKey}\", new AttributeValue {{ L = {selectExpr} }})";
+            }
+            else // Map
+            {
+                var valueConverter =
+                    nestedElemMapping switch
+                    {
+                        MapperBasedNesting mb =>
+                            $"new AttributeValue {{ M = {mb.Mapper.MapperFullyQualifiedName}.ToItem(kvp.Value) }}",
+                        InlineNesting inline =>
+                            $"new AttributeValue {{ M = {helperRegistry.GetOrRegisterToItemHelper(inline.Info.ModelFullyQualifiedType, inline.Info)}(kvp.Value) }}",
+                        _ => throw new InvalidOperationException("Unknown nested mapping type"),
+                    };
+                var toDictExpr =
+                    $"{propAccess}{(isNullable ? "?" : "")}.ToDictionary(kvp => kvp.Key, kvp => {valueConverter})";
+                if (isNullable)
+                    return omitNull
+                        ? $".SetIfNotNull(\"{prop.DynamoKey}\", {propAccess}, value => new AttributeValue {{ M = value.ToDictionary(kvp => kvp.Key, kvp => {valueConverter}) }})"
+                        : $".Set(\"{prop.DynamoKey}\", {propAccess} is null ? new AttributeValue {{ NULL = true }} : new AttributeValue {{ M = {toDictExpr} }})";
+                return $".Set(\"{prop.DynamoKey}\", new AttributeValue {{ M = {toDictExpr} }})";
+            }
+        }
+
         if (prop.Strategy is not null && prop.HasGetter)
         {
             var setMethod = $"Set{prop.Strategy.TypeName}";
@@ -608,9 +658,14 @@ internal static class PropertyMappingCodeRenderer
 
         foreach (var prop in inlineInfo.Properties)
         {
-            // Use post-construction for optional, settable properties with default values
+            // Use post-construction for optional, settable scalar properties with default values.
+            // Nested objects and nested collections are excluded: they use inline conditional
+            // expressions (TryGetValue + Select / TryGetValue + M pattern) that have no
+            // corresponding TryGet* runtime method.
             var usePostConstruction =
-                !prop.IsRequired && !prop.IsInitOnly && prop.HasDefaultValue && prop.HasSetter;
+                !prop.IsRequired && !prop.IsInitOnly && prop.HasDefaultValue && prop.HasSetter &&
+                prop.NestedMapping is null &&
+                prop.Strategy?.CollectionInfo?.ElementNestedMapping is null;
 
             if (usePostConstruction)
                 postConstructionProperties.Add(prop);
@@ -736,6 +791,58 @@ internal static class PropertyMappingCodeRenderer
             }
 
             sb.Append($"{prop.PropertyName} = {nestedCode},");
+        }
+        // Nested collection inside a helper method (e.g. List<Order> on an owned type).
+        // Strategy.TypeName will be "NestedList" or "NestedMap" — must NOT call GetList/GetMap.
+        else if (prop.Strategy?.CollectionInfo?.ElementNestedMapping is { } nestedElemMapping)
+        {
+            var collectionInfo = prop.Strategy.CollectionInfo!;
+            var isNullable = prop.Nullability.IsNullableType;
+            var varName = prop.PropertyName.ToLowerInvariant();
+            var fallback =
+                prop.IsRequired
+                    ?
+                    $"throw new System.InvalidOperationException(\"Required attribute '{prop.DynamoKey}' not found.\")"
+                    : isNullable
+                        ? "null"
+                        : "[]";
+
+            if (collectionInfo.Category == CollectionCategory.List)
+            {
+                var elementConverter =
+                    nestedElemMapping switch
+                    {
+                        MapperBasedNesting mb =>
+                            $"{mb.Mapper.MapperFullyQualifiedName}.FromItem(av.M)",
+                        InlineNesting inline =>
+                            $"{helperRegistry.GetOrRegisterFromItemHelper(inline.Info.ModelFullyQualifiedType, inline.Info)}(av.M)",
+                        _ => throw new InvalidOperationException("Unknown nested mapping type"),
+                    };
+                var selectExpr =
+                    ApplyReadMaterialization(
+                        $"{varName}List.Select(av => {elementConverter}).ToList()",
+                        collectionInfo,
+                        false
+                    );
+                sb.Append(
+                    $"{prop.PropertyName} = {mapVarName}.TryGetValue(\"{prop.DynamoKey}\", out var {varName}Attr) && {varName}Attr.L is {{ }} {varName}List ? {selectExpr} : {fallback},"
+                );
+            }
+            else // Map
+            {
+                var valueConverter =
+                    nestedElemMapping switch
+                    {
+                        MapperBasedNesting mb =>
+                            $"{mb.Mapper.MapperFullyQualifiedName}.FromItem(kvp.Value.M)",
+                        InlineNesting inline =>
+                            $"{helperRegistry.GetOrRegisterFromItemHelper(inline.Info.ModelFullyQualifiedType, inline.Info)}(kvp.Value.M)",
+                        _ => throw new InvalidOperationException("Unknown nested mapping type"),
+                    };
+                sb.Append(
+                    $"{prop.PropertyName} = {mapVarName}.TryGetValue(\"{prop.DynamoKey}\", out var {varName}Attr) && {varName}Attr.M is {{ }} {varName}Map ? {varName}Map.ToDictionary(kvp => kvp.Key, kvp => {valueConverter}) : {fallback},"
+                );
+            }
         }
         else if (prop.Strategy is not null)
         {

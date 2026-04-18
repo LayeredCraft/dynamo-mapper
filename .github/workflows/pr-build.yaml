@@ -18,7 +18,6 @@ jobs:
       solution: LayeredCraft.DynamoMapper.slnx
       hasTests: true
       useMtpRunner: true
-      testDirectory: "test"
       dotnetVersion: |
         8.0.x
         9.0.x

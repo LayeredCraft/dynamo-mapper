@@ -4,7 +4,7 @@
     <Nullable>enable</Nullable>
     <OutputType>Exe</OutputType>
     <RootNamespace>LayeredCraft.DynamoMapper.IntegrationTests</RootNamespace>
-    <TargetFrameworks>net8.0;net10.0;net9.0</TargetFrameworks>
+    <TargetFrameworks>net8.0;net10.0;net9.0;net11.0</TargetFrameworks>
     <IsTestProject>true</IsTestProject>
     <IsPackable>false</IsPackable>
     <LangVersion>default</LangVersion>
@@ -15,12 +15,7 @@
     <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest"/>
   </ItemGroup>
   <ItemGroup>
-    <Using Include="Xunit"/>
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="AWSSDK.DynamoDBv2"/>
-    <PackageReference Include="Microsoft.NET.Test.Sdk"/>
-    <PackageReference Include="xunit.runner.visualstudio"/>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference

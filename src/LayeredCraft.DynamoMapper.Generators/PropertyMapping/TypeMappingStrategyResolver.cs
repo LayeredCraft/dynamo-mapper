@@ -104,6 +104,8 @@ internal static class TypeMappingStrategyResolver
             return CreateNestedObjectStrategy(nestedResult.Value, analysis);
         }
 
+        var supportsDateOnlyTimeOnly = DateOnlyTimeOnlySupport.RuntimeApisAvailable(context);
+
         // Resolve the base type mapping strategy (existing logic unchanged)
         var strategyResult =
             analysis.UnderlyingType switch
@@ -172,7 +174,9 @@ internal static class TypeMappingStrategyResolver
                         toArg:
                         $"\"{analysis.FieldOptions?.Format ?? context.MapperOptions.TimeSpanFormat}\""
                     ),
-                INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_DateOnly, context) =>
+                INamedTypeSymbol t
+                    when supportsDateOnlyTimeOnly && DateOnlyTimeOnlySupport.IsDateOnly(t, context)
+                    =>
                     CreateStrategy(
                         "DateOnly",
                         analysis.Nullability,
@@ -181,7 +185,9 @@ internal static class TypeMappingStrategyResolver
                         toArg:
                         $"\"{analysis.FieldOptions?.Format ?? context.MapperOptions.DateOnlyFormat}\""
                     ),
-                INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_TimeOnly, context) =>
+                INamedTypeSymbol t
+                    when supportsDateOnlyTimeOnly && DateOnlyTimeOnlySupport.IsTimeOnly(t, context)
+                    =>
                     CreateStrategy(
                         "TimeOnly",
                         analysis.Nullability,
@@ -459,6 +465,7 @@ internal static class TypeMappingStrategyResolver
     )
     {
         var underlyingType = UnwrapNullable(elementType);
+        var supportsDateOnlyTimeOnly = DateOnlyTimeOnlySupport.RuntimeApisAvailable(context);
 
         return underlyingType switch
         {
@@ -477,11 +484,13 @@ internal static class TypeMappingStrategyResolver
                 CreateCollectionFormatArgs(
                     analysis.FieldOptions?.Format ?? context.MapperOptions.TimeSpanFormat
                 ),
-            INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_DateOnly, context) =>
+            INamedTypeSymbol t
+                when supportsDateOnlyTimeOnly && DateOnlyTimeOnlySupport.IsDateOnly(t, context) =>
                 CreateCollectionFormatArgs(
                     analysis.FieldOptions?.Format ?? context.MapperOptions.DateOnlyFormat
                 ),
-            INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_TimeOnly, context) =>
+            INamedTypeSymbol t
+                when supportsDateOnlyTimeOnly && DateOnlyTimeOnlySupport.IsTimeOnly(t, context) =>
                 CreateCollectionFormatArgs(
                     analysis.FieldOptions?.Format ?? context.MapperOptions.TimeOnlyFormat
                 ),

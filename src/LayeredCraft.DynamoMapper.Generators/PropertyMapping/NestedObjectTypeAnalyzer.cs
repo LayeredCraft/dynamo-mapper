@@ -172,9 +172,9 @@ internal static class NestedObjectTypeAnalyzer
             return true;
         if (wellKnown.IsType(type, WellKnownTypeData.WellKnownType.System_Guid))
             return true;
-        if (wellKnown.IsType(type, WellKnownTypeData.WellKnownType.System_DateOnly))
+        if (DateOnlyTimeOnlySupport.IsDateOnly(type, context))
             return true;
-        if (wellKnown.IsType(type, WellKnownTypeData.WellKnownType.System_TimeOnly))
+        if (DateOnlyTimeOnlySupport.IsTimeOnly(type, context))
             return true;
         var streamType = wellKnown.Get(WellKnownTypeData.WellKnownType.System_IO_Stream);
         if (streamType is not null && type.IsAssignableTo(streamType, context))
@@ -405,6 +405,7 @@ internal static class NestedObjectTypeAnalyzer
             !SymbolEqualityComparer.Default.Equals(underlyingType, originalType) ||
             originalType.NullableAnnotation == NullableAnnotation.Annotated;
         var nullableModifier = isNullable ? "Nullable" : "";
+        var supportsDateOnlyTimeOnly = DateOnlyTimeOnlySupport.RuntimeApisAvailable(context);
 
         return underlyingType switch
         {
@@ -494,20 +495,18 @@ internal static class NestedObjectTypeAnalyzer
                 [$"\"{fieldOptions?.Format ?? context.MapperOptions.TimeSpanFormat}\""],
                 [$"\"{fieldOptions?.Format ?? context.MapperOptions.TimeSpanFormat}\""]
             ),
-            INamedTypeSymbol t when context.WellKnownTypes.IsType(
-                t,
-                WellKnownTypeData.WellKnownType.System_DateOnly
-            ) => new TypeMappingStrategy(
+            INamedTypeSymbol t
+                when supportsDateOnlyTimeOnly && DateOnlyTimeOnlySupport.IsDateOnly(t, context)
+                => new TypeMappingStrategy(
                 "DateOnly",
                 "",
                 nullableModifier,
                 [$"\"{fieldOptions?.Format ?? context.MapperOptions.DateOnlyFormat}\""],
                 [$"\"{fieldOptions?.Format ?? context.MapperOptions.DateOnlyFormat}\""]
             ),
-            INamedTypeSymbol t when context.WellKnownTypes.IsType(
-                t,
-                WellKnownTypeData.WellKnownType.System_TimeOnly
-            ) => new TypeMappingStrategy(
+            INamedTypeSymbol t
+                when supportsDateOnlyTimeOnly && DateOnlyTimeOnlySupport.IsTimeOnly(t, context)
+                => new TypeMappingStrategy(
                 "TimeOnly",
                 "",
                 nullableModifier,
@@ -641,6 +640,7 @@ internal static class NestedObjectTypeAnalyzer
     )
     {
         var underlyingType = UnwrapNullable(elementType);
+        var supportsDateOnlyTimeOnly = DateOnlyTimeOnlySupport.RuntimeApisAvailable(context);
 
         return underlyingType switch
         {
@@ -665,16 +665,14 @@ internal static class NestedObjectTypeAnalyzer
             ) => CreateCollectionFormatArgs(
                 fieldOptions?.Format ?? context.MapperOptions.TimeSpanFormat
             ),
-            INamedTypeSymbol t when context.WellKnownTypes.IsType(
-                t,
-                WellKnownTypeData.WellKnownType.System_DateOnly
-            ) => CreateCollectionFormatArgs(
+            INamedTypeSymbol t
+                when supportsDateOnlyTimeOnly && DateOnlyTimeOnlySupport.IsDateOnly(t, context)
+                => CreateCollectionFormatArgs(
                 fieldOptions?.Format ?? context.MapperOptions.DateOnlyFormat
             ),
-            INamedTypeSymbol t when context.WellKnownTypes.IsType(
-                t,
-                WellKnownTypeData.WellKnownType.System_TimeOnly
-            ) => CreateCollectionFormatArgs(
+            INamedTypeSymbol t
+                when supportsDateOnlyTimeOnly && DateOnlyTimeOnlySupport.IsTimeOnly(t, context)
+                => CreateCollectionFormatArgs(
                 fieldOptions?.Format ?? context.MapperOptions.TimeOnlyFormat
             ),
             INamedTypeSymbol { TypeKind: TypeKind.Enum } => CreateCollectionFormatArgs(

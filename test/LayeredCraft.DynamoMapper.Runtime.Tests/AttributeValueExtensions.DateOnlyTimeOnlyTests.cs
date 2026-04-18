@@ -3,7 +3,7 @@ using Amazon.DynamoDBv2.Model;
 
 namespace LayeredCraft.DynamoMapper.Runtime.Tests;
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
 public class AttributeValueExtensionsDateOnlyTimeOnlyTests
 {
     #region DateOnly Tests

@@ -845,7 +845,7 @@ public static class CollectionAttributeValueExtensions
                         CultureInfo.InvariantCulture
                     ));
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
             // DateOnly
             if (underlyingType == typeof(DateOnly))
                 return (T)(object)(format is null
@@ -960,7 +960,7 @@ public static class CollectionAttributeValueExtensions
                     )
                     .ToAttributeValue(DynamoKind.S);
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
             // DateOnly
             if (underlyingType == typeof(DateOnly))
                 return ((DateOnly)(object)value)

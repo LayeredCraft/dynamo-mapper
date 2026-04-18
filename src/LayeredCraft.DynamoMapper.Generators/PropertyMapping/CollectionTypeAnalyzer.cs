@@ -226,6 +226,18 @@ internal static class CollectionTypeAnalyzer
             if (SymbolEqualityComparer.Default.Equals(namedType, timeSpanType))
                 return new ElementTypeValidationResult(true, null, null);
 
+            // DateOnly
+            var dateOnlyType = context.WellKnownTypes.Get(WellKnownType.System_DateOnly);
+            if (dateOnlyType is not null &&
+                SymbolEqualityComparer.Default.Equals(namedType, dateOnlyType))
+                return new ElementTypeValidationResult(true, null, null);
+
+            // TimeOnly
+            var timeOnlyType = context.WellKnownTypes.Get(WellKnownType.System_TimeOnly);
+            if (timeOnlyType is not null &&
+                SymbolEqualityComparer.Default.Equals(namedType, timeOnlyType))
+                return new ElementTypeValidationResult(true, null, null);
+
             // Enums
             if (namedType.TypeKind == TypeKind.Enum)
                 return new ElementTypeValidationResult(true, null, null);

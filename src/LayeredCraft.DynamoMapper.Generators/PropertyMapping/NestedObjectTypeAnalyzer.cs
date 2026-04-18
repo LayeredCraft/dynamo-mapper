@@ -172,6 +172,10 @@ internal static class NestedObjectTypeAnalyzer
             return true;
         if (wellKnown.IsType(type, WellKnownTypeData.WellKnownType.System_Guid))
             return true;
+        if (wellKnown.IsType(type, WellKnownTypeData.WellKnownType.System_DateOnly))
+            return true;
+        if (wellKnown.IsType(type, WellKnownTypeData.WellKnownType.System_TimeOnly))
+            return true;
         var streamType = wellKnown.Get(WellKnownTypeData.WellKnownType.System_IO_Stream);
         if (streamType is not null && type.IsAssignableTo(streamType, context))
             return true;
@@ -490,6 +494,26 @@ internal static class NestedObjectTypeAnalyzer
                 [$"\"{fieldOptions?.Format ?? context.MapperOptions.TimeSpanFormat}\""],
                 [$"\"{fieldOptions?.Format ?? context.MapperOptions.TimeSpanFormat}\""]
             ),
+            INamedTypeSymbol t when context.WellKnownTypes.IsType(
+                t,
+                WellKnownTypeData.WellKnownType.System_DateOnly
+            ) => new TypeMappingStrategy(
+                "DateOnly",
+                "",
+                nullableModifier,
+                [$"\"{fieldOptions?.Format ?? context.MapperOptions.DateOnlyFormat}\""],
+                [$"\"{fieldOptions?.Format ?? context.MapperOptions.DateOnlyFormat}\""]
+            ),
+            INamedTypeSymbol t when context.WellKnownTypes.IsType(
+                t,
+                WellKnownTypeData.WellKnownType.System_TimeOnly
+            ) => new TypeMappingStrategy(
+                "TimeOnly",
+                "",
+                nullableModifier,
+                [$"\"{fieldOptions?.Format ?? context.MapperOptions.TimeOnlyFormat}\""],
+                [$"\"{fieldOptions?.Format ?? context.MapperOptions.TimeOnlyFormat}\""]
+            ),
             IArrayTypeSymbol { ElementType.SpecialType: SpecialType.System_Byte } =>
                 new TypeMappingStrategy("Binary", "", nullableModifier, [], []),
             INamedTypeSymbol t when
@@ -640,6 +664,18 @@ internal static class NestedObjectTypeAnalyzer
                 WellKnownTypeData.WellKnownType.System_TimeSpan
             ) => CreateCollectionFormatArgs(
                 fieldOptions?.Format ?? context.MapperOptions.TimeSpanFormat
+            ),
+            INamedTypeSymbol t when context.WellKnownTypes.IsType(
+                t,
+                WellKnownTypeData.WellKnownType.System_DateOnly
+            ) => CreateCollectionFormatArgs(
+                fieldOptions?.Format ?? context.MapperOptions.DateOnlyFormat
+            ),
+            INamedTypeSymbol t when context.WellKnownTypes.IsType(
+                t,
+                WellKnownTypeData.WellKnownType.System_TimeOnly
+            ) => CreateCollectionFormatArgs(
+                fieldOptions?.Format ?? context.MapperOptions.TimeOnlyFormat
             ),
             INamedTypeSymbol { TypeKind: TypeKind.Enum } => CreateCollectionFormatArgs(
                 fieldOptions?.Format ?? context.MapperOptions.EnumFormat

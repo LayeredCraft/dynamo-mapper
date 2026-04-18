@@ -172,6 +172,24 @@ internal static class TypeMappingStrategyResolver
                         toArg:
                         $"\"{analysis.FieldOptions?.Format ?? context.MapperOptions.TimeSpanFormat}\""
                     ),
+                INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_DateOnly, context) =>
+                    CreateStrategy(
+                        "DateOnly",
+                        analysis.Nullability,
+                        fromArg:
+                        $"\"{analysis.FieldOptions?.Format ?? context.MapperOptions.DateOnlyFormat}\"",
+                        toArg:
+                        $"\"{analysis.FieldOptions?.Format ?? context.MapperOptions.DateOnlyFormat}\""
+                    ),
+                INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_TimeOnly, context) =>
+                    CreateStrategy(
+                        "TimeOnly",
+                        analysis.Nullability,
+                        fromArg:
+                        $"\"{analysis.FieldOptions?.Format ?? context.MapperOptions.TimeOnlyFormat}\"",
+                        toArg:
+                        $"\"{analysis.FieldOptions?.Format ?? context.MapperOptions.TimeOnlyFormat}\""
+                    ),
                 INamedTypeSymbol { TypeKind: TypeKind.Enum } enumType => CreateEnumStrategy(
                     enumType,
                     analysis,
@@ -458,6 +476,14 @@ internal static class TypeMappingStrategyResolver
             INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_TimeSpan, context) =>
                 CreateCollectionFormatArgs(
                     analysis.FieldOptions?.Format ?? context.MapperOptions.TimeSpanFormat
+                ),
+            INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_DateOnly, context) =>
+                CreateCollectionFormatArgs(
+                    analysis.FieldOptions?.Format ?? context.MapperOptions.DateOnlyFormat
+                ),
+            INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_TimeOnly, context) =>
+                CreateCollectionFormatArgs(
+                    analysis.FieldOptions?.Format ?? context.MapperOptions.TimeOnlyFormat
                 ),
             INamedTypeSymbol { TypeKind: TypeKind.Enum } => CreateCollectionFormatArgs(
                 analysis.FieldOptions?.Format ?? context.MapperOptions.EnumFormat

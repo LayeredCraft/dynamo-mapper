@@ -845,6 +845,20 @@ public static class CollectionAttributeValueExtensions
                         CultureInfo.InvariantCulture
                     ));
 
+#if NET6_0_OR_GREATER
+            // DateOnly
+            if (underlyingType == typeof(DateOnly))
+                return (T)(object)(format is null
+                    ? DateOnly.Parse(av.GetString(DynamoKind.S), CultureInfo.InvariantCulture)
+                    : DateOnly.ParseExact(av.GetString(DynamoKind.S), format, CultureInfo.InvariantCulture));
+
+            // TimeOnly
+            if (underlyingType == typeof(TimeOnly))
+                return (T)(object)(format is null
+                    ? TimeOnly.Parse(av.GetString(DynamoKind.S), CultureInfo.InvariantCulture)
+                    : TimeOnly.ParseExact(av.GetString(DynamoKind.S), format, CultureInfo.InvariantCulture));
+#endif
+
             // Guid
             if (underlyingType == typeof(Guid))
                 return (T)(object)(format is null
@@ -945,6 +959,20 @@ public static class CollectionAttributeValueExtensions
                         CultureInfo.InvariantCulture
                     )
                     .ToAttributeValue(DynamoKind.S);
+
+#if NET6_0_OR_GREATER
+            // DateOnly
+            if (underlyingType == typeof(DateOnly))
+                return ((DateOnly)(object)value)
+                    .ToString(format ?? "yyyy-MM-dd", CultureInfo.InvariantCulture)
+                    .ToAttributeValue(DynamoKind.S);
+
+            // TimeOnly
+            if (underlyingType == typeof(TimeOnly))
+                return ((TimeOnly)(object)value)
+                    .ToString(format ?? "HH:mm:ss.fffffff", CultureInfo.InvariantCulture)
+                    .ToAttributeValue(DynamoKind.S);
+#endif
 
             // Guid
             if (underlyingType == typeof(Guid))

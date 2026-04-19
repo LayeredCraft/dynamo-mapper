@@ -79,11 +79,14 @@
     <File Path="taskfile.yaml" />
   </Folder>
   <Folder Name="/src/">
+    <Project Path="src/LayeredCraft.DynamoMapper.Client/LayeredCraft.DynamoMapper.Client.csproj"/>
     <Project Path="src/LayeredCraft.DynamoMapper.Generators/LayeredCraft.DynamoMapper.Generators.csproj" />
     <Project Path="src/LayeredCraft.DynamoMapper.Runtime/LayeredCraft.DynamoMapper.Runtime.csproj" />
   </Folder>
   <Folder Name="/test/">
     <File Path="test\Directory.Build.props" />
+    <Project
+      Path="test/LayeredCraft.DynamoMapper.Client.Tests/LayeredCraft.DynamoMapper.Client.Tests.csproj"/>
     <Project Path="test/LayeredCraft.DynamoMapper.Generators.Tests/LayeredCraft.DynamoMapper.Generators.Tests.csproj" />
     <Project
       Path="test/LayeredCraft.DynamoMapper.IntegrationTests/LayeredCraft.DynamoMapper.IntegrationTests.csproj"/>

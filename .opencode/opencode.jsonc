@@ -1,0 +1,45 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": [
+    "CLAUDE.local.md"
+  ],
+  "formatter": {
+    "cs-jb-formatter": {
+      "command": [
+        "dotnet",
+        "tool",
+        "run",
+        "jb",
+        "cleanupcode",
+        "--profile=Built-in: Reformat Code",
+        "--include=$FILE",
+        "--settings=LayeredCraft.DynamoMapper.sln.DotSettings"
+      ],
+      "extensions": [
+        ".cs",
+        ".props",
+        ".csproj"
+      ]
+    },
+    "mdformat": {
+      "command": [
+        "uvx",
+        "--with",
+        "mdformat-mkdocs",
+        "--with",
+        "mdformat-frontmatter",
+        "mdformat",
+        "$FILE",
+        "--exclude",
+        ".agents/**",
+        "--exclude",
+        ".claude/**",
+        "--exclude",
+        ".opencode/**"
+      ],
+      "extensions": [
+        ".md"
+      ]
+    }
+  }
+}

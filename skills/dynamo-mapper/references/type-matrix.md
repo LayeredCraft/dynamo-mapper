@@ -4,6 +4,9 @@
 
 - `string`, `bool`, `int`, `long`, `float`, `double`, `decimal`
 - `DateTime`, `DateTimeOffset`, `TimeSpan`, `Guid`
+- `DateOnly`, `TimeOnly` (net6.0+ only; stored as DynamoDB `S` with configurable format)
+  - `DateOnly` default format: `"yyyy-MM-dd"` — override via `[DynamoMapper(DateOnlyFormat = "...")]` or `[DynamoField(..., Format = "...")]`
+  - `TimeOnly` default format: `"HH:mm:ss.fffffff"` — override via `[DynamoMapper(TimeOnlyFormat = "...")]` or `[DynamoField(..., Format = "...")]`
 - enums
 - nullable versions of supported scalar types
 
@@ -25,6 +28,7 @@ Important note:
 
 - `string`, `bool`, `byte`, `short`, `int`, `long`, `float`, `double`, `decimal`
 - `DateTime`, `DateTimeOffset`, `TimeSpan`, `Guid`
+- `DateOnly`, `TimeOnly` (net6.0+ only)
 - enums
 - many nullable variants in list/map shapes
 - `byte[]`

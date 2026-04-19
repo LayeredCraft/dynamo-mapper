@@ -180,6 +180,7 @@ internal static class CollectionTypeAnalyzer
     )
     {
         var context = nestedContext.Context;
+        var supportsDateOnlyTimeOnly = DateOnlyTimeOnlySupport.RuntimeApisAvailable(context);
 
         // Unwrap Nullable<T> - nullable elements are allowed
         var underlyingType = elementType;
@@ -225,6 +226,15 @@ internal static class CollectionTypeAnalyzer
             var timeSpanType = context.WellKnownTypes.Get(WellKnownType.System_TimeSpan);
             if (SymbolEqualityComparer.Default.Equals(namedType, timeSpanType))
                 return new ElementTypeValidationResult(true, null, null);
+
+            // DateOnly / TimeOnly
+            if (DateOnlyTimeOnlySupport.IsDateOnly(namedType, context) ||
+                DateOnlyTimeOnlySupport.IsTimeOnly(namedType, context))
+            {
+                return supportsDateOnlyTimeOnly
+                    ? new ElementTypeValidationResult(true, null, null)
+                    : new ElementTypeValidationResult(false, null, null);
+            }
 
             // Enums
             if (namedType.TypeKind == TypeKind.Enum)

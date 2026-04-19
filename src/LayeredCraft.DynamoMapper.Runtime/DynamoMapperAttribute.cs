@@ -68,6 +68,14 @@ public sealed class DynamoMapperAttribute : Attribute
     /// <remarks>Default is "O" (round-trip format, ISO-8601).</remarks>
     public string DateTimeFormat { get; set; } = "O";
 
+    /// <summary>Gets or sets the default format string for DateOnly properties.</summary>
+    /// <remarks>Default is "yyyy-MM-dd" (ISO 8601 date, lexicographically sortable).</remarks>
+    public string DateOnlyFormat { get; set; } = "yyyy-MM-dd";
+
+    /// <summary>Gets or sets the default format string for TimeOnly properties.</summary>
+    /// <remarks>Default is "HH:mm:ss.fffffff" (round-trip precision).</remarks>
+    public string TimeOnlyFormat { get; set; } = "HH:mm:ss.fffffff";
+
     /// <summary>Gets or sets the default format string for TimeSpan properties.</summary>
     /// <remarks>Default is "c" (constant/invariant format).</remarks>
     public string TimeSpanFormat { get; set; } = "c";

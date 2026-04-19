@@ -12,17 +12,18 @@
     <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest"/>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AWSSDK.DynamoDBv2" />
-    <PackageReference Include="Basic.Reference.Assemblies.Net100" />
-    <PackageReference Include="Basic.Reference.Assemblies.Net80" />
-    <PackageReference Include="Basic.Reference.Assemblies.Net90" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
-    <PackageReference Include="Verify.SourceGenerators" />
-    <PackageReference Include="Verify.XunitV3" />
-    <PackageReference Include="Humanizer.Core" PrivateAssets="all" GeneratePathProperty="true" />
+    <PackageReference Include="AWSSDK.DynamoDBv2"/>
+    <PackageReference Include="Basic.Reference.Assemblies.Net100"/>
+    <PackageReference Include="Basic.Reference.Assemblies.Net110"/>
+    <PackageReference Include="Basic.Reference.Assemblies.Net80"/>
+    <PackageReference Include="Basic.Reference.Assemblies.Net90"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp"/>
+    <PackageReference Include="Verify.SourceGenerators"/>
+    <PackageReference Include="Verify.XunitV3"/>
+    <PackageReference Include="Humanizer.Core" PrivateAssets="all" GeneratePathProperty="true"/>
     <None
       Include="$(PkgHumanizer_Core)\lib\netstandard2.0\*.dll"
       Pack="true"
@@ -42,11 +43,11 @@
     />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\LayeredCraft.DynamoMapper.Generators\LayeredCraft.DynamoMapper.Generators.csproj" />
-    <ProjectReference Include="..\..\src\LayeredCraft.DynamoMapper.Runtime\LayeredCraft.DynamoMapper.Runtime.csproj" />
-    <ProjectReference Include="..\LayeredCraft.DynamoMapper.TestKit\LayeredCraft.DynamoMapper.TestKit.csproj" />
+    <ProjectReference Include="..\..\src\LayeredCraft.DynamoMapper.Generators\LayeredCraft.DynamoMapper.Generators.csproj"/>
+    <ProjectReference Include="..\..\src\LayeredCraft.DynamoMapper.Runtime\LayeredCraft.DynamoMapper.Runtime.csproj"/>
+    <ProjectReference Include="..\LayeredCraft.DynamoMapper.TestKit\LayeredCraft.DynamoMapper.TestKit.csproj"/>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Snapshots\" />
+    <Folder Include="Snapshots\"/>
   </ItemGroup>
 </Project>

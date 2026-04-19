@@ -1,7 +1,8 @@
 using LayeredCraft.DynamoMapper.Generator.Diagnostics;
 using LayeredCraft.SourceGeneratorTools.Types;
 using Microsoft.CodeAnalysis;
-using WellKnownType = LayeredCraft.DynamoMapper.Generator.WellKnownTypes.WellKnownTypeData.WellKnownType;
+using WellKnownType =
+    LayeredCraft.DynamoMapper.Generator.WellKnownTypes.WellKnownTypeData.WellKnownType;
 
 namespace LayeredCraft.DynamoMapper.Generator.Models;
 
@@ -12,8 +13,13 @@ internal sealed record MapperClassInfo(
     string? ToItemSignature,
     string? FromItemSignature,
     string? FromItemParameterName,
+    string? ToItemParameterName,
     LocationInfo? Location,
-    EquatableArray<HelperMethodInfo> HelperMethods
+    EquatableArray<HelperMethodInfo> HelperMethods,
+    bool HasBeforeToItem,
+    bool HasAfterToItem,
+    bool HasBeforeFromItem,
+    bool HasAfterFromItem
 );
 
 internal static class MapperClassInfoExtensions
@@ -23,9 +29,11 @@ internal static class MapperClassInfoExtensions
 
     extension(MapperClassInfo)
     {
-        internal static DiagnosticResult<(MapperClassInfo, ITypeSymbol)> CreateAndResolveModelType(
-            INamedTypeSymbol classSymbol, GeneratorContext context
-        )
+        internal static
+            DiagnosticResult<( MapperClassInfo MapperClass, ITypeSymbol ModelType,
+                EquatableArray<DiagnosticInfo> Diagnostics )> CreateAndResolveModelType(
+                INamedTypeSymbol classSymbol, GeneratorContext context
+            )
         {
             context.ThrowIfCancellationRequested();
 
@@ -68,11 +76,34 @@ internal static class MapperClassInfoExtensions
 
                         var fromItemParameterName =
                             fromItemMethod?.Parameters.FirstOrDefault()?.Name;
+                        var toItemParameterName = toItemMethod?.Parameters.FirstOrDefault()?.Name;
 
-                        return DiagnosticResult<(MapperClassInfo, ITypeSymbol)>.Success(
-                            (new MapperClassInfo(classSymbol.Name, namespaceStatement, classSignature, toItemSignature, fromItemSignature, fromItemParameterName, context.TargetNode.CreateLocationInfo(), new EquatableArray<HelperMethodInfo>()),
-                                modelType)
-                        );
+                        var hookAnalysis = AnalyzeHooks(methods, modelType, context);
+
+                        var hasBeforeToItem =
+                            toItemMethod is not null && hookAnalysis.HasBeforeToItem;
+                        var hasAfterToItem =
+                            toItemMethod is not null && hookAnalysis.HasAfterToItem;
+                        var hasBeforeFromItem =
+                            fromItemMethod is not null && hookAnalysis.HasBeforeFromItem;
+                        var hasAfterFromItem =
+                            fromItemMethod is not null && hookAnalysis.HasAfterFromItem;
+
+                        if ((hasBeforeToItem || hasAfterToItem) && toItemParameterName is null)
+                            return DiagnosticResult<( MapperClassInfo MapperClass, ITypeSymbol
+                                ModelType, EquatableArray<DiagnosticInfo> Diagnostics )>.Failure(
+                                DiagnosticDescriptors.InvalidHookSignature,
+                                classSymbol.CreateLocationInfo(),
+                                "ToItem",
+                                "ToItem"
+                            );
+
+                        return
+                            DiagnosticResult<( MapperClassInfo MapperClass, ITypeSymbol ModelType,
+                                EquatableArray<DiagnosticInfo> Diagnostics )>.Success(
+                                (new MapperClassInfo(classSymbol.Name, namespaceStatement, classSignature, toItemSignature, fromItemSignature, fromItemParameterName, toItemParameterName, context.TargetNode.CreateLocationInfo(), new EquatableArray<HelperMethodInfo>(), hasBeforeToItem, hasAfterToItem, hasBeforeFromItem, hasAfterFromItem),
+                                    modelType, hookAnalysis.Diagnostics)
+                            );
                     }
                 );
         }
@@ -133,6 +164,37 @@ internal static class MapperClassInfoExtensions
             IsPartialDefinition: true, PartialImplementationPart: null, Parameters.Length: 1,
         } && IsAttributeValueDictionary(method.Parameters[0].Type, context);
 
+    private sealed record HookAnalysisResult(
+        bool HasBeforeToItem,
+        bool HasAfterToItem,
+        bool HasBeforeFromItem,
+        bool HasAfterFromItem,
+        EquatableArray<DiagnosticInfo> Diagnostics
+    );
+
+    private static HookAnalysisResult AnalyzeHooks(
+        IMethodSymbol[] methods, ITypeSymbol modelType, GeneratorContext context
+    )
+    {
+        var diagnostics = new List<DiagnosticInfo>();
+
+        var hasBeforeToItem =
+            IsHookPresent(methods, "BeforeToItem", modelType, context, diagnostics);
+        var hasAfterToItem = IsHookPresent(methods, "AfterToItem", modelType, context, diagnostics);
+        var hasBeforeFromItem =
+            IsHookPresent(methods, "BeforeFromItem", modelType, context, diagnostics);
+        var hasAfterFromItem =
+            IsHookPresent(methods, "AfterFromItem", modelType, context, diagnostics);
+
+        return new HookAnalysisResult(
+            hasBeforeToItem,
+            hasAfterToItem,
+            hasBeforeFromItem,
+            hasAfterFromItem,
+            diagnostics.ToEquatableArray()
+        );
+    }
+
     private static bool IsAttributeValueDictionary(ITypeSymbol type, GeneratorContext context) =>
         type is INamedTypeSymbol { IsGenericType: true } namedType && context.WellKnownTypes.IsType(
             namedType.ConstructedFrom,
@@ -165,4 +227,116 @@ internal static class MapperClassInfoExtensions
         return
             $"{accessibility} {modifiers}partial {returnType} {method.Name}({extensionMethod}{parameterType} {parameterName})";
     }
+
+    private static bool IsHookPresent(
+        IEnumerable<IMethodSymbol> methods, string name, ITypeSymbol modelType,
+        GeneratorContext context, List<DiagnosticInfo> diagnostics
+    )
+    {
+        var matchingMethods = methods.Where(m => m.Name == name).ToArray();
+        var hasValidHook = false;
+
+        foreach (var method in matchingMethods)
+        {
+            if (!method.IsStatic)
+            {
+                diagnostics.Add(
+                    new DiagnosticInfo(
+                        DiagnosticDescriptors.HookNotStatic,
+                        method.CreateLocationInfo(),
+                        method.Name
+                    )
+                );
+                continue;
+            }
+
+            if (!method.ReturnsVoid)
+            {
+                diagnostics.Add(
+                    new DiagnosticInfo(
+                        DiagnosticDescriptors.InvalidHookSignature,
+                        method.CreateLocationInfo(),
+                        method.Name,
+                        name
+                    )
+                );
+                continue;
+            }
+
+            if (!HasExpectedParameterCount(method, name) || !HasExpectedRefKinds(method, name))
+            {
+                diagnostics.Add(
+                    new DiagnosticInfo(
+                        DiagnosticDescriptors.InvalidHookSignature,
+                        method.CreateLocationInfo(),
+                        method.Name,
+                        name
+                    )
+                );
+                continue;
+            }
+
+            if (!HasExpectedParameterTypes(method, name, modelType, context))
+            {
+                diagnostics.Add(
+                    new DiagnosticInfo(
+                        DiagnosticDescriptors.HookParameterTypeMismatch,
+                        method.CreateLocationInfo(),
+                        method.Name,
+                        modelType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
+                    )
+                );
+                continue;
+            }
+
+            hasValidHook = true;
+        }
+
+        return hasValidHook;
+    }
+
+    private static bool HasExpectedParameterCount(IMethodSymbol method, string hookName) =>
+        method.Parameters.Length == hookName switch
+        {
+            "BeforeToItem" => 2,
+            "AfterToItem" => 2,
+            "BeforeFromItem" => 1,
+            "AfterFromItem" => 2,
+            _ => -1,
+        };
+
+    private static bool HasExpectedRefKinds(IMethodSymbol method, string hookName)
+    {
+        if (method.Parameters.Length == 0)
+            return false;
+
+        return hookName switch
+        {
+            "BeforeToItem" => method.Parameters[0].RefKind == RefKind.None &&
+                method.Parameters[1].RefKind == RefKind.None,
+            "AfterToItem" => method.Parameters[0].RefKind == RefKind.None &&
+                method.Parameters[1].RefKind == RefKind.None,
+            "BeforeFromItem" => method.Parameters[0].RefKind == RefKind.None,
+            "AfterFromItem" => method.Parameters[0].RefKind == RefKind.None &&
+                method.Parameters[1].RefKind == RefKind.Ref,
+            _ => false,
+        };
+    }
+
+    private static bool HasExpectedParameterTypes(
+        IMethodSymbol method, string hookName, ITypeSymbol modelType, GeneratorContext context
+    ) => hookName switch
+    {
+        "BeforeToItem" => IsModelType(method.Parameters[0].Type, modelType) &&
+            IsAttributeValueDictionary(method.Parameters[1].Type, context),
+        "AfterToItem" => IsModelType(method.Parameters[0].Type, modelType) &&
+            IsAttributeValueDictionary(method.Parameters[1].Type, context),
+        "BeforeFromItem" => IsAttributeValueDictionary(method.Parameters[0].Type, context),
+        "AfterFromItem" => IsAttributeValueDictionary(method.Parameters[0].Type, context) &&
+            IsModelType(method.Parameters[1].Type, modelType),
+        _ => false,
+    };
+
+    private static bool IsModelType(ITypeSymbol hookType, ITypeSymbol modelType) =>
+        SymbolEqualityComparer.Default.Equals(hookType, modelType);
 }

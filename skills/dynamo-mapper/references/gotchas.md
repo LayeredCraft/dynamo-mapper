@@ -17,11 +17,13 @@
 - nested objects are not supported inside sets
 - constructor parameter matching uses .NET property names, not attribute names
 - empty sets are omitted because DynamoDB does not allow them
+- `OmitNullStrings` is legacy and misnamed; prefer `OmitNullValues` for mapper-level null omission,
+    especially for nested object and nested collection containers
 
 ## Stale-doc corrections
 
 - nested mapping is supported
-- hook docs are stale for current behavior
+- lifecycle hooks are implemented with strict signature validation
 - static converter docs are stale on signatures and constraints
 - some prose docs mention diagnostics that do not exist
 
@@ -29,5 +31,5 @@
 
 - prefer simple mapper classes
 - prefer supported scalar and collection shapes
-- avoid promising hook behavior
+- use the exact four hook names and signatures when hooks are needed
 - avoid inventing converter signatures from memory

@@ -23,7 +23,7 @@ public static partial class OrderMapper
     public static partial global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> ToItem(global::MyNamespace.Order source) =>
         new Dictionary<string, AttributeValue>(2)
             .SetString("id", source.Id, false, true)
-            .Set("billingAddress", source.BillingAddress is null ? new AttributeValue { NULL = true } : new AttributeValue { M = global::MyNamespace.AddressMapper.ToItem(source.BillingAddress) });
+            .SetIfNotNull("billingAddress", source.BillingAddress, value => new AttributeValue { M = global::MyNamespace.AddressMapper.ToItem(value) });
 
     [global::System.CodeDom.Compiler.GeneratedCode("LayeredCraft.DynamoMapper", "REPLACED")]
     public static partial global::MyNamespace.Order FromItem(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> item)

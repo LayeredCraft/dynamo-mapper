@@ -22,11 +22,28 @@ using Amazon.DynamoDBv2.Model;
 {
     {{~ if mapper_class.to_item_signature != null ~}}
     {{ generated_code_attribute }}
+    {{~ if mapper_class.has_before_to_item || mapper_class.has_after_to_item ~}}
+    {{ mapper_class.to_item_signature }}
+    {
+        var item = new Dictionary<string, AttributeValue>({{ dictionary_capacity }});
+        {{~ if mapper_class.has_before_to_item ~}}
+        BeforeToItem({{ mapper_class.to_item_parameter_name }}, item);
+        {{~ end ~}}
+        {{~ for assignment in to_assignments ~}}
+        item{{ assignment }};
+        {{~ end ~}}
+        {{~ if mapper_class.has_after_to_item ~}}
+        AfterToItem({{ mapper_class.to_item_parameter_name }}, item);
+        {{~ end ~}}
+        return item;
+    }
+    {{~ else ~}}
     {{ mapper_class.to_item_signature }} =>
-        new Dictionary<string, AttributeValue>({{ dictionary_capacity }}){{ if dictionary_capacity == 0 }};{{ end }}
+        new Dictionary<string, AttributeValue>({{ dictionary_capacity }}){{ if to_assignments.size == 0 }};{{ end }}
             {{~ for assignment in to_assignments ~}}
             {{ assignment }}{{ if for.last }};{{ end }}
             {{~ end ~}}
+    {{~ end ~}}
     {{~ end ~}}
     {{~ if mapper_class.to_item_signature != null && mapper_class.from_item_signature != null ~}}
 
@@ -35,6 +52,9 @@ using Amazon.DynamoDBv2.Model;
     {{ generated_code_attribute }}
     {{ mapper_class.from_item_signature }}
     {
+        {{~ if mapper_class.has_before_from_item ~}}
+        BeforeFromItem({{ mapper_class.from_item_parameter_name }});
+        {{~ end ~}}
         {{~ if model_class.constructor != null ~}}
         {{~ # Constructor-based initialization ~}}
         {{~ if from_init_assignments.size == 0 ~}}
@@ -70,6 +90,9 @@ using Amazon.DynamoDBv2.Model;
         {{~ end ~}}
         {{~ for assignment in from_assignments ~}}
         {{ assignment }}
+        {{~ end ~}}
+        {{~ if mapper_class.has_after_from_item ~}}
+        AfterFromItem({{ mapper_class.from_item_parameter_name }}, ref {{ model_var_name }});
         {{~ end ~}}
         return {{ model_var_name }};
     }

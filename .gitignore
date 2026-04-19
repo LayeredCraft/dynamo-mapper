@@ -422,8 +422,6 @@ FodyWeavers.xsd
 
 .idea
 
-.config
-
 # macOS
 .DS_Store
 .DS_Store?
@@ -438,3 +436,5 @@ Thumbs.db
 **/*.DotSettings.user
 /.claude/do_not_commit/
 /nupkg/
+
+**/.env

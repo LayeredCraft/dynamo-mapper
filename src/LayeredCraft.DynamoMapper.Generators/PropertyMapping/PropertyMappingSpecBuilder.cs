@@ -17,9 +17,7 @@ internal static class PropertyMappingSpecBuilder
     /// <param name="context">The generator context.</param>
     /// <returns>A property mapping specification ready for code generation.</returns>
     internal static PropertyMappingSpec Build(
-        PropertyAnalysis analysis,
-        TypeMappingStrategy? strategy,
-        GeneratorContext context
+        PropertyAnalysis analysis, TypeMappingStrategy? strategy, GeneratorContext context
     )
     {
         var fieldOptions = analysis.FieldOptions;
@@ -35,25 +33,24 @@ internal static class PropertyMappingSpecBuilder
             return BuildNestedObjectSpec(analysis, strategy, key, context);
 
         // Check if property should be ignored in specific directions
-        var ignoreOptions = context.IgnoreOptions.TryGetValue(analysis.PropertyName, out var opts)
-            ? opts
-            : null;
+        var ignoreOptions =
+            context.IgnoreOptions.TryGetValue(analysis.PropertyName, out var opts) ? opts : null;
         var shouldIgnoreToItem =
             ignoreOptions?.Ignore is IgnoreMapping.All or IgnoreMapping.FromModel;
         var shouldIgnoreFromItem =
             ignoreOptions?.Ignore is IgnoreMapping.All or IgnoreMapping.ToModel;
 
         // Only build methods if the mapper has them defined
-        var fromItemMethod = context.HasFromItemMethod
-            ? shouldIgnoreFromItem
-                ? null
-                : BuildFromItemMethod(analysis, strategy, key, context)
-            : null;
-        var toItemMethod = context.HasToItemMethod
-            ? shouldIgnoreToItem
-                ? null
-                : BuildToItemMethod(analysis, strategy, key, context)
-            : null;
+        var fromItemMethod =
+            context.HasFromItemMethod
+                ? shouldIgnoreFromItem
+                    ? null
+                    : BuildFromItemMethod(analysis, strategy, key, context)
+                : null;
+        var toItemMethod =
+            context.HasToItemMethod
+                ? shouldIgnoreToItem ? null : BuildToItemMethod(analysis, strategy, key, context)
+                : null;
 
         return new PropertyMappingSpec(
             analysis.PropertyName,
@@ -69,8 +66,8 @@ internal static class PropertyMappingSpecBuilder
     ///     specified, otherwise applies the naming convention converter.
     /// </summary>
     private static string GetAttributeKey(PropertyAnalysis analysis, GeneratorContext context) =>
-        analysis.FieldOptions?.AttributeName
-        ?? context.MapperOptions.KeyNamingConventionConverter(analysis.PropertyName);
+        analysis.FieldOptions?.AttributeName ??
+        context.MapperOptions.KeyNamingConventionConverter(analysis.PropertyName);
 
     /// <summary>
     ///     Builds the method specification for deserialization (FromItem). Method name format:
@@ -78,9 +75,7 @@ internal static class PropertyMappingSpecBuilder
     ///     (optional) kind]
     /// </summary>
     private static MethodCallSpec BuildFromItemMethod(
-        PropertyAnalysis analysis,
-        [NotNull] TypeMappingStrategy? strategy,
-        string key,
+        PropertyAnalysis analysis, [NotNull] TypeMappingStrategy? strategy, string key,
         GeneratorContext context
     )
     {
@@ -91,11 +86,12 @@ internal static class PropertyMappingSpecBuilder
 
         var methodName = $"Get{strategy!.NullableModifier}{strategy.TypeName}";
 
-        var args = new List<ArgumentSpec>
-        {
-            // Argument 1: The DynamoDB attribute key
-            new($"\"{key}\"", ArgumentSource.Key),
-        };
+        var args =
+            new List<ArgumentSpec>
+            {
+                // Argument 1: The DynamoDB attribute key
+                new($"\"{key}\"", ArgumentSource.Key),
+            };
 
         // Arguments 2+: Type-specific arguments (format strings, default values)
         // Format parameters need named parameters to avoid ambiguity with out parameters
@@ -104,21 +100,20 @@ internal static class PropertyMappingSpecBuilder
                 (typeArg, index) =>
                     new ArgumentSpec(
                         // Format strings (quoted strings) need named parameters
-                        typeArg.StartsWith("\"")
-                            ? $"format: {typeArg}"
-                            : typeArg,
+                        typeArg.StartsWith("\"") ? $"format: {typeArg}" : typeArg,
                         ArgumentSource.TypeSpecific
                     )
             )
         );
 
         // Requiredness: field override > global default
-        var requiredness = analysis.FieldOptions?.Required switch
-        {
-            true => Requiredness.Required,
-            false => Requiredness.Optional,
-            null => context.MapperOptions.DefaultRequiredness,
-        };
+        var requiredness =
+            analysis.FieldOptions?.Required switch
+            {
+                true => Requiredness.Required,
+                false => Requiredness.Optional,
+                null => context.MapperOptions.DefaultRequiredness,
+            };
 
         args.Add(
             new ArgumentSpec(
@@ -147,9 +142,7 @@ internal static class PropertyMappingSpecBuilder
     ///     args, omitEmptyStrings, omitNullStrings, (optional) kind]
     /// </summary>
     private static MethodCallSpec BuildToItemMethod(
-        PropertyAnalysis analysis,
-        [NotNull] TypeMappingStrategy? strategy,
-        string key,
+        PropertyAnalysis analysis, [NotNull] TypeMappingStrategy? strategy, string key,
         GeneratorContext context
     )
     {
@@ -158,27 +151,27 @@ internal static class PropertyMappingSpecBuilder
         var methodName = $"Set{strategy!.TypeName}";
         var paramName = context.MapperOptions.ToMethodParameterName;
 
-        var args = new List<ArgumentSpec>
-        {
-            // Argument 1: The DynamoDB attribute key
-            new($"\"{key}\"", ArgumentSource.Key),
-            // Argument 2: The property value from source object
-            new($"{paramName}.{analysis.PropertyName}", ArgumentSource.PropertyValue),
-        };
+        var args =
+            new List<ArgumentSpec>
+            {
+                // Argument 1: The DynamoDB attribute key
+                new($"\"{key}\"", ArgumentSource.Key),
+                // Argument 2: The property value from source object
+                new($"{paramName}.{analysis.PropertyName}", ArgumentSource.PropertyValue),
+            };
 
         // Arguments 3+: Type-specific arguments (format strings)
         args.AddRange(
-            strategy.ToTypeSpecificArgs.Select(typeArg => new ArgumentSpec(
-                typeArg,
-                ArgumentSource.TypeSpecific
-            ))
+            strategy.ToTypeSpecificArgs.Select(
+                typeArg => new ArgumentSpec(typeArg, ArgumentSource.TypeSpecific)
+            )
         );
 
         // Omit flags: field override > global default
         var omitEmptyStrings =
             analysis.FieldOptions?.OmitIfEmptyString ?? context.MapperOptions.OmitEmptyStrings;
         var omitNullStrings =
-            analysis.FieldOptions?.OmitIfNull ?? context.MapperOptions.OmitNullStrings;
+            GetEffectiveOmitNullSetting(analysis.FieldOptions?.OmitIfNull, context);
 
         args.Add(
             new ArgumentSpec(
@@ -209,32 +202,41 @@ internal static class PropertyMappingSpecBuilder
         return new MethodCallSpec(methodName, [.. args]);
     }
 
+    internal static bool
+        GetEffectiveOmitNullSetting(bool? fieldOverride, GeneratorContext context) =>
+        fieldOverride ?? GetEffectiveMapperOmitNullSetting(context);
+
+    internal static bool GetEffectiveMapperOmitNullSetting(GeneratorContext context) =>
+        context.MapperOptions.OmitNullValuesSpecified
+            ? context.MapperOptions.OmitNullValues
+            : context.MapperOptions.OmitNullStrings;
+
     /// <summary>
     ///     Builds a property mapping spec when custom ToMethod or FromMethod is specified. Custom
     ///     methods completely replace the standard Get/Set method calls.
     /// </summary>
     private static PropertyMappingSpec BuildWithCustomMethods(
-        PropertyAnalysis analysis,
-        TypeMappingStrategy? strategy,
-        DynamoFieldOptions fieldOptions,
+        PropertyAnalysis analysis, TypeMappingStrategy? strategy, DynamoFieldOptions fieldOptions,
         GeneratorContext context
     )
     {
         var key = GetAttributeKey(analysis, context);
 
         // Only build FromItem method if mapper has FromItem defined
-        var fromItemMethod = context.HasFromItemMethod
-            ? fieldOptions.FromMethod is not null
-                ? BuildCustomFromItemMethod(fieldOptions.FromMethod, context)
-                : BuildFromItemMethod(analysis, strategy, key, context)
-            : null;
+        var fromItemMethod =
+            context.HasFromItemMethod
+                ? fieldOptions.FromMethod is not null
+                    ? BuildCustomFromItemMethod(fieldOptions.FromMethod, context)
+                    : BuildFromItemMethod(analysis, strategy, key, context)
+                : null;
 
         // Only build ToItem method if mapper has ToItem defined
-        var toItemMethod = context.HasToItemMethod
-            ? fieldOptions.ToMethod is not null
-                ? BuildCustomToItemMethod(fieldOptions.ToMethod, analysis, context)
-                : BuildToItemMethod(analysis, strategy, key, context)
-            : null;
+        var toItemMethod =
+            context.HasToItemMethod
+                ? fieldOptions.ToMethod is not null
+                    ? BuildCustomToItemMethod(fieldOptions.ToMethod, analysis, context)
+                    : BuildToItemMethod(analysis, strategy, key, context)
+                : null;
 
         return new PropertyMappingSpec(
             analysis.PropertyName,
@@ -250,17 +252,17 @@ internal static class PropertyMappingSpecBuilder
     ///     dictionary as their only argument.
     /// </summary>
     private static MethodCallSpec BuildCustomFromItemMethod(
-        string methodName,
-        GeneratorContext context
+        string methodName, GeneratorContext context
     )
     {
-        var args = new[]
-        {
-            new ArgumentSpec(
-                context.MapperOptions.FromMethodParameterName,
-                ArgumentSource.FieldOverride
-            ),
-        };
+        var args =
+            new[]
+            {
+                new ArgumentSpec(
+                    context.MapperOptions.FromMethodParameterName,
+                    ArgumentSource.FieldOverride
+                ),
+            };
         return new MethodCallSpec(methodName, args, true);
     }
 
@@ -269,19 +271,18 @@ internal static class PropertyMappingSpecBuilder
     ///     and return an AttributeValue to be used within a .Set() call.
     /// </summary>
     private static MethodCallSpec BuildCustomToItemMethod(
-        string methodName,
-        PropertyAnalysis analysis,
-        GeneratorContext context
+        string methodName, PropertyAnalysis analysis, GeneratorContext context
     )
     {
         var key = GetAttributeKey(analysis, context);
         var paramName = context.MapperOptions.ToMethodParameterName;
 
-        var args = new[]
-        {
-            new ArgumentSpec($"\"{key}\"", ArgumentSource.Key),
-            new ArgumentSpec($"{methodName}({paramName})", ArgumentSource.FieldOverride),
-        };
+        var args =
+            new[]
+            {
+                new ArgumentSpec($"\"{key}\"", ArgumentSource.Key),
+                new ArgumentSpec($"{methodName}({paramName})", ArgumentSource.FieldOverride),
+            };
         return new MethodCallSpec("Set", args, true);
     }
 
@@ -291,16 +292,13 @@ internal static class PropertyMappingSpecBuilder
     ///     We pass null for methods and let the renderer handle the special case.
     /// </summary>
     private static PropertyMappingSpec BuildNestedObjectSpec(
-        PropertyAnalysis analysis,
-        TypeMappingStrategy strategy,
-        string key,
+        PropertyAnalysis analysis, TypeMappingStrategy strategy, string key,
         GeneratorContext context
     )
     {
         // Check if property should be ignored in specific directions
-        var ignoreOptions = context.IgnoreOptions.TryGetValue(analysis.PropertyName, out var opts)
-            ? opts
-            : null;
+        var ignoreOptions =
+            context.IgnoreOptions.TryGetValue(analysis.PropertyName, out var opts) ? opts : null;
         var shouldIgnoreToItem =
             ignoreOptions?.Ignore is IgnoreMapping.All or IgnoreMapping.FromModel;
         var shouldIgnoreFromItem =
@@ -312,8 +310,8 @@ internal static class PropertyMappingSpecBuilder
             analysis.PropertyName,
             key,
             strategy,
-            ToItemMethod: context.HasToItemMethod && !shouldIgnoreToItem ? MethodCallSpec.Placeholder : null,
-            FromItemMethod: context.HasFromItemMethod && !shouldIgnoreFromItem ? MethodCallSpec.Placeholder : null
+            context.HasToItemMethod && !shouldIgnoreToItem ? MethodCallSpec.Placeholder : null,
+            context.HasFromItemMethod && !shouldIgnoreFromItem ? MethodCallSpec.Placeholder : null
         );
     }
 }

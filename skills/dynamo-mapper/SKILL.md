@@ -1,6 +1,6 @@
 ---
 name: dynamo-mapper
-description: Use this skill when you need to write or explain DynamoMapper mappings for DynamoDB `AttributeValue` items in C#. It covers how to declare mapper classes, how `DynamoMapper`, `DynamoField`, `DynamoIgnore`, and `DynamoMapperConstructor` behave, what types and nested shapes are supported, how custom conversion really works, and how to troubleshoot DynamoMapper diagnostics and common gotchas without relying on stale docs.
+description: Use this skill when you need to write or explain DynamoMapper mappings for DynamoDB `AttributeValue` items in C#. It covers how to declare mapper classes, how `DynamoMapper`, `DynamoField`, `DynamoIgnore`, and `DynamoMapperConstructor` behave, how lifecycle hooks work, what types and nested shapes are supported, how custom conversion really works, and how to troubleshoot DynamoMapper diagnostics and common gotchas without relying on stale docs.
 ---
 
 # DynamoMapper
@@ -17,6 +17,8 @@ Use this skill when generating or explaining DynamoMapper code.
 - One-way mappers are valid: `To*` only or `From*` only.
 - Domain models usually stay clean except for optional `[DynamoMapperConstructor]` on a constructor.
 - Nested object mapping is implemented and tested.
+- Lifecycle hooks are implemented and validated (`BeforeToItem`, `AfterToItem`,
+  `BeforeFromItem`, `AfterFromItem`).
 - Some public docs are stale; use `references/gotchas.md` when behavior seems surprising.
 
 ## Choose a path
@@ -26,6 +28,8 @@ Use this skill when generating or explaining DynamoMapper code.
 - Read `references/type-matrix.md` for supported types, collection rules, nested shapes, and hard
   limits.
 - Read `references/diagnostics.md` for generator diagnostics and the most likely fixes.
+- Read `references/hooks.md` for hook signatures, call order, generation behavior, and
+  hook-specific diagnostics.
 - Read `references/gotchas.md` for stale-doc traps and the non-obvious rules most likely to cause
   bad guidance.
 
@@ -33,9 +37,10 @@ Use this skill when generating or explaining DynamoMapper code.
 
 1. Identify whether the task is mapper authoring, supported-type lookup, or diagnostics.
 2. Read the matching reference file before making assumptions.
-3. If the task touches nested mapping, converters, or hooks, check `references/gotchas.md` before
+3. If the task touches hooks, read `references/hooks.md` first.
+4. If the task touches nested mapping or converters, check `references/gotchas.md` before
    answering.
-4. Keep answers concrete and code-oriented.
+5. Keep answers concrete and code-oriented.
 
 ## High-risk misunderstandings
 
@@ -51,4 +56,5 @@ Use this skill when generating or explaining DynamoMapper code.
 - `references/core-usage.md`
 - `references/type-matrix.md`
 - `references/diagnostics.md`
+- `references/hooks.md`
 - `references/gotchas.md`

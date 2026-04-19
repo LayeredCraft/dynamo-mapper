@@ -8,12 +8,17 @@ internal class MapperOptions
     internal DynamoNamingConvention Convention { get; set; } = DynamoNamingConvention.CamelCase;
     internal string DateTimeFormat { get; set; } = "O";
     internal string TimeSpanFormat { get; set; } = "c";
+    internal string DateOnlyFormat { get; set; } = "yyyy-MM-dd";
+    internal string TimeOnlyFormat { get; set; } = "HH:mm:ss.fffffff";
     internal Requiredness DefaultRequiredness { get; set; } = Requiredness.InferFromNullability;
     internal bool IncludeBaseClassProperties { get; set; } = false;
     internal string EnumFormat { get; set; } = "G";
     internal string GuidFormat { get; set; } = "D";
     internal bool OmitEmptyStrings { get; set; } = false;
+    internal bool OmitNullValues { get; set; } = true;
+    internal bool OmitNullValuesSpecified { get; set; }
     internal bool OmitNullStrings { get; set; } = true;
+    internal bool OmitNullStringsSpecified { get; set; }
 
     internal string ToMethodParameterName { get; set; } = "source";
     internal string FromMethodParameterName { get; set; } = "item";

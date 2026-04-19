@@ -31,13 +31,16 @@ internal static class CollectionTypeAnalyzer
         // Check for arrays first
         if (type is IArrayTypeSymbol arrayType)
         {
+            if (arrayType.ElementType.SpecialType == SpecialType.System_Byte)
+                return null;
+
             var elementType = arrayType.ElementType;
             return new CollectionInfo(
                 Category: CollectionCategory.List,
                 ElementType: elementType,
                 TargetKind: DynamoKind.L,
                 KeyType: null,
-                IsArray: true
+                CollectionReadMaterialization.Array
             );
         }
 
@@ -63,8 +66,7 @@ internal static class CollectionTypeAnalyzer
                     Category: CollectionCategory.Map,
                     ElementType: valueType,
                     TargetKind: DynamoKind.M,
-                    KeyType: keyType,
-                    IsArray: false
+                    keyType
                 );
             }
         }
@@ -89,9 +91,17 @@ internal static class CollectionTypeAnalyzer
                         ElementType: elementType,
                         TargetKind: setKind.Value,
                         KeyType: null,
-                        IsArray: false
+                        CollectionReadMaterialization.HashSet
                     );
                 }
+
+                return new CollectionInfo(
+                    CollectionCategory.List,
+                    elementType,
+                    DynamoKind.L,
+                    null,
+                    CollectionReadMaterialization.HashSet
+                );
             }
         }
 
@@ -117,8 +127,7 @@ internal static class CollectionTypeAnalyzer
                     Category: CollectionCategory.List,
                     ElementType: elementType,
                     TargetKind: DynamoKind.L,
-                    KeyType: null,
-                    IsArray: false
+                    null
                 );
             }
         }
@@ -171,6 +180,7 @@ internal static class CollectionTypeAnalyzer
     )
     {
         var context = nestedContext.Context;
+        var supportsDateOnlyTimeOnly = DateOnlyTimeOnlySupport.RuntimeApisAvailable(context);
 
         // Unwrap Nullable<T> - nullable elements are allowed
         var underlyingType = elementType;
@@ -217,8 +227,21 @@ internal static class CollectionTypeAnalyzer
             if (SymbolEqualityComparer.Default.Equals(namedType, timeSpanType))
                 return new ElementTypeValidationResult(true, null, null);
 
+            // DateOnly / TimeOnly
+            if (DateOnlyTimeOnlySupport.IsDateOnly(namedType, context) ||
+                DateOnlyTimeOnlySupport.IsTimeOnly(namedType, context))
+            {
+                return supportsDateOnlyTimeOnly
+                    ? new ElementTypeValidationResult(true, null, null)
+                    : new ElementTypeValidationResult(false, null, null);
+            }
+
             // Enums
             if (namedType.TypeKind == TypeKind.Enum)
+                return new ElementTypeValidationResult(true, null, null);
+
+            var streamType = context.WellKnownTypes.Get(WellKnownType.System_IO_Stream);
+            if (streamType is not null && namedType.IsAssignableTo(streamType, context))
                 return new ElementTypeValidationResult(true, null, null);
         }
 

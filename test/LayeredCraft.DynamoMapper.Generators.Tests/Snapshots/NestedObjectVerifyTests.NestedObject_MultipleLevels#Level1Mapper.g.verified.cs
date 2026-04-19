@@ -24,7 +24,7 @@ public static partial class Level1Mapper
         new Dictionary<string, AttributeValue>(3)
             .SetString("id", source.Id, false, true)
             .SetString("name", source.Name, false, true)
-            .Set("level2Data", source.Level2Data is null ? new AttributeValue { NULL = true } : new AttributeValue { M = ToItem_Level2(source.Level2Data) });
+            .SetIfNotNull("level2Data", source.Level2Data, value => new AttributeValue { M = ToItem_Level2(value) });
 
     [global::System.CodeDom.Compiler.GeneratedCode("LayeredCraft.DynamoMapper", "REPLACED")]
     public static partial global::MyNamespace.Level1 FromItem(global::System.Collections.Generic.Dictionary<string, global::Amazon.DynamoDBv2.Model.AttributeValue> item)
@@ -44,7 +44,7 @@ public static partial class Level1Mapper
         new Dictionary<string, AttributeValue>(3)
             .SetString("id", level2.Id, false, true)
             .SetString("description", level2.Description, false, true)
-            .Set("level3Data", level2.Level3Data is null ? new AttributeValue { NULL = true } : new AttributeValue { M = ToItem_Level3(level2.Level3Data) });
+            .SetIfNotNull("level3Data", level2.Level3Data, value => new AttributeValue { M = ToItem_Level3(value) });
 
     private static global::MyNamespace.Level2 FromItem_Level2(Dictionary<string, AttributeValue> map)
     {
@@ -62,7 +62,7 @@ public static partial class Level1Mapper
         new Dictionary<string, AttributeValue>(3)
             .SetString("id", level3.Id, false, true)
             .SetInt("value", level3.Value, false, true)
-            .Set("level4Data", level3.Level4Data is null ? new AttributeValue { NULL = true } : new AttributeValue { M = ToItem_Level4(level3.Level4Data) });
+            .SetIfNotNull("level4Data", level3.Level4Data, value => new AttributeValue { M = ToItem_Level4(value) });
 
     private static global::MyNamespace.Level3 FromItem_Level3(Dictionary<string, AttributeValue> map)
     {

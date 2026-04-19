@@ -8,7 +8,7 @@
 > **Migrating from `DynamoMapper`?** This package (`LayeredCraft.DynamoMapper`) is the successor to the original `DynamoMapper` NuGet package. Update your `using DynamoMapper.Runtime;` statements to `using LayeredCraft.DynamoMapper.Runtime;`.
 
 [![NuGet](https://img.shields.io/nuget/v/LayeredCraft.DynamoMapper.svg)](https://www.nuget.org/packages/LayeredCraft.DynamoMapper/)
-[![Build Status](https://github.com/LayeredCraft/dynamo-mapper/actions/workflows/build.yaml/badge.svg)](https://github.com/LayeredCraft/dynamo-mapper/actions/workflows/build.yaml)
+[![Build Status](https://github.com/LayeredCraft/dynamo-mapper/actions/workflows/pr-build.yaml/badge.svg)](https://github.com/LayeredCraft/dynamo-mapper/actions/workflows/pr-build.yaml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Documentation](https://img.shields.io/badge/docs-latest-blue)](https://layeredcraft.github.io/dynamo-mapper/)
 

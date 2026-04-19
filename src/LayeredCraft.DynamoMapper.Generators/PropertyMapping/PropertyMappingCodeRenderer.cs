@@ -173,12 +173,14 @@ internal static class PropertyMappingCodeRenderer
                 ? $"{spec.FromItemMethod.MethodName}({args})" // Custom: MethodName(item)
                 : $"{context.MapperOptions.FromMethodParameterName}.{spec.FromItemMethod.MethodName}{spec.TypeStrategy!.GenericArgument}({args})"; // Standard: item.GetXxx<T>(args)
 
-        // For array properties, append .ToArray() to convert the List to an array
-        // GetList returns List<T>, but if the property is T[], we need to convert it
-        var isArrayProperty = analysis.PropertyType.TypeKind == TypeKind.Array;
-        if (isArrayProperty && !spec.FromItemMethod.IsCustomMethod)
+        if (!spec.FromItemMethod.IsCustomMethod)
         {
-            methodCall += ".ToArray()";
+            methodCall =
+                ApplyReadMaterialization(
+                    methodCall,
+                    spec.TypeStrategy?.CollectionInfo,
+                    analysis.Nullability.IsNullableType
+                );
         }
 
         return $"{spec.PropertyName} = {methodCall},";
@@ -212,14 +214,17 @@ internal static class PropertyMappingCodeRenderer
         var methodCall =
             $"Try{spec.FromItemMethod.MethodName}{spec.TypeStrategy!.GenericArgument}({args})";
 
-        // For array properties, append .ToArray() to convert the List to an array
-        // GetList returns List<T>, but if the property is T[], we need to convert it
-        var isArrayProperty = analysis.PropertyType.TypeKind == TypeKind.Array;
-        var toArray =
-            isArrayProperty && !spec.FromItemMethod.IsCustomMethod ? ".ToArray()" : string.Empty;
+        var materializedVar =
+            spec.FromItemMethod.IsCustomMethod
+                ? $"var{index}!"
+                : ApplyReadMaterialization(
+                    $"var{index}!",
+                    spec.TypeStrategy?.CollectionInfo,
+                    analysis.Nullability.IsNullableType
+                );
 
         return
-            $"if ({context.MapperOptions.FromMethodParameterName}.{methodCall}) {modelVarName}.{spec.PropertyName} = var{index}!{toArray};";
+            $"if ({context.MapperOptions.FromMethodParameterName}.{methodCall}) {modelVarName}.{spec.PropertyName} = {materializedVar};";
     }
 
     /// <summary>
@@ -266,14 +271,56 @@ internal static class PropertyMappingCodeRenderer
                 ? $"{spec.FromItemMethod.MethodName}({args})" // Custom: MethodName(item)
                 : $"{context.MapperOptions.FromMethodParameterName}.{spec.FromItemMethod.MethodName}{spec.TypeStrategy!.GenericArgument}({args})"; // Standard: item.GetXxx<T>(args)
 
-        // For array properties, append .ToArray() to convert the List to an array
-        var isArrayProperty = analysis.PropertyType.TypeKind == TypeKind.Array;
-        if (isArrayProperty && !spec.FromItemMethod.IsCustomMethod)
+        if (!spec.FromItemMethod.IsCustomMethod)
         {
-            methodCall += ".ToArray()";
+            methodCall =
+                ApplyReadMaterialization(
+                    methodCall,
+                    spec.TypeStrategy?.CollectionInfo,
+                    analysis.Nullability.IsNullableType
+                );
         }
 
         return methodCall;
+    }
+
+    private static string ApplyReadMaterialization(
+        string expression, CollectionInfo? collectionInfo, bool isNullableType
+    )
+    {
+        if (collectionInfo is null)
+            return expression;
+
+        return collectionInfo.ReadMaterialization switch
+        {
+            CollectionReadMaterialization.None => expression,
+            CollectionReadMaterialization.Array => isNullableType
+                ? $"{expression}?.ToArray()"
+                : $"{expression}.ToArray()",
+            CollectionReadMaterialization.HashSet =>
+                collectionInfo.Category == CollectionCategory.List
+                    ? MaterializeHashSet(
+                        expression,
+                        collectionInfo.ElementType.QualifiedName,
+                        isNullableType
+                    )
+                    : expression,
+            _ => throw new InvalidOperationException(
+                $"Unexpected read materialization: {collectionInfo.ReadMaterialization}"
+            ),
+        };
+    }
+
+    private static string MaterializeHashSet(
+        string expression, string elementTypeName, bool isNullableType
+    )
+    {
+        var constructorExpression =
+            $"new global::System.Collections.Generic.HashSet<{elementTypeName}>({expression})";
+
+        return isNullableType
+            ? $"{expression} is null ? null : {constructorExpression}"
+            : constructorExpression;
     }
 
     #region Nested Object Rendering
@@ -296,13 +343,16 @@ internal static class PropertyMappingCodeRenderer
                 spec,
                 paramName,
                 isNullable,
-                mapperBased.Mapper
+                mapperBased.Mapper,
+                analysis.FieldOptions?.OmitIfNull,
+                context
             ),
             InlineNesting inline => RenderInlineToAssignment(
                 spec,
                 paramName,
                 isNullable,
                 inline.Info,
+                analysis.FieldOptions?.OmitIfNull,
                 context,
                 helperRegistry
             ),
@@ -317,15 +367,18 @@ internal static class PropertyMappingCodeRenderer
     ///     Output: .Set("key", source.Prop is null ? new AttributeValue { NULL = true } : new AttributeValue { M = MapperName.ToItem(source.Prop) })
     /// </summary>
     private static string RenderMapperBasedToAssignment(
-        PropertyMappingSpec spec, string paramName, bool isNullable, MapperReference mapper
+        PropertyMappingSpec spec, string paramName, bool isNullable, MapperReference mapper,
+        bool? omitIfNull, GeneratorContext context
     )
     {
         var propAccess = $"{paramName}.{spec.PropertyName}";
+        var omitNull = GetEffectiveNestedOmitNullSetting(omitIfNull, context);
 
         if (isNullable)
         {
-            return
-                $".Set(\"{spec.Key}\", {propAccess} is null ? new AttributeValue {{ NULL = true }} : new AttributeValue {{ M = {mapper.MapperFullyQualifiedName}.ToItem({propAccess}) }})";
+            return omitNull
+                ? $".SetIfNotNull(\"{spec.Key}\", {propAccess}, value => new AttributeValue {{ M = {mapper.MapperFullyQualifiedName}.ToItem(value) }})"
+                : $".Set(\"{spec.Key}\", {propAccess} is null ? new AttributeValue {{ NULL = true }} : new AttributeValue {{ M = {mapper.MapperFullyQualifiedName}.ToItem({propAccess}) }})";
         }
 
         return
@@ -338,10 +391,11 @@ internal static class PropertyMappingCodeRenderer
     /// </summary>
     private static string RenderInlineToAssignment(
         PropertyMappingSpec spec, string paramName, bool isNullable, NestedInlineInfo inlineInfo,
-        GeneratorContext context, HelperMethodRegistry helperRegistry
+        bool? omitIfNull, GeneratorContext context, HelperMethodRegistry helperRegistry
     )
     {
         var propAccess = $"{paramName}.{spec.PropertyName}";
+        var omitNull = GetEffectiveNestedOmitNullSetting(omitIfNull, context);
 
         // Register the helper method and get its name
         var helperMethodName =
@@ -352,8 +406,9 @@ internal static class PropertyMappingCodeRenderer
 
         if (isNullable)
         {
-            return
-                $".Set(\"{spec.Key}\", {propAccess} is null ? new AttributeValue {{ NULL = true }} : new AttributeValue {{ M = {helperMethodName}({propAccess}) }})";
+            return omitNull
+                ? $".SetIfNotNull(\"{spec.Key}\", {propAccess}, value => new AttributeValue {{ M = {helperMethodName}(value) }})"
+                : $".Set(\"{spec.Key}\", {propAccess} is null ? new AttributeValue {{ NULL = true }} : new AttributeValue {{ M = {helperMethodName}({propAccess}) }})";
         }
 
         return
@@ -395,6 +450,7 @@ internal static class PropertyMappingCodeRenderer
         if (prop.NestedMapping is not null)
         {
             var nestedSourcePrefix = $"{sourcePrefix}.{prop.PropertyName}";
+            var omitNull = GetEffectiveNestedOmitNullSetting(prop.OmitIfNull, context);
 
             string nestedCode;
             if (prop.NestedMapping is MapperBasedNesting mapperBased)
@@ -417,8 +473,59 @@ internal static class PropertyMappingCodeRenderer
                 throw new InvalidOperationException("Unknown nested mapping type");
             }
 
-            return
-                $".Set(\"{prop.DynamoKey}\", {nestedSourcePrefix} is null ? new AttributeValue {{ NULL = true }} : {nestedCode})";
+            return omitNull
+                ? $".SetIfNotNull(\"{prop.DynamoKey}\", {nestedSourcePrefix}, value => {nestedCode.Replace(nestedSourcePrefix, "value")})"
+                : $".Set(\"{prop.DynamoKey}\", {nestedSourcePrefix} is null ? new AttributeValue {{ NULL = true }} : {nestedCode})";
+        }
+
+        // Nested collection inside a helper method (e.g. List<Order> on an owned type).
+        // Strategy.TypeName will be "NestedList" or "NestedMap" — must NOT call SetList/SetMap.
+        if (prop.Strategy?.CollectionInfo?.ElementNestedMapping is { } nestedElemMapping &&
+            prop.HasGetter)
+        {
+            var collectionInfo = prop.Strategy.CollectionInfo!;
+            var propAccess = $"{sourcePrefix}.{prop.PropertyName}";
+            var isNullable = prop.Nullability.IsNullableType;
+            var omitNull = GetEffectiveNestedOmitNullSetting(prop.OmitIfNull, context);
+
+            if (collectionInfo.Category == CollectionCategory.List)
+            {
+                var elementConverter =
+                    nestedElemMapping switch
+                    {
+                        MapperBasedNesting mb =>
+                            $"new AttributeValue {{ M = {mb.Mapper.MapperFullyQualifiedName}.ToItem(x) }}",
+                        InlineNesting inline =>
+                            $"new AttributeValue {{ M = {helperRegistry.GetOrRegisterToItemHelper(inline.Info.ModelFullyQualifiedType, inline.Info)}(x) }}",
+                        _ => throw new InvalidOperationException("Unknown nested mapping type"),
+                    };
+                var selectExpr =
+                    $"{propAccess}{(isNullable ? "?" : "")}.Select(x => {elementConverter}).ToList()";
+                if (isNullable)
+                    return omitNull
+                        ? $".SetIfNotNull(\"{prop.DynamoKey}\", {propAccess}, value => new AttributeValue {{ L = value.Select(x => {elementConverter}).ToList() }})"
+                        : $".Set(\"{prop.DynamoKey}\", {propAccess} is null ? new AttributeValue {{ NULL = true }} : new AttributeValue {{ L = {selectExpr} }})";
+                return $".Set(\"{prop.DynamoKey}\", new AttributeValue {{ L = {selectExpr} }})";
+            }
+            else // Map
+            {
+                var valueConverter =
+                    nestedElemMapping switch
+                    {
+                        MapperBasedNesting mb =>
+                            $"new AttributeValue {{ M = {mb.Mapper.MapperFullyQualifiedName}.ToItem(kvp.Value) }}",
+                        InlineNesting inline =>
+                            $"new AttributeValue {{ M = {helperRegistry.GetOrRegisterToItemHelper(inline.Info.ModelFullyQualifiedType, inline.Info)}(kvp.Value) }}",
+                        _ => throw new InvalidOperationException("Unknown nested mapping type"),
+                    };
+                var toDictExpr =
+                    $"{propAccess}{(isNullable ? "?" : "")}.ToDictionary(kvp => kvp.Key, kvp => {valueConverter})";
+                if (isNullable)
+                    return omitNull
+                        ? $".SetIfNotNull(\"{prop.DynamoKey}\", {propAccess}, value => new AttributeValue {{ M = value.ToDictionary(kvp => kvp.Key, kvp => {valueConverter}) }})"
+                        : $".Set(\"{prop.DynamoKey}\", {propAccess} is null ? new AttributeValue {{ NULL = true }} : new AttributeValue {{ M = {toDictExpr} }})";
+                return $".Set(\"{prop.DynamoKey}\", new AttributeValue {{ M = {toDictExpr} }})";
+            }
         }
 
         if (prop.Strategy is not null && prop.HasGetter)
@@ -432,8 +539,11 @@ internal static class PropertyMappingCodeRenderer
                     ? ", " + string.Join(", ", prop.Strategy.ToTypeSpecificArgs)
                     : "";
 
-            var omitEmpty = context.MapperOptions.OmitEmptyStrings.ToString().ToLowerInvariant();
-            var omitNull = context.MapperOptions.OmitNullStrings.ToString().ToLowerInvariant();
+            var omitEmpty =
+                (prop.OmitIfEmptyString ?? context.MapperOptions.OmitEmptyStrings).ToString()
+                .ToLowerInvariant();
+            var omitNull =
+                GetEffectiveOmitNullSetting(prop.OmitIfNull, context).ToString().ToLowerInvariant();
 
             return
                 $".{setMethod}{genericArg}(\"{prop.DynamoKey}\", {propValue}{typeArgs}, {omitEmpty}, {omitNull})";
@@ -548,9 +658,14 @@ internal static class PropertyMappingCodeRenderer
 
         foreach (var prop in inlineInfo.Properties)
         {
-            // Use post-construction for optional, settable properties with default values
+            // Use post-construction for optional, settable scalar properties with default values.
+            // Nested objects and nested collections are excluded: they use inline conditional
+            // expressions (TryGetValue + Select / TryGetValue + M pattern) that have no
+            // corresponding TryGet* runtime method.
             var usePostConstruction =
-                !prop.IsRequired && !prop.IsInitOnly && prop.HasDefaultValue && prop.HasSetter;
+                !prop.IsRequired && !prop.IsInitOnly && prop.HasDefaultValue && prop.HasSetter &&
+                prop.NestedMapping is null &&
+                prop.Strategy?.CollectionInfo?.ElementNestedMapping is null;
 
             if (usePostConstruction)
                 postConstructionProperties.Add(prop);
@@ -676,6 +791,58 @@ internal static class PropertyMappingCodeRenderer
             }
 
             sb.Append($"{prop.PropertyName} = {nestedCode},");
+        }
+        // Nested collection inside a helper method (e.g. List<Order> on an owned type).
+        // Strategy.TypeName will be "NestedList" or "NestedMap" — must NOT call GetList/GetMap.
+        else if (prop.Strategy?.CollectionInfo?.ElementNestedMapping is { } nestedElemMapping)
+        {
+            var collectionInfo = prop.Strategy.CollectionInfo!;
+            var isNullable = prop.Nullability.IsNullableType;
+            var varName = prop.PropertyName.ToLowerInvariant();
+            var fallback =
+                prop.IsRequired
+                    ?
+                    $"throw new System.InvalidOperationException(\"Required attribute '{prop.DynamoKey}' not found.\")"
+                    : isNullable
+                        ? "null"
+                        : "[]";
+
+            if (collectionInfo.Category == CollectionCategory.List)
+            {
+                var elementConverter =
+                    nestedElemMapping switch
+                    {
+                        MapperBasedNesting mb =>
+                            $"{mb.Mapper.MapperFullyQualifiedName}.FromItem(av.M)",
+                        InlineNesting inline =>
+                            $"{helperRegistry.GetOrRegisterFromItemHelper(inline.Info.ModelFullyQualifiedType, inline.Info)}(av.M)",
+                        _ => throw new InvalidOperationException("Unknown nested mapping type"),
+                    };
+                var selectExpr =
+                    ApplyReadMaterialization(
+                        $"{varName}List.Select(av => {elementConverter}).ToList()",
+                        collectionInfo,
+                        false
+                    );
+                sb.Append(
+                    $"{prop.PropertyName} = {mapVarName}.TryGetValue(\"{prop.DynamoKey}\", out var {varName}Attr) && {varName}Attr.L is {{ }} {varName}List ? {selectExpr} : {fallback},"
+                );
+            }
+            else // Map
+            {
+                var valueConverter =
+                    nestedElemMapping switch
+                    {
+                        MapperBasedNesting mb =>
+                            $"{mb.Mapper.MapperFullyQualifiedName}.FromItem(kvp.Value.M)",
+                        InlineNesting inline =>
+                            $"{helperRegistry.GetOrRegisterFromItemHelper(inline.Info.ModelFullyQualifiedType, inline.Info)}(kvp.Value.M)",
+                        _ => throw new InvalidOperationException("Unknown nested mapping type"),
+                    };
+                sb.Append(
+                    $"{prop.PropertyName} = {mapVarName}.TryGetValue(\"{prop.DynamoKey}\", out var {varName}Attr) && {varName}Attr.M is {{ }} {varName}Map ? {varName}Map.ToDictionary(kvp => kvp.Key, kvp => {valueConverter}) : {fallback},"
+                );
+            }
         }
         else if (prop.Strategy is not null)
         {
@@ -861,6 +1028,7 @@ internal static class PropertyMappingCodeRenderer
                 spec,
                 propAccess,
                 isNullable,
+                analysis.FieldOptions?.OmitIfNull,
                 elementMapping,
                 collectionInfo,
                 context,
@@ -870,6 +1038,7 @@ internal static class PropertyMappingCodeRenderer
                 spec,
                 propAccess,
                 isNullable,
+                analysis.FieldOptions?.OmitIfNull,
                 elementMapping,
                 context,
                 helperRegistry
@@ -885,7 +1054,7 @@ internal static class PropertyMappingCodeRenderer
     ///     Output: .Set("key", source.Prop?.Select(x => new AttributeValue { M = ... }).ToList())
     /// </summary>
     private static string RenderNestedListToAssignment(
-        PropertyMappingSpec spec, string propAccess, bool isNullable,
+        PropertyMappingSpec spec, string propAccess, bool isNullable, bool? omitIfNull,
         NestedMappingInfo elementMapping, CollectionInfo collectionInfo, GeneratorContext context,
         HelperMethodRegistry helperRegistry
     )
@@ -902,11 +1071,13 @@ internal static class PropertyMappingCodeRenderer
 
         var selectExpr =
             $"{propAccess}{(isNullable ? "?" : "")}.Select(x => {elementConverter}).ToList()";
+        var omitNull = GetEffectiveNestedOmitNullSetting(omitIfNull, context);
 
         if (isNullable)
         {
-            return
-                $".Set(\"{spec.Key}\", {propAccess} is null ? new AttributeValue {{ NULL = true }} : new AttributeValue {{ L = {selectExpr} }})";
+            return omitNull
+                ? $".SetIfNotNull(\"{spec.Key}\", {propAccess}, value => new AttributeValue {{ L = value.Select(x => {elementConverter}).ToList() }})"
+                : $".Set(\"{spec.Key}\", {propAccess} is null ? new AttributeValue {{ NULL = true }} : new AttributeValue {{ L = {selectExpr} }})";
         }
 
         return $".Set(\"{spec.Key}\", new AttributeValue {{ L = {selectExpr} }})";
@@ -917,7 +1088,7 @@ internal static class PropertyMappingCodeRenderer
     ///     Output: .Set("key", source.Prop?.ToDictionary(kvp => kvp.Key, kvp => new AttributeValue { M = ... }))
     /// </summary>
     private static string RenderNestedMapToAssignment(
-        PropertyMappingSpec spec, string propAccess, bool isNullable,
+        PropertyMappingSpec spec, string propAccess, bool isNullable, bool? omitIfNull,
         NestedMappingInfo elementMapping, GeneratorContext context,
         HelperMethodRegistry helperRegistry
     )
@@ -934,15 +1105,25 @@ internal static class PropertyMappingCodeRenderer
 
         var toDictExpr =
             $"{propAccess}{(isNullable ? "?" : "")}.ToDictionary(kvp => kvp.Key, kvp => {valueConverter})";
+        var omitNull = GetEffectiveNestedOmitNullSetting(omitIfNull, context);
 
         if (isNullable)
         {
-            return
-                $".Set(\"{spec.Key}\", {propAccess} is null ? new AttributeValue {{ NULL = true }} : new AttributeValue {{ M = {toDictExpr} }})";
+            return omitNull
+                ? $".SetIfNotNull(\"{spec.Key}\", {propAccess}, value => new AttributeValue {{ M = value.ToDictionary(kvp => kvp.Key, kvp => {valueConverter}) }})"
+                : $".Set(\"{spec.Key}\", {propAccess} is null ? new AttributeValue {{ NULL = true }} : new AttributeValue {{ M = {toDictExpr} }})";
         }
 
         return $".Set(\"{spec.Key}\", new AttributeValue {{ M = {toDictExpr} }})";
     }
+
+    private static bool GetEffectiveOmitNullSetting(
+        bool? analysisFieldOverride, GeneratorContext context
+    ) => PropertyMappingSpecBuilder.GetEffectiveOmitNullSetting(analysisFieldOverride, context);
+
+    private static bool GetEffectiveNestedOmitNullSetting(
+        bool? fieldOverride, GeneratorContext context
+    ) => fieldOverride ?? PropertyMappingSpecBuilder.GetEffectiveMapperOmitNullSetting(context);
 
     /// <summary>
     ///     Renders the FromItem code for a nested collection (init-style assignment).
@@ -1029,11 +1210,10 @@ internal static class PropertyMappingCodeRenderer
 
         var selectExpr = $"{varName}List.Select(av => {elementConverter}).ToList()";
 
-        // For arrays, add .ToArray()
-        var toArray = collectionInfo.IsArray ? ".ToArray()" : "";
+        var materializedValue = ApplyReadMaterialization(selectExpr, collectionInfo, false);
 
         return
-            $"{spec.PropertyName} = {itemParam}.TryGetValue(\"{spec.Key}\", out var {varName}Attr) && {varName}Attr.L is {{ }} {varName}List ? {selectExpr}{toArray} : {fallback},";
+            $"{spec.PropertyName} = {itemParam}.TryGetValue(\"{spec.Key}\", out var {varName}Attr) && {varName}Attr.L is {{ }} {varName}List ? {materializedValue} : {fallback},";
     }
 
     /// <summary>
@@ -1122,11 +1302,10 @@ internal static class PropertyMappingCodeRenderer
 
         var selectExpr = $"{varName}List.Select(av => {elementConverter}).ToList()";
 
-        // For arrays, add .ToArray()
-        var toArray = collectionInfo.IsArray ? ".ToArray()" : "";
+        var materializedValue = ApplyReadMaterialization(selectExpr, collectionInfo, false);
 
         return
-            $"if ({itemParam}.TryGetValue(\"{spec.Key}\", out var {varName}Attr) && {varName}Attr.L is {{ }} {varName}List) {modelVarName}.{spec.PropertyName} = {selectExpr}{toArray};";
+            $"if ({itemParam}.TryGetValue(\"{spec.Key}\", out var {varName}Attr) && {varName}Attr.L is {{ }} {varName}List) {modelVarName}.{spec.PropertyName} = {materializedValue};";
     }
 
     /// <summary>

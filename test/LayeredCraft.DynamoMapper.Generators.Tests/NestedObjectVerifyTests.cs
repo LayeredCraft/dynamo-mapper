@@ -76,6 +76,80 @@ public class NestedObjectVerifyTests
     );
 
     [Fact]
+    public async Task NestedObject_NullableInline_OmitNullValues() =>
+        await GeneratorTestHelpers.Verify(
+            new VerifyTestOptions
+            {
+                SourceCode =
+                    """
+                    using System.Collections.Generic;
+                    using Amazon.DynamoDBv2.Model;
+                    using LayeredCraft.DynamoMapper.Runtime;
+
+                    namespace MyNamespace;
+
+                    [DynamoMapper(OmitNullValues = true)]
+                    public static partial class OrderMapper
+                    {
+                        public static partial Dictionary<string, AttributeValue> ToItem(Order source);
+
+                        public static partial Order FromItem(Dictionary<string, AttributeValue> item);
+                    }
+
+                    public class Order
+                    {
+                        public string Id { get; set; }
+                        public Address? BillingAddress { get; set; }
+                    }
+
+                    public class Address
+                    {
+                        public string Line1 { get; set; }
+                        public string City { get; set; }
+                    }
+                    """,
+            },
+            TestContext.Current.CancellationToken
+        );
+
+    [Fact]
+    public async Task NestedObject_NullableInline_OmitNullValuesFalse() =>
+        await GeneratorTestHelpers.Verify(
+            new VerifyTestOptions
+            {
+                SourceCode =
+                    """
+                    using System.Collections.Generic;
+                    using Amazon.DynamoDBv2.Model;
+                    using LayeredCraft.DynamoMapper.Runtime;
+
+                    namespace MyNamespace;
+
+                    [DynamoMapper(OmitNullValues = false)]
+                    public static partial class OrderMapper
+                    {
+                        public static partial Dictionary<string, AttributeValue> ToItem(Order source);
+
+                        public static partial Order FromItem(Dictionary<string, AttributeValue> item);
+                    }
+
+                    public class Order
+                    {
+                        public string Id { get; set; }
+                        public Address? BillingAddress { get; set; }
+                    }
+
+                    public class Address
+                    {
+                        public string Line1 { get; set; }
+                        public string City { get; set; }
+                    }
+                    """,
+            },
+            TestContext.Current.CancellationToken
+        );
+
+    [Fact]
     public async Task NestedObject_NullableMapperBased() => await GeneratorTestHelpers.Verify(
         new VerifyTestOptions
         {
@@ -202,6 +276,44 @@ public class NestedObjectVerifyTests
                         public string Line1 { get; set; }
                         public string City { get; set; }
                         public string PostalCode { get; set; }
+                    }
+                    """,
+            },
+            TestContext.Current.CancellationToken
+        );
+
+    [Fact]
+    public async Task NestedObject_WithBinaryAndStreamScalarMembers() =>
+        await GeneratorTestHelpers.Verify(
+            new VerifyTestOptions
+            {
+                SourceCode =
+                    """
+                    using System.Collections.Generic;
+                    using System.IO;
+                    using Amazon.DynamoDBv2.Model;
+                    using LayeredCraft.DynamoMapper.Runtime;
+
+                    namespace MyNamespace;
+
+                    [DynamoMapper]
+                    public static partial class OrderMapper
+                    {
+                        public static partial Dictionary<string, AttributeValue> ToItem(Order source);
+
+                        public static partial Order FromItem(Dictionary<string, AttributeValue> item);
+                    }
+
+                    public class Order
+                    {
+                        public string Id { get; set; }
+                        public Attachment Payload { get; set; }
+                    }
+
+                    public class Attachment
+                    {
+                        public byte[] Checksum { get; set; } = [];
+                        public Stream Content { get; set; } = Stream.Null;
                     }
                     """,
             },
@@ -695,6 +807,94 @@ public class NestedObjectVerifyTests
         );
 
     [Fact]
+    public async Task NestedCollection_NullableListOfNestedObjects_MapperBased_OmitNullValues() =>
+        await GeneratorTestHelpers.Verify(
+            new VerifyTestOptions
+            {
+                SourceCode =
+                    """
+                    using System.Collections.Generic;
+                    using Amazon.DynamoDBv2.Model;
+                    using LayeredCraft.DynamoMapper.Runtime;
+
+                    namespace MyNamespace;
+
+                    [DynamoMapper]
+                    public static partial class LineItemMapper
+                    {
+                        public static partial Dictionary<string, AttributeValue> ToItem(LineItem source);
+
+                        public static partial LineItem FromItem(Dictionary<string, AttributeValue> item);
+                    }
+
+                    [DynamoMapper(OmitNullValues = true)]
+                    public static partial class OrderMapper
+                    {
+                        public static partial Dictionary<string, AttributeValue> ToItem(Order source);
+
+                        public static partial Order FromItem(Dictionary<string, AttributeValue> item);
+                    }
+
+                    public class Order
+                    {
+                        public string Id { get; set; }
+                        public List<LineItem>? Items { get; set; }
+                    }
+
+                    public class LineItem
+                    {
+                        public string ProductId { get; set; }
+                        public int Quantity { get; set; }
+                    }
+                    """,
+            },
+            TestContext.Current.CancellationToken
+        );
+
+    [Fact]
+    public async Task NestedObject_DotNotationOmitIfNull_OmitsNestedProperty() =>
+        await GeneratorTestHelpers.Verify(
+            new VerifyTestOptions
+            {
+                SourceCode =
+                    """
+                    using System.Collections.Generic;
+                    using Amazon.DynamoDBv2.Model;
+                    using LayeredCraft.DynamoMapper.Runtime;
+
+                    namespace MyNamespace;
+
+                    [DynamoMapper]
+                    [DynamoField("Level2Data.Level3Data", OmitIfNull = true)]
+                    public static partial class Level1Mapper
+                    {
+                        public static partial Dictionary<string, AttributeValue> ToItem(Level1 source);
+
+                        public static partial Level1 FromItem(Dictionary<string, AttributeValue> item);
+                    }
+
+                    public class Level1
+                    {
+                        public string Id { get; set; } = string.Empty;
+                        public Level2? Level2Data { get; set; }
+                    }
+
+                    public class Level2
+                    {
+                        public string Id { get; set; } = string.Empty;
+                        public Level3? Level3Data { get; set; }
+                    }
+
+                    public class Level3
+                    {
+                        public string Id { get; set; } = string.Empty;
+                    }
+                    """,
+            },
+            TestContext.Current.CancellationToken
+        );
+
+    [Fact]
     public async Task NestedCollection_NullableDictionaryOfNestedObjects_Inline() =>
         await GeneratorTestHelpers.Verify(
             new VerifyTestOptions
@@ -775,6 +975,177 @@ public class NestedObjectVerifyTests
             },
             TestContext.Current.CancellationToken
         );
+
+    [Fact]
+    public async Task NestedObject_OwnedTypeContainingListOfComplexObjects() =>
+        await GeneratorTestHelpers.Verify(
+            new VerifyTestOptions
+            {
+                SourceCode =
+                    """
+                    using System.Collections.Generic;
+                    using Amazon.DynamoDBv2.Model;
+                    using LayeredCraft.DynamoMapper.Runtime;
+
+                    namespace MyNamespace;
+
+                    [DynamoMapper]
+                    public static partial class UserMapper
+                    {
+                        public static partial Dictionary<string, AttributeValue> ToItem(User source);
+
+                        public static partial User FromItem(Dictionary<string, AttributeValue> item);
+                    }
+
+                    public class User
+                    {
+                        public string Id { get; set; }
+                        public string Name { get; set; }
+                        public Order CurrentOrder { get; set; }
+                    }
+
+                    public class Order
+                    {
+                        public string OrderId { get; set; }
+                        public decimal Total { get; set; }
+                        public List<OrderItem> Items { get; set; }
+                    }
+
+                    public class OrderItem
+                    {
+                        public string ProductId { get; set; }
+                        public int Quantity { get; set; }
+                        public decimal UnitPrice { get; set; }
+                    }
+                    """,
+            },
+            TestContext.Current.CancellationToken
+        );
+
+    [Fact]
+    public async Task NestedObject_DeepNestedObjectWithListContainingNestedObjects() =>
+        await GeneratorTestHelpers.Verify(
+            new VerifyTestOptions
+            {
+                SourceCode =
+                    """
+                    using System.Collections.Generic;
+                    using Amazon.DynamoDBv2.Model;
+                    using LayeredCraft.DynamoMapper.Runtime;
+
+                    namespace MyNamespace;
+
+                    [DynamoMapper]
+                    public static partial class AccountMapper
+                    {
+                        public static partial Dictionary<string, AttributeValue> ToItem(Account source);
+
+                        public static partial Account FromItem(Dictionary<string, AttributeValue> item);
+                    }
+
+                    // Root
+                    public class Account
+                    {
+                        public string AccountId { get; set; }
+                        public UserProfile Profile { get; set; }
+                    }
+
+                    // Level 1 owned type — has both a scalar list and a list of complex objects
+                    public class UserProfile
+                    {
+                        public string DisplayName { get; set; }
+                        public List<string> Roles { get; set; }
+                        public List<PurchaseOrder> Orders { get; set; }
+                    }
+
+                    // Level 2 element type — itself has an owned complex type and a list of complex objects
+                    public class PurchaseOrder
+                    {
+                        public string OrderId { get; set; }
+                        public ShippingAddress Destination { get; set; }
+                        public List<LineItem> Lines { get; set; }
+                    }
+
+                    // Level 3 owned type inside a list element
+                    public class ShippingAddress
+                    {
+                        public string Street { get; set; }
+                        public string City { get; set; }
+                        public string PostalCode { get; set; }
+                    }
+
+                    // Level 3 list element type inside a list element
+                    public class LineItem
+                    {
+                        public string Sku { get; set; }
+                        public int Qty { get; set; }
+                        public decimal Price { get; set; }
+                    }
+                    """,
+            },
+            TestContext.Current.CancellationToken
+        );
+
+    [Fact]
+    public async Task NestedObject_FourLevelDeepNesting() => await GeneratorTestHelpers.Verify(
+        new VerifyTestOptions
+        {
+            SourceCode =
+                """
+                using System.Collections.Generic;
+                using Amazon.DynamoDBv2.Model;
+                using LayeredCraft.DynamoMapper.Runtime;
+
+                namespace MyNamespace;
+
+                [DynamoMapper]
+                public static partial class OrgMapper
+                {
+                    public static partial Dictionary<string, AttributeValue> ToItem(Org source);
+
+                    public static partial Org FromItem(Dictionary<string, AttributeValue> item);
+                }
+
+                // Level 0 — root
+                public class Org
+                {
+                    public string OrgId { get; set; }
+                    public Division Division { get; set; }
+                }
+
+                // Level 1 — owned type on root
+                public class Division
+                {
+                    public string Name { get; set; }
+                    public List<Department> Departments { get; set; }
+                }
+
+                // Level 2 — complex list element inside owned type
+                public class Department
+                {
+                    public string Code { get; set; }
+                    public Manager HeadManager { get; set; }
+                    public List<Employee> Employees { get; set; }
+                }
+
+                // Level 3a — owned type inside a list element
+                public class Manager
+                {
+                    public string FullName { get; set; }
+                    public string Email { get; set; }
+                }
+
+                // Level 3b — complex list element inside a list element
+                public class Employee
+                {
+                    public string EmployeeId { get; set; }
+                    public string Name { get; set; }
+                    public List<string> Tags { get; set; }
+                }
+                """,
+        },
+        TestContext.Current.CancellationToken
+    );
 
     // ==================== DIAGNOSTIC TESTS ====================
 

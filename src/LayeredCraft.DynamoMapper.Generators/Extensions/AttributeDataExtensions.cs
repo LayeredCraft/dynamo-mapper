@@ -9,37 +9,47 @@ internal static class AttributeDataExtensions
 {
     extension(AttributeData attributeData)
     {
-        internal TOptions PopulateOptions<TOptions>()
-            where TOptions : class, new()
+        internal TOptions PopulateOptions<TOptions>() where TOptions : class, new()
         {
             var options = new TOptions();
 
             var settingsType = typeof(TOptions);
 
-            var ctorArgs = GetConstructorArgs(
-                attributeData.AttributeConstructor,
-                attributeData.ConstructorArguments
-            );
+            var ctorArgs =
+                GetConstructorArgs(
+                    attributeData.AttributeConstructor,
+                    attributeData.ConstructorArguments
+                );
 
             KeyValuePair<string, TypedConstant>[] combinedArgs =
             [
-                .. attributeData.NamedArguments,
-                .. ctorArgs,
+                .. attributeData.NamedArguments, .. ctorArgs,
             ];
 
             // Map named arguments (properties)
             foreach (var (propertyName, value) in combinedArgs)
             {
-                var property = settingsType.GetProperty(
-                    propertyName,
-                    BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance
-                );
+                var property =
+                    settingsType.GetProperty(
+                        propertyName,
+                        BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance
+                    );
 
                 if (property is not null && property.CanWrite)
                 {
                     var actualValue = GetTypedConstantValue(value);
                     var convertedValue = ConvertToPropertyType(actualValue, property.PropertyType);
                     property.SetValue(options, convertedValue);
+
+                    var specifiedProperty =
+                        settingsType.GetProperty(
+                            $"{propertyName}Specified",
+                            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance
+                        );
+
+                    if (specifiedProperty is { CanWrite: true } &&
+                        specifiedProperty.PropertyType == typeof(bool))
+                        specifiedProperty.SetValue(options, true);
                 }
             }
 
@@ -48,30 +58,27 @@ internal static class AttributeDataExtensions
     }
 
     private static IEnumerable<KeyValuePair<string, TypedConstant>> GetConstructorArgs(
-        IMethodSymbol? constructor,
-        ImmutableArray<TypedConstant> constructorArgs
-    ) =>
-        constructor is not null
-            ? constructorArgs.Select(
-                (_, i) =>
-                    new KeyValuePair<string, TypedConstant>(
-                        constructor.Parameters[i].Name.Dehumanize(),
-                        constructorArgs[i]
-                    )
-            )
-            : [];
+        IMethodSymbol? constructor, ImmutableArray<TypedConstant> constructorArgs
+    ) => constructor is not null
+        ? constructorArgs.Select(
+            (_, i) =>
+                new KeyValuePair<string, TypedConstant>(
+                    constructor.Parameters[i].Name.Dehumanize(),
+                    constructorArgs[i]
+                )
+        )
+        : [];
 
-    private static object? GetTypedConstantValue(TypedConstant constant) =>
-        constant.Kind switch
-        {
-            TypedConstantKind.Array => constant.Values.Select(GetTypedConstantValue).ToArray(),
-            TypedConstantKind.Type => constant.Value as ITypeSymbol,
-            TypedConstantKind.Primitive => constant.Value,
-            TypedConstantKind.Enum => GetValidatedEnumValue(constant),
-            _ => throw new InvalidOperationException(
-                $"TypedConstant of type '{constant.Kind}' is not supported"
-            ),
-        };
+    private static object? GetTypedConstantValue(TypedConstant constant) => constant.Kind switch
+    {
+        TypedConstantKind.Array => constant.Values.Select(GetTypedConstantValue).ToArray(),
+        TypedConstantKind.Type => constant.Value as ITypeSymbol,
+        TypedConstantKind.Primitive => constant.Value,
+        TypedConstantKind.Enum => GetValidatedEnumValue(constant),
+        _ => throw new InvalidOperationException(
+            $"TypedConstant of type '{constant.Kind}' is not supported"
+        ),
+    };
 
     private static object GetValidatedEnumValue(TypedConstant constant)
     {
@@ -83,12 +90,12 @@ internal static class AttributeDataExtensions
             throw new InvalidOperationException("Enum value cannot be null");
 
         // Get all declared enum field values
-        var validValues = enumType
-            .GetMembers()
-            .OfType<IFieldSymbol>()
-            .Where(f => f.IsConst && f.HasConstantValue)
-            .Select(f => f.ConstantValue)
-            .ToHashSet();
+        var validValues =
+            enumType.GetMembers()
+                .OfType<IFieldSymbol>()
+                .Where(f => f.IsConst && f.HasConstantValue)
+                .Select(f => f.ConstantValue)
+                .ToHashSet();
 
         if (validValues.Count == 0)
             throw new InvalidOperationException(
@@ -96,9 +103,9 @@ internal static class AttributeDataExtensions
             );
 
         // Check if it's a Flags enum
-        var isFlagsEnum = enumType
-            .GetAttributes()
-            .Any(attr => attr.AttributeClass?.ToDisplayString() == "System.FlagsAttribute");
+        var isFlagsEnum =
+            enumType.GetAttributes()
+                .Any(attr => attr.AttributeClass?.ToDisplayString() == "System.FlagsAttribute");
 
         if (isFlagsEnum)
         {
@@ -106,9 +113,8 @@ internal static class AttributeDataExtensions
             var numericValue = Convert.ToInt64(value);
 
             // Calculate bitmask of all valid flags
-            var validFlagsMask = validValues
-                .Select(v => Convert.ToInt64(v))
-                .Aggregate(0L, (acc, v) => acc | v);
+            var validFlagsMask =
+                validValues.Select(v => Convert.ToInt64(v)).Aggregate(0L, (acc, v) => acc | v);
 
             // Check if value contains only valid flag bits
             if ((numericValue & ~validFlagsMask) != 0)
@@ -123,8 +129,8 @@ internal static class AttributeDataExtensions
             {
                 var validList = string.Join(", ", validValues.Select(v => v?.ToString() ?? "null"));
                 throw new ArgumentException(
-                    $"Enum value '{value}' is not defined in type '{enumType.Name}'. "
-                        + $"Valid values: {validList}"
+                    $"Enum value '{value}' is not defined in type '{enumType.Name}'. " +
+                    $"Valid values: {validList}"
                 );
             }
         }

@@ -172,6 +172,13 @@ internal static class NestedObjectTypeAnalyzer
             return true;
         if (wellKnown.IsType(type, WellKnownTypeData.WellKnownType.System_Guid))
             return true;
+        if (DateOnlyTimeOnlySupport.IsDateOnly(type, context))
+            return true;
+        if (DateOnlyTimeOnlySupport.IsTimeOnly(type, context))
+            return true;
+        var streamType = wellKnown.Get(WellKnownTypeData.WellKnownType.System_IO_Stream);
+        if (streamType is not null && type.IsAssignableTo(streamType, context))
+            return true;
 
         return false;
     }
@@ -253,6 +260,8 @@ internal static class NestedObjectTypeAnalyzer
                         property.Name,
                         dynamoKey,
                         scalarStrategy,
+                        fieldOptions?.OmitIfNull,
+                        fieldOptions?.OmitIfEmptyString,
                         propertyAnalysis.Nullability,
                         propertyAnalysis.HasGetter,
                         propertyAnalysis.HasSetter,
@@ -298,13 +307,24 @@ internal static class NestedObjectTypeAnalyzer
                     continue;
                 }
 
-                // Create collection strategy (simplified for nested objects)
-                var collectionStrategy = CreateCollectionStrategy(collectionInfo, propertyType);
+                // Create collection strategy — pass NestedMapping through so that
+                // List<ComplexType> inside a helper method emits a NestedList strategy
+                // (not a plain List strategy that would call SetList<ComplexType> at runtime).
+                var collectionStrategy =
+                    CreateCollectionStrategy(
+                        collectionInfo,
+                        propertyType,
+                        fieldOptions,
+                        nestedContext.Context,
+                        validation.NestedMapping
+                    );
                 propertySpecs.Add(
                     new NestedPropertySpec(
                         property.Name,
                         dynamoKey,
                         collectionStrategy,
+                        fieldOptions?.OmitIfNull,
+                        fieldOptions?.OmitIfEmptyString,
                         propertyAnalysis.Nullability,
                         propertyAnalysis.HasGetter,
                         propertyAnalysis.HasSetter,
@@ -334,6 +354,8 @@ internal static class NestedObjectTypeAnalyzer
                         property.Name,
                         dynamoKey,
                         null,
+                        fieldOptions?.OmitIfNull,
+                        fieldOptions?.OmitIfEmptyString,
                         propertyAnalysis.Nullability,
                         propertyAnalysis.HasGetter,
                         propertyAnalysis.HasSetter,
@@ -383,6 +405,7 @@ internal static class NestedObjectTypeAnalyzer
             !SymbolEqualityComparer.Default.Equals(underlyingType, originalType) ||
             originalType.NullableAnnotation == NullableAnnotation.Annotated;
         var nullableModifier = isNullable ? "Nullable" : "";
+        var supportsDateOnlyTimeOnly = DateOnlyTimeOnlySupport.RuntimeApisAvailable(context);
 
         return underlyingType switch
         {
@@ -472,6 +495,36 @@ internal static class NestedObjectTypeAnalyzer
                 [$"\"{fieldOptions?.Format ?? context.MapperOptions.TimeSpanFormat}\""],
                 [$"\"{fieldOptions?.Format ?? context.MapperOptions.TimeSpanFormat}\""]
             ),
+            INamedTypeSymbol t
+                when supportsDateOnlyTimeOnly && DateOnlyTimeOnlySupport.IsDateOnly(t, context)
+                => new TypeMappingStrategy(
+                "DateOnly",
+                "",
+                nullableModifier,
+                [$"\"{fieldOptions?.Format ?? context.MapperOptions.DateOnlyFormat}\""],
+                [$"\"{fieldOptions?.Format ?? context.MapperOptions.DateOnlyFormat}\""]
+            ),
+            INamedTypeSymbol t
+                when supportsDateOnlyTimeOnly && DateOnlyTimeOnlySupport.IsTimeOnly(t, context)
+                => new TypeMappingStrategy(
+                "TimeOnly",
+                "",
+                nullableModifier,
+                [$"\"{fieldOptions?.Format ?? context.MapperOptions.TimeOnlyFormat}\""],
+                [$"\"{fieldOptions?.Format ?? context.MapperOptions.TimeOnlyFormat}\""]
+            ),
+            IArrayTypeSymbol { ElementType.SpecialType: SpecialType.System_Byte } =>
+                new TypeMappingStrategy("Binary", "", nullableModifier, [], []),
+            INamedTypeSymbol t when
+                context.WellKnownTypes.Get(WellKnownTypeData.WellKnownType.System_IO_Stream) is
+                    { } streamType &&
+                t.IsAssignableTo(streamType, context) => new TypeMappingStrategy(
+                    "Stream",
+                    "",
+                    nullableModifier,
+                    [],
+                    []
+                ),
             INamedTypeSymbol { TypeKind: TypeKind.Enum } enumType => CreateEnumStrategy(
                 enumType,
                 isNullable,
@@ -509,13 +562,43 @@ internal static class NestedObjectTypeAnalyzer
 
     /// <summary>
     ///     Creates a collection type mapping strategy.
+    ///     When <paramref name="elementNestedMapping"/> is non-null the element type is a complex
+    ///     object, so a "NestedList" / "NestedMap" strategy is returned instead of the plain scalar
+    ///     variant — preventing helper methods from calling SetList/GetList on complex types.
     /// </summary>
     private static TypeMappingStrategy CreateCollectionStrategy(
-        CollectionInfo collectionInfo, ITypeSymbol originalType
+        CollectionInfo collectionInfo, ITypeSymbol originalType, DynamoFieldOptions? fieldOptions,
+        GeneratorContext context, NestedMappingInfo? elementNestedMapping = null
     )
     {
         var isNullable = originalType.NullableAnnotation == NullableAnnotation.Annotated;
         var nullableModifier = isNullable ? "Nullable" : "";
+
+        // When the element type is a complex object, mirror TypeMappingStrategyResolver's
+        // CreateNestedCollectionStrategy so the renderers emit the correct Select(x => ...) code.
+        if (elementNestedMapping is not null)
+        {
+            var nestedTypeName =
+                collectionInfo.Category switch
+                {
+                    CollectionCategory.List => "NestedList",
+                    CollectionCategory.Map => "NestedMap",
+                    _ => throw new InvalidOperationException(
+                        $"Unexpected category for nested collection: {collectionInfo.Category}"
+                    ),
+                };
+
+            return new TypeMappingStrategy(
+                nestedTypeName,
+                $"<{collectionInfo.ElementType.ToDisplayString()}>",
+                nullableModifier,
+                [],
+                [],
+                collectionInfo.TargetKind,
+                elementNestedMapping,
+                collectionInfo with { ElementNestedMapping = elementNestedMapping }
+            );
+        }
 
         var (typeName, genericArg) =
             collectionInfo.Category switch
@@ -539,14 +622,70 @@ internal static class NestedObjectTypeAnalyzer
                 ),
             };
 
+        var (fromArgs, toArgs) =
+            GetCollectionElementTypeSpecificArgs(collectionInfo.ElementType, fieldOptions, context);
+
         return new TypeMappingStrategy(
             typeName,
             genericArg,
             nullableModifier,
-            [],
-            [],
+            fromArgs,
+            toArgs,
             KindOverride: collectionInfo.TargetKind
         );
+    }
+
+    private static (string[] FromArgs, string[] ToArgs) GetCollectionElementTypeSpecificArgs(
+        ITypeSymbol elementType, DynamoFieldOptions? fieldOptions, GeneratorContext context
+    )
+    {
+        var underlyingType = UnwrapNullable(elementType);
+        var supportsDateOnlyTimeOnly = DateOnlyTimeOnlySupport.RuntimeApisAvailable(context);
+
+        return underlyingType switch
+        {
+            { SpecialType: SpecialType.System_DateTime } => CreateCollectionFormatArgs(
+                fieldOptions?.Format ?? context.MapperOptions.DateTimeFormat
+            ),
+            INamedTypeSymbol t when context.WellKnownTypes.IsType(
+                t,
+                WellKnownTypeData.WellKnownType.System_DateTimeOffset
+            ) => CreateCollectionFormatArgs(
+                fieldOptions?.Format ?? context.MapperOptions.DateTimeFormat
+            ),
+            INamedTypeSymbol t when context.WellKnownTypes.IsType(
+                t,
+                WellKnownTypeData.WellKnownType.System_Guid
+            ) => CreateCollectionFormatArgs(
+                fieldOptions?.Format ?? context.MapperOptions.GuidFormat
+            ),
+            INamedTypeSymbol t when context.WellKnownTypes.IsType(
+                t,
+                WellKnownTypeData.WellKnownType.System_TimeSpan
+            ) => CreateCollectionFormatArgs(
+                fieldOptions?.Format ?? context.MapperOptions.TimeSpanFormat
+            ),
+            INamedTypeSymbol t
+                when supportsDateOnlyTimeOnly && DateOnlyTimeOnlySupport.IsDateOnly(t, context)
+                => CreateCollectionFormatArgs(
+                fieldOptions?.Format ?? context.MapperOptions.DateOnlyFormat
+            ),
+            INamedTypeSymbol t
+                when supportsDateOnlyTimeOnly && DateOnlyTimeOnlySupport.IsTimeOnly(t, context)
+                => CreateCollectionFormatArgs(
+                fieldOptions?.Format ?? context.MapperOptions.TimeOnlyFormat
+            ),
+            INamedTypeSymbol { TypeKind: TypeKind.Enum } => CreateCollectionFormatArgs(
+                fieldOptions?.Format ?? context.MapperOptions.EnumFormat
+            ),
+            _ => ([], []),
+        };
+    }
+
+    private static (string[] FromArgs, string[] ToArgs) CreateCollectionFormatArgs(string format)
+    {
+        var arg = $"\"{format}\"";
+        return ([arg], [arg]);
     }
 
     /// <summary>

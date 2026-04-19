@@ -65,6 +65,20 @@ internal static class TypeMappingStrategyResolver
             return CreateCollectionStrategy(collectionInfo, analysis, context);
         }
 
+        if (analysis.UnderlyingType is IArrayTypeSymbol
+            {
+                ElementType.SpecialType: SpecialType.System_Byte,
+            })
+            return DiagnosticResult<TypeMappingStrategy?>.Success(
+                CreateStrategy("Binary", analysis.Nullability)
+            );
+
+        if (analysis.UnderlyingType is INamedTypeSymbol namedType &&
+            namedType.IsAssignableTo(WellKnownType.System_IO_Stream, context))
+            return DiagnosticResult<TypeMappingStrategy?>.Success(
+                CreateStrategy("Stream", analysis.Nullability)
+            );
+
         // Try nested object analysis before scalar type resolution
         // Include the root model type in the ancestor chain to detect self-referencing cycles
         var nestedContext = NestedAnalysisContext.Create(context, context.MapperRegistry);
@@ -89,6 +103,8 @@ internal static class TypeMappingStrategyResolver
         {
             return CreateNestedObjectStrategy(nestedResult.Value, analysis);
         }
+
+        var supportsDateOnlyTimeOnly = DateOnlyTimeOnlySupport.RuntimeApisAvailable(context);
 
         // Resolve the base type mapping strategy (existing logic unchanged)
         var strategyResult =
@@ -157,6 +173,28 @@ internal static class TypeMappingStrategyResolver
                         $"\"{analysis.FieldOptions?.Format ?? context.MapperOptions.TimeSpanFormat}\"",
                         toArg:
                         $"\"{analysis.FieldOptions?.Format ?? context.MapperOptions.TimeSpanFormat}\""
+                    ),
+                INamedTypeSymbol t
+                    when supportsDateOnlyTimeOnly && DateOnlyTimeOnlySupport.IsDateOnly(t, context)
+                    =>
+                    CreateStrategy(
+                        "DateOnly",
+                        analysis.Nullability,
+                        fromArg:
+                        $"\"{analysis.FieldOptions?.Format ?? context.MapperOptions.DateOnlyFormat}\"",
+                        toArg:
+                        $"\"{analysis.FieldOptions?.Format ?? context.MapperOptions.DateOnlyFormat}\""
+                    ),
+                INamedTypeSymbol t
+                    when supportsDateOnlyTimeOnly && DateOnlyTimeOnlySupport.IsTimeOnly(t, context)
+                    =>
+                    CreateStrategy(
+                        "TimeOnly",
+                        analysis.Nullability,
+                        fromArg:
+                        $"\"{analysis.FieldOptions?.Format ?? context.MapperOptions.TimeOnlyFormat}\"",
+                        toArg:
+                        $"\"{analysis.FieldOptions?.Format ?? context.MapperOptions.TimeOnlyFormat}\""
                     ),
                 INamedTypeSymbol { TypeKind: TypeKind.Enum } enumType => CreateEnumStrategy(
                     enumType,
@@ -341,13 +379,23 @@ internal static class TypeMappingStrategyResolver
                 ),
             };
 
-        // Build strategy - collections are nullable at collection level, not element level
-        var strategy = CreateStrategy(typeName, analysis.Nullability, genericArg);
+        var (fromArgs, toArgs) =
+            GetCollectionElementTypeSpecificArgs(collectionInfo.ElementType, analysis, context);
+
+        var strategy =
+            new TypeMappingStrategy(
+                typeName,
+                genericArg,
+                analysis.Nullability.IsNullableType ? "Nullable" : string.Empty,
+                fromArgs,
+                toArgs
+            );
 
         // Apply Kind override if present (or use inferred kind)
         return strategy with
         {
             KindOverride = analysis.FieldOptions?.Kind ?? collectionInfo.TargetKind,
+            CollectionInfo = collectionInfo,
         };
     }
 
@@ -410,5 +458,63 @@ internal static class TypeMappingStrategyResolver
             );
 
         return DiagnosticResult<TypeMappingStrategy?>.Success(strategy);
+    }
+
+    private static (string[] FromArgs, string[] ToArgs) GetCollectionElementTypeSpecificArgs(
+        ITypeSymbol elementType, PropertyAnalysis analysis, GeneratorContext context
+    )
+    {
+        var underlyingType = UnwrapNullable(elementType);
+        var supportsDateOnlyTimeOnly = DateOnlyTimeOnlySupport.RuntimeApisAvailable(context);
+
+        return underlyingType switch
+        {
+            { SpecialType: SpecialType.System_DateTime } => CreateCollectionFormatArgs(
+                analysis.FieldOptions?.Format ?? context.MapperOptions.DateTimeFormat
+            ),
+            INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_DateTimeOffset, context)
+                => CreateCollectionFormatArgs(
+                    analysis.FieldOptions?.Format ?? context.MapperOptions.DateTimeFormat
+                ),
+            INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_Guid, context) =>
+                CreateCollectionFormatArgs(
+                    analysis.FieldOptions?.Format ?? context.MapperOptions.GuidFormat
+                ),
+            INamedTypeSymbol t when t.IsAssignableTo(WellKnownType.System_TimeSpan, context) =>
+                CreateCollectionFormatArgs(
+                    analysis.FieldOptions?.Format ?? context.MapperOptions.TimeSpanFormat
+                ),
+            INamedTypeSymbol t
+                when supportsDateOnlyTimeOnly && DateOnlyTimeOnlySupport.IsDateOnly(t, context) =>
+                CreateCollectionFormatArgs(
+                    analysis.FieldOptions?.Format ?? context.MapperOptions.DateOnlyFormat
+                ),
+            INamedTypeSymbol t
+                when supportsDateOnlyTimeOnly && DateOnlyTimeOnlySupport.IsTimeOnly(t, context) =>
+                CreateCollectionFormatArgs(
+                    analysis.FieldOptions?.Format ?? context.MapperOptions.TimeOnlyFormat
+                ),
+            INamedTypeSymbol { TypeKind: TypeKind.Enum } => CreateCollectionFormatArgs(
+                analysis.FieldOptions?.Format ?? context.MapperOptions.EnumFormat
+            ),
+            _ => ([], []),
+        };
+    }
+
+    private static (string[] FromArgs, string[] ToArgs) CreateCollectionFormatArgs(string format)
+    {
+        var arg = $"\"{format}\"";
+        return ([arg], [arg]);
+    }
+
+    private static ITypeSymbol UnwrapNullable(ITypeSymbol type)
+    {
+        if (type is INamedTypeSymbol
+            {
+                OriginalDefinition.SpecialType: SpecialType.System_Nullable_T,
+            } nullableType && nullableType.TypeArguments.Length == 1)
+            return nullableType.TypeArguments[0];
+
+        return type;
     }
 }

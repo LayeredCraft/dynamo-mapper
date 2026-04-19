@@ -63,9 +63,12 @@
   </Folder>
   <Folder Name="/git/">
     <File Path=".github\dependabot.yml" />
-    <File Path=".github\workflows\build.yaml" />
     <File Path=".github\workflows\docs.yml" />
     <File Path=".github\workflows\pr-build.yaml" />
+    <File Path=".github\workflows\pr-title-check.yaml" />
+    <File Path=".github\workflows\publish-preview.yaml" />
+    <File Path=".github\workflows\publish-release.yaml" />
+    <File Path=".github\workflows\release-drafter.yaml" />
     <File Path=".gitignore" />
   </Folder>
   <Folder Name="/Solution Items/">
@@ -85,6 +88,8 @@
     <Project
       Path="test/LayeredCraft.DynamoMapper.Client.Tests/LayeredCraft.DynamoMapper.Client.Tests.csproj"/>
     <Project Path="test/LayeredCraft.DynamoMapper.Generators.Tests/LayeredCraft.DynamoMapper.Generators.Tests.csproj" />
+    <Project
+      Path="test/LayeredCraft.DynamoMapper.IntegrationTests/LayeredCraft.DynamoMapper.IntegrationTests.csproj"/>
     <Project Path="test/LayeredCraft.DynamoMapper.Runtime.Tests/LayeredCraft.DynamoMapper.Runtime.Tests.csproj" />
     <Project Path="test/LayeredCraft.DynamoMapper.TestKit/LayeredCraft.DynamoMapper.TestKit.csproj" />
   </Folder>

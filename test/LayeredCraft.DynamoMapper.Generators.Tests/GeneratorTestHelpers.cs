@@ -51,8 +51,7 @@ internal class CodeGenerationOptions
 internal static class GeneratorTestHelpers
 {
     internal static Task Verify(
-        VerifyTestOptions options,
-        CancellationToken cancellationToken = default
+        VerifyTestOptions options, CancellationToken cancellationToken = default
     )
     {
         var (driver, originalCompilation) = GenerateFromSource(options, cancellationToken);
@@ -61,64 +60,59 @@ internal static class GeneratorTestHelpers
 
         var result = driver.GetRunResult();
 
-        result
-            .Diagnostics.Should()
+        result.Diagnostics.Should()
             .BeEmpty(
-                "code should be generated without errors, but found:\n"
-                    + string.Join(
-                        "\n---\n",
-                        result.Diagnostics.Select(e =>
-                            $"  - {e.Id}: {e.GetMessage()} at {e.Location}"
-                        )
-                    )
+                "code should be generated without errors, but found:\n" + string.Join(
+                    "\n---\n",
+                    result.Diagnostics.Select(e => $"  - {e.Id}: {e.GetMessage()} at {e.Location}")
+                )
             );
 
         // Reparse generated trees with the same parse options as the original compilation
         // to ensure consistent syntax tree features (e.g., InterceptorsNamespaces)
         var parseOptions = originalCompilation.SyntaxTrees.First().Options;
-        var reparsedTrees = result
-            .GeneratedTrees.Select(tree =>
-                CSharpSyntaxTree.ParseText(tree.GetText(), (CSharpParseOptions)parseOptions)
-            )
-            .ToArray();
+        var reparsedTrees =
+            result.GeneratedTrees.Select(
+                    tree =>
+                        CSharpSyntaxTree.ParseText(tree.GetText(), (CSharpParseOptions)parseOptions)
+                )
+                .ToArray();
 
         // Add generated trees to original compilation
         var outputCompilation = originalCompilation.AddSyntaxTrees(reparsedTrees);
 
-        var errors = outputCompilation
-            .GetDiagnostics(cancellationToken)
-            .Where(d => d.Severity == DiagnosticSeverity.Error)
-            .ToList();
+        var errors =
+            outputCompilation.GetDiagnostics(cancellationToken)
+                .Where(d => d.Severity == DiagnosticSeverity.Error)
+                .ToList();
 
-        errors
-            .Should()
+        errors.Should()
             .BeEmpty(
-                "generated code should compile without errors, but found:\n"
-                    + string.Join(
-                        "\n---\n",
-                        errors.Select(e => $"  - {e.Id}: {e.GetMessage()} at {e.Location}")
-                    )
+                "generated code should compile without errors, but found:\n" + string.Join(
+                    "\n---\n",
+                    errors.Select(e => $"  - {e.Id}: {e.GetMessage()} at {e.Location}")
+                )
             );
 
         if (options.ExpectedTrees is not null)
             result.GeneratedTrees.Length.Should().Be(options.ExpectedTrees);
 
-        return Verifier
-            .Verify(driver)
+        return Verifier.Verify(driver)
             .UseDirectory("Snapshots")
             .DisableDiff()
-            .ScrubLinesWithReplace(line =>
-            {
-                if (line.Contains("global::System.CodeDom.Compiler.GeneratedCode"))
-                    return RegexHelper.GeneratedCodeAttributeRegex().Replace(line, "REPLACED");
+            .ScrubLinesWithReplace(
+                line =>
+                {
+                    if (line.Contains("global::System.CodeDom.Compiler.GeneratedCode"))
+                        return RegexHelper.GeneratedCodeAttributeRegex().Replace(line, "REPLACED");
 
-                return line;
-            });
+                    return line;
+                }
+            );
     }
 
     internal static Task VerifyFailure(
-        VerifyTestOptions options,
-        CancellationToken cancellationToken = default
+        VerifyTestOptions options, CancellationToken cancellationToken = default
     )
     {
         var (driver, _) = GenerateFromSource(options, cancellationToken);
@@ -127,83 +121,85 @@ internal static class GeneratorTestHelpers
 
         var result = driver.GetRunResult();
 
-        result
-            .Diagnostics.Should()
-            .NotBeEmpty("expected diagnostic errors to be generated");
+        result.Diagnostics.Should().NotBeEmpty("expected diagnostic errors to be generated");
 
         if (options.ExpectedDiagnosticId is not null)
         {
-            result
-                .Diagnostics.Should()
-                .Contain(d => d.Id == options.ExpectedDiagnosticId,
-                    $"expected diagnostic {options.ExpectedDiagnosticId} to be present, but found:\n"
-                        + string.Join(
-                            "\n---\n",
-                            result.Diagnostics.Select(e =>
-                                $"  - {e.Id}: {e.GetMessage()} at {e.Location}"
-                            )
+            result.Diagnostics.Should()
+                .Contain(
+                    d => d.Id == options.ExpectedDiagnosticId,
+                    $"expected diagnostic {options.ExpectedDiagnosticId} to be present, but found:\n" +
+                    string.Join(
+                        "\n---\n",
+                        result.Diagnostics.Select(
+                            e => $"  - {e.Id}: {e.GetMessage()} at {e.Location}"
                         )
+                    )
                 );
         }
 
-        return Verifier
-            .Verify(driver)
+        return Verifier.Verify(driver)
             .UseDirectory("Snapshots")
             .DisableDiff()
-            .ScrubLinesWithReplace(line =>
-            {
-                if (line.Contains("global::System.CodeDom.Compiler.GeneratedCode"))
-                    return RegexHelper.GeneratedCodeAttributeRegex().Replace(line, "REPLACED");
+            .ScrubLinesWithReplace(
+                line =>
+                {
+                    if (line.Contains("global::System.CodeDom.Compiler.GeneratedCode"))
+                        return RegexHelper.GeneratedCodeAttributeRegex().Replace(line, "REPLACED");
 
-                return line;
-            });
+                    return line;
+                }
+            );
     }
 
     internal static (GeneratorDriver driver, Compilation compilation) GenerateFromSource(
-        CodeGenerationOptions options,
-        CancellationToken cancellationToken = default
+        CodeGenerationOptions options, CancellationToken cancellationToken = default
     )
     {
-        var parseOptions = CSharpParseOptions
-            .Default.WithLanguageVersion(options.LanguageVersion)
-            .WithFeatures(options.LanguageFeatures);
+        var parseOptions =
+            CSharpParseOptions.Default.WithLanguageVersion(options.LanguageVersion)
+                .WithFeatures(options.LanguageFeatures);
 
-        var syntaxTree = CSharpSyntaxTree.ParseText(
-            options.SourceCode,
-            parseOptions,
-            options.CodePath,
-            cancellationToken: cancellationToken
-        );
+        var syntaxTree =
+            CSharpSyntaxTree.ParseText(
+                options.SourceCode,
+                parseOptions,
+                options.CodePath,
+                cancellationToken: cancellationToken
+            );
 
         List<MetadataReference> references =
         [
-#if NET10_0_OR_GREATER
+#if NET11_0_OR_GREATER
+            .. Net110.References.All.ToList(),
+#elif NET10_0_OR_GREATER
             .. Net100.References.All.ToList(),
 #elif NET9_0
             .. Net90.References.All.ToList(),
-#else
+#elif NET8_0
             .. Net80.References.All.ToList(),
 #endif
             MetadataReference.CreateFromFile(typeof(AttributeValue).Assembly.Location),
             MetadataReference.CreateFromFile(typeof(DynamoMapperAttribute).Assembly.Location),
         ];
 
-        var compilationOptions = new CSharpCompilationOptions(
-            OutputKind.DynamicallyLinkedLibrary,
-            nullableContextOptions: NullableContextOptions.Enable
-        ).WithSpecificDiagnosticOptions(options.DiagnosticsToSuppress);
+        var compilationOptions =
+            new CSharpCompilationOptions(
+                OutputKind.DynamicallyLinkedLibrary,
+                nullableContextOptions: NullableContextOptions.Enable
+            ).WithSpecificDiagnosticOptions(options.DiagnosticsToSuppress);
 
         if (options.DiagnosticsToSuppress is not null)
-            compilationOptions = compilationOptions.WithSpecificDiagnosticOptions(
-                options.DiagnosticsToSuppress
-            );
+            compilationOptions =
+                compilationOptions.WithSpecificDiagnosticOptions(options.DiagnosticsToSuppress);
 
-        var compilation = CSharpCompilation.Create(
-            options.AssemblyName,
-            [syntaxTree],
-            references,
-            compilationOptions
-        );
+        var compilation =
+            CSharpCompilation.Create(
+                options.AssemblyName,
+                [syntaxTree],
+                references,
+                compilationOptions
+            );
 
         var generator = new DynamoMapperGenerator().AsSourceGenerator();
 

@@ -152,6 +152,7 @@ internal static class GeneratorTestHelpers
             );
     }
 
+
     internal static (GeneratorDriver driver, Compilation compilation) GenerateFromSource(
         CodeGenerationOptions options, CancellationToken cancellationToken = default
     )
@@ -212,6 +213,12 @@ internal static class GeneratorTestHelpers
 
 internal static partial class RegexHelper
 {
-    [GeneratedRegex("""(\d+\.\d+\.\d+\.\d+)""", RegexOptions.None, "en-US")]
+    [GeneratedRegex(
+        """
+        (?<=\")\d+\.\d+\.\d+\+[\w]*(?=\")
+        """,
+        RegexOptions.None,
+        "en-US"
+    )]
     internal static partial Regex GeneratedCodeAttributeRegex();
 }

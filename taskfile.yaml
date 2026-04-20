@@ -3,6 +3,9 @@ version: '3'
 dotenv:
   - .env
 
+vars:
+  VERSION: '{{.VERSION | default ""}}'
+
 tasks:
   format:
     desc: Reformat the solution
@@ -36,7 +39,7 @@ tasks:
     deps: [ restore ]
     cmds:
       - echo "🔨 Building Release"
-      - dotnet build --configuration Release --no-restore
+      - dotnet build --configuration Release --no-restore {{if .VERSION}}/p:Version="{{.VERSION}}"{{end}}
       - echo "✅ Release build complete"
   
   pack:
@@ -45,12 +48,14 @@ tasks:
     deps: [ build ]
     cmds:
       - echo "📦 Packing Packages"
-      - dotnet pack --configuration Release --no-build --output ./nupkg
+      - dotnet pack --configuration Release --no-build --output ./nupkg {{if .VERSION}}/p:Version="{{.VERSION}}"{{end}}
       - echo "✅ Packed"
   
   publish:
     desc: Publish the package to a package registry
     silent: true
+    requires:
+      vars: [ VERSION ]
     deps: [ pack ]
     cmds:
       - echo "🚀 Publishing"
@@ -60,6 +65,8 @@ tasks:
   pack-local:
     desc: Package and publish to local NuGet source for use in other solutions
     silent: true
+    requires:
+      vars: [ VERSION ]
     deps: [ pack ]
     vars:
       LOCAL_NUGET_SOURCE: '{{.LOCAL_NUGET_SOURCE | default "~/LocalNuGetPackages"}}'

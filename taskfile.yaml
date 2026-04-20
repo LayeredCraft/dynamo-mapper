@@ -39,7 +39,7 @@ tasks:
     deps: [ restore ]
     cmds:
       - echo "🔨 Building Release"
-      - dotnet build --configuration Release --no-restore {{if .VERSION}}/p:Version="{{.VERSION}}"{{end}}
+      - dotnet build --configuration Release --no-restore {{if .VERSION}}/p:Version={{.VERSION}}{{end}}
       - echo "✅ Release build complete"
   
   pack:
@@ -48,7 +48,7 @@ tasks:
     deps: [ build ]
     cmds:
       - echo "📦 Packing Packages"
-      - dotnet pack --configuration Release --no-build --output ./nupkg {{if .VERSION}}/p:Version="{{.VERSION}}"{{end}}
+      - dotnet pack --configuration Release --no-build --output ./nupkg {{if .VERSION}}/p:Version={{.VERSION}}{{end}}
       - echo "✅ Packed"
   
   publish:

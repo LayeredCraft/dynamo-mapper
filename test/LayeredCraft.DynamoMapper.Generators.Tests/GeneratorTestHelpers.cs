@@ -215,7 +215,7 @@ internal static partial class RegexHelper
 {
     [GeneratedRegex(
         """
-        (?<=\")\d+\.\d+\.\d+\+[\w]*(?=\")
+        (?<=\")\d+\.\d+\.\d+[\w|\+|\.|\-]*(?=\")
         """,
         RegexOptions.None,
         "en-US"

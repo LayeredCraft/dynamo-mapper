@@ -58,7 +58,7 @@ tasks:
       vars: [ VERSION ]
     deps: [ pack ]
     cmds:
-      - echo "🚀 Publishing"
+      - echo "🚀 Publishing version {{.VERSION}}"
       - dotnet nuget push ./nupkg/*.nupkg --source https://api.nuget.org/v3/index.json --api-key $NUGET_API_KEY_LOCAL --skip-duplicate
       - echo "✨ Published"
   

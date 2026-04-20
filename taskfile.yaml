@@ -71,7 +71,7 @@ tasks:
     vars:
       LOCAL_NUGET_SOURCE: '{{.LOCAL_NUGET_SOURCE | default "~/LocalNuGetPackages"}}'
     cmds:
-      - echo "📦 Publishing to local NuGet source"
+      - echo "📦 Publishing version {{.VERSION}} to local NuGet source"
       - mkdir -p {{.LOCAL_NUGET_SOURCE}}
       - cp -f ./nupkg/*.nupkg {{.LOCAL_NUGET_SOURCE}}/
       - echo "✅ Published to {{.LOCAL_NUGET_SOURCE}}"

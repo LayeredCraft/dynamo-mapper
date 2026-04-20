@@ -40,6 +40,8 @@ Notes:
 - Invalid paths emit `DM0008`.
 - `OmitIfNull` works on nested object and nested collection properties too, so paths like
   `"Customer.Profile"` or `"Customer.Addresses"` can omit null containers during `ToItem`.
+- `Required` works on nested object and nested collection containers too, including dot-notation
+  paths.
 
 ### Collection Element Members
 
@@ -88,3 +90,11 @@ Notes:
 | `ToMethod`          | Uses a custom method to serialize a value.                                                   |
 | `FromMethod`        | Uses a custom method to deserialize a value.                                                 |
 | `Format`            | Overrides default format for date/time/enum conversions.                                     |
+
+Notes:
+
+- If `Required` is omitted, `FromItem` uses mapper-level `DefaultRequiredness`
+  (`InferFromNullability` by default).
+- For nested containers, effective requiredness controls missing-attribute fallback:
+  required -> throw; optional -> nullable containers use `null`, non-nullable collections use `[]`,
+  and non-nullable nested objects use `null!`.

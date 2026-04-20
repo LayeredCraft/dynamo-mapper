@@ -19,6 +19,7 @@
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
     <PackageScribanIncludeSource>true</PackageScribanIncludeSource>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -29,7 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Humanizer.Core" PrivateAssets="all" GeneratePathProperty="true" />
+    <PackageReference Include="Humanizer.Core" PrivateAssets="all" GeneratePathProperty="true"/>
     <None
       Include="$(PkgHumanizer_Core)\lib\netstandard2.0\*.dll"
       Pack="true"
@@ -51,21 +52,21 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.CodeAnalysis.Common" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.CSharp" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" />
-    <PackageReference Include="Scriban" IncludeAssets="Build" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" PrivateAssets="all"/>
+    <PackageReference Include="Microsoft.CSharp" PrivateAssets="all"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all"/>
+    <PackageReference Include="Scriban" IncludeAssets="Build"/>
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="Templates\*.scriban" />
-    <EmbeddedResource Include="Templates\*.scriban" />
+    <Compile Remove="Templates\*.scriban"/>
+    <EmbeddedResource Include="Templates\*.scriban"/>
   </ItemGroup>
 
   <ItemGroup>
-    <AdditionalFiles Include="AnalyzerReleases.Shipped.md" />
-    <AdditionalFiles Include="AnalyzerReleases.Unshipped.md" />
+    <AdditionalFiles Include="AnalyzerReleases.Shipped.md"/>
+    <AdditionalFiles Include="AnalyzerReleases.Unshipped.md"/>
   </ItemGroup>
 
   <PropertyGroup>

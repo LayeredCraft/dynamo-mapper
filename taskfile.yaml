@@ -62,7 +62,7 @@ tasks:
       - dotnet nuget push ./nupkg/*.nupkg --source https://api.nuget.org/v3/index.json --api-key $NUGET_API_KEY_LOCAL --skip-duplicate
       - echo "✨ Published"
   
-  pack-local:
+  publish-local:
     desc: Package and publish to local NuGet source for use in other solutions
     silent: true
     requires:

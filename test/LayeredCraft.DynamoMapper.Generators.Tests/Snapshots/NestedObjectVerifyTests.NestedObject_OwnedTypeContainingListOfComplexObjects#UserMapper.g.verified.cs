@@ -33,7 +33,7 @@ public static partial class UserMapper
         {
             Id = item.GetString("id", Requiredness.InferFromNullability),
             Name = item.GetString("name", Requiredness.InferFromNullability),
-            CurrentOrder = item.TryGetValue("currentOrder", out var currentorderAttr) && currentorderAttr.M is { } currentorderMap ? FromItem_Order(currentorderMap) : null,
+            CurrentOrder = item.TryGetValue("currentOrder", out var currentorderAttr) && currentorderAttr.M is { } currentorderMap ? FromItem_Order(currentorderMap) : throw new System.InvalidOperationException("Required attribute 'currentOrder' not found."),
         };
         return user;
     }
@@ -50,9 +50,9 @@ public static partial class UserMapper
     {
         return new global::MyNamespace.Order
         {
-            OrderId = map.GetString("orderId", Requiredness.Optional),
-            Total = map.GetDecimal("total", Requiredness.Optional),
-            Items = map.TryGetValue("items", out var itemsAttr) && itemsAttr.L is { } itemsList ? itemsList.Select(av => FromItem_OrderItem(av.M)).ToList() : [],
+            OrderId = map.GetString("orderId", Requiredness.InferFromNullability),
+            Total = map.GetDecimal("total", Requiredness.InferFromNullability),
+            Items = map.TryGetValue("items", out var itemsAttr) && itemsAttr.L is { } itemsList ? itemsList.Select(av => FromItem_OrderItem(av.M)).ToList() : throw new System.InvalidOperationException("Required attribute 'items' not found."),
         };
     }
 
@@ -67,9 +67,9 @@ public static partial class UserMapper
     {
         return new global::MyNamespace.OrderItem
         {
-            ProductId = map.GetString("productId", Requiredness.Optional),
-            Quantity = map.GetInt("quantity", Requiredness.Optional),
-            UnitPrice = map.GetDecimal("unitPrice", Requiredness.Optional),
+            ProductId = map.GetString("productId", Requiredness.InferFromNullability),
+            Quantity = map.GetInt("quantity", Requiredness.InferFromNullability),
+            UnitPrice = map.GetDecimal("unitPrice", Requiredness.InferFromNullability),
         };
     }
 

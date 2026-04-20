@@ -31,7 +31,7 @@ public static partial class OrderMapper
         var order = new global::MyNamespace.Order
         {
             Id = item.GetString("id", Requiredness.InferFromNullability),
-            ShippingAddress = item.TryGetValue("shippingAddress", out var shippingaddressAttr) && shippingaddressAttr.M is { } shippingaddressMap ? FromItem_Address(shippingaddressMap) : null,
+            ShippingAddress = item.TryGetValue("shippingAddress", out var shippingaddressAttr) && shippingaddressAttr.M is { } shippingaddressMap ? FromItem_Address(shippingaddressMap) : throw new System.InvalidOperationException("Required attribute 'shippingAddress' not found."),
         };
         return order;
     }
@@ -48,9 +48,9 @@ public static partial class OrderMapper
     {
         return new global::MyNamespace.Address
         {
-            Line1 = map.GetString("addr_line1", Requiredness.Optional),
-            City = map.GetString("addr_city", Requiredness.Optional),
-            PostalCode = map.GetString("postalCode", Requiredness.Optional),
+            Line1 = map.GetString("addr_line1", Requiredness.InferFromNullability),
+            City = map.GetString("addr_city", Requiredness.InferFromNullability),
+            PostalCode = map.GetString("postalCode", Requiredness.InferFromNullability),
         };
     }
 

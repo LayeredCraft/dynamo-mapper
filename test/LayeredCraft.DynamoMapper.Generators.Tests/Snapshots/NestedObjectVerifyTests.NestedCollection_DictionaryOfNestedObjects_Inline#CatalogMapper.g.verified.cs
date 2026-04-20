@@ -31,7 +31,7 @@ public static partial class CatalogMapper
         var catalog = new global::MyNamespace.Catalog
         {
             Id = item.GetString("id", Requiredness.InferFromNullability),
-            Products = item.TryGetValue("products", out var productsAttr) && productsAttr.M is { } productsMap ? productsMap.ToDictionary(kvp => kvp.Key, kvp => FromItem_Product(kvp.Value.M)) : [],
+            Products = item.TryGetValue("products", out var productsAttr) && productsAttr.M is { } productsMap ? productsMap.ToDictionary(kvp => kvp.Key, kvp => FromItem_Product(kvp.Value.M)) : throw new System.InvalidOperationException("Required attribute 'products' not found."),
         };
         return catalog;
     }
@@ -47,8 +47,8 @@ public static partial class CatalogMapper
     {
         return new global::MyNamespace.Product
         {
-            Name = map.GetString("name", Requiredness.Optional),
-            Price = map.GetDecimal("price", Requiredness.Optional),
+            Name = map.GetString("name", Requiredness.InferFromNullability),
+            Price = map.GetDecimal("price", Requiredness.InferFromNullability),
         };
     }
 

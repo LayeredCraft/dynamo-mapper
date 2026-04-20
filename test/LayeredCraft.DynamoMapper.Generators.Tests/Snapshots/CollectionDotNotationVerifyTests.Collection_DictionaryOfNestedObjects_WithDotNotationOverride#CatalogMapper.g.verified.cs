@@ -31,7 +31,7 @@ public static partial class CatalogMapper
         var catalog = new global::MyNamespace.Catalog
         {
             Id = item.GetString("id", Requiredness.InferFromNullability),
-            ProductMap = item.TryGetValue("productMap", out var productmapAttr) && productmapAttr.M is { } productmapMap ? productmapMap.ToDictionary(kvp => kvp.Key, kvp => FromItem_OrderItem(kvp.Value.M)) : [],
+            ProductMap = item.TryGetValue("productMap", out var productmapAttr) && productmapAttr.M is { } productmapMap ? productmapMap.ToDictionary(kvp => kvp.Key, kvp => FromItem_OrderItem(kvp.Value.M)) : throw new System.InvalidOperationException("Required attribute 'productMap' not found."),
         };
         return catalog;
     }
@@ -47,8 +47,8 @@ public static partial class CatalogMapper
     {
         return new global::MyNamespace.OrderItem
         {
-            Name = map.GetString("name", Requiredness.Optional),
-            CreatedAt = map.GetDateTime("createdAt", format: "yyyy-MM-dd", Requiredness.Optional),
+            Name = map.GetString("name", Requiredness.InferFromNullability),
+            CreatedAt = map.GetDateTime("createdAt", format: "yyyy-MM-dd", Requiredness.InferFromNullability),
         };
     }
 

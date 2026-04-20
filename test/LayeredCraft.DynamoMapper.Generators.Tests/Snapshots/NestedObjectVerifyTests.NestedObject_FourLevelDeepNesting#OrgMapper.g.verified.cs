@@ -31,7 +31,7 @@ public static partial class OrgMapper
         var org = new global::MyNamespace.Org
         {
             OrgId = item.GetString("orgId", Requiredness.InferFromNullability),
-            Division = item.TryGetValue("division", out var divisionAttr) && divisionAttr.M is { } divisionMap ? FromItem_Division(divisionMap) : null,
+            Division = item.TryGetValue("division", out var divisionAttr) && divisionAttr.M is { } divisionMap ? FromItem_Division(divisionMap) : throw new System.InvalidOperationException("Required attribute 'division' not found."),
         };
         return org;
     }
@@ -47,8 +47,8 @@ public static partial class OrgMapper
     {
         return new global::MyNamespace.Division
         {
-            Name = map.GetString("name", Requiredness.Optional),
-            Departments = map.TryGetValue("departments", out var departmentsAttr) && departmentsAttr.L is { } departmentsList ? departmentsList.Select(av => FromItem_Department(av.M)).ToList() : [],
+            Name = map.GetString("name", Requiredness.InferFromNullability),
+            Departments = map.TryGetValue("departments", out var departmentsAttr) && departmentsAttr.L is { } departmentsList ? departmentsList.Select(av => FromItem_Department(av.M)).ToList() : throw new System.InvalidOperationException("Required attribute 'departments' not found."),
         };
     }
 
@@ -63,9 +63,9 @@ public static partial class OrgMapper
     {
         return new global::MyNamespace.Department
         {
-            Code = map.GetString("code", Requiredness.Optional),
-            HeadManager = map.TryGetValue("headManager", out var map_headmanagerAttr) && map_headmanagerAttr.M is { } map_headmanager ? FromItem_Manager(map_headmanager) : null,
-            Employees = map.TryGetValue("employees", out var employeesAttr) && employeesAttr.L is { } employeesList ? employeesList.Select(av => FromItem_Employee(av.M)).ToList() : [],
+            Code = map.GetString("code", Requiredness.InferFromNullability),
+            HeadManager = map.TryGetValue("headManager", out var map_headmanagerAttr) && map_headmanagerAttr.M is { } map_headmanager ? FromItem_Manager(map_headmanager) : throw new System.InvalidOperationException("Required nested property 'headManager' not found in DynamoDB item."),
+            Employees = map.TryGetValue("employees", out var employeesAttr) && employeesAttr.L is { } employeesList ? employeesList.Select(av => FromItem_Employee(av.M)).ToList() : throw new System.InvalidOperationException("Required attribute 'employees' not found."),
         };
     }
 
@@ -85,8 +85,8 @@ public static partial class OrgMapper
     {
         return new global::MyNamespace.Manager
         {
-            FullName = map.GetString("fullName", Requiredness.Optional),
-            Email = map.GetString("email", Requiredness.Optional),
+            FullName = map.GetString("fullName", Requiredness.InferFromNullability),
+            Email = map.GetString("email", Requiredness.InferFromNullability),
         };
     }
 
@@ -95,9 +95,9 @@ public static partial class OrgMapper
     {
         return new global::MyNamespace.Employee
         {
-            EmployeeId = map.GetString("employeeId", Requiredness.Optional),
-            Name = map.GetString("name", Requiredness.Optional),
-            Tags = map.GetList<string>("tags", Requiredness.Optional),
+            EmployeeId = map.GetString("employeeId", Requiredness.InferFromNullability),
+            Name = map.GetString("name", Requiredness.InferFromNullability),
+            Tags = map.GetList<string>("tags", Requiredness.InferFromNullability),
         };
     }
 

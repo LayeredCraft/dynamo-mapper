@@ -31,7 +31,7 @@ public static partial class OrderMapper
         var order = new global::MyNamespace.Order
         {
             Id = item.GetString("id", Requiredness.InferFromNullability),
-            Customer = item.TryGetValue("customer", out var customerAttr) && customerAttr.M is { } customerMap ? FromItem_Customer(customerMap) : null,
+            Customer = item.TryGetValue("customer", out var customerAttr) && customerAttr.M is { } customerMap ? FromItem_Customer(customerMap) : throw new System.InvalidOperationException("Required attribute 'customer' not found."),
         };
         return order;
     }
@@ -47,8 +47,8 @@ public static partial class OrderMapper
     {
         return new global::MyNamespace.Customer
         {
-            Name = map.GetString("name", Requiredness.Optional),
-            Address = map.TryGetValue("address", out var map_addressAttr) && map_addressAttr.M is { } map_address ? FromItem_Address(map_address) : null,
+            Name = map.GetString("name", Requiredness.InferFromNullability),
+            Address = map.TryGetValue("address", out var map_addressAttr) && map_addressAttr.M is { } map_address ? FromItem_Address(map_address) : throw new System.InvalidOperationException("Required nested property 'address' not found in DynamoDB item."),
         };
     }
 
@@ -62,8 +62,8 @@ public static partial class OrderMapper
     {
         return new global::MyNamespace.Address
         {
-            Line1 = map.GetString("line1", Requiredness.Optional),
-            City = map.GetString("city", Requiredness.Optional),
+            Line1 = map.GetString("line1", Requiredness.InferFromNullability),
+            City = map.GetString("city", Requiredness.InferFromNullability),
         };
     }
 

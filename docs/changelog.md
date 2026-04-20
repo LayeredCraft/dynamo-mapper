@@ -20,6 +20,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Diagnostics for nested cycles and invalid dot-notation paths (DM0006-DM0008).
 - `examples/DynamoMapper.Nested` for end-to-end nested mapping scenarios.
 
+### Fixed
+
+- Nested `FromItem` fallback behavior now honors effective requiredness for nested object and
+  nested collection containers.
+- Non-nullable optional nested object fallbacks now emit `null!` to avoid CS8601 warnings while
+  preserving optional semantics.
+
 ### Planned
 - Phase 1: Attribute-based mapping
 - Phase 2: Fluent DSL configuration

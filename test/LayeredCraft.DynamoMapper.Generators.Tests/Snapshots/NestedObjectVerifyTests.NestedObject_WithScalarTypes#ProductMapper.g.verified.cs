@@ -33,7 +33,7 @@ public static partial class ProductMapper
         {
             Id = item.GetString("id", Requiredness.InferFromNullability),
             Name = item.GetString("name", Requiredness.InferFromNullability),
-            Details = item.TryGetValue("details", out var detailsAttr) && detailsAttr.M is { } detailsMap ? FromItem_ProductDetails(detailsMap) : null,
+            Details = item.TryGetValue("details", out var detailsAttr) && detailsAttr.M is { } detailsMap ? FromItem_ProductDetails(detailsMap) : throw new System.InvalidOperationException("Required attribute 'details' not found."),
         };
         return product;
     }
@@ -51,10 +51,10 @@ public static partial class ProductMapper
     {
         return new global::MyNamespace.ProductDetails
         {
-            Price = map.GetDecimal("price", Requiredness.Optional),
-            StockCount = map.GetInt("stockCount", Requiredness.Optional),
-            LastUpdated = map.GetDateTime("lastUpdated", format: "O", Requiredness.Optional),
-            IsActive = map.GetBool("isActive", Requiredness.Optional),
+            Price = map.GetDecimal("price", Requiredness.InferFromNullability),
+            StockCount = map.GetInt("stockCount", Requiredness.InferFromNullability),
+            LastUpdated = map.GetDateTime("lastUpdated", format: "O", Requiredness.InferFromNullability),
+            IsActive = map.GetBool("isActive", Requiredness.InferFromNullability),
         };
     }
 

@@ -31,7 +31,7 @@ public static partial class OrderMapper
         var order = new global::MyNamespace.Order
         {
             Id = item.GetString("id", Requiredness.InferFromNullability),
-            ShippingAddress = item.TryGetValue("shippingAddress", out var shippingaddressAttr) && shippingaddressAttr.M is { } shippingaddressMap ? global::MyNamespace.AddressMapper.FromItem(shippingaddressMap) : null,
+            ShippingAddress = item.TryGetValue("shippingAddress", out var shippingaddressAttr) && shippingaddressAttr.M is { } shippingaddressMap ? global::MyNamespace.AddressMapper.FromItem(shippingaddressMap) : throw new System.InvalidOperationException("Required attribute 'shippingAddress' not found."),
         };
         return order;
     }

@@ -1,4 +1,5 @@
 using LayeredCraft.DynamoMapper.Generator.Models;
+using LayeredCraft.DynamoMapper.Runtime;
 using LayeredCraft.SourceGeneratorTools.Types;
 
 namespace LayeredCraft.DynamoMapper.Generator.PropertyMapping.Models;
@@ -49,6 +50,7 @@ internal sealed record NestedInlineInfo(
 /// <param name="IsRequired">Whether the property is marked as required.</param>
 /// <param name="IsInitOnly">Whether the property is init-only.</param>
 /// <param name="HasDefaultValue">Whether the property has a default value.</param>
+/// <param name="Requiredness">Configured requiredness for generated read paths.</param>
 /// <param name="NestedMapping">If the property is itself a nested object, its mapping info.</param>
 internal sealed record NestedPropertySpec(
     string PropertyName,
@@ -62,5 +64,6 @@ internal sealed record NestedPropertySpec(
     bool IsRequired,
     bool IsInitOnly,
     bool HasDefaultValue,
+    Requiredness Requiredness,
     NestedMappingInfo? NestedMapping = null
 );

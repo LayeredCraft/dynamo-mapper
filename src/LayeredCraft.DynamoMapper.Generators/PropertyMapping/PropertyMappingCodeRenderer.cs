@@ -564,7 +564,7 @@ internal static class PropertyMappingCodeRenderer
         var itemParam = context.MapperOptions.FromMethodParameterName;
 
         // Determine fallback based on required keyword and nullability
-        var fallback = GetNestedObjectFallback(spec, analysis);
+        var fallback = GetNestedObjectFallback(spec, analysis, context);
 
         return nestedMapping switch
         {
@@ -592,21 +592,26 @@ internal static class PropertyMappingCodeRenderer
     ///     Determines the fallback expression for a nested object when not found in DynamoDB.
     /// </summary>
     private static string GetNestedObjectFallback(
-        PropertyMappingSpec spec, PropertyAnalysis analysis
+        PropertyMappingSpec spec, PropertyAnalysis analysis, GeneratorContext context
     )
     {
-        // If property has 'required' keyword, throw on missing
-        if (analysis.IsRequired)
+        var configuredRequiredness =
+            RequirednessResolver.ResolveConfigured(
+                analysis.FieldOptions,
+                analysis.IsRequired,
+                context.MapperOptions.DefaultRequiredness
+            );
+        if (RequirednessResolver.IsEffectivelyRequired(
+                configuredRequiredness,
+                analysis.Nullability
+            ))
             return
                 $"throw new System.InvalidOperationException(\"Required attribute '{spec.Key}' not found.\")";
 
-        // For nullable types, return null
         if (analysis.Nullability.IsNullableType)
             return "null";
 
-        // For non-nullable, non-required types, we still use null but this may cause CS8601
-        // This is a design limitation - the model should either mark as required or nullable
-        return "null";
+        return "null!";
     }
 
     /// <summary>
@@ -757,16 +762,13 @@ internal static class PropertyMappingCodeRenderer
             // Recursive nested object
             var nestedVarName = $"{mapVarName}_{prop.PropertyName.ToLowerInvariant()}";
 
-            // Determine fallback based on required and nullability
-            string fallback;
-            if (prop.IsRequired)
-                fallback =
-                    $"throw new System.InvalidOperationException(\"Required nested property '{prop.DynamoKey}' not found in DynamoDB item.\")";
-            else if (prop.Nullability.IsNullableType)
-                fallback = "null";
-            else
-                // Non-nullable, non-required - use null (design limitation)
-                fallback = "null";
+            var fallback =
+                RequirednessResolver.IsEffectivelyRequired(prop.Requiredness, prop.Nullability)
+                    ?
+                    $"throw new System.InvalidOperationException(\"Required nested property '{prop.DynamoKey}' not found in DynamoDB item.\")"
+                    : prop.Nullability.IsNullableType
+                        ? "null"
+                        : "null!";
 
             string nestedCode;
             if (prop.NestedMapping is MapperBasedNesting mapperBased)
@@ -800,7 +802,7 @@ internal static class PropertyMappingCodeRenderer
             var isNullable = prop.Nullability.IsNullableType;
             var varName = prop.PropertyName.ToLowerInvariant();
             var fallback =
-                prop.IsRequired
+                RequirednessResolver.IsEffectivelyRequired(prop.Requiredness, prop.Nullability)
                     ?
                     $"throw new System.InvalidOperationException(\"Required attribute '{prop.DynamoKey}' not found.\")"
                     : isNullable
@@ -861,8 +863,7 @@ internal static class PropertyMappingCodeRenderer
                     ) + ", "
                     : "";
 
-            // Determine requiredness based on property analysis
-            var requiredness = prop.IsRequired ? "Requiredness.Required" : "Requiredness.Optional";
+            var requiredness = $"Requiredness.{prop.Requiredness}";
 
             sb.Append(
                 $"{prop.PropertyName} = {mapVarName}.{getMethod}{genericArg}(\"{prop.DynamoKey}\", {typeArgs}{requiredness}),"
@@ -894,8 +895,10 @@ internal static class PropertyMappingCodeRenderer
                 ) + ", "
                 : "";
 
+        var requiredness = $"Requiredness.{prop.Requiredness}";
+
         return
-            $"{mapVarName}.{tryMethod}{genericArg}(\"{prop.DynamoKey}\", out var {outVarName}, {typeArgs}Requiredness.InferFromNullability)";
+            $"{mapVarName}.{tryMethod}{genericArg}(\"{prop.DynamoKey}\", out var {outVarName}, {typeArgs}{requiredness})";
     }
 
     /// <summary>
@@ -1139,7 +1142,7 @@ internal static class PropertyMappingCodeRenderer
         var varName = spec.PropertyName.ToLowerInvariant();
 
         // Determine fallback based on required keyword and nullability
-        var fallback = GetNestedCollectionFallback(spec, analysis);
+        var fallback = GetNestedCollectionFallback(spec, analysis, context);
 
         return collectionInfo.Category switch
         {
@@ -1172,20 +1175,25 @@ internal static class PropertyMappingCodeRenderer
     ///     Determines the fallback expression for a nested collection when not found in DynamoDB.
     /// </summary>
     private static string GetNestedCollectionFallback(
-        PropertyMappingSpec spec, PropertyAnalysis analysis
+        PropertyMappingSpec spec, PropertyAnalysis analysis, GeneratorContext context
     )
     {
-        // If property has 'required' keyword, throw on missing
-        if (analysis.IsRequired)
+        var configuredRequiredness =
+            RequirednessResolver.ResolveConfigured(
+                analysis.FieldOptions,
+                analysis.IsRequired,
+                context.MapperOptions.DefaultRequiredness
+            );
+        if (RequirednessResolver.IsEffectivelyRequired(
+                configuredRequiredness,
+                analysis.Nullability
+            ))
             return
                 $"throw new System.InvalidOperationException(\"Required attribute '{spec.Key}' not found.\")";
 
-        // For nullable types, return null
         if (analysis.Nullability.IsNullableType)
             return "null";
 
-        // For non-nullable, non-required collections, return empty collection
-        // Using collection expression [] which works for arrays, lists, and dictionaries in C# 12+
         return "[]";
     }
 

@@ -235,6 +235,12 @@ internal static class NestedObjectTypeAnalyzer
             }
 
             var propertyAnalysis = propertyAnalysisResult.Value!;
+            var requiredness =
+                RequirednessResolver.ResolveConfigured(
+                    fieldOptions,
+                    propertyAnalysis.IsRequired,
+                    nestedContext.Context.MapperOptions.DefaultRequiredness
+                );
 
             // Determine the DynamoDB attribute name
             var dynamoKey =
@@ -268,6 +274,7 @@ internal static class NestedObjectTypeAnalyzer
                         propertyAnalysis.IsRequired,
                         propertyAnalysis.IsInitOnly,
                         propertyAnalysis.HasDefaultValue,
+                        requiredness,
                         null
                     )
                 );
@@ -331,6 +338,7 @@ internal static class NestedObjectTypeAnalyzer
                         propertyAnalysis.IsRequired,
                         propertyAnalysis.IsInitOnly,
                         propertyAnalysis.HasDefaultValue,
+                        requiredness,
                         null
                     )
                 );
@@ -362,6 +370,7 @@ internal static class NestedObjectTypeAnalyzer
                         propertyAnalysis.IsRequired,
                         propertyAnalysis.IsInitOnly,
                         propertyAnalysis.HasDefaultValue,
+                        requiredness,
                         nestedResult.Value
                     )
                 );
@@ -495,24 +504,24 @@ internal static class NestedObjectTypeAnalyzer
                 [$"\"{fieldOptions?.Format ?? context.MapperOptions.TimeSpanFormat}\""],
                 [$"\"{fieldOptions?.Format ?? context.MapperOptions.TimeSpanFormat}\""]
             ),
-            INamedTypeSymbol t
-                when supportsDateOnlyTimeOnly && DateOnlyTimeOnlySupport.IsDateOnly(t, context)
-                => new TypeMappingStrategy(
-                "DateOnly",
-                "",
-                nullableModifier,
-                [$"\"{fieldOptions?.Format ?? context.MapperOptions.DateOnlyFormat}\""],
-                [$"\"{fieldOptions?.Format ?? context.MapperOptions.DateOnlyFormat}\""]
-            ),
-            INamedTypeSymbol t
-                when supportsDateOnlyTimeOnly && DateOnlyTimeOnlySupport.IsTimeOnly(t, context)
-                => new TypeMappingStrategy(
-                "TimeOnly",
-                "",
-                nullableModifier,
-                [$"\"{fieldOptions?.Format ?? context.MapperOptions.TimeOnlyFormat}\""],
-                [$"\"{fieldOptions?.Format ?? context.MapperOptions.TimeOnlyFormat}\""]
-            ),
+            INamedTypeSymbol t when
+                supportsDateOnlyTimeOnly && DateOnlyTimeOnlySupport.IsDateOnly(t, context) => new
+                    TypeMappingStrategy(
+                        "DateOnly",
+                        "",
+                        nullableModifier,
+                        [$"\"{fieldOptions?.Format ?? context.MapperOptions.DateOnlyFormat}\""],
+                        [$"\"{fieldOptions?.Format ?? context.MapperOptions.DateOnlyFormat}\""]
+                    ),
+            INamedTypeSymbol t when
+                supportsDateOnlyTimeOnly && DateOnlyTimeOnlySupport.IsTimeOnly(t, context) => new
+                    TypeMappingStrategy(
+                        "TimeOnly",
+                        "",
+                        nullableModifier,
+                        [$"\"{fieldOptions?.Format ?? context.MapperOptions.TimeOnlyFormat}\""],
+                        [$"\"{fieldOptions?.Format ?? context.MapperOptions.TimeOnlyFormat}\""]
+                    ),
             IArrayTypeSymbol { ElementType.SpecialType: SpecialType.System_Byte } =>
                 new TypeMappingStrategy("Binary", "", nullableModifier, [], []),
             INamedTypeSymbol t when
@@ -665,16 +674,14 @@ internal static class NestedObjectTypeAnalyzer
             ) => CreateCollectionFormatArgs(
                 fieldOptions?.Format ?? context.MapperOptions.TimeSpanFormat
             ),
-            INamedTypeSymbol t
-                when supportsDateOnlyTimeOnly && DateOnlyTimeOnlySupport.IsDateOnly(t, context)
-                => CreateCollectionFormatArgs(
-                fieldOptions?.Format ?? context.MapperOptions.DateOnlyFormat
-            ),
-            INamedTypeSymbol t
-                when supportsDateOnlyTimeOnly && DateOnlyTimeOnlySupport.IsTimeOnly(t, context)
-                => CreateCollectionFormatArgs(
-                fieldOptions?.Format ?? context.MapperOptions.TimeOnlyFormat
-            ),
+            INamedTypeSymbol t when supportsDateOnlyTimeOnly &&
+                DateOnlyTimeOnlySupport.IsDateOnly(t, context) => CreateCollectionFormatArgs(
+                    fieldOptions?.Format ?? context.MapperOptions.DateOnlyFormat
+                ),
+            INamedTypeSymbol t when supportsDateOnlyTimeOnly &&
+                DateOnlyTimeOnlySupport.IsTimeOnly(t, context) => CreateCollectionFormatArgs(
+                    fieldOptions?.Format ?? context.MapperOptions.TimeOnlyFormat
+                ),
             INamedTypeSymbol { TypeKind: TypeKind.Enum } => CreateCollectionFormatArgs(
                 fieldOptions?.Format ?? context.MapperOptions.EnumFormat
             ),

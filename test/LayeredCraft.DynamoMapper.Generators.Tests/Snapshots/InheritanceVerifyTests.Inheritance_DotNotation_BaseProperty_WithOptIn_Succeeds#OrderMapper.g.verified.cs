@@ -29,7 +29,7 @@ internal static partial class OrderMapper
     {
         var order = new global::MyNamespace.Order
         {
-            Address = item.TryGetValue("address", out var addressAttr) && addressAttr.M is { } addressMap ? FromItem_Address(addressMap) : null,
+            Address = item.TryGetValue("address", out var addressAttr) && addressAttr.M is { } addressMap ? FromItem_Address(addressMap) : throw new System.InvalidOperationException("Required attribute 'address' not found."),
         };
         return order;
     }

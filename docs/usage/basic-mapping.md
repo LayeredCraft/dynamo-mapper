@@ -65,6 +65,20 @@ Nested collections of sets (SS/NS/BS) are not supported.
 
 Nested object graphs cannot contain cycles. Cycles emit `DM0006`.
 
+### Missing Nested Attributes During `FromItem`
+
+For nested object and nested collection containers, generated fallback behavior follows effective
+requiredness:
+
+- `Required = true` (or C# `required`) -> missing attribute throws.
+- `Required = false` -> nested object falls back to `null`/`null!`; nested collections fall back to
+  `null`/`[]` depending on container nullability.
+- no explicit override -> `DefaultRequiredness` applies (default:
+  `Requiredness.InferFromNullability`).
+
+With `InferFromNullability`, non-nullable containers are treated as required and missing attributes
+throw; nullable containers fall back to `null`.
+
 ### Example
 
 ```csharp

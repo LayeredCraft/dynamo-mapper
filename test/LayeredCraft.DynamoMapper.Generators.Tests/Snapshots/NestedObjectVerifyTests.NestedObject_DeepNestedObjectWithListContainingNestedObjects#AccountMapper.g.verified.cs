@@ -31,7 +31,7 @@ public static partial class AccountMapper
         var account = new global::MyNamespace.Account
         {
             AccountId = item.GetString("accountId", Requiredness.InferFromNullability),
-            Profile = item.TryGetValue("profile", out var profileAttr) && profileAttr.M is { } profileMap ? FromItem_UserProfile(profileMap) : null,
+            Profile = item.TryGetValue("profile", out var profileAttr) && profileAttr.M is { } profileMap ? FromItem_UserProfile(profileMap) : throw new System.InvalidOperationException("Required attribute 'profile' not found."),
         };
         return account;
     }
@@ -48,9 +48,9 @@ public static partial class AccountMapper
     {
         return new global::MyNamespace.UserProfile
         {
-            DisplayName = map.GetString("displayName", Requiredness.Optional),
-            Roles = map.GetList<string>("roles", Requiredness.Optional),
-            Orders = map.TryGetValue("orders", out var ordersAttr) && ordersAttr.L is { } ordersList ? ordersList.Select(av => FromItem_PurchaseOrder(av.M)).ToList() : [],
+            DisplayName = map.GetString("displayName", Requiredness.InferFromNullability),
+            Roles = map.GetList<string>("roles", Requiredness.InferFromNullability),
+            Orders = map.TryGetValue("orders", out var ordersAttr) && ordersAttr.L is { } ordersList ? ordersList.Select(av => FromItem_PurchaseOrder(av.M)).ToList() : throw new System.InvalidOperationException("Required attribute 'orders' not found."),
         };
     }
 
@@ -65,9 +65,9 @@ public static partial class AccountMapper
     {
         return new global::MyNamespace.PurchaseOrder
         {
-            OrderId = map.GetString("orderId", Requiredness.Optional),
-            Destination = map.TryGetValue("destination", out var map_destinationAttr) && map_destinationAttr.M is { } map_destination ? FromItem_ShippingAddress(map_destination) : null,
-            Lines = map.TryGetValue("lines", out var linesAttr) && linesAttr.L is { } linesList ? linesList.Select(av => FromItem_LineItem(av.M)).ToList() : [],
+            OrderId = map.GetString("orderId", Requiredness.InferFromNullability),
+            Destination = map.TryGetValue("destination", out var map_destinationAttr) && map_destinationAttr.M is { } map_destination ? FromItem_ShippingAddress(map_destination) : throw new System.InvalidOperationException("Required nested property 'destination' not found in DynamoDB item."),
+            Lines = map.TryGetValue("lines", out var linesAttr) && linesAttr.L is { } linesList ? linesList.Select(av => FromItem_LineItem(av.M)).ToList() : throw new System.InvalidOperationException("Required attribute 'lines' not found."),
         };
     }
 
@@ -88,9 +88,9 @@ public static partial class AccountMapper
     {
         return new global::MyNamespace.ShippingAddress
         {
-            Street = map.GetString("street", Requiredness.Optional),
-            City = map.GetString("city", Requiredness.Optional),
-            PostalCode = map.GetString("postalCode", Requiredness.Optional),
+            Street = map.GetString("street", Requiredness.InferFromNullability),
+            City = map.GetString("city", Requiredness.InferFromNullability),
+            PostalCode = map.GetString("postalCode", Requiredness.InferFromNullability),
         };
     }
 
@@ -99,9 +99,9 @@ public static partial class AccountMapper
     {
         return new global::MyNamespace.LineItem
         {
-            Sku = map.GetString("sku", Requiredness.Optional),
-            Qty = map.GetInt("qty", Requiredness.Optional),
-            Price = map.GetDecimal("price", Requiredness.Optional),
+            Sku = map.GetString("sku", Requiredness.InferFromNullability),
+            Qty = map.GetInt("qty", Requiredness.InferFromNullability),
+            Price = map.GetDecimal("price", Requiredness.InferFromNullability),
         };
     }
 

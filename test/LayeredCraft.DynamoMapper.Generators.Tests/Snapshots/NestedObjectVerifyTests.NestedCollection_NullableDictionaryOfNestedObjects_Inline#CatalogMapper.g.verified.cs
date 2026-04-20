@@ -47,8 +47,8 @@ public static partial class CatalogMapper
     {
         return new global::MyNamespace.Product
         {
-            Name = map.GetString("name", Requiredness.Optional),
-            Price = map.GetDecimal("price", Requiredness.Optional),
+            Name = map.GetString("name", Requiredness.InferFromNullability),
+            Price = map.GetDecimal("price", Requiredness.InferFromNullability),
         };
     }
 

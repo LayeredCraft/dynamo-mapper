@@ -31,7 +31,7 @@ public static partial class EventLogMapper
         var eventLog = new global::MyNamespace.EventLog
         {
             Id = item.GetString("id", Requiredness.InferFromNullability),
-            Entries = item.TryGetValue("entries", out var entriesAttr) && entriesAttr.L is { } entriesList ? entriesList.Select(av => FromItem_LogEntry(av.M)).ToList() : [],
+            Entries = item.TryGetValue("entries", out var entriesAttr) && entriesAttr.L is { } entriesList ? entriesList.Select(av => FromItem_LogEntry(av.M)).ToList() : throw new System.InvalidOperationException("Required attribute 'entries' not found."),
         };
         return eventLog;
     }
@@ -49,10 +49,10 @@ public static partial class EventLogMapper
     {
         return new global::MyNamespace.LogEntry
         {
-            Timestamp = map.GetDateTime("timestamp", format: "O", Requiredness.Optional),
-            Message = map.GetString("message", Requiredness.Optional),
-            Severity = map.GetInt("severity", Requiredness.Optional),
-            IsError = map.GetBool("isError", Requiredness.Optional),
+            Timestamp = map.GetDateTime("timestamp", format: "O", Requiredness.InferFromNullability),
+            Message = map.GetString("message", Requiredness.InferFromNullability),
+            Severity = map.GetInt("severity", Requiredness.InferFromNullability),
+            IsError = map.GetBool("isError", Requiredness.InferFromNullability),
         };
     }
 

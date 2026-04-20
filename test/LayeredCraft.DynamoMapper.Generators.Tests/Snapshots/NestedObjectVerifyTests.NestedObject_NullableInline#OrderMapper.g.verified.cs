@@ -47,8 +47,8 @@ public static partial class OrderMapper
     {
         return new global::MyNamespace.Address
         {
-            Line1 = map.GetString("line1", Requiredness.Optional),
-            City = map.GetString("city", Requiredness.Optional),
+            Line1 = map.GetString("line1", Requiredness.InferFromNullability),
+            City = map.GetString("city", Requiredness.InferFromNullability),
         };
     }
 

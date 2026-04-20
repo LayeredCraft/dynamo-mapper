@@ -117,9 +117,11 @@ Order:
 
 ## Requiredness and defaults
 
-- missing required root scalar values throw at runtime
+- missing required values throw at runtime (scalars and nested containers)
 - nullable root scalar values read as `null` when absent
 - optional/default-initialized members can keep their C# defaults when the attribute is missing
+- nested containers respect effective requiredness (`DynamoField.Required` override, otherwise
+  mapper default / nullability inference)
 
 ## Safe guidance
 

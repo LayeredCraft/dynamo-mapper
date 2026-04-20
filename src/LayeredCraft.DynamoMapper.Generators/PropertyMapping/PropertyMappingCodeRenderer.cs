@@ -895,8 +895,10 @@ internal static class PropertyMappingCodeRenderer
                 ) + ", "
                 : "";
 
+        var requiredness = $"Requiredness.{prop.Requiredness}";
+
         return
-            $"{mapVarName}.{tryMethod}{genericArg}(\"{prop.DynamoKey}\", out var {outVarName}, {typeArgs}Requiredness.InferFromNullability)";
+            $"{mapVarName}.{tryMethod}{genericArg}(\"{prop.DynamoKey}\", out var {outVarName}, {typeArgs}{requiredness})";
     }
 
     /// <summary>

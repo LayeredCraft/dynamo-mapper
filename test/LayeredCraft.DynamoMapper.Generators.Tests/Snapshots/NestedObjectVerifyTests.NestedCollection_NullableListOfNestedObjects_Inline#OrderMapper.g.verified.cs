@@ -47,8 +47,8 @@ public static partial class OrderMapper
     {
         return new global::MyNamespace.LineItem
         {
-            ProductId = map.GetString("productId", Requiredness.Optional),
-            Quantity = map.GetInt("quantity", Requiredness.Optional),
+            ProductId = map.GetString("productId", Requiredness.InferFromNullability),
+            Quantity = map.GetInt("quantity", Requiredness.InferFromNullability),
         };
     }
 

@@ -31,7 +31,7 @@ public static partial class OrderMapper
         var order = new global::MyNamespace.Order
         {
             Id = item.GetString("id", Requiredness.InferFromNullability),
-            Items = item.TryGetValue("items", out var itemsAttr) && itemsAttr.L is { } itemsList ? itemsList.Select(av => FromItem_LineItem(av.M)).ToList() : [],
+            Items = item.TryGetValue("items", out var itemsAttr) && itemsAttr.L is { } itemsList ? itemsList.Select(av => FromItem_LineItem(av.M)).ToList() : throw new System.InvalidOperationException("Required attribute 'items' not found."),
         };
         return order;
     }
@@ -47,8 +47,8 @@ public static partial class OrderMapper
     {
         return new global::MyNamespace.LineItem
         {
-            ProductId = map.GetString("product_id", Requiredness.Optional),
-            Quantity = map.GetInt("quantity", Requiredness.Optional),
+            ProductId = map.GetString("product_id", Requiredness.InferFromNullability),
+            Quantity = map.GetInt("quantity", Requiredness.InferFromNullability),
         };
     }
 

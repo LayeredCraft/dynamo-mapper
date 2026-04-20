@@ -31,7 +31,7 @@ public static partial class CustomerMapper
         var customer = new global::MyNamespace.Customer
         {
             Id = item.GetString("id", Requiredness.InferFromNullability),
-            Contacts = item.TryGetValue("contacts", out var contactsAttr) && contactsAttr.L is { } contactsList ? contactsList.Select(av => FromItem_CustomerContact(av.M)).ToList() : [],
+            Contacts = item.TryGetValue("contacts", out var contactsAttr) && contactsAttr.L is { } contactsList ? contactsList.Select(av => FromItem_CustomerContact(av.M)).ToList() : throw new System.InvalidOperationException("Required attribute 'contacts' not found."),
         };
         return customer;
     }
@@ -47,8 +47,8 @@ public static partial class CustomerMapper
     {
         return new global::MyNamespace.CustomerContact
         {
-            Name = map.GetString("name", Requiredness.Optional),
-            VerifiedAt = map.GetDateTime("verifiedAt", format: "yyyy-MM-dd", Requiredness.Optional),
+            Name = map.GetString("name", Requiredness.InferFromNullability),
+            VerifiedAt = map.GetDateTime("verifiedAt", format: "yyyy-MM-dd", Requiredness.InferFromNullability),
         };
     }
 

@@ -30,7 +30,7 @@ public static partial class OrderMapper
     {
         var order = new global::MyNamespace.Order
         {
-            ShippingAddress = item.TryGetValue("shippingAddress", out var shippingaddressAttr) && shippingaddressAttr.M is { } shippingaddressMap ? FromItem_Address(shippingaddressMap) : null,
+            ShippingAddress = item.TryGetValue("shippingAddress", out var shippingaddressAttr) && shippingaddressAttr.M is { } shippingaddressMap ? FromItem_Address(shippingaddressMap) : throw new System.InvalidOperationException("Required attribute 'shippingAddress' not found."),
         };
         if (item.TryGetString("id", out var var0, Requiredness.InferFromNullability)) order.Id = var0!;
         return order;
@@ -52,7 +52,7 @@ public static partial class OrderMapper
         {
             Line1 = map.GetString("line1", Requiredness.Required),
             City = map.GetString("city", Requiredness.Required),
-            PostalCode = map.GetNullableString("postalCode", Requiredness.Optional),
+            PostalCode = map.GetNullableString("postalCode", Requiredness.InferFromNullability),
             State = map.GetString("state", Requiredness.Required),
         };
         if (map.TryGetString("country", out var var0, Requiredness.InferFromNullability)) address.Country = var0!;

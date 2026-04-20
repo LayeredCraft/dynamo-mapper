@@ -29,7 +29,7 @@ public static partial class ExampleEntityMapper
     {
         var entity = new global::MyNamespace.Entity
         {
-            Items = item.TryGetValue("items", out var itemsAttr) && itemsAttr.L is { } itemsList ? itemsList.Select(av => FromItem_CustomClass(av.M)).ToList() : [],
+            Items = item.TryGetValue("items", out var itemsAttr) && itemsAttr.L is { } itemsList ? itemsList.Select(av => FromItem_CustomClass(av.M)).ToList() : throw new System.InvalidOperationException("Required attribute 'items' not found."),
         };
         return entity;
     }
@@ -44,7 +44,7 @@ public static partial class ExampleEntityMapper
     {
         return new global::MyNamespace.CustomClass
         {
-            Name = map.GetString("name", Requiredness.Optional),
+            Name = map.GetString("name", Requiredness.InferFromNullability),
         };
     }
 

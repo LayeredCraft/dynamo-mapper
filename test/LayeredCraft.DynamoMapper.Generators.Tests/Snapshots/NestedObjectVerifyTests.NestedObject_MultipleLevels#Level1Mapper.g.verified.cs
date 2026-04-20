@@ -68,7 +68,7 @@ public static partial class Level1Mapper
     {
         var level3 = new global::MyNamespace.Level3
         {
-            Value = map.GetInt("value", Requiredness.Optional),
+            Value = map.GetInt("value", Requiredness.InferFromNullability),
             Level4Data = map.TryGetValue("level4Data", out var map_level4dataAttr) && map_level4dataAttr.M is { } map_level4data ? FromItem_Level4(map_level4data) : null,
         };
         if (map.TryGetString("id", out var var0, Requiredness.InferFromNullability)) level3.Id = var0!;
@@ -86,8 +86,8 @@ public static partial class Level1Mapper
     {
         var level4 = new global::MyNamespace.Level4
         {
-            IsActive = map.GetBool("isActive", Requiredness.Optional),
-            Price = map.GetDecimal("price", Requiredness.Optional),
+            IsActive = map.GetBool("isActive", Requiredness.InferFromNullability),
+            Price = map.GetDecimal("price", Requiredness.InferFromNullability),
         };
         if (map.TryGetString("id", out var var0, Requiredness.InferFromNullability)) level4.Id = var0!;
         return level4;

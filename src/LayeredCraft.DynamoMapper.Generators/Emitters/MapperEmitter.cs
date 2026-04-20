@@ -17,8 +17,7 @@ internal static class MapperEmitter
                 var generatorName = assembly.GetName().Name;
                 var generatorVersion =
                     assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
-                        ?.InformationalVersion ??
-                    assembly.GetName().Version?.ToString() ?? "unknown";
+                        ?.InformationalVersion ?? "unknown";
 
                 field =
                     $"""[global::System.CodeDom.Compiler.GeneratedCode("{generatorName}", "{generatorVersion}")]""";

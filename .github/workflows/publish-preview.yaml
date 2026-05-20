@@ -16,7 +16,7 @@ permissions: write-all
 
 jobs:
   publish:
-    uses: LayeredCraft/devops-templates/.github/workflows/publish-preview.yml@v8.1
+    uses: LayeredCraft/devops-templates/.github/workflows/publish-preview.yml@v8.2
     with:
       solution: LayeredCraft.DynamoMapper.slnx
       dotnetVersion: |

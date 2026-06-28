@@ -6,6 +6,9 @@ updates:
       interval: "weekly"
       day: "wednesday"
     open-pull-requests-limit: 25
+    commit-message:
+      prefix: "chore"
+      include: "scope"
     groups:
       dotnet:
         patterns:

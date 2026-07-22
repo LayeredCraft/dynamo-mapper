@@ -1,0 +1,9 @@
+[project]
+name = "dynamo-mapper-docs"
+version = "0.0.0"
+description = "Documentation build dependencies for DynamoMapper."
+requires-python = ">=3.12"
+dependencies = [
+    "mkdocs-material>=9.5.0",
+    "mkdocs-minify-plugin>=0.8.0",
+]

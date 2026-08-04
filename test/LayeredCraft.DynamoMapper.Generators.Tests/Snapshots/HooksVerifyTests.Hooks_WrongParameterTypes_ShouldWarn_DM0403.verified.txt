@@ -1,4 +1,4 @@
-{
+﻿{
   Diagnostics: [
     {
       Location: Program.cs: (11,24)-(11,36),

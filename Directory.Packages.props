@@ -8,15 +8,15 @@
     <PackageVersion Include="AutoFixture" Version="4.18.1" />
     <PackageVersion Include="AutoFixture.AutoNSubstitute" Version="4.18.1" />
     <PackageVersion Include="AutoFixture.Xunit3" Version="4.19.0" />
-    <PackageVersion Include="AwesomeAssertions" Version="9.5.0" />
-    <PackageVersion Include="AWSSDK.DynamoDBv2" Version="4.0.103.3" />
+    <PackageVersion Include="AwesomeAssertions" Version="9.6.0" />
+    <PackageVersion Include="AWSSDK.DynamoDBv2" Version="4.0.103.5" />
     <PackageVersion Include="Basic.Reference.Assemblies.Net100" Version="1.8.11" />
     <PackageVersion Include="Basic.Reference.Assemblies.Net110" Version="1.8.11" />
     <PackageVersion Include="Basic.Reference.Assemblies.Net80" Version="1.8.11" />
     <PackageVersion Include="Basic.Reference.Assemblies.Net90" Version="1.8.11" />
     <PackageVersion Include="Humanizer.Core" Version="3.0.10" />
     <PackageVersion Include="LayeredCraft.SourceGeneratorTools" Version="0.1.0-beta.10" />
-    <PackageVersion Include="Meziantou.Polyfill" Version="1.0.160" />
+    <PackageVersion Include="Meziantou.Polyfill" Version="1.0.163" />
     <PackageVersion Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="5.9.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="[5.9.0]" />

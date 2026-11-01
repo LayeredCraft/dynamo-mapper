@@ -2,7 +2,7 @@
 
 **High-performance source generator for DynamoDB attribute mapping**
 
-> **Migrating from `DynamoMapper`?** This package (`LayeredCraft.DynamoMapper`) replaces the original `DynamoMapper` NuGet package. Update your using statements from `using LayeredCraft.DynamoMapper.Runtime;` to `using LayeredCraft.DynamoMapper.Runtime;`.
+> **Migrating from `DynamoMapper`?** This package (`LayeredCraft.DynamoMapper`) replaces the original `DynamoMapper` NuGet package. Update your using statements from `using DynamoMapper.Runtime;` to `using LayeredCraft.DynamoMapper.Runtime;`.
 
 ---
 

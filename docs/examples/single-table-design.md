@@ -122,11 +122,11 @@ public static partial class OrderMapper
         }
     }
 
-    static AttributeValue ToOrderStatus(OrderStatus status) =>
-        new() { S = status.Name };
+    static AttributeValue ToOrderStatus(Order source) =>
+        new() { S = source.Status.Name };
 
-    static OrderStatus FromOrderStatus(AttributeValue value) =>
-        OrderStatus.FromName(value.S);
+    static OrderStatus FromOrderStatus(Dictionary<string, AttributeValue> item) =>
+        OrderStatus.FromName(item["status"].S);
 }
 ```
 
@@ -501,11 +501,11 @@ public static partial class OrderMapper
         }
     }
 
-    static AttributeValue ToOrderStatus(OrderStatus status) =>
-        new() { S = status.Name };
+    static AttributeValue ToOrderStatus(Order source) =>
+        new() { S = source.Status.Name };
 
-    static OrderStatus FromOrderStatus(AttributeValue value) =>
-        OrderStatus.FromName(value.S);
+    static OrderStatus FromOrderStatus(Dictionary<string, AttributeValue> item) =>
+        OrderStatus.FromName(item["status"].S);
 }
 ```
 

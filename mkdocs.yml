@@ -114,6 +114,7 @@ nav:
     - Basic Mapping: usage/basic-mapping.md
     - Field Configuration: usage/field-configuration.md
     - Converters: usage/converters.md
+    - Static Conversion Methods: usage/static-converters.md
     - Customization Hooks: usage/customization-hooks.md
     - DSL Configuration: usage/dsl-configuration.md
   - Examples:
@@ -122,6 +123,7 @@ nav:
     - Custom Converters: examples/custom-converters.md
     - Lambda Functions: examples/lambda-functions.md
     - Inheritance Mapping: examples/inheritance-mapping.md
+    - Nested Mapping: examples/nested-mapping.md
   - Advanced:
     - Performance: advanced/performance.md
     - Diagnostics: advanced/diagnostics.md
@@ -144,7 +146,7 @@ extra:
       link: https://github.com/layeredcraft/dynamo-mapper
       name: GitHub Repository
     - icon: fontawesome/solid/download
-      link: https://www.nuget.org/packages/DynamoMapper/
+      link: https://www.nuget.org/packages/LayeredCraft.DynamoMapper/
       name: NuGet Package
 
 # Custom CSS

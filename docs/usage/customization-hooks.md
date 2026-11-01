@@ -18,7 +18,8 @@ DynamoMapper provides **four lifecycle hooks** that execute at strategic points 
 | `BeforeFromItem` | FromItem | Before property mapping | Validation, preprocessing |
 | `AfterFromItem` | FromItem | After object construction | Normalization, computed properties |
 
-Hooks are implemented as **optional partial void methods**. If not implemented, they compile away with zero runtime overhead.
+Hooks can be regular static methods or partial void methods. Unimplemented partial void
+declarations compile away with zero runtime overhead.
 
 ## Why Hooks?
 
@@ -32,7 +33,9 @@ DynamoMapper focuses exclusively on mapping properties to/from DynamoDB Attribut
 
 ## Hook Signatures
 
-All hooks must be declared as `static partial void` on the mapper class.
+All hooks must be `static void` methods on the mapper class with the signatures below.
+`partial` is optional. Regular static methods must have bodies; unimplemented partial
+void declarations are removed by the C# compiler.
 
 ### BeforeToItem
 

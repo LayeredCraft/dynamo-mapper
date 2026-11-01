@@ -22,7 +22,7 @@
 
 ## Hook diagnostics (all warnings)
 
-- `DM0401` covers wrong parameter count, wrong `ref` usage, non-void return type, or non-partial hook
+- `DM0401` covers wrong parameter count, wrong `ref` usage, non-void return type
 - `DM0402` is emitted when a hook method is not static
 - `DM0403` is emitted when hook parameter types do not match mapper model type/dictionary shape
 

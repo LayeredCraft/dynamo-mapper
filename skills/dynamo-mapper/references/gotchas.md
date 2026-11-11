@@ -19,12 +19,12 @@
 - `OmitNullStrings` is legacy and misnamed; prefer `OmitNullValues` for mapper-level null omission,
     especially for nested object and nested collection containers
 
-## Stale-doc corrections
+## Current implementation
 
 - nested mapping is supported
 - lifecycle hooks are implemented with strict signature validation
-- static converter docs are stale on signatures and constraints
-- some prose docs mention diagnostics that do not exist
+- custom write methods take the whole source model; read methods take the whole item dictionary
+- roadmap documents include proposed APIs and diagnostics that are not implemented
 
 ## If unsure
 

@@ -2,7 +2,7 @@
 
 ## Supported lifecycle hooks
 
-Hooks are optional `static partial void` methods on the mapper class.
+Hooks are optional `static void` methods on the mapper class. They may be partial or regular methods with bodies.
 
 - `BeforeToItem(T source, Dictionary<string, AttributeValue> item)`
 - `AfterToItem(T source, Dictionary<string, AttributeValue> item)`

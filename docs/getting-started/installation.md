@@ -7,7 +7,7 @@ This guide walks you through installing LayeredCraft.DynamoMapper in your .NET p
 
     1. Uninstall the old package: `dotnet remove package DynamoMapper`
     2. Install the new package: `dotnet add package LayeredCraft.DynamoMapper --prerelease`
-    3. Update all `using LayeredCraft.DynamoMapper.Runtime;` statements to `using LayeredCraft.DynamoMapper.Runtime;`
+    3. Update all `using DynamoMapper.Runtime;` statements to `using LayeredCraft.DynamoMapper.Runtime;`
 
 ## Prerequisites
 
@@ -23,7 +23,7 @@ Add the DynamoMapper package to your project:
 dotnet add package LayeredCraft.DynamoMapper --prerelease
 ```
 
-This installs both the source generator and runtime packages.
+This package includes the source generator and runtime assembly.
 
 ## Install the agent skill
 

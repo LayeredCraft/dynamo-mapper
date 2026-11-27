@@ -4,7 +4,7 @@
 
 ```csharp
 using Amazon.DynamoDBv2.Model;
-using DynamoMapper.Runtime;
+using LayeredCraft.DynamoMapper.Runtime;
 
 public sealed class Order
 {
@@ -32,10 +32,14 @@ public static partial class OrderMapper
 - names default to camelCase
 - requiredness defaults to nullability inference
 - base-class properties are excluded by default
-- `OmitNullValues` defaults to `false`
+- `OmitNullValues` defaults to `true`
 - deprecated `OmitNullStrings` still affects helper-backed nullable scalars and collections
 - empty strings are kept by default
 - format defaults are `DateTime = O`, `TimeSpan = c`, `Enum = G`, `Guid = D`
+
+Supported conventions are `Exact`, `CamelCase`, `PascalCase`, `SnakeCase`, and
+`KebabCase`. `DynamoField.AttributeName` overrides convention-based naming. Member
+selectors use .NET names, not stored attribute names.
 
 ## Per-member control
 
@@ -90,7 +94,9 @@ nested collection containers. Treat `OmitNullStrings` as legacy compatibility.
 Use mapper-class static methods through `[DynamoField(ToMethod = ..., FromMethod = ...)]`.
 
 - one-sided overrides are supported
-- stale docs describe the wrong converter signatures
+- `ToMethod` takes the whole source model and returns `AttributeValue`
+- `FromMethod` takes the whole `Dictionary<string, AttributeValue>` and returns the member type
+- custom methods handle missing keys, nulls, formatting, and validation themselves
 - bad converter wiring may fail as normal C# compile errors instead of DynamoMapper diagnostics
 
 ## Lifecycle hooks
@@ -104,7 +110,7 @@ Hooks are optional extension points on the mapper class for pre/post mapping log
 
 Rules:
 
-- hooks must be `static partial void`
+- hooks must be `static void`; `partial` is optional
 - hook names are exact (`BeforeToItem`, `AfterToItem`, `BeforeFromItem`, `AfterFromItem`)
 - hooks can be declared/implemented in another part of the same partial mapper class
 - one-way mappers only emit hooks for the generated direction

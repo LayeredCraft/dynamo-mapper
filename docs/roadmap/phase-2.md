@@ -5,6 +5,11 @@ description: Fluent DSL configuration for DynamoMapper - comprehensive Phase 2 s
 
 # DynamoMapper – Phase 2 Requirements (Fluent DSL Configuration) 🚀
 
+> This page is a design proposal, not the current API reference. For implemented behavior,
+> see [Attributes](../api-reference/attributes.md), [Static Conversion Methods](../usage/static-converters.md),
+> and [Diagnostics](../advanced/diagnostics.md).
+
+
 > **Scope:** Phase 2 introduces an **optional fluent DSL** for configuring DynamoMapper mappings, providing a strongly-typed, refactor-safe alternative to attribute-based configuration introduced in Phase 1.
 >
 > **Key principle:** Phase 2 **does not replace** Phase 1. Attribute-based configuration remains fully supported and first-class. The DSL is additive and opt-in.
@@ -325,8 +330,8 @@ public static partial class ProductMapper
 
 See also:
 - [Phase 1 Converters](phase-1.md#9-converters-phase-1)
-- [Converter Types Documentation](../../docs/usage/converters.md)
-- [Static Converter Documentation](../../docs/usage/static-converters.md)
+- [Converter Types Documentation](../usage/converters.md)
+- [Static Converter Documentation](../usage/static-converters.md)
 
 ---
 

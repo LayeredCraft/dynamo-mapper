@@ -32,6 +32,8 @@ Properties:
   omission
 - `OmitEmptyStrings` - omit empty string attributes
 - `DateTimeFormat` - `DateTime`/`DateTimeOffset` format
+- `DateOnlyFormat` - `DateOnly` format, default `yyyy-MM-dd`
+- `TimeOnlyFormat` - `TimeOnly` format, default `HH:mm:ss.fffffff`
 - `TimeSpanFormat` - `TimeSpan` format
 - `EnumFormat` - enum format
 - `GuidFormat` - `Guid` format
@@ -68,7 +70,9 @@ Properties:
 - `Kind` - DynamoDB `DynamoKind` override
 - `OmitIfNull` - omit when null, including nested object and nested collection properties
 - `OmitIfEmptyString` - omit when empty string
-- `ToMethod` / `FromMethod` - static conversion methods on the mapper class
+- `ToMethod` / `FromMethod` - static conversion methods on the mapper class.
+  See [Static Conversion Methods](../usage/static-converters.md) for signatures.
+- `Format` - per-member format override for supported date, time, GUID, and enum types
 
 ## DynamoIgnoreAttribute
 

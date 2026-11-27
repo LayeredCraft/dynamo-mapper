@@ -13,8 +13,7 @@ When handling questions around how to work with native Microsoft technologies, s
 DynamoMapper is a .NET incremental source generator that generates compile-time mapping code between domain models and Amazon DynamoDB AttributeValue dictionaries. It eliminates runtime reflection, reduces allocations, and provides type-safe mapping for single-table DynamoDB patterns.
 
 **Current Status:**
-- Version: 0.1.0-alpha (pre-release)
-- Active Branch: feature/basic-mapper
+- Read release versions from Git tags and the current branch from Git.
 - Phase: Phase 1 (attribute-based mapping)
 
 ## Common Commands
@@ -26,7 +25,7 @@ dotnet build
 
 ### Run Tests
 ```bash
-# Run all tests across all target frameworks (net8.0, net9.0, net10.0)
+# Run all configured test target frameworks
 dotnet test
 
 # Run tests for a specific framework
@@ -165,7 +164,7 @@ Nullable: All nullable versions of the above
 ### Convention-First Configuration
 - Minimal attributes required (just `[DynamoMapper]`)
 - Properties auto-mapped by convention
-- Customization via method-level attributes (Phase 1) or DSL (Phase 2, future)
+- Customization via mapper-class attributes (Phase 1) or DSL (Phase 2, future)
 
 ## Naming Conventions
 
@@ -177,7 +176,7 @@ Nullable: All nullable versions of the above
 
 ## Customization Hooks (Phase 1)
 
-Mappers support four lifecycle hooks as `static partial void` methods:
+Mappers support four lifecycle hooks as `static void` methods; `partial` is optional:
 
 - `BeforeToItem(T source, Dictionary<string, AttributeValue> item)`: Before property mapping
 - `AfterToItem(T source, Dictionary<string, AttributeValue> item)`: After property mapping (add pk/sk here)
@@ -192,30 +191,32 @@ Mappers support four lifecycle hooks as `static partial void` methods:
 
 ## Diagnostics
 
-Current diagnostics (see `src/LayeredCraft.DynamoMapper.Generators/Diagnostics/Diagnostics.cs`):
-- `DM0001`: Type cannot be mapped to an AttributeValue
-- `DM0002`: Type cannot be mapped from an AttributeValue
-
-More diagnostics planned per Phase 1 requirements.
+Current diagnostics are defined in
+`src/LayeredCraft.DynamoMapper.Generators/Diagnostics/DiagnosticDescriptors.cs`.
+See `docs/advanced/diagnostics.md` for the full list. `DM0002` is not implemented.
+Custom converter mistakes can produce ordinary C# compiler errors.
 
 ## Build System
 
 **Framework Targets**:
 - Generators: `netstandard2.0` (broad compatibility)
-- Tests: `net8.0`, `net9.0`, `net10.0` (multi-targeted)
+- Tests: see each test project for target frameworks, including `net11.0`.
 - Examples: `net10.0`
 
 **Package Management**:
 - Central package versions in `Directory.Packages.props`
 - Global build props in `Directory.Build.props`
-- Version: `0.1.0-alpha` (set in `Directory.Build.props`)
+- SDK: use the version in `global.json`.
+- Package versions: use `Directory.Packages.props` as the source of truth.
 
 **Key Dependencies**:
-- `AWSSDK.DynamoDBv2` (4.0.10.4): AttributeValue types
-- `Microsoft.CodeAnalysis` (5.0.0): Roslyn source generation
-- `Scriban` (6.5.2): Template engine for code generation
-- `xunit.v3` (3.2.1): Testing framework
-- `Verify.SourceGenerators` (2.5.0): Snapshot testing
+- `AWSSDK.DynamoDBv2`: AttributeValue types
+- `Microsoft.CodeAnalysis.CSharp`: Roslyn source generation
+- `Scriban`: Template engine for code generation
+- `xunit.v3.mtp-v2`: Testing framework
+- `Verify.SourceGenerators`: Snapshot testing
+
+Read exact versions from `Directory.Packages.props`.
 
 ## Testing Strategy
 

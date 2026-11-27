@@ -5,6 +5,11 @@ description: Attribute-based mapping for DynamoMapper - comprehensive Phase 1 sp
 
 # DynamoMapper – Phase 1 Requirements (Attribute-Based Mapping) ✅
 
+> This page is a design proposal, not the current API reference. For implemented behavior,
+> see [Attributes](../api-reference/attributes.md), [Static Conversion Methods](../usage/static-converters.md),
+> and [Diagnostics](../advanced/diagnostics.md).
+
+
 > **Scope:** Phase 1 delivers a Mapperly-style, attribute-configured **incremental source generator** that generates high-performance mapping code between **domain models** and **Amazon DynamoDB `AttributeValue` dictionaries**, without requiring any attributes on the domain models themselves.
 >
 > **Core philosophy:** *Domain stays clean.* All configuration lives on mapper methods (and optionally the mapper type). Generated code is explicit, allocation-conscious, and friendly to single-table DynamoDB patterns.
@@ -442,8 +447,8 @@ Include minimal built-ins:
 
 ### 9.6 Cross-References
 See also:
-- [Converter Types Documentation](../../docs/usage/converters.md)
-- [Static Converter Documentation](../../docs/usage/static-converters.md)
+- [Converter Types Documentation](../usage/converters.md)
+- [Static Converter Documentation](../usage/static-converters.md)
 
 ---
 
@@ -770,8 +775,8 @@ The generator validates hook signatures and emits diagnostics for:
 
 ### 11.8 Cross-References
 See also:
-- [Customization Hooks Guide](../../docs/usage/customization-hooks.md)
-- [Single-Table Design Patterns](../../docs/examples/single-table-design.md)
+- [Customization Hooks Guide](../usage/customization-hooks.md)
+- [Single-Table Design Patterns](../examples/single-table-design.md)
 
 ---
 

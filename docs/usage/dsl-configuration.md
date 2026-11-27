@@ -1,3 +1,7 @@
-# Dsl Configuration
+# DSL configuration
 
-Documentation coming soon. See [Phase 1 Requirements](../roadmap/phase-1.md) for detailed specifications.
+Fluent DSL configuration is not implemented. Configure current mappers with
+[attributes](../api-reference/attributes.md), [static conversion methods](static-converters.md),
+and [lifecycle hooks](customization-hooks.md).
+
+The [Phase 2 roadmap](../roadmap/phase-2.md) describes the proposed DSL.

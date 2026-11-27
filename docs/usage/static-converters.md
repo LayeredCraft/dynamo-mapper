@@ -1,322 +1,72 @@
 ---
 title: Static Conversion Methods
-description: Using named static methods for inline DynamoDB attribute conversion
+description: Custom member conversion using the source model and item dictionary
 ---
 
-# Static Conversion Methods
+# Static conversion methods
 
-Static conversion methods provide an inline, lightweight approach to custom type conversion in DynamoMapper. Static methods are defined directly on the mapper class, making them ideal for simple, mapper-specific conversions.
+Configure custom conversion on the mapper class using `DynamoField.ToMethod` and
+`DynamoField.FromMethod`.
 
-## Overview
-
-The current release supports **named static methods** on the mapper class for custom conversions.
-
-## When to Use Static Methods
-
-Use static conversion methods when:
-
-- Conversion logic is specific to a single mapper
-- The conversion is simple and doesn't warrant a separate type
-- You prefer co-location of mapping configuration and conversion logic
-- No reuse across multiple mappers is needed
-
-For reusable conversions across multiple mappers, create shared static helpers and call them from
-the mapper’s static conversion methods.
-
-## Required Method Signatures
-
-Static conversion methods must follow exact signatures:
+The signatures use the whole model and item dictionary:
 
 ```csharp
-// Conversion TO DynamoDB AttributeValue
-static AttributeValue ToMethodName(TProperty value);
-
-// Conversion FROM DynamoDB AttributeValue
-static TProperty FromMethodName(AttributeValue value);
+static AttributeValue ToMethodName(TModel source);
+static TProperty FromMethodName(Dictionary<string, AttributeValue> item);
 ```
 
-**Requirements:**
-- Methods must be `static`
-- Methods must be declared on the mapper class
-- Return type and parameter type must match exactly as shown
-- Both To and From methods must be provided together
+`ToMethod` returns the value stored under the member's configured attribute name.
+`FromMethod` returns the member value. It must read the correct key from the dictionary
+itself. Both methods must be accessible static methods on the mapper class.
 
-## Basic Example
+You may override one direction. The other direction uses normal mapping if the member
+type is supported. For an unsupported type, supply custom conversion for each direction
+you generate, or ignore that direction.
+
+## Example
 
 ```csharp
+using System.Collections.Generic;
+using System.Globalization;
 using Amazon.DynamoDBv2.Model;
+using LayeredCraft.DynamoMapper.Runtime;
 
-public class OrderStatus
+public sealed class Product
 {
-    public string Name { get; }
-    public int Value { get; }
-
-    private OrderStatus(string name, int value)
-    {
-        Name = name;
-        Value = value;
-    }
-
-    public static readonly OrderStatus Pending = new("Pending", 0);
-    public static readonly OrderStatus Confirmed = new("Confirmed", 1);
-    public static readonly OrderStatus Shipped = new("Shipped", 2);
-
-    public static OrderStatus FromName(string name) => name switch
-    {
-        "Pending" => Pending,
-        "Confirmed" => Confirmed,
-        "Shipped" => Shipped,
-        _ => throw new ArgumentException($"Unknown status: {name}")
-    };
+    public decimal Price { get; set; }
 }
 
-public class Order
-{
-    public Guid OrderId { get; set; }
-    public OrderStatus Status { get; set; }
-    public decimal Total { get; set; }
-}
-
-[DynamoMapper(Convention = DynamoNamingConvention.CamelCase)]
-[DynamoField(nameof(Order.Status), ToMethod = nameof(ToOrderStatus), FromMethod = nameof(FromOrderStatus))]
-public static partial class OrderMapper
-{
-    public static partial Dictionary<string, AttributeValue> ToItem(Order source);
-
-    public static partial Order FromItem(Dictionary<string, AttributeValue> item);
-
-    // Static conversion methods
-    static AttributeValue ToOrderStatus(OrderStatus status)
-    {
-        return new AttributeValue { S = status.Name };
-    }
-
-    static OrderStatus FromOrderStatus(AttributeValue value)
-    {
-        return OrderStatus.FromName(value.S);
-    }
-}
-```
-
-## Attribute Usage (Phase 1)
-
-### DynamoField Attribute
-
-Configure static methods using the `[DynamoField]` attribute on the mapper class:
-
-```csharp
 [DynamoMapper]
-[DynamoField(nameof(Order.Status),
-    ToMethod = nameof(ToOrderStatus),
-    FromMethod = nameof(FromOrderStatus))]
-public static partial class OrderMapper
-{
-    public static partial Dictionary<string, AttributeValue> ToItem(Order source);
-    public static partial Order FromItem(Dictionary<string, AttributeValue> item);
-}
-```
-
-**Properties:**
-- `ToMethod` - Name of the static method for To conversion (required)
-- `FromMethod` - Name of the static method for From conversion (required)
-
-**Constraints:**
-- Both `ToMethod` and `FromMethod` must be specified together
-- Method names must reference existing, accessible static methods
-
-## DSL Usage (Phase 2)
-
-In Phase 2, static methods will be configurable using the fluent DSL (planned):
-
-```csharp
-[DynamoMapper]
-public static partial class OrderMapper
-{
-    public static partial Dictionary<string, AttributeValue> ToItem(Order source);
-    public static partial Order FromItem(Dictionary<string, AttributeValue> item);
-
-    static partial void Configure(DynamoMapBuilder<Order> map)
-    {
-        map.Property(x => x.Status)
-           .Using(nameof(ToOrderStatus), nameof(FromOrderStatus));
-    }
-
-    static AttributeValue ToOrderStatus(OrderStatus status)
-    {
-        return new AttributeValue { S = status.Name };
-    }
-
-    static OrderStatus FromOrderStatus(AttributeValue value)
-    {
-        return OrderStatus.FromName(value.S);
-    }
-}
-```
-
-## Multiple Static Conversions
-
-You can define multiple static conversion method pairs in a single mapper:
-
-```csharp
-[DynamoMapper(Convention = DynamoNamingConvention.CamelCase)]
-[DynamoField(nameof(Product.Category), ToMethod = nameof(ToCategory), FromMethod = nameof(FromCategory))]
-[DynamoField(nameof(Product.Status), ToMethod = nameof(ToProductStatus), FromMethod = nameof(FromProductStatus))]
+[DynamoField(nameof(Product.Price), AttributeName = "price_text",
+    ToMethod = nameof(WritePrice), FromMethod = nameof(ReadPrice))]
 public static partial class ProductMapper
 {
     public static partial Dictionary<string, AttributeValue> ToItem(Product source);
-
     public static partial Product FromItem(Dictionary<string, AttributeValue> item);
 
-    // Category conversion
-    static AttributeValue ToCategory(ProductCategory category)
-    {
-        return new AttributeValue { S = category.Code };
-    }
+    private static AttributeValue WritePrice(Product source) =>
+        new() { S = source.Price.ToString(CultureInfo.InvariantCulture) };
 
-    static ProductCategory FromCategory(AttributeValue value)
-    {
-        return ProductCategory.FromCode(value.S);
-    }
-
-    // Status conversion
-    static AttributeValue ToProductStatus(ProductStatus status)
-    {
-        return new AttributeValue { S = status.Name };
-    }
-
-    static ProductStatus FromProductStatus(AttributeValue value)
-    {
-        return ProductStatus.FromName(value.S);
-    }
+    private static decimal ReadPrice(Dictionary<string, AttributeValue> item) =>
+        decimal.Parse(item["price_text"].S, CultureInfo.InvariantCulture);
 }
 ```
 
-## Nullable Types
+The generated write is equivalent to `item.Set("price_text", WritePrice(source))`.
+The generated read assigns `ReadPrice(item)` to `Price`.
 
-The generator automatically handles nullable types. Your static methods should work with the non-nullable type:
+## Nulls, missing keys, and validation
 
-```csharp
-public class User
-{
-    public Guid UserId { get; set; }
-    public UserRole? Role { get; set; }  // Nullable
-}
+Custom methods replace the normal conversion calls. Handle null values, missing keys,
+requiredness, and formatting inside your methods. For optional members, use
+`TryGetValue` and return an appropriate default when the key is absent.
 
-[DynamoMapper(Convention = DynamoNamingConvention.CamelCase)]
-[DynamoField(nameof(User.Role), ToMethod = nameof(ToUserRole), FromMethod = nameof(FromUserRole))]
-public static partial class UserMapper
-{
-    public static partial Dictionary<string, AttributeValue> ToItem(User source);
+Incorrect method names or signatures can produce ordinary C# compiler errors. There
+is no dedicated converter diagnostic family in the current implementation.
 
-    public static partial User FromItem(Dictionary<string, AttributeValue> item);
+For shared conversion logic, call a shared static helper from the mapper's methods.
+Converter types such as `IDynamoConverter<T>` and fluent DSL configuration are not
+implemented.
 
-    // Methods work with non-nullable UserRole
-    static AttributeValue ToUserRole(UserRole role)
-    {
-        return new AttributeValue { S = role.Name };
-    }
-
-    static UserRole FromUserRole(AttributeValue value)
-    {
-        return UserRole.FromName(value.S);
-    }
-}
-```
-
-The generator wraps your methods with null checks as needed.
-
-## Advanced Example: Complex Value Objects
-
-Static methods work well for complex value objects:
-
-```csharp
-public class Money
-{
-    public decimal Amount { get; }
-    public string Currency { get; }
-
-    public Money(decimal amount, string currency)
-    {
-        Amount = amount;
-        Currency = currency;
-    }
-
-    public override string ToString() => $"{Amount:F2} {Currency}";
-
-    public static Money Parse(string value)
-    {
-        var parts = value.Split(' ');
-        return new Money(decimal.Parse(parts[0]), parts[1]);
-    }
-}
-
-[DynamoMapper(Convention = DynamoNamingConvention.CamelCase)]
-[DynamoField(nameof(Product.Price), ToMethod = nameof(ToMoney), FromMethod = nameof(FromMoney))]
-public static partial class ProductMapper
-{
-    public static partial Dictionary<string, AttributeValue> ToItem(Product source);
-
-    public static partial Product FromItem(Dictionary<string, AttributeValue> item);
-
-    static AttributeValue ToMoney(Money money)
-    {
-        // Store as string: "99.99 USD"
-        return new AttributeValue { S = money.ToString() };
-    }
-
-    static Money FromMoney(AttributeValue value)
-    {
-        return Money.Parse(value.S);
-    }
-}
-```
-
-## Diagnostics for Invalid Signatures
-
-DynamoMapper validates static method signatures and emits compile-time diagnostics
-when a method is missing or has the wrong signature. Check the diagnostic message
-for the exact fix needed.
-
-## Best Practices
-
-1. **Use clear naming conventions**
-   ```csharp
-   // Good: Clear what type is being converted
-   static AttributeValue ToOrderStatus(OrderStatus status) { }
-   static OrderStatus FromOrderStatus(AttributeValue value) { }
-
-   // Avoid: Ambiguous method names
-   static AttributeValue Convert(OrderStatus status) { }
-   ```
-
-2. **Keep methods simple**
-   - Static methods should focus on conversion logic only
-   - Complex business logic belongs elsewhere
-
-3. **Handle errors gracefully**
-   ```csharp
-   static OrderStatus FromOrderStatus(AttributeValue value)
-   {
-       if (string.IsNullOrEmpty(value.S))
-           throw new DynamoMappingException("OrderStatus cannot be null or empty");
-
-       return OrderStatus.FromName(value.S);
-   }
-   ```
-
-4. **Use static methods for mapper-specific conversions**
-   - If conversion logic is reused across mappers, use converter types instead
-
-5. **Document complex conversions**
-   ```csharp
-   /// <summary>
-   /// Converts Money to DynamoDB string format: "amount currency" (e.g., "99.99 USD")
-   /// </summary>
-   static AttributeValue ToMoney(Money money) { }
-   ```
-
-## See Also
-
-- [Converter Types](converters.md) - Not supported in the current release
-- [Phase 1 Requirements](../roadmap/phase-1.md#9-converters-phase-1) - Detailed converter specifications
-- [Phase 2 DSL](../roadmap/phase-2.md#8-converters-dsl) - DSL converter configuration
+See [Attributes](../api-reference/attributes.md) for member configuration and
+[Naming conventions](../core-concepts/naming-conventions.md) for key naming.

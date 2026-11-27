@@ -19,7 +19,7 @@ DynamoMapper is a .NET incremental source generator that generates high-performa
 **Why DynamoMapper?**
 - ⚡ **Zero reflection overhead** - All mapping code generated at compile time
 - 🎯 **Type-safe** - Catches configuration errors at compile time with diagnostics
-- 🚀 **Allocation-free** - Uses efficient dictionary operations, no LINQ or unnecessary allocations
+- 🚀 **Low allocations** - Generates direct dictionary operations without runtime reflection
 - 🔧 **Simple** - Convention-first with minimal attribute configuration
 - 🌐 **Single-table friendly** - Designed for single-table DynamoDB patterns with customization hooks
 - 📦 **Clean domain models** - No attributes on your domain classes required
@@ -123,8 +123,8 @@ For more examples including single-table patterns and custom converters, see the
 ## Key Features
 
 - **Attribute-Based Configuration** (Phase 1): Configure mapping via `[DynamoField]` and `[DynamoIgnore]` on mapper classes
-- **Fluent DSL Configuration** (Phase 2): Optional strongly-typed DSL for configuration
-- **Naming Conventions**: CamelCase, SnakeCase, or Exact field naming
+- **Fluent DSL Configuration** (planned for Phase 2): Not available in the current release
+- **Naming Conventions**: Exact, CamelCase, PascalCase, SnakeCase, or KebabCase field naming
 - **Required Field Validation**: Compile-time and runtime validation of required fields
 - **Omission Policies**: Flexible null/empty value omission strategies
 - **Custom Converters**: Type-safe converter pattern for custom serialization

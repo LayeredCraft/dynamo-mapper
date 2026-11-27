@@ -227,8 +227,9 @@ public static partial class ProductMapper
     public static partial Dictionary<string, AttributeValue> ToItem(Product source);
     public static partial Product FromItem(Dictionary<string, AttributeValue> item);
 
-    static AttributeValue ToStatus(ProductStatus status) => new() { S = status.ToString() };
-    static ProductStatus FromStatus(AttributeValue value) => Enum.Parse<ProductStatus>(value.S);
+    static AttributeValue ToStatus(Product source) => new() { S = source.Status.ToString() };
+    static ProductStatus FromStatus(Dictionary<string, AttributeValue> item) =>
+        Enum.Parse<ProductStatus>(item["status"].S);
 }
 ```
 
@@ -281,8 +282,9 @@ public static partial class OrderMapper
     public static partial Dictionary<string, AttributeValue> ToItem(Order source);
     public static partial Order FromItem(Dictionary<string, AttributeValue> item);
 
-    static AttributeValue ToStatus(OrderStatus value) => new() { S = value.Name };
-    static OrderStatus FromStatus(AttributeValue value) => OrderStatus.FromName(value.S);
+    static AttributeValue ToStatus(Order source) => new() { S = source.Status.Name };
+    static OrderStatus FromStatus(Dictionary<string, AttributeValue> item) =>
+        OrderStatus.FromName(item["status"].S);
 }
 ```
 

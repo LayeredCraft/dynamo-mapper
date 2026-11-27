@@ -5,7 +5,7 @@ Thank you for your interest in contributing to DynamoMapper!
 ## Development Setup
 
 1. Clone the repository
-2. Install .NET SDK 8.0 or later
+2. Install the SDK specified in `global.json`. This checkout requires .NET 11 preview.
 3. Run `dotnet restore`
 4. Run `dotnet build`
 
@@ -29,4 +29,13 @@ dotnet test
 - Add XML documentation comments to public APIs
 - Keep generated code readable
 
-See [Phase 1 Requirements](roadmap/phase-1.md) for implementation guidelines.
+See `AGENTS.md` in the repository for implementation guidelines.
+
+## Documentation
+
+Install [uv](https://docs.astral.sh/uv/) and build with the locked dependencies:
+
+```bash
+uv sync --locked
+uv run mkdocs build --strict
+```

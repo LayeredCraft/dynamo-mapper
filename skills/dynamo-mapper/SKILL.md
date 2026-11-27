@@ -18,7 +18,8 @@ Use this skill when generating or explaining DynamoMapper code.
 - Nested object mapping is implemented and tested.
 - Lifecycle hooks are implemented and validated (`BeforeToItem`, `AfterToItem`,
   `BeforeFromItem`, `AfterFromItem`).
-- Some public docs are stale; use `references/gotchas.md` when behavior seems surprising.
+- Use `LayeredCraft.DynamoMapper.Runtime` for attributes and runtime helpers.
+- Use `references/gotchas.md` for implementation limits; roadmap pages describe proposals.
 
 ## Choose a path
 
@@ -46,8 +47,7 @@ Use this skill when generating or explaining DynamoMapper code.
 - Do not tell the user to decorate every POCO property; configuration belongs on the mapper class.
 - Do not assume methods must be named exactly `ToItem` and `FromItem`; the `To`/`From` prefix
   matters, but the generator also expects the recognized model/dictionary signatures.
-- Do not invent hook signatures; all hooks must be `static partial void` with exact parameter
-  shapes.
+- Hooks must be `static void` with exact parameter shapes; `partial` is optional.
 - `AfterFromItem` requires `ref` on the entity parameter.
 - Do not assume every unsupported converter setup becomes a DynamoMapper diagnostic; some become normal C# compile errors.
 

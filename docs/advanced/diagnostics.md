@@ -13,9 +13,18 @@ This page lists the diagnostics emitted by the generator and when they occur.
 | DM0006 | Circular reference detected in nested type | Nested object graphs contain a cycle (direct or indirect). |
 | DM0007 | Unsupported nested member type | A nested property type cannot be mapped. |
 | DM0008 | Invalid dot-notation path | A dot-notation override points to a missing property. |
+| DM0009 | Nested helper rendering limit exceeded | Generated nested helpers exceed the rendering limit. |
 | DM0101 | No mapper methods found | A `[DynamoMapper]` class has no `To*` or `From*` partial methods. |
 | DM0102 | Mapper methods use different POCO types | `ToItem`/`FromItem` use different model types. |
 | DM0103 | Multiple constructors marked with `[DynamoMapperConstructor]` | More than one constructor is attributed. |
+
+## Hook warnings
+
+| Id | Trigger |
+| --- | --- |
+| DM0401 | A hook has the wrong parameter count, `ref` usage, or return type. |
+| DM0402 | A hook is not static. |
+| DM0403 | Hook parameter types do not match the model or item dictionary. |
 
 ## Notes
 

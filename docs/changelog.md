@@ -28,7 +28,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   preserving optional semantics.
 
 ### Planned
-- Phase 1: Attribute-based mapping
 - Phase 2: Fluent DSL configuration
 
 See [Roadmap](roadmap/phase-1.md) for details.
